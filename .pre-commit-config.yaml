@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-public-repo
+        name: no internal references (public repo)
+        entry: scripts/check-public-repo.sh
+        language: script
+        pass_filenames: false
+        always_run: true

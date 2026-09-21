@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  public-repo:
+    # This repository is public. The guard scans the whole tracked tree in a CI
+    # checkout, so it fails the build on a violation that predates the PR
+    # rather than only on what the PR touched.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No internal references
+        run: scripts/check-public-repo.sh
