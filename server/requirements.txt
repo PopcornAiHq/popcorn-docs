@@ -1,0 +1,4 @@
+# The MCP SDK. Pinned to a minor line: the tool-surface API is stable within
+# one, and an unpinned server is a dependency that can change what a published
+# tool looks like without anything in this repo changing.
+mcp~=1.9

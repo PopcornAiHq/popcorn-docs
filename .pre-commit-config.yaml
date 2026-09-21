@@ -13,3 +13,9 @@ repos:
         language: script
         pass_filenames: false
         always_run: true
+      - id: check-retrieval
+        name: eval questions surface their concept
+        entry: sh -c 'scripts/emit.py >/dev/null && scripts/check-retrieval.py'
+        language: system
+        pass_filenames: false
+        always_run: true

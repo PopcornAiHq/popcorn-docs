@@ -1,0 +1,158 @@
+# The validation set for the concept summaries.
+#
+# The gate this feeds is narrow on purpose: NOT "can an agent author a bundle"
+# — a harness elsewhere measures that, with a shell and unlimited turns — but
+# "do these summaries answer the question an agent actually hits, for a model
+# that cannot explore its way out."
+#
+# How to run it, in the cheapest form that is still honest:
+#
+#   1. Give the model ONLY the ten summaries. That is the one-call budget, and
+#      handing it the bodies measures something nobody will ever experience.
+#   2. Ask one question. No follow-ups, no hints, no naming the concept.
+#   3. Score the ACTION, not the prose.
+#
+# Scoring, decided before running so it cannot be rationalised after:
+#
+#   PASS  the answer leads to `pass` below.
+#   PASS  "I need more detail — read <concept>" naming the right concept. That
+#         is the one-call-then-one-more shape working as designed, not a miss.
+#   FAIL  any answer leading to `trap`, however well written.
+#   FAIL  a confident answer that is wrong. Worse than an admitted gap, and
+#         scored worse, because an admitted gap makes the user look.
+#
+# `trap` is the plausible wrong answer — usually what a model would infer from
+# general knowledge of similar systems if the summary does not stop it. A
+# question with no trap is not testing anything.
+#
+# Run it per assistant. The bar is the weakest, not the best.
+
+- q: I renamed a flow and now its schedule never fires.
+  concept: flow-identity
+  pass: identity is the name inside the file, so the rename deleted one flow and created another; the schedule still points at the old name
+  trap: suggests the schedule cache is stale, or to re-publish, or to check the cron expression
+
+- q: Does the filename of a flow matter?
+  concept: flow-identity
+  pass: no — the name inside the file is the identity; the filename is free
+  trap: says the filename must match the flow name
+
+- q: I dropped a sample payload into the bundle and something odd installed.
+  concept: flow-identity, app-bundle
+  pass: any non-reserved YAML file in the tree installs as a flow; fixtures must be .json
+  trap: blames the manifest, or says unrecognised files are ignored
+
+- q: I published half an hour ago and the channel still runs the old version.
+  concept: bundle-version, publish-and-apply
+  pass: publishing mints a version and stops; something must bind the channel, and apply is how you finish it
+  trap: says to wait for a cache, redeploy, or republish
+
+- q: Can I fix a bad version by republishing the same version number with corrected files?
+  concept: bundle-version
+  pass: no — versions are immutable; the same number with different content is refused; publish forward instead
+  trap: says yes, or suggests deleting the version first
+
+- q: I only wanted to change one channel, but a colleague says theirs changed too.
+  concept: fork-line
+  pass: a publish is a line operation — every channel on the fork line converges, each on its own tick
+  trap: says that cannot happen, or blames a shared template, or suggests it was a bad apply
+
+- q: How do I undo a fork?
+  concept: fork-line
+  pass: there is no unfork, and no version-addressed read to recover the previous tree; treat it as one-way
+  trap: invents an unfork or a rollback command
+
+- q: Which version should I base my edits on, the one the channel runs or the newest?
+  concept: fork-line, channel-binding
+  pass: the line's head is the publish base; basing on the bound version silently overwrites what landed in between
+  trap: says the bound version, because that is what is live
+
+- q: We upgraded the app while a long flow was mid-run. Did it pick up the new code?
+  concept: channel-binding
+  pass: no — the run pins its version at start and keeps pairing that flow with that code until it ends
+  trap: says yes, or says it depends, or warns about mixed versions
+
+- q: I removed the schedules block from the manifest and the schedules are still there.
+  concept: manifest-keys
+  pass: omitting a key leaves the channel alone; only an explicit empty list replaces with nothing
+  trap: says removal should have deleted them, and suggests a reinstall
+
+- q: What is the safest way to delete every schedule an app declares?
+  concept: manifest-keys
+  pass: "declare `schedules: []` — an empty list means replace with nothing"
+  trap: says to remove the key
+
+- q: My channel lost its app type after an install and the interface changed.
+  concept: manifest-keys
+  pass: a manifest with no app_type strips whatever the channel had; never install an untyped bundle into a channel running a real app
+  trap: blames a client bug or a failed migration
+
+- q: I renamed a table column in the manifest and the old values are gone from the new one.
+  concept: manifest-keys, merge-policy
+  pass: the reconcile is additive and never renames — it added a column and orphaned the old one, data intact in the old
+  trap: says the data was migrated, or offers a backfill as though the rename worked
+
+- q: How do I record the first time we saw a row, without it changing on later updates?
+  concept: merge-policy
+  pass: there is no keep-existing policy, so write it in a separate step gated on the row having just been created
+  trap: invents a merge mode such as keep, first, or ignore
+
+- q: I want a column counting how many times a row has come back.
+  concept: merge-policy
+  pass: there is no arithmetic — accumulate with a concat string column and let readers count the entries
+  trap: describes an increment or counter column as if one existed
+
+- q: My merge key is a number and every delivery creates a duplicate row.
+  concept: merge-policy
+  pass: a merge key must be indexed and string-typed; a non-string key silently never matches
+  trap: suggests the payload is inconsistent, or to add a second key
+
+- q: Can a timestamp history column be a datetime?
+  concept: merge-policy
+  pass: no — concat requires a string column
+  trap: says yes
+
+- q: My operator toggle keeps reverting to the default.
+  concept: scalar-tiers
+  pass: it is declared under scalars, which upserts on every install; use default_scalars, which writes once
+  trap: blames a race, a cache, or a client overwrite
+
+- q: A flow writes a cursor scalar. Should I declare it in the manifest so it exists?
+  concept: scalar-tiers
+  pass: no — declaring runtime state means every install resets it; flows may create their own keys
+  trap: says yes, declare it for clarity or to guarantee it exists
+
+- q: Can I ship a default for the outbound send mode in my manifest?
+  concept: scalar-tiers
+  pass: yes, but only via default_scalars — platform keys are never declared under scalars, and the default is off
+  trap: says to declare it under scalars, or that it cannot be defaulted at all
+
+- q: Can I set a row's status directly to retained?
+  concept: state-machine
+  pass: no — status is a projection of the machine tuple, so a direct write is overwritten; fire the event instead
+  trap: says to update the status column, or to patch the record
+
+- q: Two of my machines both have a state called done and the bundle will not install.
+  concept: state-machine
+  pass: the status vocabulary is the union of every machine's states, so a value must identify its own machine; rename one
+  trap: suggests namespacing at read time, or calls it a validation bug
+
+- q: Where do I configure the buttons a user sees on a row?
+  concept: state-machine
+  pass: on the transition — every button is an edge, so the graph and the interface cannot disagree
+  trap: invents a separate buttons, actions or ctas config block
+
+- q: My bundle publishes fine, so the state graph must be correct.
+  concept: state-machine
+  pass: parse-time checks prove structure — no unreachable states, no dead ends — not intent; a well-formed graph can still be wrong
+  trap: agrees that publishing validates the graph's correctness
+
+- q: What actually happens when I run apply?
+  concept: publish-and-apply
+  pass: it brings that one channel to its own line's head, takes no version from the caller, and reports already-current when there is nothing to do
+  trap: says it publishes, or that it can move a channel to a version you name
+
+- q: Is there anything that stops me publishing a change that affects everyone?
+  concept: publish-and-apply
+  pass: no — every guard is about validity, none about intent; nothing asks whether you meant to do it to everyone
+  trap: claims a confirmation, a dry run, or a staged rollout exists

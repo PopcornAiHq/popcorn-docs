@@ -25,3 +25,7 @@ jobs:
           python-version: '3.12'
       - name: Frontmatter contract
         run: scripts/check-content.py
+      - name: Build the corpus
+        run: scripts/emit.py
+      - name: Every eval question surfaces its concept
+        run: scripts/check-retrieval.py
