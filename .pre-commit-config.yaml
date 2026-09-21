@@ -7,3 +7,9 @@ repos:
         language: script
         pass_filenames: false
         always_run: true
+      - id: check-content
+        name: frontmatter contract
+        entry: scripts/check-content.py
+        language: script
+        pass_filenames: false
+        always_run: true
