@@ -23,6 +23,14 @@ Orphans are removed one key at a time, not with `rm --recursive`. A prefix
 delete against a live bucket is the operation that cannot be taken back, and
 the only keys that should ever disappear are the ones this build stopped
 producing.
+
+The publish ends with an invalidation, and that is not belt-and-braces. A
+change to a header alone leaves the body byte-identical, so the ETag does not
+move; when the TTL lapses CloudFront revalidates, S3 answers 304 Not Modified,
+and the cached response is served again with its stale headers. Waiting cannot
+fix a metadata-only change — this is exactly how the missing charset survived
+its first correction. A deleted orphan has the same shape: gone from the
+bucket, still served until something says otherwise.
 """
 
 from __future__ import annotations
@@ -77,6 +85,12 @@ def remote_keys(bucket: str) -> set[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bucket", default="popcorn-prod-docs")
+    ap.add_argument("--distribution", default="E2KXXLZNE4W83R")
+    ap.add_argument(
+        "--no-invalidate",
+        action="store_true",
+        help="skip the CloudFront invalidation (headers and deletions will lag)",
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -105,8 +119,21 @@ def main() -> int:
             continue
         aws("s3api", "delete-object", "--bucket", args.bucket, "--key", key)
 
+    invalidated = False
+    if not args.no_invalidate:
+        if args.dry_run:
+            print(f"   would invalidate /* on {args.distribution}")
+        else:
+            aws(
+                "cloudfront", "create-invalidation",
+                "--distribution-id", args.distribution,
+                "--paths", "/*",
+            )
+            invalidated = True
+
     verb = "would publish" if args.dry_run else "published"
     tail = f", {len(orphans)} orphan(s) removed" if orphans else ""
+    tail += ", invalidated /*" if invalidated else ""
     print(f"✔  {verb} {len(files)} files to s3://{args.bucket}/{tail}")
     return 0
 
