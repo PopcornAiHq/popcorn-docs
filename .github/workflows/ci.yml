@@ -27,5 +27,7 @@ jobs:
         run: scripts/check-content.py
       - name: Build the corpus
         run: scripts/emit.py
+      - name: Every advertised URL resolves
+        run: scripts/check-links.py
       - name: Every eval question surfaces its concept
         run: scripts/check-retrieval.py

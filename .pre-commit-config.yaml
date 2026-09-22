@@ -13,6 +13,12 @@ repos:
         language: script
         pass_filenames: false
         always_run: true
+      - id: check-links
+        name: advertised URLs resolve to emitted pages
+        entry: sh -c 'scripts/emit.py >/dev/null && scripts/check-links.py'
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: check-retrieval
         name: eval questions surface their concept
         entry: sh -c 'scripts/emit.py >/dev/null && scripts/check-retrieval.py'
