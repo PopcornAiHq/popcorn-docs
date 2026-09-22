@@ -36,6 +36,7 @@ bucket, still served until something says otherwise.
 from __future__ import annotations
 
 import argparse
+import os
 import pathlib
 import subprocess
 import sys
@@ -84,8 +85,17 @@ def remote_keys(bucket: str) -> set[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--bucket", default="popcorn-prod-docs")
-    ap.add_argument("--distribution", default="E2KXXLZNE4W83R")
+    ap.add_argument(
+        "--bucket",
+        default=os.environ.get("DOCS_BUCKET"),
+        help="target bucket; defaults to $DOCS_BUCKET",
+    )
+    ap.add_argument(
+        "--distribution",
+        default=os.environ.get("DOCS_DISTRIBUTION_ID"),
+        help="CloudFront distribution to invalidate; defaults to "
+             "$DOCS_DISTRIBUTION_ID",
+    )
     ap.add_argument(
         "--no-invalidate",
         action="store_true",
@@ -93,6 +103,15 @@ def main() -> int:
     )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+
+    if not args.bucket:
+        sys.exit("✖  no bucket — pass --bucket or set DOCS_BUCKET")
+    if not args.distribution and not args.no_invalidate:
+        sys.exit(
+            "✖  no distribution — pass --distribution, set "
+            "DOCS_DISTRIBUTION_ID, or pass --no-invalidate and accept that a "
+            "header change or a deletion will not reach anyone"
+        )
 
     files = local_files()
     unknown = sorted({p.suffix for p in files.values()} - set(CONTENT_TYPES))
