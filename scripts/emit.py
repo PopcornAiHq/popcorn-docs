@@ -14,6 +14,8 @@ Outputs, under `build/`:
     llms-full.txt    every body concatenated, for a reader that wants it all
     <section>/<id>.md  the plain-Markdown twin of each page, at the path
                      its llms.txt entry advertises
+    <section>/<id>.html  the same page for a person with a browser
+    index.html       the landing page, every concept with its summary
 
 `llms.txt` is the file most likely to be fetched by something we do not
 control, so it carries summaries and not bodies. A reader that wants
@@ -27,6 +29,12 @@ what now holds the two together.
 
 The `.md` suffix is load-bearing: it is what makes S3 serve the page as
 text/markdown without the upload having to name a content type per object.
+
+The HTML twin sits beside the Markdown one rather than replacing it, and
+`llms.txt` keeps pointing at the `.md`. An agent asking for a page should get
+prose, not a document it has to strip tags out of first; a person following
+the same path in a browser gets the `.html`. Neither has to content-negotiate
+and neither URL moves when the other changes.
 """
 
 from __future__ import annotations
@@ -36,6 +44,8 @@ import pathlib
 import re
 import shutil
 import sys
+
+import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
@@ -90,6 +100,30 @@ def parse(path: pathlib.Path) -> dict:
     return meta
 
 
+def landing(pages: list[dict]) -> str:
+    """The one page a person lands on: every concept, with its summary."""
+    items = []
+    for page in pages:
+        href = f"/{page['section']}/{page['id']}.html"
+        items.append(
+            f'<li><a href="{href}">{render.inline(page["title"])}</a>'
+            f"<p>{render.inline(page['summary'])}</p></li>"
+        )
+    return render.document(
+        "Popcorn docs",
+        "<h1>Popcorn docs</h1>\n"
+        '<p class="summary">How app bundles work — the concepts an author or an '
+        "agent needs in order to change what a channel tracks.</p>\n"
+        '<ul class="index">' + "".join(items) + "</ul>\n"
+        "<footer>For agents: the index is <a href=\"/llms.txt\">/llms.txt</a>, "
+        "every body at <a href=\"/llms-full.txt\">/llms-full.txt</a>, "
+        "and one record per concept at <a href=\"/chunks.json\">/chunks.json</a>."
+        "</footer>",
+        description="How Popcorn app bundles work: tables, flows, schedules and "
+        "webhooks, and what happens when you publish.",
+    )
+
+
 def main() -> int:
     pages = [
         parse(p)
@@ -123,14 +157,27 @@ def main() -> int:
         page_file.write_text(
             f"# {page['title']}\n\n{page['summary']}\n\n{page['body']}\n"
         )
+        page_file.with_suffix(".html").write_text(
+            render.document(
+                f"{page['title']} — Popcorn docs",
+                '<a class="home" href="/">← Popcorn docs</a>\n'
+                f"<h1>{render.inline(page['title'])}</h1>\n"
+                f'<p class="summary">{render.inline(page["summary"])}</p>\n'
+                f"{render.body(page['body'])}\n"
+                "<footer>This page as Markdown: "
+                f'<a href="/{path}">/{path}</a></footer>',
+                description=page["summary"],
+            )
+        )
 
     (BUILD / "llms.txt").write_text("\n".join(index))
     (BUILD / "llms-full.txt").write_text("\n".join(full))
+    (BUILD / "index.html").write_text(landing(pages))
 
     size = (BUILD / "llms.txt").stat().st_size
     sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
-          f"llms-full.txt, {sections}")
+          f"llms-full.txt, index.html, {sections}(.md + .html)")
     return 0
 
 
