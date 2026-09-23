@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Everything needed to run the validation pass by hand, in the right order.
 
-The pass is manual and stays manual: it asks whether a summary ANSWERS a
-question, and only a model can judge that. What can be removed is the friction
-around it — pasting the corpus, keeping the questions in order, not letting an
-answer be scored against a rubric read after the fact.
+This is the by-hand route: it asks whether a summary ANSWERS a question, and
+only a model can judge that. What can be removed is the friction around it —
+pasting the corpus, keeping the questions in order, not letting an answer be
+scored against a rubric read after the fact. `eval-run.py` drives the same
+prompt through the Gemini API instead; this remains the way to test an
+assistant through its own app, which an API call is not.
 
 Three outputs, in the order they are used:
 

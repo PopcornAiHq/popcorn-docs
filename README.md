@@ -75,8 +75,26 @@ publishes the site: `.github/workflows/publish.yml` reruns the checks, uploads
 
 ## Validating the summaries
 
-`scripts/eval-kit.py` prints what a manual validation pass needs: the prompt
-(`--prompt`), the questions (`--ask`) and a scoring sheet (`--sheet`). Run it
-per assistant, one question per fresh session; the reasons are in
-`evals/questions.yaml`. Write the sheet outside this repository — never into
-`build/`, which is published whole.
+Each question is answered from the summaries alone, one question per fresh
+session, and the answer is graded against the question's `pass` and `trap`; the
+reasons are in `evals/questions.yaml`. There are two ways to run it:
+
+```bash
+# Automated: one Gemini API call per question, then a transcript to grade
+export GEMINI_API_KEY=…                      # or ~/.config/popcorn-docs/eval.json
+python3 scripts/eval-run.py > ~/gemini-run.md          # all questions
+python3 scripts/eval-run.py --only 3,6,7 > ~/gemini-run.md
+python3 scripts/eval-run.py --list-models               # what the key can call
+
+# By hand, through an assistant's own app
+python3 scripts/eval-kit.py --prompt | pbcopy
+python3 scripts/eval-kit.py --sheet > ~/pass.md
+```
+
+`eval-run.py` does not grade. Hand the whole transcript to a model from a
+different family (Claude, when Gemini answered) and ask it to grade: the
+transcript carries its own instructions, the scoring rules, every rubric and,
+for the grader only, every page in full to check deferrals against.
+
+Keep the key and every output outside this repository — it is public, and
+`build/` is published whole.
