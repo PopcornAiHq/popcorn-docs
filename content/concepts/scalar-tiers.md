@@ -2,11 +2,11 @@
 id: scalar-tiers
 title: The three scalar tiers
 summary: >
-  Declared scalars are written on first install and fast-forwarded on update
-  unless the channel changed them. Default scalars write once, only if absent —
-  the tier for an operator-owned switch. Platform `popcorn.*` keys, such as the
-  outbound send mode, ship only through default scalars. Never declare a value a
-  flow writes at runtime: declaring it hands it to install, which can reset it.
+  `scalars:` are written on first install and fast-forwarded on update unless
+  the channel changed them. `default_scalars:` write once, only if absent — the
+  manifest tier for an operator-owned switch and for platform `popcorn.*` keys
+  such as the outbound send mode. Never declare a value a flow writes at
+  runtime: declaring it hands it to install, which can reset it.
 concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
 source: [PLATFORM_SETTINGS, candidate_settings, filter_update_scalar_pairs]
