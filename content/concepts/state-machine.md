@@ -7,7 +7,7 @@ summary: >
   projection of those machines, so it changes by firing an event, never by
   writing the column. Publish proves the graph's structure; its intent is the
   author's to check — states no event fires, terminals reached too early.
-concepts: [manifest-keys, channel-binding]
+concepts: [manifest-keys, channel-binding, states-authoring]
 applies_to: [cli, mcp, human]
 source: [StatesSpec, parse_states, project_row]
 ---

@@ -330,7 +330,9 @@ worth spelling-checking against this table first.
 `states:` declares a state machine over one declared table. It is validated as
 a graph at publish, and every transition's `flow` and `then` must name a flow
 in the bundle. The grammar is its own page:
-[the state machine](https://docs.popcorn.ai/concepts/state-machine.md).
+[the state machine](https://docs.popcorn.ai/concepts/state-machine.md). Writing
+one end to end, with every publish error it can raise, is
+[authoring a states tier](https://docs.popcorn.ai/guides/states-authoring.md).
 
 > **An untyped bundle CLEARS the channel's `app_type`.** A manifest with no
 > `app_type:` key strips whatever was there, which changes the client's whole
