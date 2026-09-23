@@ -122,12 +122,12 @@
 
 - q: How do I record the first time we saw a row, without it changing on later updates?
   concept: merge-policy
-  pass: declare the column `merge: keep` — first write wins, and later writes to it are ignored once it holds a value
+  pass: declare the column with `merge` set to `keep` — first write wins, and later writes to it are ignored once it holds a value
   trap: says no such policy exists and hand-rolls a gated second write, or invents a mode such as first or ignore
 
 - q: I want a column counting how many times a row has come back.
   concept: merge-policy
-  pass: a number column with `merge: increment_on_change` and `merge_when` naming the transition that means it came back; the write must merge
+  pass: a number column with `merge` set to `increment_on_change` and `merge_when` naming the transition that means it came back; the write must merge
   trap: says a counter is impossible, or builds one from a concat history or a read-add-write step
 
 - q: Can a table's merge key be a number column?
