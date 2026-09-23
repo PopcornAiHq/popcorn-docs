@@ -32,8 +32,10 @@ name is caught without appearing anywhere.
 
 A concept's `source:` field names bare symbols — the names a reader would
 search the backend for, nothing about where they live. This is why a path is
-both a leak and unnecessary. Nothing checks those names against the backend,
-so search for each one before citing it.
+both a leak and unnecessary. `scripts/drift.py sources` checks each name
+still has a definition in a local backend checkout; CI cannot, since the
+backend is private, so run it before any content PR. It checks existence, not
+behaviour — see "Checking the pages against the backend" in `README.md`.
 
 A symbol that moves file keeps its name; a path does not survive a refactor.
 That is the same reason this rule holds in prose.
