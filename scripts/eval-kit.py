@@ -8,8 +8,10 @@ answer be scored against a rubric read after the fact.
 
 Three outputs, in the order they are used:
 
-    --prompt   the preamble plus llms.txt, pasted into a NEW session for every
-               question — it stays on the clipboard for the whole run
+    --prompt   the preamble, llms.txt fenced, and a trailing `Question: ` slot.
+               Pasted into a NEW session for every question, then the question
+               typed onto the end of it — one message, no ambiguity about where
+               the corpus stops. It stays on the clipboard for the whole run
     --ask      the questions, one per line, to send one at a time
     --sheet    a scoring sheet on stdout, with pass and trap spelled out per
                question and a blank verdict to fill in — redirect it somewhere
@@ -50,16 +52,26 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 QUESTIONS = ROOT / "evals" / "questions.yaml"
 
+# The reference is fenced and the question has a labelled slot at the end, so
+# that both the corpus and the question paste as one message with no ambiguity
+# about where one stops. Without the fence the question lands as loose prose
+# after the last summary, and the corpus is itself Markdown with `##` headings,
+# so a heading would read as a twelfth entry rather than as the ask.
 PREAMBLE = """\
 You are answering questions about Popcorn, an AI tracker, using only the
-reference below. Answer as if you were about to act on it: say what the person
-should do, concretely.
+reference between the markers below. Answer as if you were about to act on it:
+say what the person should do, concretely.
 
 If the reference does not contain enough to answer, say so and name the entry
 you would read in full. Do not guess at how similar systems usually behave.
 
-Reference:
+===== REFERENCE START =====
 """
+
+POSTAMBLE = """
+===== REFERENCE END =====
+
+Question: """
 
 
 def questions() -> list[dict]:
@@ -105,7 +117,8 @@ def main() -> int:
         sys.exit("✖  no questions parsed from evals/questions.yaml")
 
     if args.prompt:
-        print(PREAMBLE + corpus())
+        # No trailing newline: the question is pasted straight onto the slot.
+        sys.stdout.write(PREAMBLE + corpus().rstrip("\n") + POSTAMBLE)
         return 0
 
     if args.ask:
