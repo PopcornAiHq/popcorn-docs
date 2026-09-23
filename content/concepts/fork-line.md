@@ -3,10 +3,10 @@ id: fork-line
 title: Fork lines
 summary: >
   A fork line is a workspace's own version series of an app, forked from the
-  shared product version. Publishing to it moves every channel on that line, not
-  only the one you edited — the others converge on their own daily update. A
-  change meant for fewer channels needs a second named line. A fork cannot be
-  undone, and a channel never changes line.
+  shared product version. Publishing to it moves every channel on that line —
+  the others converge on their daily update. A channel never changes line, so
+  isolating a change means forking a second named line from a channel still on
+  the product version. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 applies_to: [cli, mcp, human]
 source: [fork_for_channel, publish_fork_version, ChannelForkRegressionError, AmbiguousForkLineError]
