@@ -36,6 +36,12 @@
 # question with no trap is not testing anything.
 #
 # Run it per assistant. The bar is the weakest, not the best.
+#
+# Some entries are statements, not questions — "I renamed a flow and now its
+# schedule never fires." That is deliberate: a symptom report is how most of
+# these reach an agent, and it leaves the model to connect the symptom to the
+# cause. Rephrasing one as "why does renaming a flow stop its schedule?" names
+# the connection the summary is meant to supply. Keep them as reports.
 
 - q: I renamed a flow and now its schedule never fires.
   concept: flow-identity

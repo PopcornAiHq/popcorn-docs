@@ -8,7 +8,8 @@ answer be scored against a rubric read after the fact.
 
 Three outputs, in the order they are used:
 
-    --prompt   the preamble, llms.txt fenced, and a trailing `Question: ` slot.
+    --prompt   the preamble, llms.txt fenced, and a trailing
+               `Question or problem: ` slot.
                Pasted into a NEW session for every question, then the question
                typed onto the end of it — one message, no ambiguity about where
                the corpus stops. It stays on the clipboard for the whole run
@@ -56,11 +57,13 @@ QUESTIONS = ROOT / "evals" / "questions.yaml"
 # that both the corpus and the question paste as one message with no ambiguity
 # about where one stops. Without the fence the question lands as loose prose
 # after the last summary, and the corpus is itself Markdown with `##` headings,
-# so a heading would read as a twelfth entry rather than as the ask.
+# so a heading would read as a twelfth entry rather than as the ask. The slot
+# says "or problem" because half the set are symptom reports, not questions,
+# and a report pasted after a bare `Question:` reads as a mislabelled ask.
 PREAMBLE = """\
-You are answering questions about Popcorn, an AI tracker, using only the
-reference between the markers below. Answer as if you were about to act on it:
-say what the person should do, concretely.
+You are answering questions and problem reports about Popcorn, an AI
+tracker, using only the reference between the markers below. Answer as if you
+were about to act on it: say what the person should do, concretely.
 
 If the reference does not contain enough to answer, say so and name the entry
 you would read in full. Do not open the links or search the web; the reference
@@ -72,7 +75,7 @@ is everything you have. Do not guess at how similar systems usually behave.
 POSTAMBLE = """
 ===== REFERENCE END =====
 
-Question: """
+Question or problem: """
 
 
 def questions() -> list[dict]:
