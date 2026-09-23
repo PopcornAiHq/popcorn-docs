@@ -25,11 +25,12 @@ set -eu
 # Skip this file: it necessarily contains the shapes it searches for.
 self=':(exclude)scripts/check-public-repo.sh'
 
-# Public names this repository may write — the repositories it may cite, and
-# its own MCP server identifier, which shares their shape. The check matches a
-# shape rather than a list, so anything named `popcorn-something` lands here
-# whether or not it is a repository. Anything not listed is refused.
-ALLOWED_REPO='^(PopcornAiHq/)?(popcorn-docs|popcorn-cli|popcorn-claude-code)$'
+# Public names this repository may write — the repositories it may cite, its
+# own MCP server identifier, and `.popcorn-app.json`, the marker file a
+# checkout writes into a bundle directory. The check matches a shape rather
+# than a list, so anything named `popcorn-something` lands here whether or not
+# it is a repository. Anything not listed is refused.
+ALLOWED_REPO='^(PopcornAiHq/)?(popcorn-docs|popcorn-cli|popcorn-claude-code|popcorn-app)$'
 
 # Prefixes of public identifier standards, which share their shape with an
 # issue key. Without this, a page about datetime columns fails on "ISO-8601".
