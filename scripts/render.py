@@ -76,8 +76,41 @@ def _cells(row: str) -> list[str]:
     return [c.strip() for c in row.strip().strip("|").split("|")]
 
 
+_TAG = re.compile(r"<[^>]+>")
+_H2 = re.compile(r'<h2 id="(?P<id>[^"]+)">(?P<html>.*?)<a class="anchor"')
+
+
+def _slug(text: str, seen: set[str]) -> str:
+    """A heading's anchor: stable for as long as its wording is, unique per page.
+
+    Derived from the words rather than numbered, so a link to a section
+    survives a section being added above it.
+    """
+    base = re.sub(r"[^a-z0-9]+", "-", _TAG.sub("", inline(text)).lower()).strip("-")
+    base = base or "section"
+    anchor, n = base, 2
+    while anchor in seen:
+        anchor, n = f"{base}-{n}", n + 1
+    seen.add(anchor)
+    return anchor
+
+
+def toc(rendered: str, minimum: int = 6) -> str:
+    """A contents list of a rendered page's second-level headings.
+
+    Empty below ``minimum``: a short page is its own contents, and a box
+    listing three headings is furniture.
+    """
+    entries = _H2.findall(rendered)
+    if len(entries) < minimum:
+        return ""
+    items = "".join(f'<li><a href="#{a}">{h}</a></li>' for a, h in entries)
+    return f'<nav class="toc" aria-label="Contents"><p>Contents</p><ol>{items}</ol></nav>'
+
+
 def body(md: str) -> str:
     """Render a concept body. Block constructs first, inline within them."""
+    seen: set[str] = set()
     lines = md.splitlines()
     out: list[str] = []
     i = 0
@@ -114,7 +147,13 @@ def body(md: str) -> str:
         heading = _HEADING.match(line)
         if heading:
             level = len(heading.group("level"))
-            out.append(f"<h{level}>{inline(heading.group('text'))}</h{level}>")
+            text = heading.group("text")
+            anchor = _slug(text, seen)
+            out.append(
+                f'<h{level} id="{anchor}">{inline(text)}'
+                f'<a class="anchor" href="#{anchor}" aria-label="Link to this section">#</a>'
+                f"</h{level}>"
+            )
             i += 1
             continue
 
@@ -210,19 +249,25 @@ def body(md: str) -> str:
     return "\n".join(out)
 
 
+# The dark palette, declared once and applied two ways: by the OS setting
+# unless the reader chose light, and by the reader's choice regardless.
+_DARK = """
+    --bg: #1a1917; --fg: #e8e4dd; --muted: #9b958c; --rule: #33302c;
+    --accent: #f0935f; --code-bg: #232120; color-scheme: dark;
+"""
+
 _CSS = """
 :root {
+  color-scheme: light;
   --bg: #fdfdfc; --fg: #22201d; --muted: #6b665f; --rule: #e4e0d9;
   --accent: #9a3412; --code-bg: #f4f2ee;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1917; --fg: #e8e4dd; --muted: #9b958c; --rule: #33302c;
-    --accent: #f0935f; --code-bg: #232120;
-  }
+  :root:not([data-theme="light"]) {""" + _DARK + """}
 }
+:root[data-theme="dark"] {""" + _DARK + """}
 * { box-sizing: border-box; }
 body {
   margin: 0; padding: 3rem 1rem 6rem; background: var(--bg); color: var(--fg);
@@ -236,7 +281,6 @@ h2 { font-size: 1.25rem; margin: 2.5rem 0 .75rem; letter-spacing: -.01em; }
 h3 { font-size: 1.05rem; margin: 2rem 0 .5rem; }
 p { margin: 0 0 1.1rem; }
 .summary { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
-.home { display: inline-block; margin-bottom: 2.5rem; color: var(--muted); font-size: .9rem; }
 code {
   font-family: var(--mono); font-size: .88em; background: var(--code-bg);
   padding: .12em .35em; border-radius: 3px;
@@ -259,6 +303,75 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .index p { color: var(--muted); margin: .3rem 0 0; font-size: .96rem; }
 footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .88rem; }
 footer code { font-size: .85em; }
+.site { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+  margin-bottom: 2.5rem; padding-bottom: .9rem; border-bottom: 1px solid var(--rule); font-size: .92rem; }
+.site a { text-decoration: none; }
+.site .brand { color: var(--fg); font-weight: 650; letter-spacing: -.01em; }
+.site nav a { color: var(--muted); margin-left: 1rem; }
+.site nav a:hover, .site .brand:hover { color: var(--accent); }
+.theme { margin-left: 1rem; padding: 0 .2rem; border: 0; background: none; color: var(--muted);
+  font: inherit; font-size: 1rem; line-height: 1; cursor: pointer; }
+.theme:hover { color: var(--accent); }
+.anchor { margin-left: .4rem; color: var(--rule); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; color: var(--muted); }
+:target { scroll-margin-top: 1.5rem; }
+blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--accent); color: var(--fg); }
+blockquote p:last-child { margin-bottom: 0; }
+.toc { background: var(--code-bg); border-radius: 6px; padding: .9rem 1.2rem .6rem; margin: 0 0 2.5rem; font-size: .93rem; }
+.toc p { margin: 0 0 .4rem; font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+.toc ol { margin: 0; padding: 0; list-style: none; }
+.toc li { margin-bottom: .25rem; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+.section-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 3rem 0 0; font-weight: 600; }
+.related { margin-top: 3rem; }
+.related ul { padding-left: 1.3rem; }
+@media (max-width: 30rem) {
+  body { padding-top: 1.5rem; font-size: 16px; }
+  .site nav a { margin-left: .7rem; }
+}
+"""
+
+
+# An emoji favicon, inline: no file to publish, advertise or keep in sync.
+_ICON = (
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E"
+    "%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%BF%3C/text%3E%3C/svg%3E"
+)
+
+
+# A reader's explicit theme choice, applied in <head> so the page is never
+# painted in the other theme first. Storage can be unavailable (private
+# windows, blocked site data); the page then simply follows the OS.
+_THEME_EARLY = (
+    'try{var t=localStorage.getItem("theme");'
+    'if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}'
+)
+
+# The toggle. The button ships hidden and is revealed here, so a reader
+# without JavaScript never sees a control that does nothing.
+_THEME_TOGGLE = """
+(function () {
+  var root = document.documentElement, button = document.querySelector(".theme");
+  if (!button) return;
+  var dark = matchMedia("(prefers-color-scheme: dark)");
+  function current() { return root.dataset.theme || (dark.matches ? "dark" : "light"); }
+  function label() {
+    var isDark = current() === "dark";
+    button.textContent = isDark ? "\u2600" : "\u263E";
+    button.title = isDark ? "Switch to light mode" : "Switch to dark mode";
+    button.setAttribute("aria-label", button.title);
+  }
+  button.addEventListener("click", function () {
+    var next = current() === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    label();
+  });
+  dark.addEventListener("change", label);
+  button.hidden = false;
+  label();
+})();
 """
 
 
@@ -275,12 +388,19 @@ def document(title: str, content: str, *, description: str = "") -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title, quote=False)}</title>{meta}
+  <link rel="icon" href="{_ICON}">
   <style>{_CSS}</style>
+  <script>{_THEME_EARLY}</script>
 </head>
 <body>
 <main>
+<header class="site"><a class="brand" href="/">Popcorn docs</a><nav>
+<a href="/guides/template-authoring.html">Guide</a><a href="/#concepts">Concepts</a><a href="/llms.txt">llms.txt</a>
+<button class="theme" type="button" hidden></button>
+</nav></header>
 {content}
 </main>
+<script>{_THEME_TOGGLE}</script>
 </body>
 </html>
 """
