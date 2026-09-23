@@ -34,10 +34,11 @@ uncapped summary is a cost every caller pays.
 to check the page. Paths are both a leak in a public repo and less durable than
 the name: a symbol that moves file keeps its name.
 
-Nothing verifies them. No check compares `source` against the backend, so a
-symbol that is renamed or removed stays cited until someone notices. Search
-the backend for each name before adding it, and treat a page's `source` as a
-pointer, not a proof.
+`scripts/drift.py sources` verifies that each one still has a definition in
+the backend. It runs locally only, against a backend checkout, because the
+backend is private and CI cannot read it — so run it before a content PR.
+Nothing verifies behaviour: a symbol can exist and do the opposite of what the
+page says. Treat a page's `source` as a pointer, not a proof.
 
 Omit `source` when a concept describes a behaviour no single symbol owns; do
 not invent one to satisfy the field.

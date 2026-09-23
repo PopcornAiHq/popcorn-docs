@@ -14,6 +14,9 @@ Checks, in the order a writer meets them:
   address and a file whose name disagrees with it has two
 * `summary` is present and within the cap
 * no unwritten body is left behind a finished-looking summary
+* every id in `concepts:` names a page that exists. The build drops a dangling
+  one from "Related" rather than linking a 404, which is right for the site
+  and exactly why nobody sees it: the reference just silently stops working
 """
 
 from __future__ import annotations
@@ -29,9 +32,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _ID = re.compile(r"^id:\s*(\S+)", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
+_CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 
 
-def check(path: pathlib.Path) -> list[str]:
+def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     text = path.read_text()
     doc = _DOC.match(text)
     if not doc:
@@ -56,6 +60,12 @@ def check(path: pathlib.Path) -> list[str]:
         if len(folded) > SUMMARY_MAX:
             problems.append(f"summary is {len(folded)} chars, cap is {SUMMARY_MAX}")
 
+    concepts = _CONCEPTS.search(front)
+    if concepts:
+        for ref in (i.strip() for i in concepts.group("ids").split(",")):
+            if ref and ref not in ids:
+                problems.append(f"concepts: '{ref}' is not the id of any page")
+
     words = len(body.split())
     if words < BODY_MIN_WORDS:
         problems.append(f"body is {words} words; a stub is not publishable")
@@ -70,9 +80,12 @@ def main() -> int:
         print("✖  no content files found", file=sys.stderr)
         return 1
 
+    # A page's id is its filename, which the id check above enforces, so the
+    # stems are the ids a `concepts:` entry may name.
+    ids = {f.stem for f in files}
     failed = 0
     for path in files:
-        problems = check(path)
+        problems = check(path, ids)
         if problems:
             failed += 1
             print(f"\n✖  {path.relative_to(ROOT)}")

@@ -122,12 +122,12 @@
 
 - q: How do I record the first time we saw a row, without it changing on later updates?
   concept: merge-policy
-  pass: declare the column `merge: keep` — first write wins, and later writes to it are ignored once it holds a value
+  pass: declare the column with `merge` set to `keep` — first write wins, and later writes to it are ignored once it holds a value
   trap: says no such policy exists and hand-rolls a gated second write, or invents a mode such as first or ignore
 
 - q: I want a column counting how many times a row has come back.
   concept: merge-policy
-  pass: a number column with `merge: increment_on_change` and `merge_when` naming the transition that means it came back; the write must merge
+  pass: a number column with `merge` set to `increment_on_change` and `merge_when` naming the transition that means it came back; the write must merge
   trap: says a counter is impossible, or builds one from a concat history or a read-add-write step
 
 - q: Can a table's merge key be a number column?
@@ -174,6 +174,21 @@
   concept: state-machine
   pass: parse-time checks prove structure — no unreachable states, no dead ends — not intent; a well-formed graph can still be wrong
   trap: agrees that publishing validates the graph's correctness
+
+- q: "Publish fails with states: 'review': no expected edge enters ['in_review']."
+  concept: states-authoring
+  pass: every state but the initial needs one edge into it marked expected — the normal way in, not the likely one; add expected true (or a list of its from states) to that edge
+  trap: says the state is unreachable and adds another edge, or suggests reordering states or declaring it initial
+
+- q: Publish says my table lacks columns the states tier writes, but those are columns the transitions set.
+  concept: states-authoring
+  pass: the table named by states must declare every column the tier reads or writes — writes and payload_writes targets, machine columns, Status, CTAs and Why (defaults included) and predicate columns; declare them under tables
+  trap: says the columns are created on first write, or to have a flow write them before publishing
+
+- q: My button flow's then step never runs after the edge applies.
+  concept: states-authoring
+  pass: feature.state.transition does not start flow or then flows — it returns them as launches, and the calling flow must start each one with foundation.workflow.start_flow
+  trap: blames the then when condition, or says the engine launches it asynchronously and to wait
 
 - q: What actually happens when I run apply?
   concept: publish-and-apply
