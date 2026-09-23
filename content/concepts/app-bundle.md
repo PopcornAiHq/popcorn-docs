@@ -3,9 +3,10 @@ id: app-bundle
 title: App bundles
 summary: >
   An app bundle is a directory of YAML plus optional code that turns an empty
-  channel into an application — tables for state, flows for work, schedules
-  and webhooks to start them. Flows are the YAML files at the bundle's root;
-  a manifest with a version is what makes it publishable.
+  channel into an application — tables, flows, schedules and webhooks. Every
+  non-reserved YAML file at the bundle's root is a flow, so a sample payload
+  left there installs as one; keep payloads outside the bundle. A manifest with
+  a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
 applies_to: [cli, mcp, human]
 source: [ParsedTemplateConfig, bundle_file_tree, unrecognized_tree_paths]

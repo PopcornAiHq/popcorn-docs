@@ -2,10 +2,11 @@
 id: bundle-version
 title: Bundle versions
 summary: >
-  Publishing mints an immutable, content-addressed version on a line —
-  identified by its semver there — and installing it is a separate step that
-  can be blocked. The same semver with different content is refused, and so
-  is a new semver whose content matches an earlier version exactly.
+  Publishing mints an immutable, content-addressed version on a line, and
+  installing it is a separate step that can be blocked. The same semver with
+  different content is refused, and so is a new semver whose content matches an
+  earlier version exactly — to restore old files, change something such as the
+  changelog and publish forward. Nothing moves a channel back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
 applies_to: [cli, mcp, human]
 source: [publish_tree, BundleImmutabilityError, BundleDigestCollisionError, bundle_digest]

@@ -85,7 +85,7 @@
 
 - q: Which version should I base my edits on, the one the channel runs or the newest?
   concept: fork-line, channel-binding
-  pass: the line's head is the publish base; basing on the bound version silently overwrites what landed in between
+  pass: the line's head is the publish base; a publish based on anything else, including the bound version when it lags, is refused
   trap: says the bound version, because that is what is live
 
 - q: We upgraded the app while a long flow was mid-run. Did it pick up the new code?

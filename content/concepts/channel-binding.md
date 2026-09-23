@@ -2,10 +2,11 @@
 id: channel-binding
 title: How a channel runs a version
 summary: >
-  A channel points at exactly one bundle version, and flows and code resolve
-  through that reference. A run reads it once at start and is pinned for its
-  whole life — including the flows it calls — so an upgrade mid-run never
-  mixes versions. Table data and channel state are live, not pinned.
+  A channel points at exactly one bundle version. A run reads it once at start
+  and is pinned for its whole life, including the flows it calls, so an upgrade
+  mid-run never mixes versions; table data stays live. Base edits on the
+  line's newest version (head): when a channel lags behind it, a publish based
+  on the version the channel runs is refused.
 concepts: [bundle-version, fork-line]
 applies_to: [cli, mcp, human]
 source: [bind_version_internal, get_flow_bytes_pinned]
