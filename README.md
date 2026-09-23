@@ -66,6 +66,32 @@ python3 -m http.server -d build 8000   # http://localhost:8000
 CI runs the same five on every push and pull request; the content and leak
 checks are required to merge.
 
+## Checking the pages against the backend
+
+A page's `source:` names the backend symbols it describes, and the backend
+keeps moving after the page is written. `scripts/drift.py` compares the two.
+The backend repository is private, so this runs **locally only**, against a
+checkout named by `$POPCORN_BACKEND` (default `$HOME/popcorn/backend`); with
+none there it prints a notice and exits 0, which is also why CI does not run it.
+
+```bash
+python3 scripts/drift.py sources               # every cited symbol still has a definition
+python3 scripts/drift.py changes               # backend commits since each page last changed
+python3 scripts/drift.py packet merge-policy > ~/packet.md   # page + cited source, to fact-check
+python3 scripts/drift.py packet --all > ~/packets.md
+```
+
+- **`sources`** — before any content PR. It fails on a cited name the backend
+  no longer defines; it cannot tell you the page is right.
+- **`changes`** — periodically. A review list, not a verdict: the pages whose
+  cited files have moved since the page did.
+- **`packet`** — for each page `changes` flags, and for every new page. Hand
+  the output to a model; it carries its own instructions to list what the code
+  contradicts and what the page omits.
+
+`changes` and `packet` print private source paths, and `packet` reproduces
+private source. Keep their output outside this repository.
+
 ## Publishing
 
 A merge to `main` that touches `content/`, `scripts/` or the publish workflow
