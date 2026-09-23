@@ -7,8 +7,9 @@
 #
 # How to run it, in the cheapest form that is still honest:
 #
-#   1. Give the model ONLY the ten summaries. That is the one-call budget, and
-#      handing it the bodies measures something nobody will ever experience.
+#   1. Give the model ONLY `build/llms.txt` — every summary, no bodies. That is
+#      the one-call budget, and handing it the bodies measures something nobody
+#      will ever experience. `scripts/eval-kit.py` prints it with the preamble.
 #   2. Ask one question. No follow-ups, no hints, no naming the concept.
 #   3. Score the ACTION, not the prose.
 #
@@ -17,6 +18,11 @@
 #   PASS  the answer leads to `pass` below.
 #   PASS  "I need more detail — read <concept>" naming the right concept. That
 #         is the one-call-then-one-more shape working as designed, not a miss.
+#   PASS  the same deferral naming a guide, when that guide covers the question.
+#         The index carries guides as well as concepts, so an agent can be
+#         pointed at either; what is being scored is whether it was sent
+#         somewhere that answers, not whether it picked the file this set
+#         happens to key on.
 #   FAIL  any answer leading to `trap`, however well written.
 #   FAIL  a confident answer that is wrong. Worse than an admitted gap, and
 #         scored worse, because an admitted gap makes the user look.

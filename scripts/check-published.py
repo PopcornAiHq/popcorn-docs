@@ -3,7 +3,7 @@
 
 The offline checks cannot see this. `check-links.py` proves the build is
 self-consistent, and it would have passed happily while the live site returned
-403 for all ten concepts, because a build knows nothing about what reached the
+403 for every concept, because a build knows nothing about what reached the
 bucket or what headers the CDN puts on it. Both of the ways this site has been
 broken so far were invisible until something fetched a real URL:
 
