@@ -68,8 +68,8 @@ says so itself, and some of its findings predate the merge policies in §5.
 ```
 mytemplate/
 ├── manifest.yaml        tables, schedules, webhooks, config, scalars
-├── AGENT.md             notes injected into the channel agent's prompt
-├── README.md            human docs (not installed as anything)
+├── AGENT.md             notes the channel agent reads on demand
+├── README.md            human docs, installed as a channel file
 └── some_flow.yaml       one flow per file, at the root
 ```
 

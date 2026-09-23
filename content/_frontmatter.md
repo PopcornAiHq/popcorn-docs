@@ -18,8 +18,8 @@ source: [fork_for_channel, publish_fork_version]   # BARE SYMBOLS, never paths
 
 ## Field notes
 
-**`id`** is a permanent address. It appears in MCP responses, in cross-links,
-and in the CI comment that names which concepts a backend diff touched.
+**`id`** is a permanent address. It is the page's URL, the handle MCP
+responses and `get_doc` use, and what another page's `concepts:` names.
 Renaming one breaks all three, so choose it as if it were a URL, because it is.
 
 **`summary`** is what an agent gets back from `search_docs` and often the only
@@ -27,17 +27,23 @@ thing it ever reads. Three rules: state the fact, then its consequence; use the
 platform's own nouns; never open with "This page describes."
 
 The 400-character cap is not a style preference. Search returns many summaries
-in one response, and the whole response lands in the model's context — a
-neighbouring design measured one bundle at roughly 71,000 tokens to move
-wholesale, which is what happens when nobody caps anything.
+in one response, and the whole response lands in the model's context, so an
+uncapped summary is a cost every caller pays.
 
-**`source`** lists bare symbols and is checked against a manifest the backend
-publishes from its own CI. Paths are both a leak in a public repo and less
-durable than the name — a symbol that moves file keeps its name.
+**`source`** lists bare symbols — the backend names a reader would search for
+to check the page. Paths are both a leak in a public repo and less durable than
+the name: a symbol that moves file keeps its name.
+
+Nothing verifies them. No check compares `source` against the backend, so a
+symbol that is renamed or removed stays cited until someone notices. Search
+the backend for each name before adding it, and treat a page's `source` as a
+pointer, not a proof.
 
 Omit `source` when a concept describes a behaviour no single symbol owns; do
 not invent one to satisfy the field.
 
-**`applies_to`** drops a page from a rendering that should not carry it. A
-concept about editing files on disk is `[cli, human]` — an MCP host with no
-filesystem should not be told to do something it cannot.
+**`applies_to`** records which readers a page is written for — `cli`, `mcp`,
+`human`. Nothing reads it: the build and the MCP server serve every page to
+every reader. It is still worth setting honestly: a page marked
+`[cli, human]` — editing files on disk, say — tells a reviewer it asks for
+something an MCP host with no filesystem cannot do.
