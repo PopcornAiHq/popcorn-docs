@@ -22,7 +22,11 @@ about what "defined" means:
 nothing about behaviour — a symbol can exist and do the opposite of what the
 page says. `changes` narrows that down to the pages worth re-reading: the
 backend commits, since the page last changed, to the files that define what it
-cites. It is a review list, not a verdict, so it always exits 0. `packet`
+cites. It is a review list, not a verdict, so it always exits 0 — and it is
+only as wide as `source:`. A change to code no page cites, such as a new
+endpoint beside a cited function, reaches `changes` only if it shares a file
+with something cited, and the pages it contradicts may not be the pages
+flagged. `packet`
 assembles what a model needs to do the re-reading: the page, every cited
 definition in full, and the instructions to list what the code contradicts.
 
@@ -244,7 +248,7 @@ def cmd_changes(repo: pathlib.Path, _args) -> int:
 
     total = sum(1 for _, m in pages() if m.get("source"))
     print(f"\n✔  {flagged} of {total} pages with a `source:` cite backend files "
-          "changed since the page was — re-read those, `packet` helps")
+          "changed since the page last was — re-read those; `packet` helps")
     return 0
 
 
