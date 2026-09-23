@@ -81,7 +81,7 @@ report() {
 # worse than one that misses. The source-path shape requires a ".py" tail and a
 # preceding non-path character, so prose naming a bare symbol is untouched.
 report 'private source path' \
-    '(^|[^/[:alnum:]_.-])(lib|services|ops)/[a-z_]+/[a-z_/]*\.py'
+    '(^|[^/[:alnum:]_.-])(lib|services|ops|agents)/[a-z_]+/[a-z_/]*\.py'
 report 'internal document path' \
     '(specs|plans|runbooks|notes)/[0-9]{4}-[0-9]{2}-[0-9]{2}'
 report 'machine-local path' \

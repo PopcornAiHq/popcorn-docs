@@ -73,6 +73,23 @@ publishes the site: `.github/workflows/publish.yml` reruns the checks, uploads
 `build/`, invalidates the CDN and then reads the live site back with
 `scripts/check-published.py`. Nothing needs to be run by hand.
 
+## Regenerating the activity reference
+
+`content/reference/activities.md` is generated from the deployed activity
+catalog and never edited by hand:
+
+```bash
+python3 scripts/sync-activities.py           # reads prod through the popcorn CLI
+python3 scripts/sync-activities.py --check   # exit 1 if the page is stale
+git add content/reference && ./scripts/check-public-repo.sh
+```
+
+It reads prod explicitly, whatever environment the CLI is switched to, and
+publishes `foundation` and `feature` activities at `release` or `beta`. The
+descriptions are backend docstrings, so the leak guard can fail on them; the
+fix for that is the docstring, and the page can be regenerated once the fix is
+deployed.
+
 ## Validating the summaries
 
 Each question is answered from the summaries alone, one question per fresh
