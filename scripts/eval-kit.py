@@ -8,11 +8,20 @@ answer be scored against a rubric read after the fact.
 
 Three outputs, in the order they are used:
 
-    --prompt   the preamble plus llms.txt, to paste once into a fresh session
+    --prompt   the preamble plus llms.txt, pasted into a NEW session for every
+               question — it stays on the clipboard for the whole run
     --ask      the questions, one per line, to send one at a time
     --sheet    a scoring sheet on stdout, with pass and trap spelled out per
                question and a blank verdict to fill in — redirect it somewhere
                outside this repository, it is a working document
+
+One question per session, and the session is thrown away afterwards. Most of
+these questions share a concept with another one, so a run that asks them in
+sequence lets the model answer from its own earlier turn instead of from the
+summary — and by the fifteenth it has learned what a good answer looks like
+here, which is learning the test rather than reading the corpus. Pasting the
+same 4 KB twenty-six times is the isolation; removing the tedium removes the
+measurement.
 
 The sheet is the part that matters. Scoring 26 answers from memory against a
 rubric is how a gate quietly becomes a vibe: the `trap` for question 19 is not
@@ -107,9 +116,10 @@ def main() -> int:
     lines = [
         "# Validation pass — scoring sheet",
         "",
-        "One question per section, asked in a fresh session that has been given",
-        "`--prompt` and nothing else. No follow-ups, no hints, never name the",
-        "concept. Read `trap` BEFORE writing a verdict.",
+        "One question per section. Each goes in its OWN new session, given",
+        "`--prompt` and nothing else — never several questions in one chat, or",
+        "the model answers later ones from its earlier turns. No follow-ups, no",
+        "hints, never name the concept. Read `trap` BEFORE writing a verdict.",
         "",
         "`PASS` the answer leads to **pass**, or defers to something that answers.",
         "`FAIL` the answer leads to **trap**, or is confidently wrong.",
