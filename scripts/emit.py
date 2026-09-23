@@ -100,28 +100,57 @@ def parse(path: pathlib.Path) -> dict:
     return meta
 
 
+# The order sections appear on the landing page. A guide is where a person
+# starts; the concepts are what it and every agent answer points into.
+SECTION_ORDER = {"guides": ("Start here", "guides"), "concepts": ("Concepts", "concepts")}
+
+
 def landing(pages: list[dict]) -> str:
-    """The one page a person lands on: every concept, with its summary."""
-    items = []
+    """The one page a person lands on: every page, grouped by section."""
+    groups: dict[str, list[str]] = {}
     for page in pages:
         href = f"/{page['section']}/{page['id']}.html"
-        items.append(
+        groups.setdefault(page["section"], []).append(
             f'<li><a href="{href}">{render.inline(page["title"])}</a>'
             f"<p>{render.inline(page['summary'])}</p></li>"
+        )
+    ordered = sorted(groups, key=lambda s: (s not in SECTION_ORDER, list(SECTION_ORDER).index(s) if s in SECTION_ORDER else 0, s))
+    sections = []
+    for section in ordered:
+        heading, anchor = SECTION_ORDER.get(section, (section.title(), section))
+        sections.append(
+            f'<h2 class="section-title" id="{anchor}">{heading}</h2>\n'
+            '<ul class="index">' + "".join(groups[section]) + "</ul>"
         )
     return render.document(
         "Popcorn docs",
         "<h1>Popcorn docs</h1>\n"
         '<p class="summary">How app bundles work — the concepts an author or an '
         "agent needs in order to change what a channel tracks.</p>\n"
-        '<ul class="index">' + "".join(items) + "</ul>\n"
-        "<footer>For agents: the index is <a href=\"/llms.txt\">/llms.txt</a>, "
+        + "\n".join(sections)
+        + "\n<footer>For agents: the index is <a href=\"/llms.txt\">/llms.txt</a>, "
         "every body at <a href=\"/llms-full.txt\">/llms-full.txt</a>, "
         "and one record per concept at <a href=\"/chunks.json\">/chunks.json</a>."
         "</footer>",
         description="How Popcorn app bundles work: tables, flows, schedules and "
         "webhooks, and what happens when you publish.",
     )
+
+
+def related(page: dict, by_id: dict[str, dict]) -> str:
+    """"See also" from the page's `concepts:` — only ids that exist.
+
+    An id naming no page is dropped rather than linked, so a typo costs a
+    missing link, not a 404 on the published site.
+    """
+    links = [
+        f'<li><a href="/{by_id[i]["section"]}/{i}.html">{render.inline(by_id[i]["title"])}</a></li>'
+        for i in page.get("concepts", [])
+        if i in by_id and i != page["id"]
+    ]
+    if not links:
+        return ""
+    return '<section class="related"><h2>Related</h2><ul>' + "".join(links) + "</ul></section>\n"
 
 
 def main() -> int:
@@ -148,6 +177,7 @@ def main() -> int:
 
     index = ["# Popcorn docs", ""]
     full = ["# Popcorn docs — full text", ""]
+    by_id = {page["id"]: page for page in pages}
     for page in pages:
         path = f"{page['section']}/{page['id']}.md"
         index += [f"## {page['title']}", f"{SITE}/{path}", "", page["summary"], ""]
@@ -157,13 +187,14 @@ def main() -> int:
         page_file.write_text(
             f"# {page['title']}\n\n{page['summary']}\n\n{page['body']}\n"
         )
+        rendered = render.body(page["body"])
         page_file.with_suffix(".html").write_text(
             render.document(
                 f"{page['title']} — Popcorn docs",
-                '<a class="home" href="/">← Popcorn docs</a>\n'
                 f"<h1>{render.inline(page['title'])}</h1>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
-                f"{render.body(page['body'])}\n"
+                f"{render.toc(rendered)}{rendered}\n"
+                f"{related(page, by_id)}"
                 "<footer>This page as Markdown: "
                 f'<a href="/{path}">/{path}</a></footer>',
                 description=page["summary"],

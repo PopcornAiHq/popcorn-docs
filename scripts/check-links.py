@@ -66,8 +66,11 @@ def hrefs() -> list[tuple[str, str]]:
     for page in sorted(BUILD.rglob("*.html")):
         src = str(page.relative_to(BUILD))
         for href in _HREF.findall(page.read_text()):
-            if href.startswith(("http://", "https://", "#", "mailto:")):
+            if href.startswith(("http://", "https://", "#", "mailto:", "data:")):
                 continue
+            # A fragment names a place in the page, not a file; the file is
+            # what has to exist.
+            href = href.split("#", 1)[0]
             # "/" is the site root, which the distribution serves as index.html.
             target = "index.html" if href == "/" else href.lstrip("/")
             out.append((src, target))
