@@ -24,6 +24,10 @@ import html
 import re
 
 _FENCE = re.compile(r"^```")
+_RULE = re.compile(r"^-{3,}\s*$")
+_QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
+_ORDERED = re.compile(r"^\d+\.\s+(?P<text>.+)$")
+_LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 _HEADING = re.compile(r"^(?P<level>#{2,4})\s+(?P<text>.+)$")
 _BULLET = re.compile(r"^[-*]\s+(?P<text>.+)$")
 _TABLE_SEP = re.compile(r"^\|?[\s:|-]+\|[\s:|-]*$")
@@ -45,11 +49,27 @@ def inline(text: str) -> str:
         return f"\x00{len(spans) - 1}\x00"
 
     out = _CODE.sub(stash, out)
+    out = _LINK.sub(
+        lambda m: f'<a href="{m.group(2).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
+        out,
+    )
     out = _BOLD.sub(r"<strong>\1</strong>", out)
     out = _ITALIC.sub(r"<em>\1</em>", out)
     for i, span in enumerate(spans):
         out = out.replace(f"\x00{i}\x00", f"<code>{span}</code>")
     return out
+
+
+def _continues(line: str) -> bool:
+    """Is this line the wrapped remainder of the list item above it?
+
+    Any indented, non-blank, non-fence line is. The four-space rule that means
+    "code block" in open prose does not apply inside a list: markdown wants
+    code indented past the item's own text, and an item numbered in double
+    digits already puts its continuation at four. Treating those as code broke
+    a twenty-one item list into three, each restarting at 1.
+    """
+    return bool(line.strip()) and line[0] in " \t" and not _FENCE.match(line.strip())
 
 
 def _cells(row: str) -> list[str]:
@@ -113,6 +133,40 @@ def body(md: str) -> str:
             out.append(f"<table><thead><tr>{thead}</tr></thead><tbody>{tbody}</tbody></table>")
             continue
 
+        if _RULE.match(line):
+            out.append("<hr>")
+            i += 1
+            continue
+
+        # A quote's contents are rendered as a body of their own: these carry
+        # whole paragraphs and lists, not one styled sentence. The markers are
+        # stripped first, so the recursion cannot re-enter this branch.
+        if _QUOTE.match(line):
+            inner = []
+            while i < len(lines) and _QUOTE.match(lines[i]):
+                inner.append(_QUOTE.match(lines[i]).group("text"))
+                i += 1
+            out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
+            continue
+
+        if _ORDERED.match(line):
+            items: list[str] = []
+            while i < len(lines):
+                item = _ORDERED.match(lines[i])
+                if item:
+                    items.append(item.group("text"))
+                    i += 1
+                    continue
+                if items and _continues(lines[i]):
+                    items[-1] += " " + lines[i].strip()
+                    i += 1
+                    continue
+                break
+            out.append(
+                "<ol>" + "".join(f"<li>{inline(t)}</li>" for t in items) + "</ol>"
+            )
+            continue
+
         if _BULLET.match(line):
             items: list[str] = []
             while i < len(lines):
@@ -125,10 +179,8 @@ def body(md: str) -> str:
                 # a code block, so only a shallower indent continues the item;
                 # without this the tail of a wrapped bullet became its own
                 # paragraph, sitting outside the list that owned it.
-                cont = lines[i]
-                if items and cont.strip() and cont[0] in " \t" \
-                        and not cont.startswith("    "):
-                    items[-1] += " " + cont.strip()
+                if items and _continues(lines[i]):
+                    items[-1] += " " + lines[i].strip()
                     i += 1
                     continue
                 break
@@ -144,6 +196,9 @@ def body(md: str) -> str:
             or _FENCE.match(lines[i])
             or lines[i].startswith("    ")
             or lines[i].lstrip().startswith("|")
+            or _RULE.match(lines[i])
+            or _QUOTE.match(lines[i])
+            or _ORDERED.match(lines[i])
         ):
             para.append(lines[i].strip())
             i += 1
