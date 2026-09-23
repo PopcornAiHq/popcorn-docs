@@ -5,7 +5,8 @@ summary: >
   A bundle declares its own state machines — states, transitions, and the
   button on each edge — and the platform runs them. A row's status is a
   projection of those machines, so it changes by firing an event, never by
-  writing the column. Publish checks the graph's structure, not its intent.
+  writing the column. Publish proves the graph's structure; its intent is the
+  author's to check — states no event fires, terminals reached too early.
 concepts: [manifest-keys, channel-binding]
 applies_to: [cli, mcp, human]
 source: [StatesSpec, parse_states, project_row]

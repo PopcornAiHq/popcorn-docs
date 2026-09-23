@@ -3,9 +3,10 @@ id: fork-line
 title: Fork lines
 summary: >
   A fork line is a workspace's own version series of an app, forked from the
-  shared product version. Publishing to it moves every channel on that line,
-  not only the one you edited — the others converge on their own daily
-  update. A fork cannot be undone, and a channel never changes line.
+  shared product version. Publishing to it moves every channel on that line, not
+  only the one you edited — the others converge on their own daily update. A
+  change meant for fewer channels needs a second named line. A fork cannot be
+  undone, and a channel never changes line.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 applies_to: [cli, mcp, human]
 source: [fork_for_channel, publish_fork_version, ChannelForkRegressionError, AmbiguousForkLineError]
@@ -58,15 +59,16 @@ Treat forking as a decision about the workspace, not a step in an edit.
 
 ## Head versus bound
 
-Two different versions, and using the wrong one is silent:
+Two different versions, and each is right for one job:
 
 - **bound** — what this channel is running right now. Right for reading what
   is live.
-- **head** — the newest version on the line. Right as a publish base, because
-  a diff computed against an older version would silently overwrite whatever
-  the versions in between changed. `popcorn app checkout` takes head unless
-  told otherwise.
+- **head** — the newest version on the line. The only publish base the server
+  accepts: a publish whose base is not the head is refused, because a diff
+  computed against an older version would drop whatever the versions in
+  between changed. `popcorn app checkout` takes head unless told otherwise.
 
 They differ while an install has not landed, and for good on a channel that
-never takes updates. That window is exactly when getting it wrong costs the
-most.
+never takes updates. Reading bound in that window is right for what is live
+and wrong as a base — the publish is refused, and the edit has to be redone
+on a fresh checkout.

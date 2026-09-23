@@ -4,9 +4,9 @@ title: Manifest keys and what install does to them
 summary: >
   Each manifest key has its own install semantics, and an absent key is not
   the same as an empty one — omitting schedules leaves them alone, while
-  `schedules: []` deletes every schedule the bundle manages. Unknown keys are
-  ignored without a warning, and a manifest with no app_type clears the
-  channel's.
+  `schedules: []` deletes every schedule the bundle manages. An unknown key,
+  such as the typo `schedule:`, is ignored without a warning, and a manifest
+  with no app_type clears the channel's.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
 applies_to: [cli, mcp, human]
 source: [ParsedTemplateConfig, ChannelTemplateInstaller]
