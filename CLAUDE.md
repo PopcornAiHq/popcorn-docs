@@ -30,9 +30,10 @@ name is caught without appearing anywhere.
 
 ## Cite symbols, never paths
 
-A concept's `source:` field names bare symbols. They are checked against a
-manifest the backend publishes from its own CI — the names that exist, nothing
-about where they live. This is why a path is both a leak and unnecessary.
+A concept's `source:` field names bare symbols — the names a reader would
+search the backend for, nothing about where they live. This is why a path is
+both a leak and unnecessary. Nothing checks those names against the backend,
+so search for each one before citing it.
 
 A symbol that moves file keeps its name; a path does not survive a refactor.
 That is the same reason this rule holds in prose.
