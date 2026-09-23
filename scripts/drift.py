@@ -248,7 +248,7 @@ def cmd_changes(repo: pathlib.Path, _args) -> int:
 
     total = sum(1 for _, m in pages() if m.get("source"))
     print(f"\n✔  {flagged} of {total} pages with a `source:` cite backend files "
-          "changed since the page last was — re-read those; `packet` helps")
+          "changed after the page itself last did — re-read those; `packet` helps")
     return 0
 
 
