@@ -2,10 +2,10 @@
 id: state-machine
 title: State machines in a bundle
 summary: >
-  A bundle declares its own state machine — states, legal transitions, and
-  which action fires from where — and the platform runs it. Nothing in the
-  platform knows an app's state names, so what a status means is the app's to
-  state and is read from the version a channel runs.
+  A bundle declares its own state machines — states, transitions, and the
+  button on each edge — and the platform runs them. A row's status is a
+  projection of those machines, so it changes by firing an event, never by
+  writing the column. Publish checks the graph's structure, not its intent.
 concepts: [manifest-keys, channel-binding]
 applies_to: [cli, mcp, human]
 source: [StatesSpec, parse_states, project_row]
@@ -16,8 +16,16 @@ the single chip a user sees is a projection of that tuple.
 
 A bundle declares the machines, their states, and the transitions between them
 in its manifest. The platform ships the engine and runs the graph; the bundle
-ships the graph and the vocabulary. Nothing in the platform knows a single one
-of your state names.
+ships the graph and the vocabulary. The platform knows none of your state
+names — only its own few words: `none`, `same`, and the `system` and `staff`
+event families.
+
+`states:` needs a `tables:` section, and the table it names must declare every
+column the tier reads or writes — here `Status`, `CTAs`, `Stage`,
+`Tracking Mode`, `Decision`, and `Why`, where the reason for the last
+transition is written unless `status.why_column` names another. The graph is
+read at run time from the version the channel is bound to; install writes
+only the display hints it adds to those columns.
 
 ```yaml
 states:
@@ -34,15 +42,25 @@ states:
       column: Tracking Mode
       overlay: true
       states:
-        not_tracking: {label: Not tracking, tone: gray}
+        paused: {label: Paused, tone: gray}
   events:
-    staff: [retain]
+    staff: [retain, pause, resume]
   transitions:
     - on: staff.retain
       from: undecided
       to: funnel.retained
+      expected: true
       writes: {Decision: retain}
       cta: {kind: retain, label: Retain}
+    - on: staff.pause
+      from: tracking.none
+      to: tracking.paused
+      expected: true
+      cta: {kind: pause, label: Pause}
+    - on: staff.resume
+      from: tracking.paused
+      to: tracking.none
+      cta: {kind: resume, label: Resume}
 ```
 
 ## Funnel, overlay, derived
@@ -55,14 +73,19 @@ and should not need declaring.
 
 A machine with a `column:` is **stored** — its value lives in that column. A
 machine without one is **derived**: the bundle's own code decides its value from
-the row's facts. That is the seam between the two halves. Turning facts into
-machine values is the bundle's job; everything after — values to status, event
+the row's facts and passes it to the engine when it projects or transitions a
+row. `derive: true` with a column is both — the bundle decides the value and the
+engine mirrors it into the column. That is the seam between the two halves.
+Turning facts into machine values is the bundle's job; everything after — values to status, event
 to legality, what a transition writes — belongs to the engine.
 
 ## Status is a projection, not a column somebody writes
 
-The status chip is composed from the tuple by a precedence rule. Nothing
-hand-writes it, which is why changing a row's status means firing an event
+The status chip is composed from the tuple by a precedence rule: the first
+`status.compose` rule whose `when` holds; otherwise the first overlay, in
+declaration order, that is not `none`; otherwise the first non-overlay machine.
+Nothing hand-writes it — a bundle's own writes may not touch the projection
+columns — which is why changing a row's status means firing an event
 rather than setting a value: set the value and the next projection overwrites
 it.
 
@@ -77,21 +100,26 @@ facts it writes, and the state it lands on. The button a user sees is declared
 on the transition, so the graph and the interface cannot disagree — there is no
 second place where buttons are configured.
 
-**Guards** are conditions an edge requires. Most are simple column predicates
-the platform evaluates itself. An edge whose rule only the bundle's own code can
-answer is marked external: it still appears in the graph, and a legality check
-reports it as delegated rather than deciding it. The predicate language is
-deliberately small.
+**Guards** are conditions an edge requires. Most are column or machine-state
+predicates the platform evaluates itself, combined with `all`, `any` and
+negation. An edge whose rule only the bundle's own code can answer is marked
+external: it still appears in the graph, and the edge is refused unless the
+caller vouches that the guard holds. The predicate language is deliberately
+small.
 
 ## An illegal graph fails at publish, not at runtime
 
-The whole spec is resolved when the bundle is parsed. A transition naming a
-state, group, event or guard that does not exist fails. So does a state nothing
-can reach, a non-terminal state with no way out, and the shared-state-name
-clash above.
+The whole spec is resolved when the bundle is parsed. It fails when:
 
-This is worth knowing because it inverts the usual authoring risk: you cannot
-publish a graph that strands a row. What you *can* still publish is a graph that
-is well-formed and wrong — reachable states that no event ever fires in
-practice, a terminal state reached too early. The checks prove structure, not
-intent.
+- a transition names a state, group, event, guard or flow that does not exist
+- a state is unreachable, or has no **expected** edge into it — every state but
+  the initial one marks the edge that is its normal way in with `expected:`
+- a non-terminal state of a funnel machine has no way out
+- a terminal state is left by anything but a `system` event
+- two machines share a state name, or a column the tier needs is not declared
+
+This inverts the usual authoring risk, but not completely. Overlay states are
+exempt from the no-way-out rule, so an overlay can still hold a row. And what
+you can always publish is a graph that is well-formed and wrong — reachable
+states that no event fires in practice, a terminal state reached too early.
+The checks prove structure, not intent.
