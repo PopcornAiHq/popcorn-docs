@@ -175,6 +175,21 @@
   pass: parse-time checks prove structure — no unreachable states, no dead ends — not intent; a well-formed graph can still be wrong
   trap: agrees that publishing validates the graph's correctness
 
+- q: "Publish fails with states: 'review': no expected edge enters ['in_review']."
+  concept: states-authoring
+  pass: every state but the initial needs one edge into it marked expected — the normal way in, not the likely one; add expected true (or a list of its from states) to that edge
+  trap: says the state is unreachable and adds another edge, or suggests reordering states or declaring it initial
+
+- q: Publish says my table lacks columns the states tier writes, but those are columns the transitions set.
+  concept: states-authoring
+  pass: the table named by states must declare every column the tier reads or writes — writes and payload_writes targets, machine columns, Status, CTAs and Why (defaults included) and predicate columns; declare them under tables
+  trap: says the columns are created on first write, or to have a flow write them before publishing
+
+- q: My button flow's then step never runs after the edge applies.
+  concept: states-authoring
+  pass: feature.state.transition does not start flow or then flows — it returns them as launches, and the calling flow must start each one with foundation.workflow.start_flow
+  trap: blames the then when condition, or says the engine launches it asynchronously and to wait
+
 - q: What actually happens when I run apply?
   concept: publish-and-apply
   pass: it brings that one channel to its own line's head, takes no version from the caller, and reports already-current when there is nothing to do
