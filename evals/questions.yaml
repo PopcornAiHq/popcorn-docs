@@ -10,7 +10,11 @@
 #   1. Give the model ONLY `build/llms.txt` — every summary, no bodies. That is
 #      the one-call budget, and handing it the bodies measures something nobody
 #      will ever experience. `scripts/eval-kit.py` prints it with the preamble.
-#   2. Ask one question. No follow-ups, no hints, no naming the concept.
+#   2. Ask one question, in a session that has seen nothing else, and throw
+#      the session away. Most of these share a concept with another question,
+#      so asking them in sequence lets the model answer from its own earlier
+#      turn rather than from the summary, and the run scores the transcript
+#      instead of the corpus. No follow-ups, no hints, no naming the concept.
 #   3. Score the ACTION, not the prose.
 #
 # Scoring, decided before running so it cannot be rationalised after:
