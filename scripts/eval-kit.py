@@ -22,10 +22,10 @@ these questions share a concept with another one, so a run that asks them in
 sequence lets the model answer from its own earlier turn instead of from the
 summary — and by the fifteenth it has learned what a good answer looks like
 here, which is learning the test rather than reading the corpus. Pasting the
-same 4 KB twenty-six times is the isolation; removing the tedium removes the
-measurement.
+same reference once per question is the isolation; removing the tedium
+removes the measurement.
 
-The sheet is the part that matters. Scoring 26 answers from memory against a
+The sheet is the part that matters. Scoring every answer from memory against a
 rubric is how a gate quietly becomes a vibe: the `trap` for question 19 is not
 in anyone's head by the time they reach it, and an answer that sounds right
 gets a pass it did not earn. Reading the trap before the verdict is the whole
@@ -63,7 +63,8 @@ reference between the markers below. Answer as if you were about to act on it:
 say what the person should do, concretely.
 
 If the reference does not contain enough to answer, say so and name the entry
-you would read in full. Do not guess at how similar systems usually behave.
+you would read in full. Do not open the links or search the web; the reference
+is everything you have. Do not guess at how similar systems usually behave.
 
 ===== REFERENCE START =====
 """

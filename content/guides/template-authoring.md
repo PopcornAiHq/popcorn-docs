@@ -44,25 +44,22 @@ other? Everything it reports passes `flow validate` cleanly — a fixture named
 `.yaml`, a write to an undeclared column, a schedule naming a flow that is not
 there. Run both; neither subsumes the other.
 
-Two bundles are referred to throughout, as the two ends of the choice §6 is
-about:
-
-| Bundle | Producers | Per-delivery cost |
-|---|---|---|
-| `alerttracker` | four, unrelated | one LLM call — it must *derive* severity and env |
-| `deploywatch` | one (GitHub) | none — it *extracts* fields the payload states |
-
-The gap between them is §6, and it is the single most consequential choice in
-a webhook-backed template.
+The shipped `alerttracker` app is the running example: one producer
+(Alertmanager), a webhook whose flow names every field by path with
+`fields.extract` and upserts one row per alert, and no model anywhere in it.
+The choice it embodies — *extract* fields the payload states, or *derive* ones
+it does not — is §6, and it is the single most consequential choice in a
+webhook-backed template.
 [`examples/alerttracker/GOTCHAS.md`](https://github.com/PopcornAiHq/popcorn-cli/blob/main/examples/alerttracker/GOTCHAS.md) is
-the raw evidence log behind most of the rules below, and is worth reading
-whole.
+the raw evidence log from building an LLM-normalised, multi-producer version
+of that app, and is behind most of the rules below. Read it as a record: it
+says so itself, and some of its findings predate the merge policies in §5.
 
-> **Do not copy a bundle out of this repo.** Cut-down copies of both live under
-> `tests/fixtures/bundles/` and exist to exercise `template check`; neither
-> declares a `version:`, so neither can publish, and both have drifted from
-> what the platform actually ships. **Get bundle source from the server** — see
-> §2b, where `app checkout` hands you the deployed version of a real one.
+> **Do not copy a bundle out of a repo.** The cut-down bundles under the CLI
+> repo's `tests/fixtures/bundles/` exist to exercise `template check`; none
+> declares a `version:`, so none can publish, and they do not match what the
+> platform ships. **Get bundle source from the server** — see §2b, where
+> `app checkout` hands you the deployed version of a real one.
 
 ---
 
@@ -73,12 +70,13 @@ mytemplate/
 ├── manifest.yaml        tables, schedules, webhooks, config, scalars
 ├── AGENT.md             notes injected into the channel agent's prompt
 ├── README.md            human docs (not installed as anything)
-├── some_flow.yaml       one flow per file
-└── fixtures/*.json      sample payloads — NOT installed (see §2)
+└── some_flow.yaml       one flow per file, at the root
 ```
 
-Only `manifest.yaml` is meaningful on its own; everything else is optional. A
-bundle with one flow and no manifest is a legal template.
+Only `manifest.yaml` is meaningful on its own, and a publish needs it — with
+a `version:` — so everything else is optional. Sample payloads and
+notes belong **outside** the bundle directory — anything the format does not
+name is left behind at publish and reported by `template check` (§2).
 
 ## 2. How a bundle gets installed
 
@@ -157,10 +155,10 @@ The bump is not optional either, and inside a checkout `template check` is
 where you find that out. A published version is immutable, so `version:` must
 strictly advance past the one the checkout came from; leaving it alone gets you
 a `version-not-advanced` error offline instead of a server refusal after the
-upload. Rewriting `changelog:` in the same edit is a warning
-(`changelog-not-updated`) rather than an error, because the checkout arrives
-carrying the *previous* version's note — so keeping it is the default outcome,
-not an unlikely one. The warning says which job the field is doing for the line
+upload. Leaving `changelog:` exactly as the checkout wrote it while `version:`
+advances is a warning (`changelog-not-updated`) rather than an error, because
+the checkout arrives carrying the *previous* version's note — so keeping it is
+the default outcome, not an unlikely one. The warning says which job the field is doing for the line
 you are on: in a fork checkout it is documentation that ships with the bundle
 and `-m` is what records a note on the version, matching what `app publish`
 tells you rather than contradicting it. Both checks read the baseline
@@ -249,45 +247,55 @@ debug.
 
 ### What the reader does with your files
 
-Two readers, one classification path: the registry reads your directory off
-disk, and `read_zip` reads an uploaded archive (retained for a future upload
-transport). Both then:
+The registry reads your directory off disk and classifies every path:
 
 - **Reserves four names**: `manifest.yaml`, `AGENT.md`, `README.md`, and
   `strings.yaml` (client copy — `config.yaml` is a legacy manifest alias).
-  Every template the backend ships has a `strings.yaml`.
-- **Treats every other `.yaml` / `.yml` as a flow.** This is why fixtures must
-  be `.json` — a sample payload named `.yaml` can be installed as a flow.
-- **Descends `prompts/` and `templates/` only**, one level, seeding
+  Most shipped templates carry a `strings.yaml`; it is optional.
+- **Treats every other root-level `.yaml` / `.yml` as a flow.** Flows are read
+  from the bundle root only, so a stray `.yaml` there is installed as a flow
+  (`template check` reports one with no `name:`/`steps:`), while a nested
+  `.yaml` is not a flow at all.
+- **Descends `prompts/` and `templates/`**, one level, seeding
   `$channel.prompts.<stem>` and `$channel.templates.<stem>`.
 - **Descends `code/<block>/` to any depth** — one directory per custom code
   block, so a block may be a small package rather than a single file. The block
   name is a slug (it rides inside flow YAML as `code_name:`), and every segment
-  below it must be visible: a hidden entry gets the tree refused at publish.
+  below it must be visible: the server refuses a tree with a hidden entry
+  there, and `app publish` drops dotfiles under `code/` before upload — so from
+  the CLI a hidden file is silently left behind rather than refused.
   Unlike the two directories above, files here are **not** seeded into channel
   config — `foundation.code.execute` reads them by block name at run time.
-- **Silently skips everything else**, including dotfiles and `__MACOSX`.
+- **Reads `agents/<name>/`** — one directory per agent the bundle defines for
+  itself: `agent.yaml`, `prompt.md` and `schemas/*.json`, parsed and refused at
+  publish if they would not run. The CLI does not currently upload this
+  directory: `app publish` leaves `agents/` behind like any other unrecognized
+  path.
+- **Does not read anything else.** A `fixtures/` directory, a `notes.txt`, a
+  file nested a level too deep: `template check` reports each as
+  `path-not-published` (a warning, so `--strict` fails), `app publish` leaves
+  it behind, and the server refuses such a path if one reaches it. Only
+  dotfiles and `__pycache__` are dropped without comment. Move fixtures
+  outside the bundle directory — renaming them to `.json` does not make them
+  part of the format.
 
 A block file may carry any extension, `.yaml` included, and is block source
 rather than a flow. `template check` reports `code-file-outside-block` for a
 loose file directly under `code/` and `code-block-name-invalid` for a name that
 is not a slug — both are trees `app publish` refuses.
 
-Where they diverge — **keep the bundle flat and it never matters:**
+**Keep flows at the root.** A flow in a subdirectory is not a flow: through
+`app publish` it never gets that far — the CLI reports it and leaves it behind
+— and `template check` flags the nesting.
 
-| | registry (on-disk) | `read_zip` (archive) |
-|---|---|---|
-| `flows/a.yaml` | **ignored** — the dir is not descended | flattened to `a.yaml` |
-| two files, same basename | both kept (different paths) | second one wins |
-| entry over 1 MiB | no limit | rejected |
-
-A nested flow is silently *dropped* by one reader and silently *flattened* by
-the other. Neither tells you. `template check` flags the nesting.
-
-**Flow identity is the `name:` inside the YAML, not the filename.** Install
-upserts by name. Renaming `name:` creates a second flow and leaves the first
-one installed — and install **prunes** flows the bundle no longer covers, so a
-rename that you meant as a rename reads as one delete plus one create.
+**Flow identity is the `name:` inside the YAML, not the filename.** A name
+matches `FLOW_NAME_RE` — `^[a-z0-9][a-z0-9_-]{0,62}$`: lowercase, digits,
+`_` and `-`, not starting with `_`, at most 63 characters. No flow is copied
+into a channel: schedules, webhooks and runs resolve flows by name from the
+flow index of the version the channel is bound to. So renaming `name:` is one
+flow leaving and another arriving — the old name disappears the moment a
+channel binds the new version, and anything still pointing at it points at
+nothing.
 
 ## 3. Manifest keys
 
@@ -298,28 +306,51 @@ wrong is how you wipe a live channel's state.
 |---|---|---|
 | `display_name`, `description` | catalog copy | for the template picker |
 | `version` | bundle semver | **required to publish**; shape-validated when present |
-| `app_type` | sets the channel's app | **see the warning below** |
+| `changelog` | the version's note | a fork publish ignores it and records `-m` instead (§2b) |
+| `app_type` | sets the channel's app | **written or cleared every install** — see the warning below |
+| `channel_agent` | the channel's agent | written or cleared every install, exactly like `app_type` |
 | `tables` | **additive reconcile** | columns are added and attributes fixed, never dropped or renamed |
-| `channel_parameters` | upsert, **types preserved** | read as `$channel.<name>` |
-| `scalars` | **UPSERT on every install** | never put flow-written runtime state here |
+| `states` | a state machine over one table | requires `tables:`; see below |
+| `channel_parameters`, `status_kinds` | **upsert per key**; drift-preserving on update | parameters keep their types and read as `$channel.<name>` |
+| `scalars` | **upsert per key**; drift-preserving on update | never put flow-written runtime state here |
 | `default_scalars` | **write once, first install only** | safe place for an operator-owned switch |
-| `schedules` | **REPLACE wholesale** | omitted = leave alone; `[]` = delete all |
+| `schedules` | **reconcile by (flow, slug)** | omitted = leave alone; `[]` = delete every manifest-managed one |
 | `webhooks` | **create-if-missing** | never updated or deleted |
-| `triggers`, `connections`, `documents`, `status_kinds` | replace, omit-vs-empty | `[]` means "replace with nothing" |
+| `triggers`, `required_connections`, `connections`, `documents` | replace, omit-vs-empty | `[]` means "replace with nothing"; a trigger's `enabled` is a seed, applied the first time only |
 
-The `*_declared` distinction runs through all of them: **an absent key leaves
-the channel alone; a present-but-empty key means "replace with nothing."**
-`schedules: []` deletes every schedule. Omitting `schedules:` does not.
+The `*_declared` distinction runs through the list-shaped keys: **an absent key
+leaves the channel alone; a present-but-empty key means "replace with
+nothing."** `schedules: []` deletes every manifest-managed schedule. Omitting
+`schedules:` does not.
+
+**An unknown top-level key is silently ignored.** A typo such as `schedule:`
+installs nothing and reports nothing, so a key that seems to do nothing is
+worth spelling-checking against this table first.
+
+`states:` declares a state machine over one declared table. It is validated as
+a graph at publish, and every transition's `flow` and `then` must name a flow
+in the bundle. The grammar is its own page:
+[the state machine](https://docs.popcorn.ai/concepts/state-machine.md).
 
 > **An untyped bundle CLEARS the channel's `app_type`.** A manifest with no
 > `app_type:` key strips whatever was there, which changes the client's whole
 > interface paradigm. Never import an untyped bundle into a channel running a
-> real app. `--dry-run` warns you.
+> real app. `template check` warns you (`clears-app-type`).
 
 ### Runtime state must not appear under `scalars:`
 
-`scalars:` upserts on *every* install. If a flow writes a `last_swept_at` key
-and the manifest also declares it, every re-import resets it. Declare only
+A first install, and an install by template name, write every declared scalar
+unconditionally. A version update — `app publish` moving the channel on,
+`app apply`, or the daily auto-update of a bound channel — is drift-preserving
+per key: it writes a declared scalar only if the channel has no value for it
+or still holds the *old* bundle's declared value, and otherwise keeps the
+channel's. Channel config sections (`channel_parameters`, `status_kinds`) and
+`AGENT.md`'s agent docs follow the same rule.
+
+That rule is built for configuration a member may edit, and it is wrong for
+state a flow maintains. If a flow writes a `last_swept_at` key the manifest
+also declares, a fresh install resets it, and an update overwrites it whenever
+the live value happens to equal the old declared one. Declare only
 install-time configuration; let flows create their own runtime keys.
 `template check` warns (`runtime-state-in-scalars`) when it sees a flow write
 a scalar the manifest declares.
@@ -332,14 +363,29 @@ bundle passes its own channel's id into a scheduled flow.
 
 ```yaml
 schedules:
-  - flow: alert_tick
-    slug: alert-tick
-    interval: 300          # seconds; or cron: "0 8 * * *" + timezone:
+  - flow: basic_tick
+    slug: basic-tick
+    interval: 3600         # seconds; or cron: "0 8 * * *" + timezone:
+    class: periodic        # periodic | deadline | window
     overlap: skip
-    jitter: 30
+    jitter: 60
     inputs:
       conversation_id: <channel-conversation-id>
 ```
+
+Each entry names exactly one of `interval:` or `cron:` — one naming both is
+refused. `class:` is routing, not decoration: it picks the queue and how the
+fire time is spread (`periodic` for an interval, `deadline` for a daily cron,
+`window` for deferrable work).
+
+Install upserts each schedule by (flow, slug), then deletes the name-keyed
+schedules the manifest no longer declares; schedules a member created through
+another surface are never touched. On a version update an unchanged
+`schedules:` section is skipped, only schedules the *old* manifest declared
+and the new one drops are deleted, and a recreated schedule keeps its paused
+state and note. A schedule whose `flow:` is not in the bundle is skipped — and
+is then deleted as undeclared, so a typo in `flow:` removes the schedule it
+meant to keep.
 
 ## 4. Flow grammar
 
@@ -380,7 +426,7 @@ outputs:
 | `$inputs.*` | the run's declared inputs |
 | `$steps.<id>.output.*` | a prior step's result |
 | `$steps.<id>.<collect>` | a `foreach` step's collected list, under the name `collect:` gave it |
-| `$channel.*` | channel config — parameters, scalars, and the seeded `integrations` / `integration_list` |
+| `$channel.*` | channel config — `channel_parameters` plus the seeded `integrations` / `integration_list`; scalars are **not** here |
 | `$trigger.*` | what triggered the run |
 | `as:` name | the current item inside a `foreach` |
 
@@ -392,14 +438,18 @@ say) resolves to null rather than erroring. `$channel` is not closed: its keys
 come from a per-channel config the bundle cannot see, which is why an
 unrecognized one is a warning.
 
-**Every dot-separated segment starts with a letter or underscore** and then
-carries only letters, digits and underscores. `$a.`, `$a..b` and `$a.1b` are
-not references at all — they resolve as literal strings at runtime, which is a
-silently wrong value rather than an error. A numeric segment is the one
-exception and means an array index (`$steps.x.output.rows.0.title`).
+**The root and the first segment after it start with a letter or
+underscore**; the whole reference carries only letters, digits, underscores
+and dots. `$a.`, `$a..b` and `$a.1b` are not references at all. `flow
+validate` flags one that starts with a real root (`$steps.x.`, say) as a
+malformed reference; a flow that ships one anyway resolves it as a literal
+string at runtime, which is a silently wrong value
+rather than an error. Later segments may be numeric, which means an array
+index (`$steps.x.output.rows.0.title`).
 
-**A `foreach` alias shadows every global root.** The interpreter resolves
-aliases first, deliberately, so `as: channel` or `as: trigger` keeps working.
+**A `foreach` alias shadows `$channel` and `$trigger`**, deliberately, so
+`as: channel` or `as: trigger` keeps working. It does not shadow `$inputs` or
+`$steps` — those resolve before aliases are consulted.
 
 **Index arrays with dots, never brackets**: `$steps.x.output.ids.0`. Brackets
 are rejected as malformed and would be treated as a literal string.
@@ -433,8 +483,7 @@ arithmetic, no `${}` interpolation.
 
 `template check` does not police any of this: mirroring the routing rule
 offline means reimplementing the predicate parser, and a near-miss
-reimplementation reports valid clauses as broken (the earlier "one comparison
-only" rule rejected 55 valid clauses across the shipped backend templates). It
+reimplementation reports valid clauses as broken. It
 checks the references inside a `when:` and leaves the grammar to `flow
 validate`, which calls the real parser.
 
@@ -456,14 +505,22 @@ gate can only skip a step you already decided to run.
 ### `foreach`
 
 `foreach:` takes a list, `as:` names the item, `collect:` names the result
-list, `max_parallel:` bounds concurrency. A step-level `when:` on a `foreach`
+list, `max_parallel:` bounds concurrency — omitted, items run one at a time,
+and the authoring gates refuse a value above the platform's cap. A step-level `when:` on a `foreach`
 step is **re-evaluated per item** in that item's scope, so `when: $row.Status
 == 'firing'` filters items rather than skipping the whole step.
 
-### A step is exactly one of four things
+### A step is exactly one of five things
 
-`activity:`, `sleep_seconds:`, `await_approval:`, or a nested `steps:` block.
-Exactly one — the model rejects a step with two, or none.
+`activity:`, `sleep_seconds:`, `await_approval:`, `call_flow:`, or a nested
+`steps:` block. Exactly one — the model rejects a step with two, or none.
+
+`call_flow:` runs another flow of the same bundle as a child: `flow:` is a
+literal name the publish checks, `inputs:` are resolved like `args`, and
+`mode: wait` (the default) returns the child's `outputs:` at
+`$steps.<id>.output.outputs.<key>`, while `mode: detach` returns once it has
+started. A child runs exactly once, so `on_error.retry` is refused on it —
+`call_flow.timeout_seconds` bounds it instead.
 
 Blocks nest three lists deep, counting the flow's own `steps:` as the first —
 so a block inside a block is the deepest legal shape and a third level is
@@ -492,7 +549,8 @@ inner step  ──▶ sees $inputs, $channel, $trigger, and every
                 enclosing step at every level           ✅
 ```
 
-Inner ids are private, so two blocks may reuse the same id. `outputs:` is
+Inner ids are private for *reads* only: step ids are unique across the whole
+flow, blocks included, and reusing one is refused as `duplicate step id`. `outputs:` is
 evaluated in the block's inner scope after its steps ran, and is legal only
 alongside `steps:`. Omit it and the block publishes nothing — the same as a
 skipped step.
@@ -505,25 +563,32 @@ iteration to the same signal.
 ### Errors and retries
 
 Retry is flow-owned. **No `on_error` means up to 4 attempts** — any
-non-idempotent step must set `retry: 0`. `policy: skip` continues the flow;
-`policy: fail` stops it.
+non-idempotent step must set `retry: 0`. `retry:` is capped at 10, and
+`backoff_seconds:` sets the wait before the first retry (it needs a `retry`
+of 1 or more). `policy: skip` continues the flow with the step's output null
+and the failure under `$steps.<id>.error`; `policy: fail` stops it.
+`policy: fallback` (with `fallback: <step id>`) is accepted by the grammar,
+but the interpreter runs it as `fail` — nothing is invoked in its place.
+`on_error.retry` is refused on a block — retrying a group would repeat its
+inner side effects, so put retries on the inner steps — and on `call_flow`.
 
-### There is no arithmetic
+### Arithmetic is an activity, not syntax
 
-Nothing in the DSL adds, subtracts, counts, or compares magnitudes. There is
-no expression syntax: you cannot write `$a + $b`, and you cannot even negate a
-reference — `-$channel.minutes` is parsed as a literal string and fails type
-validation. Consequences:
+Nothing in a reference or an `args` value computes. You cannot write
+`$a + $b`, and you cannot even negate a reference — `-$channel.minutes` is
+parsed as a literal string and fails type validation. Arithmetic is
+`foundation.math.calculate`: one binary operation per step (`left`,
+`operation: add | subtract | multiply | divide`, `right`), chained through
+`$steps.<id>.output.value`. Consequences:
 
-- **Never design a counter column.** Accumulate with a `merge: concat` string
-  column and let readers count entries.
-- **A sign cannot be applied by a step.** If an activity takes a *signed*
-  value, the sign must be baked into the configured data — no step can flip
-  it. Prefer an activity that names the direction as its own argument, which
-  is why `math.offset` takes `direction: subtract` rather than a negative
-  duration.
+- **A counter belongs to the store, not to a read-add-write pair of steps.**
+  `merge: increment_on_change` (§5) counts transitions under the row lock;
+  two runs doing their own read and `add` can lose an increment.
+- **Prefer an activity that names the direction.** A signed value is easy to
+  get backwards, which is why `math.offset` takes `direction: subtract`
+  rather than a negative duration.
 
-**Time windows are the exception, and they have a real activity.**
+**Time windows have their own activity.**
 `foundation.math.offset` shifts a timestamp by a duration and returns
 `workflow.now`'s `{unix, unix_str, iso}` shape, so its output drops straight
 into a filter:
@@ -544,8 +609,9 @@ into a filter:
 ```
 
 Pass `iso` explicitly when several cutoffs must derive from the same instant.
-`alerttracker`'s sweep flow does exactly this, and is fully deterministic as a
-result — it previously spent an LLM call per run on the subtraction.
+`basicapp`'s `request_intake` uses the same activity the other way —
+`direction: add`, `days: $channel.default_due_days` — to stamp a default due
+date with no model involved.
 
 ## 5. Table schemas
 
@@ -557,7 +623,11 @@ tables:
   alerts:
     columns:
       - { name: Fingerprint, type: string, unique: true }
+      - { name: Status, type: string }
+      - { name: First Fired, type: datetime, merge: keep }
       - { name: Seen At, type: string, merge: concat }
+      - { name: Firing Count, type: number, merge: increment_on_change,
+          merge_when: { column: Status, from: resolved, to: firing } }
       - { name: Raw, type: json, internal: true }
     merge_key:
       any_of: [Fingerprint]
@@ -565,24 +635,46 @@ tables:
 ```
 
 `type` is `string | number | boolean | datetime | json`. `format` validates on
-write; `display` only hints at rendering and is **never validated** — a
+write. `display` is a rendering hint whose *kind* (the part before the first
+`:`) is validated against `DISPLAY_KINDS`; its arguments are not — a
 misspelled display arg fails silently by simply not rendering.
 
-Governance flags (`pii`, `restricted`, `internal`, `passthrough`,
-`masked_read`) are independent booleans. `internal: true` hides a column from
-the user-facing UI — right for raw payloads and bookkeeping ids.
+Governance flags (`pii`, `restricted`, `internal`, `outbound_ref`,
+`passthrough`, `masked_read`) are independent booleans. `internal: true` hides
+a column from the user-facing UI — right for raw payloads and bookkeeping ids.
+`outbound_ref` marks the recipient-facing reference an agent uses in outbound
+messages in place of a client's identity. `masked_read` means anything only
+alongside `pii: true`.
 
 ### Merge policy
 
-Every column is `merge: replace` (last write wins). The **only** other mode is
-`merge: concat`, which appends to a string column with a separator.
+A policy acts only when a write **merges into an existing row**: an
+`upsert_rows` with `on_conflict: merge`, or a PATCH. `upsert_rows` defaults to
+`on_conflict: replace`, which overwrites the whole row and applies no policy.
+A table whose schema declares a `merge_key` uses `merge_key.on_conflict`
+(default `merge`) and ignores a per-call `merge_on`.
 
-There is no "keep the existing value" policy. So a "first time we saw this"
-column must never be written by the upsert — write it in a separate step gated
-on `created == 1`, or every re-fire overwrites it.
+| Policy | Type | On merge |
+|---|---|---|
+| `replace` (default) | any | the incoming value overwrites |
+| `concat` | string only | appends with `merge_separator` (default newline); skips an incoming value equal to the whole stored value |
+| `keep` | any | first write wins — a non-blank stored value is never overwritten |
+| `increment_on_change` | number only | ignores the incoming value; adds 1 when the `merge_when` column goes `from` → `to` |
 
-`merge: concat` requires `type: string`. A timestamp history cannot be
-`datetime`.
+`increment_on_change` requires `merge_when: {column, from, to}` naming a
+*different* column; `from` and `to` must differ and are compared
+case-folded. The accumulating policies act only on a column the write
+**carries** — omit `Firing Count` from a write and it does not increment even
+when `Status` flips. So write it on every delivery; the value is discarded.
+
+`alerttracker` uses all of this: `First Fired: merge: keep` holds the first
+episode's start however often the alert re-fires, and `Firing Count:
+increment_on_change` counts `resolved` → `firing` episodes while its ingest
+flow sends the same `First Fired` and a constant `1` on every delivery. Write
+a "first time we saw this" column unconditionally into a `keep` column rather
+than gating a separate step on `created`.
+
+A timestamp history is a `concat` column, so it cannot be `datetime`.
 
 Check what is actually installed with:
 
@@ -594,8 +686,8 @@ popcorn table schema alerts --channel '#chan'
 ### Merge keys
 
 `merge_key.any_of` columns must be **indexed** (`unique: true` satisfies it)
-and **string-typed** — the OR-probe only queries the text index, so a
-non-string merge key silently never matches.
+and **string-typed** or computed — the OR-probe only queries the text index,
+so schema validation rejects a non-string merge key outright.
 
 ### Name columns without spaces if a flow reads them
 
@@ -610,10 +702,12 @@ steps[1](touch).args.text: malformed reference '$row.Last Seen'
 Renaming later is not free — the installer is additive and never renames, so a
 rename *adds* a column and orphans the old one.
 
-**And the store accepts undeclared columns.** Writing `Post Message Id` when
-the schema says `PostMessageId` silently succeeds and produces a column no
-`$ref` can reach. Renaming a column means renaming every write site; only
-reading a row back catches a miss.
+**And the store accepts undeclared columns.** Keys are whitespace-trimmed,
+and one that matches a declared column case-insensitively is rejected with a
+"did you mean" naming it. Anything further off is not: writing
+`Post Message Id` when the schema says `PostMessageId` silently succeeds and
+produces a column no `$ref` can reach. Renaming a column means renaming every
+write site; only reading a row back catches a miss.
 
 ## 6. Reading fields off an object input
 
@@ -649,22 +743,21 @@ rather than a guess:
 ```
 
 `$steps.fields.output.alarm` then resolves statically, so `flow validate`
-checks it. `deploywatch` is a whole bundle built this way — a single producer,
-every field read by path, and not one model call in it.
+checks it. `alerttracker` is a whole bundle built this way — a single
+producer, every field read by path, and not one model call in it. Its
+`alert_webhook` flow extracts the payload's `alerts` array, extracts each
+alert's fields in a `foreach`, and upserts one row per alert.
 
 Three behaviours worth knowing:
 
 - **An unresolvable path fails the step** (`ExtractPathNotFound`), listing
   every bad path at once. That is the point — it is how a flow *requires* a
   field to be present rather than accepting something invented in its place.
-  Posting a GitHub ping at `deploywatch`'s intake webhook returns exactly
-  this, and writes nothing:
+  Posting a body with no `alerts` key at `alerttracker`'s webhook fails its
+  first extract, and writes nothing:
 
   ```
-  ExtractPathNotFound: fields.extract could not resolve:
-    creator <- deployment_status.creator.login;
-    deployment_id <- deployment.node_id;
-    environment <- deployment_status.environment; …
+  ExtractPathNotFound: fields.extract could not resolve: alerts <- alerts
   ```
 
   Compare `agent.transform` given the same junk: it fabricates a row. The
@@ -686,14 +779,15 @@ extraction reads what is there, derivation invents what is not. A CloudWatch
 alarm body has no `severity` and no `env` key at all, so those must be derived;
 its `AlarmName` and `NewStateValue` are right there and should not be.
 
-The two shipped examples are the same decision answered both ways, and the
-input decides it, not taste:
+The same decision answered both ways, where the input decides it, not taste —
+the shipped `alerttracker` on one side, and on the other the several-producer
+design the evidence log records:
 
-| | `deploywatch` | `alerttracker` |
+| | extract (`alerttracker`) | derive (several producers) |
 |---|---|---|
-| producers | one | four, unrelated |
-| identity | `deployment.node_id`, stated | `source:resource:env`, composed |
-| environment | `deployment_status.environment`, stated | absent from a CloudWatch body — derived |
+| producers | one (Alertmanager) | several, unrelated |
+| identity | Alertmanager's `fingerprint`, stated | composed from fields that differ per producer |
+| environment | the `cluster` label, stated | absent from a CloudWatch body — derived |
 | tool | `fields.extract` | `agent.transform` |
 | cost | none | one LLM call per delivery |
 | junk input | fails, names every missing path | invents a plausible alert unless a `recognized` guard stops it |
@@ -810,7 +904,7 @@ creating it.
 into the inputs from `--channel`:
 
 ```bash
-popcorn flow run alert_tick --channel <id> --wait
+popcorn flow run basic_tick --channel <id> --wait
 ```
 
 Pass `--inputs` for a flow's own arguments; an explicit `conversation_id`
@@ -818,7 +912,7 @@ there always wins, so a flow can still target another conversation.
 
 ```bash
 popcorn flow run seed_test_alert --channel <id> \
-  --inputs '{"severity":"critical","env":"prod"}' --wait
+  --inputs '{"severity":"critical","fingerprint":"0000000000000002"}' --wait
 ```
 
 ### Checks will not save you
@@ -839,26 +933,30 @@ popcorn template check . --strict   # warnings do too — this is the CI form
 It cannot catch the first two. A merge policy is only wrong relative to what
 you meant, and no offline tool knows an LLM is about to invent a row.
 
-**So install it and run it.** `seed_test_alert.yaml` and
-`seed_test_deploy.yaml` exist purely so a bundle can be exercised without a
-real producer.
+**So install it and run it.** A seed flow such as `alerttracker`'s
+`seed_test_alert` exists purely so a bundle can be exercised without a real
+producer — it sends a canned payload through the same ingest flow a real
+delivery takes.
 
 And exercise the **boundary**, not the happy path. A sweep that resolves
 everything Completes just as cheerfully as a correct one; the only proof a
 cutoff works is that a row just inside it moves and a row just outside it does
-not. Both example bundles were verified that way.
+not.
 
 Watch for these when reading results:
 
 - Many activities have permissive result schemas (`additionalProperties:
-  true`). For those, `$steps.x.output.anything` **passes validation and
-  resolves to nothing at runtime**. Verify against the real response, not the
-  catalog.
+  true`). For those, `$steps.x.output.anything` **passes validation** — and at
+  runtime a key the response lacks is a hard `ReferenceError: … key not
+  found`; only a null partway along the path resolves to null. Verify against
+  the real response, not the catalog.
 - `start_flow` is asynchronous. A parent that launches a child reports
-  Completed immediately; check the **child's** run.
+  Completed immediately; check the **child's** run. When the parent needs the
+  result, use a `call_flow:` step with `mode: wait` instead (§4).
 - Posting the same webhook body twice does not test your merge logic — the
-  *webhook layer* dedupes identical deliveries and no flow runs at all. Vary
-  the body while keeping the identity fields.
+  *webhook layer* drops a delivery whose body is byte-identical (SHA-256) to
+  one seen in the last five minutes, and no flow runs at all. Vary the body
+  while keeping the identity fields.
 - A field that might be **absent** must never be dereferenced. A missing key
   is a hard `ReferenceError` that fails the run, and `on_error` does not
   rescue it — reference resolution happens before the activity is invoked.
@@ -871,29 +969,35 @@ Watch for these when reading results:
    first, with `fields.extract` when the fields are there and
    `agent.transform` when the answer must be derived.
 2. `workspace_id` is never an input; it rides the auth context.
-3. `scalars` UPSERT every install, `schedules` REPLACE wholesale,
+3. `scalars` are written on install and drift-preserved on update,
+   `schedules` reconcile by (flow, slug) and drop the undeclared,
    `default_scalars` write once. Runtime state belongs in none of them.
 4. Flow identity is `name:`, not the filename.
-5. Zips flatten to basenames, except `prompts/` and `templates/`. `code/`
-   blocks are a tree-reader concept only — a zip carries no code blocks.
+5. Flows are read from the bundle root only; anything the format does not
+   recognise is left behind by `app publish` and refused by the server.
 6. Webhook-triggered flows get `{conversation_id, payload, headers,
    source_hint, delivery_id, webhook_id}`, and only in `trigger_workflow` mode.
 7. `<channel-conversation-id>` / `<workspace-id>` are substituted in schedule
-   inputs.
+   inputs and in `triggers:` inputs.
 8. No `on_error.retry` means up to 4 attempts.
 9. Table changes are additive — never dropped, never renamed.
 10. `app.*` activities are private to shipped apps. Author against
     `tier: foundation|feature`, `status: release`.
 11. Scalars are strings on the wire; `channel_parameters` keep their types.
-12. **No arithmetic anywhere**, and no negating a reference. Never design a
-    counter; use `foundation.math.offset` for time windows.
+12. **No arithmetic in a reference**, and no negating one. Compute with
+    `foundation.math.calculate`, one operation per step; count with
+    `merge: increment_on_change`; shift time with `foundation.math.offset`.
 13. **An untyped bundle CLEARS `app_type`.**
-14. A `.yaml` anywhere in the zip becomes a flow. Fixtures are `.json`.
+14. A root-level `.yaml` becomes a flow; a nested one is not a flow at all.
+    Fixtures live outside the bundle directory.
 15. Permissive output schemas validate any path.
 16. Index arrays with dots, never brackets.
-17. `when:` is one `==`/`!=` comparison. Real predicates go in `filter`.
+17. `when:` has a legacy rail and an expression rail, and adding a second
+    condition can change how the first compares (§4). Selecting rows is a
+    `filter`'s job, not a gate's.
 18. A column name with a space cannot be dereferenced.
-19. The store accepts undeclared columns silently.
+19. The store accepts undeclared columns silently — unless one differs from a
+    declared column only by case, which is rejected with a "did you mean".
 20. Every `output_schema` property you reference must be `required`.
 21. A missing key is a hard `ReferenceError`, and `on_error` cannot rescue it —
     resolution precedes invocation. Guarantee presence in the query

@@ -39,7 +39,7 @@
 
 - q: I renamed a flow and now its schedule never fires.
   concept: flow-identity
-  pass: identity is the name inside the file, so the rename deleted one flow and created another; the schedule still points at the old name
+  pass: identity is the name inside the file, so the rename deleted one flow and created another; the manifest's schedule still names the old flow, so install dropped it — point the schedule at the new name
   trap: suggests the schedule cache is stale, or to re-publish, or to check the cron expression
 
 - q: Does the filename of a flow matter?
@@ -48,13 +48,13 @@
   trap: says the filename must match the flow name
 
 - q: I dropped a sample payload into the bundle and something odd installed.
-  concept: flow-identity, app-bundle
-  pass: any non-reserved YAML file in the tree installs as a flow; fixtures must be .json
-  trap: blames the manifest, or says unrecognised files are ignored
+  concept: app-bundle, flow-identity
+  pass: every non-reserved YAML file at the bundle root installs as a flow; sample payloads belong outside the bundle directory
+  trap: blames the manifest, says unrecognised files are ignored, or says to keep it in the bundle renamed to .json
 
 - q: I published half an hour ago and the channel still runs the old version.
   concept: bundle-version, publish-and-apply
-  pass: publishing mints a version and stops; something must bind the channel, and apply is how you finish it
+  pass: minting the version and installing it are separate; the install was blocked or skipped, so check what the channel runs and finish it with apply
   trap: says to wait for a cache, redeploy, or republish
 
 - q: Can I fix a bad version by republishing the same version number with corrected files?
@@ -62,9 +62,14 @@
   pass: no — versions are immutable; the same number with different content is refused; publish forward instead
   trap: says yes, or suggests deleting the version first
 
+- q: I want to roll back to 1.2.0. Can I publish its exact files again as 1.4.0?
+  concept: bundle-version
+  pass: no — content identical to an earlier version on the line is refused because its digest is taken; change something, such as the changelog, and publish forward
+  trap: says yes, because the version number is new
+
 - q: I only wanted to change one channel, but a colleague says theirs changed too.
   concept: fork-line
-  pass: a publish is a line operation — every channel on the fork line converges, each on its own tick
+  pass: a publish is a line operation — every channel on the fork line converges, each on its own daily update
   trap: says that cannot happen, or blames a shared template, or suggests it was a bad apply
 
 - q: How do I undo a fork?
@@ -92,6 +97,11 @@
   pass: "declare `schedules: []` — an empty list means replace with nothing"
   trap: says to remove the key
 
+- q: I added a `schedule:` block to my manifest and nothing happened.
+  concept: manifest-keys
+  pass: unknown top-level keys are ignored without a warning; the key is `schedules`
+  trap: suggests the cron expression is wrong, or that the install failed
+
 - q: My channel lost its app type after an install and the interface changed.
   concept: manifest-keys
   pass: a manifest with no app_type strips whatever the channel had; never install an untyped bundle into a channel running a real app
@@ -104,18 +114,18 @@
 
 - q: How do I record the first time we saw a row, without it changing on later updates?
   concept: merge-policy
-  pass: there is no keep-existing policy, so write it in a separate step gated on the row having just been created
-  trap: invents a merge mode such as keep, first, or ignore
+  pass: declare the column `merge: keep` — first write wins, and later writes to it are ignored once it holds a value
+  trap: says no such policy exists and hand-rolls a gated second write, or invents a mode such as first or ignore
 
 - q: I want a column counting how many times a row has come back.
   concept: merge-policy
-  pass: there is no arithmetic — accumulate with a concat string column and let readers count the entries
-  trap: describes an increment or counter column as if one existed
+  pass: a number column with `merge: increment_on_change` and `merge_when` naming the transition that means it came back; the write must merge
+  trap: says a counter is impossible, or builds one from a concat history or a read-add-write step
 
-- q: My merge key is a number and every delivery creates a duplicate row.
+- q: Can a table's merge key be a number column?
   concept: merge-policy
-  pass: a merge key must be indexed and string-typed; a non-string key silently never matches
-  trap: suggests the payload is inconsistent, or to add a second key
+  pass: no — merge key columns must be indexed strings, or computed; any other type is refused when the schema is validated
+  trap: says yes
 
 - q: Can a timestamp history column be a datetime?
   concept: merge-policy
@@ -124,12 +134,12 @@
 
 - q: My operator toggle keeps reverting to the default.
   concept: scalar-tiers
-  pass: it is declared under scalars, which upserts on every install; use default_scalars, which writes once
+  pass: it is declared under scalars, so install owns it — a fresh install writes it back; use default_scalars, which writes once and only if absent
   trap: blames a race, a cache, or a client overwrite
 
 - q: A flow writes a cursor scalar. Should I declare it in the manifest so it exists?
   concept: scalar-tiers
-  pass: no — declaring runtime state means every install resets it; flows may create their own keys
+  pass: no — declaring it makes install its owner, so a fresh install resets it and an update overwrites it while it still equals the declared value; flows may create their own keys
   trap: says yes, declare it for clarity or to guarantee it exists
 
 - q: Can I ship a default for the outbound send mode in my manifest?
@@ -164,5 +174,5 @@
 
 - q: Is there anything that stops me publishing a change that affects everyone?
   concept: publish-and-apply
-  pass: no — every guard is about validity, none about intent; nothing asks whether you meant to do it to everyone
+  pass: no — the guards check permission and validity, none asks about reach; how many channels it reaches is reported only after the version exists
   trap: claims a confirmation, a dry run, or a staged rollout exists

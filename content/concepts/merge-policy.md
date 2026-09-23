@@ -2,54 +2,75 @@
 id: merge-policy
 title: Column merge policy
 summary: >
-  Every table column is last-write-wins. The only other policy is concat,
-  which appends to a string column. There is no "keep the existing value", so
-  a first-seen timestamp must be written by a separate step or every re-fire
-  overwrites it.
-concepts: [manifest-keys, table-schema]
+  A column's merge policy decides what an upsert does to an existing row:
+  replace (the default, last-write-wins), concat (append to a string), keep
+  (first-write-wins) or increment_on_change (a counter that rises when another
+  column makes a declared transition). Policies apply only when the write
+  merges, which is not the upsert default.
+concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
-source: [reconcile_columns, ColumnDef]
+source: [ColumnDef, MergeWhenDef, apply_column_merge]
 ---
 
-A table column carries a merge policy that decides what happens when a row is
-upserted onto an existing row. There are two:
+A table column carries a merge policy that decides what happens when a write
+lands on a row that already exists. There are four:
 
-- **replace** (the default) — the incoming value wins.
-- **concat** — the incoming value is appended to the existing string, with a
-  separator. Requires a string column.
+| `merge:` | What the stored value becomes | Column type |
+|---|---|---|
+| `replace` (default) | the incoming value | any |
+| `concat` | the stored value, a separator, then the incoming value | string |
+| `keep` | unchanged, once it holds a non-blank value | any |
+| `increment_on_change` | the stored number plus one, when a sibling column makes a declared transition | number |
 
-That is the whole vocabulary, and the absence is the important part.
+```yaml
+- { name: First Fired, type: datetime, merge: keep }
+- { name: Seen At,     type: string,   merge: concat }
+- { name: Firing Count, type: number,
+    merge: increment_on_change,
+    merge_when: { column: Status, from: resolved, to: firing } }
+```
 
-## There is no "keep the existing value"
+## A policy only applies when the write merges
 
-A column that should record *the first time we saw this* cannot be written by
-the upsert that also records the latest state. Every re-fire would overwrite
-it with the current timestamp.
+Policies act when a write **merges** into an existing row: an upsert with
+`on_conflict: merge`, or a patch. The upsert's own default is `replace`, which
+swaps the whole row for the incoming one — every policy is ignored and any
+column the write omits is dropped.
 
-Write it in a separate step, gated on the row having just been created. The
-upsert reports whether it created or matched; that flag is what the gate reads.
+A table that declares a schema-level `merge_key` resolves conflicts through
+its `merge_key.on_conflict`, whose default is `merge`, and ignores a per-call
+`merge_on`.
 
-This is the single most common way a tracker table ends up quietly wrong: the
-column exists, it is populated, every value is today's.
+The accumulating policies — `concat`, `keep` and `increment_on_change` — act
+only on a column the write carries. A patch that leaves a column out leaves it
+untouched, so a write that should count must include the counter column; the
+value it sends is discarded.
 
-## concat is how you count
+## First seen is `keep`
 
-There is no arithmetic anywhere in a flow — nothing adds, subtracts or
-increments. So a "how many times has this happened" column cannot be a counter.
+A column recording *the first time this happened* is `merge: keep`. Every
+later write to it is ignored once it holds a value, so re-fires cannot move it.
 
-Accumulate with a `concat` string column and let whoever reads it count the
-entries. This is deliberate rather than an omission: a counter column would
-need read-modify-write semantics that a retried step cannot make safe, and the
-concat history is strictly more informative than the number.
+## Counting is `increment_on_change`
 
-A consequence worth knowing: a timestamp history must be a **string** column,
-not a datetime one, because `concat` requires a string.
+The counter counts **transitions, not writes.** `merge_when` names a different
+column and an exact `from`/`to` pair; the counter rises by one only when that
+column goes from one to the other on a merge. The two values are compared
+case-insensitively and must differ.
 
-## Merge keys are narrower than they look
+An insert never merges, so the row's first value is whatever the write sends —
+send the starting count.
 
-The columns that identify a row for upsert must be **indexed** and
-**string-typed**. A non-string merge key silently never matches — the probe
-only queries the text index — so instead of an error you get a second row
-every time.
+When the history matters more than the number, `concat` keeps the history:
+one entry per write, newest last, separated by a newline unless
+`merge_separator` says otherwise. It is not idempotent — a retried step
+appends again, and the only duplicate it skips is an incoming value equal to
+the whole stored value. Because `concat` requires a string column, a timestamp
+history is a **string** column, not a datetime one.
 
-Declaring a column unique satisfies the indexed requirement.
+## Merge keys must be indexed strings
+
+The columns in a schema's `merge_key.any_of` must be indexed — `index: true`,
+`unique: true`, or computed — and string-typed unless computed. A table that
+breaks either rule is refused when its schema is validated, so the install
+fails rather than producing duplicate rows.
