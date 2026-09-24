@@ -17,6 +17,8 @@ Checks, in the order a writer meets them:
 * every id in `concepts:` names a page that exists. The build drops a dangling
   one from "Related" rather than linking a 404, which is right for the site
   and exactly why nobody sees it: the reference just silently stops working
+* `order`, when present, is a whole number from 1 — the build sorts by it, and
+  a value it cannot read would crash the build rather than fail here by name
 """
 
 from __future__ import annotations
@@ -32,6 +34,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _ID = re.compile(r"^id:\s*(\S+)", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
+_ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 
 
@@ -65,6 +68,12 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         for ref in (i.strip() for i in concepts.group("ids").split(",")):
             if ref and ref not in ids:
                 problems.append(f"concepts: '{ref}' is not the id of any page")
+
+    order = _ORDER.search(front)
+    if order and not order.group("value").strip().isdigit():
+        problems.append(f"order '{order.group('value').strip()}' is not a whole number")
+    elif order and int(order.group("value")) < 1:
+        problems.append("order starts at 1")
 
     words = len(body.split())
     if words < BODY_MIN_WORDS:

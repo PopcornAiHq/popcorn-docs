@@ -1,6 +1,7 @@
 ---
 id: template-authoring
 title: Authoring a channel template
+order: 1
 summary: >
   A channel template is a directory of YAML that turns an empty channel into an application. This is the whole authoring loop: what a bundle holds, how it reaches a channel, the manifest keys, flow grammar and table schemas, and the traps. Where it disagrees with `flow validate` or `template check`, the tool is right and the guide has a bug.
 concepts: [app-bundle, manifest-keys, publish-and-apply, fork-line, merge-policy]

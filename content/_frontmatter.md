@@ -7,6 +7,7 @@ the MCP server. A file missing `id` or `summary` fails the build.
 ---
 id: fork-line                  # stable, kebab-case, citable, NEVER renamed
 title: Fork lines              # a noun phrase, not a sentence
+order: 9                       # reading position within its section
 summary: >                     # THE PRODUCT — under 400 characters
   A fork line is a workspace's own version series of an app. Publishing to it
   moves every channel on that line, not just the one you edited.
@@ -42,6 +43,13 @@ page says. Treat a page's `source` as a pointer, not a proof.
 
 Omit `source` when a concept describes a behaviour no single symbol owns; do
 not invent one to satisfy the field.
+
+**`order`** is the page's place in its section's reading path, starting at 1:
+the landing page, the previous/next links on every page, and `llms.txt` all
+follow it. Filenames sort alphabetically, which is no reading order at all —
+it once put an advanced guide ahead of the one it builds on. Number by what a
+reader needs first; a page with no `order:` goes after the ordered ones.
+Renumbering is cheap, because nothing links to a position.
 
 **`applies_to`** records which readers a page is written for — `cli`, `mcp`,
 `human`. Nothing reads it: the build and the MCP server serve every page to

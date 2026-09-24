@@ -1,6 +1,7 @@
 ---
 id: manifest-keys
 title: Manifest keys and what install does to them
+order: 3
 summary: >
   Each manifest key has its own install semantics, and an absent key is not
   the same as an empty one — omitting schedules leaves them alone, while

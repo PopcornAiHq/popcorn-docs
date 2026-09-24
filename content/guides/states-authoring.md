@@ -1,6 +1,7 @@
 ---
 id: states-authoring
 title: Authoring a states tier
+order: 2
 summary: >
   Writing a bundle's `states:` section end to end: stored, derived and
   mirrored machines; states, events, transitions and buttons; guards; and the
