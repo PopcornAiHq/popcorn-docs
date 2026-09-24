@@ -5,8 +5,9 @@ order: 10
 summary: >
   Publish mints the next version on a fork line and reaches every channel on
   it; its guards check permission and validity, never whether you meant to
-  reach everyone. Apply brings one channel up to its line's head, takes no
-  version, and is the durable retry when an install was blocked.
+  reach everyone, and a manifest missing `app_type` is not refused — it clears
+  the app on every channel. Apply brings one channel up to its line's head,
+  takes no version, and is the durable retry when an install was blocked.
 concepts: [fork-line, bundle-version]
 applies_to: [cli, mcp, human]
 source: [publish_fork_version, apply_app]
@@ -30,15 +31,25 @@ membership of the channel.
 A publish is refused when:
 
 - the caller is not a workspace admin
-- the request changes nothing
+- the request carries no file changes and no deletions
 - the base is not a fork line the workspace can see, or is no longer its head
 - the named channel runs a different line, or the product version
-- the tree has a path outside the bundle shape, or a flow that does not parse
-  strictly — including a `call_flow` naming a flow that does not exist
+- the tree has a path outside the bundle shape, two files under `prompts/` or
+  `templates/` that would install under the same key (`prompts/x.md` and
+  `prompts/x.txt`), or a root YAML file whose top level is not a mapping
+- a flow does not parse strictly — a misspelled key, a `call_flow` naming its
+  own flow or one the bundle does not have, or a `foreach` asking for more
+  `max_parallel` than the platform allows
 - the manifest has no `version:`, a version that does not advance, or a
   different `app_type` from its line
 - a flow name is not a slug, or a flow declares its own `trigger:`
 - the version or its content already exists (see `bundle-version`)
+
+A manifest with **no** `app_type:` is not refused: publish treats it as the
+line's own app. Every install of that version then clears `app_type` and
+`channel_agent` on each channel it reaches — every channel on the line. Keep
+both keys in every version, and treat `template check`'s `clears-app-type`
+warning as an error when publishing to a fork.
 
 Every one of those asks *is this allowed and well-formed*. None of them asks
 **did you mean to do this to everyone** — and a publish reaches every channel

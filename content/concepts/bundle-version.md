@@ -3,14 +3,15 @@ id: bundle-version
 title: Bundle versions
 order: 7
 summary: >
-  Publishing mints an immutable, content-addressed version on a line, and
+  Publishing mints an immutable, content-addressed version on a line;
   installing it is a separate step that can be blocked. The same semver with
   different content is refused, and so is a new semver whose content matches an
-  earlier version exactly — to restore old files, change something such as the
-  changelog and publish forward. Nothing moves a channel back.
+  earlier version — change something, such as the changelog, and publish
+  forward. An old version can be read back by id, but nothing moves a channel
+  back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
 applies_to: [cli, mcp, human]
-source: [publish_tree, BundleImmutabilityError, BundleDigestCollisionError, bundle_digest]
+source: [publish_tree, BundleImmutabilityError, BundleDigestCollisionError, bundle_digest, _line_version]
 ---
 
 A version is minted by a publish and never changes afterwards. Installing it
@@ -50,6 +51,11 @@ Two consequences follow:
 - **You cannot restore an old tree byte for byte.** Its digest is already
   taken. Bump the version and change something — the manifest's `changelog:`
   saying why is the honest change — and the digest differs.
-- **You cannot read an old tree back.** There is no version-addressed read, so
-  a bundle you publish and regret is not recoverable from the server — keep
-  the working copy.
+- **You can read an old tree back, but not restore it in place.**
+  `popcorn app checkout --channel <channel> --version <id>` checks out an
+  earlier version of the channel's own line, by its version id, read-only:
+  publishing from that checkout is refused. Version ids are the numbers
+  `app publish` and `app status` print; nothing lists a line's past versions.
+  To make old content current again, check the head out into a fresh
+  directory, copy the old files over it — deleting any file the old version
+  lacked — and publish forward with a bump.

@@ -10,7 +10,7 @@ summary: >
   runtime: declaring it hands it to install, which can reset it.
 concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
-source: [PLATFORM_SETTINGS, candidate_settings, filter_update_scalar_pairs]
+source: [PLATFORM_SETTINGS, candidate_settings, filter_update_scalar_pairs, parse_send_mode, parse_app_mode]
 ---
 
 A scalar is a named string on a channel. Two manifest tiers write them, a
@@ -54,9 +54,30 @@ declares.
 
 Keys beginning `popcorn.` are a platform convention, not app state. Every app
 reads the same keys with the same meaning, so an operator learns one set of
-switches rather than one per app. The outbound send modes — email and
-signing — are the ones to know: each is `off` unless set to `draft` or
-`send`, and any other value, unset included, reads as `off`.
+switches rather than one per app.
+
+| Key | Values | Unset or unrecognised reads as |
+|---|---|---|
+| `popcorn.email_send_mode` | `off`, `draft`, `send` | `off` |
+| `popcorn.sms_send_mode` | the same; reserved, nothing reads it | `off` |
+| `popcorn.app_mode` | `prod`, `test`, `off` | `prod` |
+| `popcorn.app_gate` | `0` (ungated) or a positive rollout level | `0` |
+| `popcorn.app_agent` | `on`, `off` | `on` |
+
+`popcorn.email_send_mode` is the one to know: only the exact strings `draft`
+and `send` activate anything. E-signature requests read it too, unless the
+signing step names a key of its own — `popcorn.signing_send_mode` is the
+convention, for an app whose mail and binding documents need separate consent.
+
+`popcorn.app_mode: test` runs a logical day in one wall-clock minute, so a
+multi-week process can be exercised in minutes; `off` is dormant. An app's own
+`set_app_mode` flow, where it has one, also retunes the channel's schedules
+for `test` and pauses them for `off`. `popcorn.app_gate` restricts only what
+an app that defines rollout levels initiates, and `popcorn.app_agent: off`
+stops agent runs only in the app activities that honour it. The last two fail
+open, the send modes fail closed.
+
+Declare none of them under `scalars:`.
 
 The convention is not enforced, which is why it matters: nothing refuses a
 `popcorn.*` key under `scalars:`, and declaring one there makes install the

@@ -26,15 +26,22 @@ code block it calls, the channel config — is then read from *that* version,
 and nothing resolves through the channel again. A flow started with
 `call_flow` inherits its parent's pin.
 
-Three consequences worth holding on to:
+Four consequences worth holding on to:
 
 - **A channel upgraded mid-run does not affect the run.** The old flow keeps
   pairing with the old code until it ends. A flow and the code it calls are
   published, versioned and upgraded together, and never mix.
 - **A replay reads the same version.** The pin lives in the run's history, so
   re-executing an old run cannot silently pick up newer files.
-- **Data is not pinned.** Table rows and channel state are read live. A run
-  that outlives an upgrade sees rows the new version wrote.
+- **Data is not pinned.** Table rows and scalars are read live. A run that
+  outlives an upgrade sees rows the new version wrote. The channel config
+  behind `$channel.*` is pinned with the run, so a parameter edited mid-run
+  is seen only by later runs.
+- **Only `call_flow` inherits the pin.** `foundation.workflow.start_flow`
+  starts a separate run, which reads the channel's binding when it starts: if
+  the channel upgrades in between, a parent on version *n* can launch a child
+  on *n+1*. An app agent's flow tools are pinned to the version of the turn
+  that called them.
 
 ## Bound is not always head
 

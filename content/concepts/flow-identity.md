@@ -9,7 +9,7 @@ summary: >
   flow is dropped at install, with no error.
 concepts: [app-bundle, manifest-keys]
 applies_to: [cli, mcp, human]
-source: [FLOW_NAME_RE, build_flow_index]
+source: [FLOW_NAME_RE, build_flow_index, analyze_flow_triggers]
 ---
 
 A flow is identified by the `name:` inside the YAML. The filename is not part
@@ -43,6 +43,11 @@ happens to the things that addressed the old name depends on what they are:
 
 Rename the references in the same change, or don't rename. `template check`
 reports `schedule-unknown-flow` and `webhook-unknown-flow` before you publish.
+
+`popcorn flow get <name> --channel <channel>` reports everything that starts
+a flow: its schedules, webhooks and message trigger, read live from the
+channel, and the document, state-transition and sibling-flow launches it has
+in the bound version. Run it on the old and new names after a rename.
 
 ## The name is a slug
 
