@@ -20,7 +20,7 @@ an edge — is [the state machine](https://docs.popcorn.ai/concepts/state-machin
 and where the two overlap that page is authoritative.
 
 The loop is the ordinary one from
-[authoring a channel template](https://docs.popcorn.ai/guides/template-authoring.md):
+[authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md):
 edit `manifest.yaml`, `popcorn app publish`, read the error, repeat. One thing
 is different. `popcorn template check` does not look inside `states:`; the
 graph is checked only when the server parses the manifest at publish. The
@@ -220,6 +220,7 @@ word. An overlay's initial state is `none`.
 | `stored_as` | the column value when it is not the state name |
 | `why` | the default Why prose while a row shows this state |
 | `work_item` | overrides `warn` for the worklist: `true` opens an item without warning, `false` warns without one |
+| `detail` | `{column, values, labels, tone}`: a qualifier column for this state — one state, many reasons — that an edge landing here may stamp |
 
 State names may not contain `,`, `;` or `|`, and labels may not contain `;`,
 `:` or `|`. Hints are built from both, and those characters are the hint's
@@ -260,11 +261,19 @@ boolean `true`, and the parser turns it back.
 | `flow` | a bundle flow that *is* the edge; the edge writes nothing itself |
 | `then` | bundle flows to launch per row after the writes land |
 | `effects` | names of bundle-side work, echoed back per applied row |
+| `detail` / `detail_from` | the landing state's detail value, literal or read from that payload key; mutually exclusive, and the landing state must declare `detail:` |
+| `importance` | 1–10, how loudly a client draws the edge, on one scale across every machine; display only. An int, or a map of source state to rank with an optional `default` |
+| `description` | free text |
 
 The machine is inferred. A qualified reference (`hold.none`) names it;
 otherwise it is the one machine that owns every `from` reference. If that
 is ambiguous, publish says `cannot infer its machine … set machine:`, and a
 `machine:` key settles it.
+
+**`importance:` is all or nothing.** A spec ranks every edge or none. With
+none, an expected edge draws at 6 and the rest at 3. Rank rarity with
+`importance`, not by dropping `expected`: a rare failure can be the one way
+into its state and still draw quietly.
 
 **`expected:` marks the normal way in, not the likely one.** Every edge is
 legal, and most are shortcuts. A client that draws only the expected edges
@@ -317,11 +326,13 @@ may carry its own `when:`, judged against the row after the writes.
 
 ### The button
 
-`cta:` takes `kind` and `label`, which are required, and optional `ui`,
-`prominence` (`primary` or `quiet`), `route`, `message` and `when`. The
-`kind` names the button, and one kind belongs to one event. `route`
-defaults to `deterministic`: a click runs your `cta_apply` flow directly
-(§5) and posts nothing. `message` is the chat line, templated on columns as
+`cta:` takes `kind` and `label`, which are required, and optional `ui`
+(`button`, the default, `input`, `contact-picker`, `contact-form` or
+`signing-modal`), `prominence` (`primary` or `quiet`), `route`
+(`deterministic`, `agent` or `noop`), `message` and `when`. The `kind` names
+the button, and one kind belongs to one event. `route` defaults to
+`deterministic`: a click runs your `cta_apply` flow directly (§5) and posts
+nothing. `message` is the chat line, templated on columns as
 `{Title}` or `{Title|this request}`.
 
 A button's `when` can offer *less* than the edge allows. Approve is legal
@@ -462,6 +473,20 @@ while the edge claims it does not:
 
 ```text
 states: 'staff.snooze' is a `same` edge but writes its own column 'Stage'; say where it lands
+```
+
+**`importance:` ranks every edge or none**, and a map must cover every
+`from:` state or carry `default:`:
+
+```text
+states: importance ranks every edge or none; unranked: ['staff.reopen']
+states: transition on 'staff.decline' ranks no importance from ['received']; name them or add default:
+```
+
+**A detail stamp needs a landing state that declares one:**
+
+```text
+states: transition on 'staff.decline' stamps a detail but its landing state declares none
 ```
 
 **`also:` names other machines.** The edge's own machine moves by `to:`:

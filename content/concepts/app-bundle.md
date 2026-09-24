@@ -10,7 +10,7 @@ summary: >
   a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
 applies_to: [cli, mcp, human]
-source: [ParsedTemplateConfig, bundle_file_tree, unrecognized_tree_paths]
+source: [ParsedTemplateConfig, bundle_file_tree, unrecognized_tree_paths, validate_code_blocks, is_agent_tree_path]
 ---
 
 An app bundle is a directory. Installing it into an empty channel gives that
@@ -27,7 +27,7 @@ myapp/
 ├── prompts/           seeded as channel config
 ├── templates/         seeded as channel config
 ├── code/<block>/      custom Python or Node the flows call
-└── agents/<name>/     an app-scoped agent
+└── agents/<name>/     an app agent: agent.yaml, prompt.md, schemas/*.json — nothing else
 ```
 
 A bundle needs a manifest carrying `version:` to be published. Everything
@@ -51,9 +51,16 @@ reads it when it needs it rather than carrying it in every prompt. An explicit
 
 `prompts/` and `templates/` are descended one level and seeded into channel
 config. `code/` holds one directory per block, each with exactly one
-entrypoint — `main.py` or `index.js` — and is not seeded anywhere: a flow reads
-a block by name at run time. `agents/<name>/` holds an app agent's definition;
-the server accepts it, but the CLI does not upload it.
+entrypoint — `main.py` or `index.js`, never both — and is not seeded anywhere:
+a flow reads a block by name at run time. Block files must be UTF-8 text, and
+a block has a file-count and a size cap, which the refusal names.
+
+`agents/<name>/` holds an app agent's definition: `agent.yaml` and
+`prompt.md` directly inside it, and JSON schemas under `schemas/`. It
+publishes like the rest of the bundle — a checkout writes the served agent
+files, and `app publish` sends what you add, edit or delete there. Any other
+file under `agents/` is not part of the bundle, and the server parses each
+agent at publish and refuses one it could not run.
 
 Anything outside that shape is not part of the bundle. The server refuses a
 publish containing an unrecognised path; the CLI leaves such paths behind

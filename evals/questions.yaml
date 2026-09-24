@@ -82,7 +82,7 @@
 
 - q: How do I undo a fork?
   concept: fork-line
-  pass: there is no unfork, and no version-addressed read to recover the previous tree; treat it as one-way
+  pass: there is no unfork and no way to re-bind an earlier version; an old version can be read by id with app checkout --version and its content published forward; treat the fork as one-way
   trap: invents an unfork or a rollback command
 
 - q: Which version should I base my edits on, the one the channel runs or the newest?
@@ -199,3 +199,13 @@
   concept: publish-and-apply
   pass: no — the guards check permission and validity, none asks about reach; how many channels it reaches is reported only after the version exists
   trap: claims a confirmation, a dry run, or a staged rollout exists
+
+- q: I published a bad version yesterday. Can I get the files from the version before it?
+  concept: bundle-version, fork-line
+  pass: yes — app checkout --version <id> reads an earlier version of the line read-only; to make it current, copy its files over a fresh checkout of the head and publish forward
+  trap: says no version-addressed read exists, or that the old version can be re-bound or republished as-is
+
+- q: My fork's new manifest dropped app_type. Will publish stop me?
+  concept: publish-and-apply, manifest-keys
+  pass: no — publish treats it as the line's app, and every install of that version clears app_type and channel_agent on each channel on the line; keep both keys
+  trap: says publish refuses a manifest whose app_type differs from its line, so it is safe

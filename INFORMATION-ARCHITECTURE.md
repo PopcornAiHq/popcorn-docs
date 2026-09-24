@@ -44,8 +44,10 @@ authoritative.
 **Audience:** an agent that needs exact argument names, and a person checking
 one.
 
-**Contains:** the activity catalog, the flow rules, the CLI command surface,
-the `template check` rule codes, and a per-app states rendering.
+**Contains:** the activity catalog. The flow rules, the CLI command surface,
+the `template check` rule codes and a per-app states rendering belong here
+too, and land here only once something generates them — never hand-written
+in the meantime.
 
 **The test:** *is there a symbol in the backend that already enforces this?*
 Then it is generated, and hand-writing it creates a second source that will

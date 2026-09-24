@@ -1,24 +1,24 @@
 ---
 id: template-authoring
-title: Authoring a channel template
+title: Authoring an app bundle
 order: 1
 summary: >
-  A channel template is a directory of YAML that turns an empty channel into an application. This is the whole authoring loop: what a bundle holds, how it reaches a channel, the manifest keys, flow grammar and table schemas, and the traps. Where it disagrees with `flow validate` or `template check`, the tool is right and the guide has a bug.
+  An app bundle is a directory of YAML that turns an empty channel into an app. The whole authoring loop: what a bundle holds, how it reaches a channel, manifest keys, flow grammar, table schemas and the traps. `flow validate` is the authority on a flow; `template check` runs offline on rules shipped with the CLI, so upgrade the CLI before changing a bundle it rejects.
 concepts: [app-bundle, manifest-keys, publish-and-apply, fork-line, merge-policy]
 applies_to: [cli, mcp, human]
 ---
 
-A **channel template** is a directory of YAML that turns an empty Popcorn
-channel into an application: tables to hold state, flows to do work, schedules
-and webhooks to invoke them.
+An **app bundle** is a directory of YAML that turns an empty Popcorn channel
+into an app: tables to hold state, flows to do work, schedules and webhooks to
+invoke them. The CLI's `template` commands and `--template` flags name the
+same thing.
 
 > **Which path you are on decides how fast you can iterate.** A *new* app type
 > is not self-serve: the set of installable templates is fixed on the server,
 > and adding to it takes an internal change plus a deploy that no CLI command
 > and no public endpoint can perform. But *editing* an app that already exists
 > is a pure CLI loop — `popcorn app fork`, `checkout`, `publish` — with no
-> deploy in it. Both paths are §2. `popcorn flow import` is gone and neither
-> path replaces it.
+> deploy in it. Both paths are §2.
 >
 > Everything else in this guide applies to both: the grammar, the manifest
 > semantics, and `popcorn template check` are about the bundle itself, not
@@ -36,12 +36,15 @@ popcorn flow validate my_flow.yaml             # is this reference real?
 popcorn template check ./mytemplate            # does the bundle hold together?
 ```
 
-`flow validate` is the authority on a reference. When this guide and the
-validator disagree, the validator is right and this guide has a bug.
+`flow validate` asks the server and is the authority on a flow. When this
+guide and the validator disagree, the validator is right and this guide has a
+bug. `template check` works offline from a copy of the server's rules that
+ships with the CLI, so an older CLI can reject a construct the platform
+accepts. When the two disagree, upgrade the CLI before changing the bundle.
 
 `template check` answers a different question, offline and with no channel:
-will the importer install what you think, and do the files agree with each
-other? Everything it reports passes `flow validate` cleanly — a fixture named
+will install do what you think, and do the files agree with each other?
+Everything it reports passes `flow validate` cleanly — a fixture named
 `.yaml`, a write to an undeclared column, a schedule naming a flow that is not
 there. Run both; neither subsumes the other.
 
@@ -124,9 +127,17 @@ and no hand-off to anyone:
 popcorn app checkout --channel '#chan' --fork
 # ... edit
 popcorn template check ./<app>
-popcorn app publish ./<app> --bump patch -m "what changed"
+popcorn app publish ./<app> --bump patch -m "what changed" --yes
 popcorn app status ./<app>              # has the install landed?
 ```
+
+`app publish` asks for confirmation before it sends anything, because a
+publish changes every channel on the fork line, not only yours. In a terminal
+you answer the prompt. In agent mode (`POPCORN_AGENT=1`) or any
+non-interactive shell there is no one to answer, so the publish is refused
+unless it carries `--yes` (or `POPCORN_ASSUME_YES=1`) — pass it once that
+reach is what you mean. The examples here include it because an agent or a
+script is usually what runs them.
 
 `--bump patch|minor|major` writes `version:` in `manifest.yaml` for you, off
 the fork line's head, and only once the publish has been accepted — so a
@@ -203,7 +214,9 @@ same thing without the checkout.
 tree — manifest, every flow, `AGENT.md`, `strings.yaml` — for the head of the
 fork line the channel runs (normally the very version it is bound to; the two
 differ only while an install has not landed), so it is the one source that
-cannot be stale.
+cannot be stale. `app checkout --version <id>` reads an earlier version of the
+same line instead, read-only — the way to recover the tree from before a bad
+publish (see `bundle-version`).
 When you want to study how a shipped app does something, spend a scratch
 channel on it rather than looking for a copy in a repo:
 
@@ -217,7 +230,7 @@ Reading needs no fork — a fork-less checkout records `"kind": "product"` and
 publishing from it is refused, which is the point. Fork when you intend to
 edit, and note what that costs: a fork line is permanent and cannot be
 deleted, so do it in a workspace you do not mind accumulating one in.
-`popcorn app lines --channel <id>` is how you see what has accumulated.
+`popcorn app lines` is how you see what has accumulated.
 
 Three things about this loop that are easy to get wrong:
 
@@ -229,8 +242,8 @@ Three things about this loop that are easy to get wrong:
 - **One fork line per (workspace, app).** There is no parallel-experiment path
   without naming a second line (`app fork --name`).
 
-`popcorn app list --channel '#chan'` shows the product line, any fork line this
-workspace owns, and what the channel currently runs.
+`popcorn app list` shows the product line and any fork line this workspace
+owns; add `--channel '#chan'` to see what that channel currently runs.
 
 ### The app list is filtered by your release track
 
@@ -267,11 +280,12 @@ The registry reads your directory off disk and classifies every path:
   the CLI a hidden file is silently left behind rather than refused.
   Unlike the two directories above, files here are **not** seeded into channel
   config — `foundation.code.execute` reads them by block name at run time.
-- **Reads `agents/<name>/`** — one directory per agent the bundle defines for
-  itself: `agent.yaml`, `prompt.md` and `schemas/*.json`, parsed and refused at
-  publish if they would not run. The CLI does not currently upload this
-  directory: `app publish` leaves `agents/` behind like any other unrecognized
-  path.
+- **Reads `agents/<name>/`** — one directory per app agent the bundle defines
+  for itself: `agent.yaml`, `prompt.md` and `schemas/*.json`, parsed and
+  refused at publish if they would not run. A checkout writes them, and
+  `app publish` sends additions, edits and deletions there like any other
+  bundle file. Anything else under `agents/` is left behind and reported as
+  `path-not-published`.
 - **Does not read anything else.** A `fixtures/` directory, a `notes.txt`, a
   file nested a level too deep: `template check` reports each as
   `path-not-published` (a warning, so `--strict` fails), `app publish` leaves
@@ -290,7 +304,7 @@ is not a slug — both are trees `app publish` refuses.
 — and `template check` flags the nesting.
 
 **Flow identity is the `name:` inside the YAML, not the filename.** A name
-matches `FLOW_NAME_RE` — `^[a-z0-9][a-z0-9_-]{0,62}$`: lowercase, digits,
+matches `^[a-z0-9][a-z0-9_-]{0,62}$`: lowercase, digits,
 `_` and `-`, not starting with `_`, at most 63 characters. No flow is copied
 into a channel: schedules, webhooks and runs resolve flows by name from the
 flow index of the version the channel is bound to. So renaming `name:` is one
@@ -317,7 +331,8 @@ wrong is how you wipe a live channel's state.
 | `default_scalars` | **write once, first install only** | safe place for an operator-owned switch |
 | `schedules` | **reconcile by (flow, slug)** | omitted = leave alone; `[]` = delete every manifest-managed one |
 | `webhooks` | **create-if-missing** | never updated or deleted |
-| `triggers`, `required_connections`, `connections`, `documents` | replace, omit-vs-empty | `[]` means "replace with nothing"; a trigger's `enabled` is a seed, applied the first time only |
+| `triggers` | replace, omit-vs-empty | `[]` means "replace with nothing"; a trigger's `enabled` is a seed, applied the first time only |
+| `required_connections`, `connections`, `documents` | replace on first install; drift-preserving on update | omit-vs-empty as above; `required_connections` is the legacy flat list |
 
 The `*_declared` distinction runs through the list-shaped keys: **an absent key
 leaves the channel alone; a present-but-empty key means "replace with
@@ -337,8 +352,10 @@ one end to end, with every publish error it can raise, is
 
 > **An untyped bundle CLEARS the channel's `app_type`.** A manifest with no
 > `app_type:` key strips whatever was there, which changes the client's whole
-> interface paradigm. Never import an untyped bundle into a channel running a
-> real app. `template check` warns you (`clears-app-type`).
+> interface paradigm. Never install an untyped bundle into a channel running a
+> real app. A fork publish does not refuse one: it reaches every channel on
+> the line and clears `app_type` and `channel_agent` on each. `template check`
+> warns you (`clears-app-type`); treat that warning as an error on a fork.
 
 ### Runtime state must not appear under `scalars:`
 
@@ -376,10 +393,15 @@ schedules:
       conversation_id: <channel-conversation-id>
 ```
 
-Each entry names exactly one of `interval:` or `cron:` — one naming both is
-refused. `class:` is routing, not decoration: it picks the queue and how the
-fire time is spread (`periodic` for an interval, `deadline` for a daily cron,
-`window` for deferrable work).
+Each entry names exactly one of `interval:` or `cron:`. `template check`
+reports one naming both (`schedule-two-triggers`). If it reaches the server,
+the install fails for a new schedule; a schedule that already exists is
+instead skipped and kept exactly as it was, and the install reports it as
+skipped. The same rule applies to an unknown `class:`. `class:` is routing,
+not decoration: it picks the queue and how the fire time is spread —
+`periodic` (the default) for an interval, `deadline` for a daily cron,
+`window` for deferrable work. Only `deadline` and `window` spread a daily
+cron.
 
 Install upserts each schedule by (flow, slug), then deletes the name-keyed
 schedules the manifest no longer declares; schedules a member created through
@@ -390,6 +412,15 @@ state and note. A schedule whose `flow:` is not in the bundle is skipped — and
 is then deleted as undeclared, so a typo in `flow:` removes the schedule it
 meant to keep.
 
+A channel's live schedules can differ from its manifest on purpose.
+`popcorn.app_mode: test` compresses them, and the platform offsets a plain
+daily cron away from the top of the hour. `popcorn app status` compares the
+live schedules with the manifest and knows which of those differences the
+platform made: it exits non-zero only for an unexplained one, or for a
+schedule paused with nothing saying why. Compare through it rather than by
+reading `schedule list` against the manifest. A paused schedule reports no
+next fire.
+
 ## 4. Flow grammar
 
 ```yaml
@@ -397,16 +428,21 @@ name: my_flow             # identity — not the filename
 version: 1
 description: >
   What this does and why it is shaped this way.
+best_effort: false        # true: run on the batch tier; children follow
+failure_status: { kind: my_kind, label: My flow }   # one terminal status update on a hard failure
+required_integrations:
+  mail: { description: The inbox to read, provider: google }
 
 inputs:
   conversation_id: { type: string }
   thing: { type: string, required: false, default: "" }
 
 steps:
-  - id: fetch
+  - id: fetch             # [A-Za-z_][A-Za-z0-9_]*, unique across the flow
     activity: foundation.store.list_rows
     when: $inputs.thing != ''
     on_error: { policy: skip, retry: 1 }
+    timeout_seconds: 600  # per attempt; heartbeat_seconds too
     args: { ... }
 
   - id: each
@@ -421,6 +457,21 @@ steps:
 outputs:
   ids: $steps.fetch.output.rows
 ```
+
+- **`required_integrations`** names what the channel must connect, keyed by
+  the name steps read as `$channel.integrations.<name>`. A run refuses to
+  start while one is unconnected; `provider` constrains which account may
+  back it.
+- **`best_effort: true`** sends every start of the flow to the batch tier,
+  however it was asked for, and the flows it launches follow it. For a
+  fan-out nobody is waiting on.
+- **`failure_status: {kind, label}`** writes one terminal status-widget update
+  of that kind when a step hard-fails past every `on_error`, then fails the
+  run.
+- **`timeout_seconds`** and **`heartbeat_seconds`** on a step override the
+  default per-attempt timeout; a heartbeat only matters for an activity that
+  sends one.
+- A step `id` matches `[A-Za-z_][A-Za-z0-9_]*`.
 
 ### Reference roots
 
@@ -508,8 +559,11 @@ gate can only skip a step you already decided to run.
 ### `foreach`
 
 `foreach:` takes a list, `as:` names the item, `collect:` names the result
-list, `max_parallel:` bounds concurrency — omitted, items run one at a time,
-and the authoring gates refuse a value above the platform's cap. A step-level `when:` on a `foreach`
+list, `max_parallel:` bounds concurrency. It defaults to 1 and may be at most
+5; publish refuses a higher value. A `foundation.code.execute` step inside a
+`foreach` runs one item at a time whatever you set, and under a `call_flow`
+with `mode: wait`, `max_parallel` bounds how many children are running at
+once. A step-level `when:` on a `foreach`
 step is **re-evaluated per item** in that item's scope, so `when: $row.Status
 == 'firing'` filters items rather than skipping the whole step.
 
@@ -524,6 +578,15 @@ literal name the publish checks, `inputs:` are resolved like `args`, and
 `$steps.<id>.output.outputs.<key>`, while `mode: detach` returns once it has
 started. A child runs exactly once, so `on_error.retry` is refused on it —
 `call_flow.timeout_seconds` bounds it instead.
+
+- A flow may not call itself, and publish refuses a `call_flow` naming a flow
+  the bundle does not have.
+- Calls nest at most three deep.
+- `mode: detach` returns `workflow_id` and `started`, which is false when a
+  child with the same id already ran.
+- A parent near its run-history limit refuses to start another child
+  (`FlowHistoryBudgetExceeded`); `on_error: skip` turns that into a null
+  item.
 
 Blocks nest three lists deep, counting the flow's own `steps:` as the first —
 so a block inside a block is the deepest legal shape and a third level is
@@ -559,9 +622,9 @@ alongside `steps:`. Omit it and the block publishes nothing — the same as a
 skipped step.
 
 `sleep_seconds:` is a durable timer (survives worker restarts, holds no worker
-capacity) and cannot be combined with `foreach`. Neither can `await_approval:`,
-which is a single blocking per-workflow gate — fanning it out would key every
-iteration to the same signal.
+capacity), must be greater than 0, and cannot be combined with `foreach`.
+Neither can `await_approval:`, which is a single blocking per-workflow gate —
+fanning it out would key every iteration to the same signal.
 
 ### Errors and retries
 
@@ -619,7 +682,7 @@ date with no model involved.
 ## 5. Table schemas
 
 Declared under `tables:` in the manifest; reconciled additively on every
-import.
+install.
 
 ```yaml
 tables:
@@ -639,8 +702,8 @@ tables:
 
 `type` is `string | number | boolean | datetime | json`. `format` validates on
 write. `display` is a rendering hint whose *kind* (the part before the first
-`:`) is validated against `DISPLAY_KINDS`; its arguments are not — a
-misspelled display arg fails silently by simply not rendering.
+`:`) is validated against the platform's list of display kinds; its arguments
+are not — a misspelled display arg fails silently by simply not rendering.
 
 Governance flags (`pii`, `restricted`, `internal`, `outbound_ref`,
 `passthrough`, `masked_read`) are independent booleans. `internal: true` hides
@@ -846,20 +909,19 @@ The **middle** loop is the fork loop from §2b, and it is the one to reach for
 whenever the app already exists. No deploy, no hand-off, seconds per turn:
 
 ```bash
-popcorn app publish ./<app> --bump patch -m "..."    # mint the next version
+popcorn app publish ./<app> --bump patch -m "..." --yes   # mint the next version
 popcorn app status ./<app>                           # has the install landed?
-popcorn app lines --channel <id>                     # what lines exist?
+popcorn app lines                                    # what lines exist?
 popcorn channel-config show --channel <id> --strict  # is the channel wired up?
-popcorn flow runs list --channel <id>
+popcorn flow runs list --channel <id> --flow <name>   # filtered on the server
 ```
 
 `app lines` is the fork-line inventory — name, head semver, and when that head
 was published — and it is worth a look before forking, because a nameless
 `app fork` adopts whatever single line exists and the server refuses outright
-once there are two. `--channel` there is the API's authorization handle, not a
-filter: the lines listed are the workspace's. Two things it cannot tell you,
-both because the API does not carry them: how many channels ride each line,
-and how to delete one. Lines accumulate until the backend grows those.
+once there are two. The lines listed are the workspace's, and it needs no
+channel. Two things it cannot tell you, both because the API does not carry
+them: how many channels ride each line, and how to delete one. Lines accumulate until the backend grows those.
 
 `channel-config show` is worth running the first time a bundle installs: it
 diffs every `$channel.*` reference your flows make against what the channel
@@ -899,9 +961,9 @@ a `app publish` rather than a deploy. It is not gone, though — the *first*
 version of a new app still has to be right, and a fork publish still moves
 every other channel on the line.
 
-A freshly created channel is **not resolvable by `#name` for ~5 minutes**
-(negative resolution caching). Use the conversation UUID immediately after
-creating it.
+A `#name` that matches more than one channel — a case variant, or a channel
+shared in from another workspace — is refused with each candidate's id. Pass
+the id in its place; `--workspace` does not narrow the lookup.
 
 `flow run` accepts a flow **name or UUID**, and defaults `conversation_id`
 into the inputs from `--channel`:
@@ -911,12 +973,17 @@ popcorn flow run basic_tick --channel <id> --wait
 ```
 
 Pass `--inputs` for a flow's own arguments; an explicit `conversation_id`
-there always wins, so a flow can still target another conversation.
+there always wins, so a flow can still target another channel.
 
 ```bash
 popcorn flow run seed_test_alert --channel <id> \
   --inputs '{"severity":"critical","fingerprint":"0000000000000002"}' --wait
 ```
+
+Every run carries `outcome`: `succeeded`, `failed` or `still_running`. Poll
+that field, not `status` — `--wait` does. To change one channel parameter
+without rewriting the others, use `popcorn channel-config params set` and
+`params unset`.
 
 ### Checks will not save you
 
@@ -985,7 +1052,8 @@ Watch for these when reading results:
 8. No `on_error.retry` means up to 4 attempts.
 9. Table changes are additive — never dropped, never renamed.
 10. `app.*` activities are private to shipped apps. Author against
-    `tier: foundation|feature`, `status: release`.
+    `foundation` and `feature` activities at `release` or `beta` (beta is
+    marked in the reference).
 11. Scalars are strings on the wire; `channel_parameters` keep their types.
 12. **No arithmetic in a reference**, and no negating one. Compute with
     `foundation.math.calculate`, one operation per step; count with
@@ -1005,3 +1073,7 @@ Watch for these when reading results:
 21. A missing key is a hard `ReferenceError`, and `on_error` cannot rescue it —
     resolution precedes invocation. Guarantee presence in the query
     (`$exists: true`) or the schema (`required`).
+22. `foundation.channel.post`, `channel.post_file` and `channel.edit` default
+    to `format: plain`, so markdown in `text:` posts literally. Set
+    `format: markdown`. An edit does not inherit the message's format — set it
+    again on every edit of a markdown message.

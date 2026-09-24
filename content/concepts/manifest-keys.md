@@ -20,20 +20,26 @@ so it is worth reading once in full.
 | Key | What install does |
 |---|---|
 | `version` | required to publish; must be a semver such as `1.2.0` — `1.0` parses as a number and is refused |
+| `display_name`, `description` | catalog copy for the template picker |
+| `changelog` | documentation only on a fork line; the version's note comes from `app publish -m` |
 | `tables` | additive reconcile — tables and columns added, attributes fixed, never dropped or renamed |
-| `channel_parameters` | upsert, types preserved; read as `$channel.<name>` |
+| `channel_parameters` | upsert; on an update, a value a member edited is kept; types preserved; read as `$channel.<name>` |
 | `scalars` | upsert — `scalar-tiers` says when an update keeps the channel's value |
 | `default_scalars` | **write once**, on first install only |
 | `schedules` | replace the schedules the bundle manages |
 | `webhooks` | create if missing; never updated, never deleted |
-| `triggers`, `connections`, `documents` | replace |
-| `status_kinds` | merge per kind — kinds the bundle stops declaring stay |
+| `triggers` | the set is replaced; a trigger's `enabled` is written the first time only, so a member's toggle survives upgrades |
+| `connections`, `documents`, `required_connections` | replaced on first install; on an update, kept where the channel's copy was edited (see `scalar-tiers`). `required_connections` is the legacy flat list |
+| `status_kinds` | merge per kind — kinds the bundle stops declaring stay; on an update, a value a member edited is kept |
 | `states` | validated as a graph at publish, read at run time from the bound version |
 | `app_type` | sets the channel's app; **absent clears it** |
 | `channel_agent` | sets which agent answers members; **absent clears it** |
 
 A top-level key the parser does not know is ignored without a word. A typo
 such as `schedule:` does nothing, and nothing tells you.
+
+`scalars.agent_runnable_flows` lists the flows the channel's agent may run.
+It is a scalar, not a top-level key, so it follows the scalar rules.
 
 ## An absent key is not an empty one
 

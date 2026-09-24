@@ -53,6 +53,9 @@ No description in the catalog.
 | Field | Type | Notes |
 |---|---|---|
 | `result` | object |  |
+| `model` | string |  |
+| `model_source` | string |  |
+| `model_requested` | string |  |
 
 ### `foundation.agent.transform`
 
