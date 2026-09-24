@@ -95,6 +95,10 @@ def parse(path: pathlib.Path) -> dict:
     if key:
         meta[key] = " ".join(folded).strip()
 
+    # A number, not the string the scalar parse gives: sorted as text, 10
+    # would come before 2. check-content.py rejects anything that is not one.
+    if "order" in meta:
+        meta["order"] = int(meta["order"])
     meta["body"] = doc.group("body").strip()
     meta["section"] = path.parent.name
     return meta
@@ -102,7 +106,49 @@ def parse(path: pathlib.Path) -> dict:
 
 # The order sections appear on the landing page. A guide is where a person
 # starts; the concepts are what it and every agent answer points into.
-SECTION_ORDER = {"guides": ("Start here", "guides"), "concepts": ("Concepts", "concepts")}
+# The sections in the order a reader meets them: (directory, nav label,
+# landing heading, what the section is for). A section not listed here still
+# publishes, after these, under its directory name.
+SECTIONS = [
+    ("guides", "Guides", "Start here",
+     "Walkthroughs, in reading order. The first is the whole authoring loop; "
+     "each later one builds on it."),
+    ("concepts", "Concepts", "Concepts",
+     "One idea each, in reading order: what a bundle holds, then how it ships "
+     "and what a publish changes."),
+    ("reference", "Reference", "Reference",
+     "Generated from the platform itself, never written by hand."),
+]
+_KNOWN = [name for name, *_ in SECTIONS]
+
+
+def section_info(section: str) -> tuple[str, str, str]:
+    for name, label, heading, blurb in SECTIONS:
+        if name == section:
+            return label, heading, blurb
+    return section.title(), section.title(), ""
+
+
+def reading_order(page: dict) -> tuple:
+    """Section first, then the page's `order:`, then its title.
+
+    `order:` is what makes a reading path: filenames sort alphabetically,
+    which put an advanced guide ahead of the one it builds on. A page with
+    no `order:` goes after the ordered ones in its section.
+    """
+    section = page["section"]
+    rank = _KNOWN.index(section) if section in _KNOWN else len(_KNOWN)
+    order = page.get("order")
+    return (rank, section, order is None, order or 0, page["title"].lower())
+
+
+def nav(pages: list[dict], current: str | None) -> list[tuple[str, str, bool]]:
+    """One nav entry per section that has pages, linking to its landing anchor."""
+    present = []
+    for page in pages:
+        if page["section"] not in present:
+            present.append(page["section"])
+    return [(section_info(s)[0], f"/#{s}", s == current) for s in present]
 
 
 def landing(pages: list[dict]) -> str:
@@ -114,13 +160,14 @@ def landing(pages: list[dict]) -> str:
             f'<li><a href="{href}">{render.inline(page["title"])}</a>'
             f"<p>{render.inline(page['summary'])}</p></li>"
         )
-    ordered = sorted(groups, key=lambda s: (s not in SECTION_ORDER, list(SECTION_ORDER).index(s) if s in SECTION_ORDER else 0, s))
     sections = []
-    for section in ordered:
-        heading, anchor = SECTION_ORDER.get(section, (section.title(), section))
+    for section, items in groups.items():
+        _, heading, blurb = section_info(section)
+        intro = f'<p class="section-intro">{blurb}</p>\n' if blurb else ""
         sections.append(
-            f'<h2 class="section-title" id="{anchor}">{heading}</h2>\n'
-            '<ul class="index">' + "".join(groups[section]) + "</ul>"
+            f'<h2 class="section-title" id="{section}">{heading}</h2>\n'
+            + intro
+            + '<ul class="index">' + "".join(items) + "</ul>"
         )
     return render.document(
         "Popcorn docs",
@@ -130,11 +177,28 @@ def landing(pages: list[dict]) -> str:
         + "\n".join(sections)
         + "\n<footer>For agents: the index is <a href=\"/llms.txt\">/llms.txt</a>, "
         "every body at <a href=\"/llms-full.txt\">/llms-full.txt</a>, "
-        "and one record per concept at <a href=\"/chunks.json\">/chunks.json</a>."
+        "and one record per page at <a href=\"/chunks.json\">/chunks.json</a>."
         "</footer>",
         description="How Popcorn app bundles work: tables, flows, schedules and "
         "webhooks, and what happens when you publish.",
+        nav=nav(pages, None),
     )
+
+
+def pager(page: dict, pages: list[dict]) -> str:
+    """Previous and next within the page's own section, in reading order."""
+    peers = [p for p in pages if p["section"] == page["section"]]
+    i = next(n for n, p in enumerate(peers) if p["id"] is page["id"])
+    links = []
+    if i > 0:
+        prev = peers[i - 1]
+        links.append(f'<a class="prev" rel="prev" href="/{prev["section"]}/{prev["id"]}.html">'
+                     f'<span>Previous</span>{render.inline(prev["title"])}</a>')
+    if i + 1 < len(peers):
+        nxt = peers[i + 1]
+        links.append(f'<a class="next" rel="next" href="/{nxt["section"]}/{nxt["id"]}.html">'
+                     f'<span>Next</span>{render.inline(nxt["title"])}</a>')
+    return f'<nav class="pager" aria-label="{section_info(page["section"])[0]}">' + "".join(links) + "</nav>\n" if links else ""
 
 
 def related(page: dict, by_id: dict[str, dict]) -> str:
@@ -154,11 +218,10 @@ def related(page: dict, by_id: dict[str, dict]) -> str:
 
 
 def main() -> int:
-    pages = [
-        parse(p)
-        for p in sorted(CONTENT.rglob("*.md"))
-        if not p.name.startswith("_")
-    ]
+    pages = sorted(
+        (parse(p) for p in CONTENT.rglob("*.md") if not p.name.startswith("_")),
+        key=reading_order,
+    )
     if not pages:
         print("✖  no content", file=sys.stderr)
         return 1
@@ -191,13 +254,17 @@ def main() -> int:
         page_file.with_suffix(".html").write_text(
             render.document(
                 f"{page['title']} — Popcorn docs",
+                f'<p class="eyebrow"><a href="/#{page["section"]}">'
+                f"{section_info(page['section'])[0]}</a></p>\n"
                 f"<h1>{render.inline(page['title'])}</h1>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
                 f"{render.toc(rendered)}{rendered}\n"
                 f"{related(page, by_id)}"
+                f"{pager(page, pages)}"
                 "<footer>This page as Markdown: "
                 f'<a href="/{path}">/{path}</a></footer>',
                 description=page["summary"],
+                nav=nav(pages, page["section"]),
             )
         )
 

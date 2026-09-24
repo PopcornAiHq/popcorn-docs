@@ -303,12 +303,24 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .index p { color: var(--muted); margin: .3rem 0 0; font-size: .96rem; }
 footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .88rem; }
 footer code { font-size: .85em; }
-.site { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+.site { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .5rem 1rem;
   margin-bottom: 2.5rem; padding-bottom: .9rem; border-bottom: 1px solid var(--rule); font-size: .92rem; }
 .site a { text-decoration: none; }
 .site .brand { color: var(--fg); font-weight: 650; letter-spacing: -.01em; }
 .site nav a { color: var(--muted); margin-left: 1rem; }
 .site nav a:hover, .site .brand:hover { color: var(--accent); }
+.site nav a.current { color: var(--fg); font-weight: 600; }
+.eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.eyebrow a { color: var(--muted); text-decoration: none; }
+.eyebrow a:hover { color: var(--accent); }
+.section-intro { color: var(--muted); margin: .4rem 0 0; font-size: .95rem; }
+.pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; }
+.pager a { flex: 1 1 0; display: block; padding: .8rem 1rem; border: 1px solid var(--rule);
+  border-radius: 6px; text-decoration: none; font-weight: 600; }
+.pager a:hover { border-color: var(--accent); }
+.pager a.next { text-align: right; margin-left: auto; }
+.pager span { display: block; font-size: .78rem; font-weight: 400; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: .15rem; }
 .theme { margin-left: 1rem; padding: 0 .2rem; border: 0; background: none; color: var(--muted);
   font: inherit; font-size: 1rem; line-height: 1; cursor: pointer; }
 .theme:hover { color: var(--accent); }
@@ -375,8 +387,25 @@ _THEME_TOGGLE = """
 """
 
 
-def document(title: str, content: str, *, description: str = "") -> str:
-    """Wrap rendered content in a standalone page."""
+def document(
+    title: str,
+    content: str,
+    *,
+    description: str = "",
+    nav: list[tuple[str, str, bool]] = (),
+) -> str:
+    """Wrap rendered content in a standalone page.
+
+    `nav` is (label, href, current) per section; the caller builds it from the
+    sections that have pages, so the header never links to one that does not
+    exist.
+    """
+    current_attrs = ' aria-current="true" class="current"'
+    links = "".join(
+        f'<a href="{href}"{current_attrs if current else ""}>'
+        f"{html.escape(label, quote=False)}</a>"
+        for label, href, current in nav
+    )
     meta = (
         f'\n  <meta name="description" content="{html.escape(description, quote=True)}">'
         if description
@@ -395,7 +424,7 @@ def document(title: str, content: str, *, description: str = "") -> str:
 <body>
 <main>
 <header class="site"><a class="brand" href="/">Popcorn docs</a><nav>
-<a href="/guides/template-authoring.html">Guide</a><a href="/#concepts">Concepts</a><a href="/llms.txt">llms.txt</a>
+{links}<a href="/llms.txt">llms.txt</a>
 <button class="theme" type="button" hidden></button>
 </nav></header>
 {content}
