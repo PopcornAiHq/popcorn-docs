@@ -5,9 +5,9 @@ order: 9
 summary: >
   A fork line is a workspace's own version series of an app, forked from the
   shared product version. Publishing to it moves every channel on that line —
-  the others converge on their daily update. A channel never changes line, so
-  isolating a change means forking a second named line from a channel still on
-  the product version. A fork cannot be undone.
+  the others converge on their daily update. Once on a fork line a channel
+  never leaves it, so isolating a change means forking a second named line from
+  a channel still on the product version. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 applies_to: [cli, mcp, human]
 source: [fork_for_channel, publish_fork_version, ChannelForkRegressionError, AmbiguousForkLineError]
@@ -50,11 +50,13 @@ can only be started from a channel still on the product version.
 ## A fork is a one-way door
 
 There is no unfork. A channel cannot be moved back to the product line or
-across to another line, and no version-addressed read exists to recover the
-tree a channel ran before — reads serve the bound version or the line's head,
-never an arbitrary earlier one. Adoption also happens by accident: applying an
-update to a product-bound channel in a workspace that owns exactly one fork
-line of that app moves the channel onto the fork.
+across to another line; the one move that exists is from the product version
+onto a fork. Reads serve the bound version or the line's head by default. An
+earlier version of a fork line can be read by id (`app checkout --version`),
+but never re-bound: the only way back to its content is to publish it forward
+as a new version. Adoption also happens by accident: applying an update to a
+product-bound channel in a workspace that owns exactly one fork line of that
+app moves the channel onto the fork.
 
 Treat forking as a decision about the workspace, not a step in an edit.
 
