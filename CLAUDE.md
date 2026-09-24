@@ -7,7 +7,7 @@ Internal references must never land in it:
 
 | Never write | Write instead |
 |---|---|
-| an issue-tracker id | the behaviour the ticket describes |
+| an issue-tracker id, in a tracked file | the behaviour the ticket describes |
 | a backend PR reference (`<private-repo>#<n>`) | what the change did |
 | a private source path ending `.py` | the bare symbol — `fork_for_channel` |
 | a repository that is not public | the behaviour, with no repository named |
@@ -19,6 +19,16 @@ the last. It exists because the private sibling repo's house style actively
 encourages these references — anyone moving between checkouts reintroduces
 them while believing they are being consistent. The hook is there so nobody
 has to remember.
+
+**Ticket ids may go in commit messages and pull requests.** A Linear id is
+allowed in a commit message, a PR title or description, and a branch name —
+that is what Linear's GitHub integration reads to link and close the issue,
+and a bare id discloses nothing the change itself does not. Every other row
+above still applies there. To close the issue when the PR merges, put a
+closing magic word and the id in the **PR description** — `Fixes KEW-NNNN`
+(`closes`, `resolves`, `completes`, `implements` work too); `Part of KEW-NNNN`
+or `Refs KEW-NNNN` links without closing. The script scans tracked files only,
+so it neither blocks nor checks messages — the judgement is yours.
 
 **It is an allowlist, and that is the point.** The script is public too, so a
 list of forbidden names would publish the names it protects. Instead it matches
