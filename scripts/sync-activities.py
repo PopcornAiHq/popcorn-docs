@@ -183,6 +183,7 @@ def page(acts: list[dict]) -> str:
         "---",
         "id: activities",
         "title: Activity reference",
+        "order: 1",
         "summary: >",
         "  Every foundation and feature activity a flow step can call at release or",
         "  beta status, with its arguments and what it returns — generated from the",
