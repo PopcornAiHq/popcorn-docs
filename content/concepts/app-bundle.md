@@ -55,12 +55,12 @@ entrypoint — `main.py` or `index.js`, never both — and is not seeded anywher
 a flow reads a block by name at run time. Block files must be UTF-8 text, and
 a block has a file-count and a size cap, which the refusal names.
 
-`agents/<name>/` holds an app agent's definition. The server accepts it, but
-the CLI does not publish it: a checkout writes the served agent files,
-`app publish` sends none of them and keeps the server's copies unchanged, so
-**an edit to a file under `agents/` never ships**. `template check` reports
-`agents/` as `path-not-published`, so `--strict` fails a bundle that has app
-agents. To change an app agent, use whatever surface published it.
+`agents/<name>/` holds an app agent's definition: `agent.yaml` and
+`prompt.md` directly inside it, and JSON schemas under `schemas/`. It
+publishes like the rest of the bundle — a checkout writes the served agent
+files, and `app publish` sends what you add, edit or delete there. Any other
+file under `agents/` is not part of the bundle, and the server parses each
+agent at publish and refuses one it could not run.
 
 Anything outside that shape is not part of the bundle. The server refuses a
 publish containing an unrecognised path; the CLI leaves such paths behind

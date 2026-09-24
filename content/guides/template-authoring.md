@@ -127,9 +127,17 @@ and no hand-off to anyone:
 popcorn app checkout --channel '#chan' --fork
 # ... edit
 popcorn template check ./<app>
-popcorn app publish ./<app> --bump patch -m "what changed"
+popcorn app publish ./<app> --bump patch -m "what changed" --yes
 popcorn app status ./<app>              # has the install landed?
 ```
+
+`app publish` asks for confirmation before it sends anything, because a
+publish changes every channel on the fork line, not only yours. In a terminal
+you answer the prompt. In agent mode (`POPCORN_AGENT=1`) or any
+non-interactive shell there is no one to answer, so the publish is refused
+unless it carries `--yes` (or `POPCORN_ASSUME_YES=1`) — pass it once that
+reach is what you mean. The examples here include it because an agent or a
+script is usually what runs them.
 
 `--bump patch|minor|major` writes `version:` in `manifest.yaml` for you, off
 the fork line's head, and only once the publish has been accepted — so a
@@ -274,12 +282,10 @@ The registry reads your directory off disk and classifies every path:
   config — `foundation.code.execute` reads them by block name at run time.
 - **Reads `agents/<name>/`** — one directory per app agent the bundle defines
   for itself: `agent.yaml`, `prompt.md` and `schemas/*.json`, parsed and
-  refused at publish if they would not run. The CLI does not publish this
-  directory. A checkout writes the served agent files, and `app publish` sends
-  none of them and keeps the server's copies unchanged, so **an edit to a file
-  under `agents/` never ships**. `template check` reports `agents/` as
-  `path-not-published`, so `--strict` fails a bundle that has app agents. To
-  change an app agent, use whatever surface published it.
+  refused at publish if they would not run. A checkout writes them, and
+  `app publish` sends additions, edits and deletions there like any other
+  bundle file. Anything else under `agents/` is left behind and reported as
+  `path-not-published`.
 - **Does not read anything else.** A `fixtures/` directory, a `notes.txt`, a
   file nested a level too deep: `template check` reports each as
   `path-not-published` (a warning, so `--strict` fails), `app publish` leaves
@@ -903,7 +909,7 @@ The **middle** loop is the fork loop from §2b, and it is the one to reach for
 whenever the app already exists. No deploy, no hand-off, seconds per turn:
 
 ```bash
-popcorn app publish ./<app> --bump patch -m "..."    # mint the next version
+popcorn app publish ./<app> --bump patch -m "..." --yes   # mint the next version
 popcorn app status ./<app>                           # has the install landed?
 popcorn app lines                                    # what lines exist?
 popcorn channel-config show --channel <id> --strict  # is the channel wired up?
@@ -954,6 +960,10 @@ That argument is weaker than it was: once the app exists, a wrong bundle costs
 a `app publish` rather than a deploy. It is not gone, though — the *first*
 version of a new app still has to be right, and a fork publish still moves
 every other channel on the line.
+
+A `#name` that matches more than one channel — a case variant, or a channel
+shared in from another workspace — is refused with each candidate's id. Pass
+the id in its place; `--workspace` does not narrow the lookup.
 
 `flow run` accepts a flow **name or UUID**, and defaults `conversation_id`
 into the inputs from `--channel`:
