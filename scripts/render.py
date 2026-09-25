@@ -41,6 +41,26 @@ _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 _ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 _TERM = re.compile(r"^\*\*([^*]+)\*\*")
 
+SITE = "https://docs.popcorn.ai"
+# A link to one of this site's pages, as the Markdown writes it: absolute and
+# ending `.md`, because the Markdown twin is what an agent follows.
+_PAGE = re.compile(r"^(?:" + re.escape(SITE) + r")?(?P<path>/[\w/-]+)\.md(?P<frag>#[\w-]*)?$")
+
+
+def _href(url: str) -> str:
+    """Where a link in a page body should go in the HTML rendering.
+
+    A person reading the HTML should land on the HTML twin, not the Markdown
+    one, so a link to this site's `.md` becomes the root-relative `.html` at
+    the same path. Root-relative, so it also works on a local build — and
+    `check-links.py`, which skips absolute URLs, checks it. Anything else,
+    including a `.md` on another host, is left as written.
+    """
+    page = _PAGE.match(url)
+    if not page:
+        return url
+    return page.group("path") + ".html" + (page.group("frag") or "")
+
 
 def inline(text: str) -> str:
     """Escape, then apply the three inline marks. Code wins over the others."""
@@ -56,7 +76,7 @@ def inline(text: str) -> str:
 
     out = _CODE.sub(stash, out)
     out = _LINK.sub(
-        lambda m: f'<a href="{m.group(2).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
+        lambda m: f'<a href="{_href(m.group(2)).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
         out,
     )
     out = _BOLD.sub(r"<strong>\1</strong>", out)
@@ -177,13 +197,13 @@ def lookup_index(rendered: str) -> str:
 Link = tuple[str, str, bool]
 
 
-def site_nav(sections: list[tuple[str, list[tuple[str, list[Link]]]]]) -> str:
-    """The left column on every other page: the whole site, in reading order.
+def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) -> str:
+    """The left column: the whole site, in reading order.
 
     Each section is (label, groups) and each group is (label, links), where an
     empty group label means the links sit directly under the section. A
-    section holding one ungrouped page of the same name — the glossary — is
-    listed as that one link rather than as a heading over itself.
+    section labelled None has no heading at all — the home page's link, which
+    belongs to no section.
     """
     def link(title: str, href: str, current: bool) -> str:
         attrs = ' aria-current="page"' if current else ""
@@ -191,9 +211,10 @@ def site_nav(sections: list[tuple[str, list[tuple[str, list[Link]]]]]) -> str:
 
     out = []
     for label, groups in sections:
-        if len(groups) == 1 and not groups[0][0] and len(groups[0][1]) == 1 \
-                and _TAG.sub("", groups[0][1][0][0]) == label:
-            out.append(f'<ul class="solo">{link(*groups[0][1][0])}</ul>')
+        if label is None:
+            out.append("".join(
+                f'<ul class="solo">{"".join(link(*l) for l in links)}</ul>' for _, links in groups
+            ))
             continue
         parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>']
         for group, links in groups:
@@ -486,6 +507,7 @@ main { min-width: 0; padding: 2.5rem 0 6rem; }
   letter-spacing: .08em; color: var(--fg); }
 .site-nav > :first-child .nav-section { margin-top: 0; }
 .solo { margin-top: 1.25rem !important; }
+.site-nav > .solo:first-child { margin-top: 0 !important; }
 .sidebar details { margin: .2rem 0 .4rem; }
 .sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
 .sidebar details ul { padding-left: .8rem; }

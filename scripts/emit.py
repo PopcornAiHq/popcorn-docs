@@ -50,7 +50,7 @@ import render
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 BUILD = ROOT / "build"
-SITE = "https://docs.popcorn.ai"
+SITE = render.SITE
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _SCALAR = re.compile(r"^(?P<key>[a-z_]+):\s*(?P<val>.*)$")
@@ -105,16 +105,17 @@ def parse(path: pathlib.Path) -> dict:
 
 
 # The sections in the order a reader meets them: (directory, nav label,
-# landing heading, what the section is for). A guide is where a person starts;
-# the concepts are what it and every agent answer points into. A section not
-# listed here still publishes, after these, under its directory name.
+# landing heading, what the section is for). The concepts come first: they
+# are what every guide and every agent answer points into, so they lead the
+# sidebar and the index. A section not listed here still publishes, after
+# these, under its directory name.
 SECTIONS = [
-    ("guides", "Guides", "Start here",
-     "Walkthroughs, in reading order. The first is the whole authoring loop; "
-     "each later one builds on it."),
     ("concepts", "Concepts", "Concepts",
      "One idea each, in reading order: what a bundle holds, then how it ships "
      "and what a publish changes."),
+    ("guides", "Guides", "Start here",
+     "Walkthroughs, in reading order. The first is the whole authoring loop; "
+     "each later one builds on it."),
     ("glossary", "Glossary", "Glossary",
      "Every term, with its synonyms and the collisions worth knowing."),
     ("reference", "Reference", "Reference",
@@ -172,7 +173,7 @@ def sidebar(pages: list[dict], current: str | None) -> str:
         )
     # The home page leads the sidebar, current when no page is — `current`
     # is None only when the landing page is the one being built.
-    home = ("Overview", [("", [("Overview", "/", current is None)])])
+    home = (None, [("", [("Overview", "/", current is None)])])
     return render.site_nav([home] + [
         (section_info(section)[0], list(groups.items()))
         for section, groups in sections.items()

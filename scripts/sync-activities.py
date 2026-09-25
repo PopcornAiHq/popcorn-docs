@@ -182,7 +182,7 @@ def page(acts: list[dict]) -> str:
     head = [
         "---",
         "id: activities",
-        "title: Activity reference",
+        "title: Activities",
         "order: 1",
         "layout: lookup",
         "summary: >",
