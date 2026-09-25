@@ -124,6 +124,7 @@ def page(schema: dict, help_text: str) -> str:
         "title: CLI",
         "order: 2",
         "layout: lookup",
+        f"version: {version}",
         "summary: >",
         "  Every `popcorn` command, grouped the way `popcorn --help` groups them, with",
         "  its arguments — generated from the CLI's own schema. Global flags, agent",

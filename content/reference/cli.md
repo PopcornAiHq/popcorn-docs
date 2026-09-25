@@ -3,6 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
+version: 0.57.0
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
