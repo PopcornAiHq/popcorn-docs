@@ -1,6 +1,6 @@
 ---
 id: activities
-title: Activity reference
+title: Activities
 order: 1
 layout: lookup
 summary: >
