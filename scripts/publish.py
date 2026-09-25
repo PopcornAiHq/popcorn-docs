@@ -50,6 +50,7 @@ CONTENT_TYPES = {
     ".md": "text/markdown; charset=utf-8",
     ".txt": "text/plain; charset=utf-8",
     ".json": "application/json",
+    ".xml": "application/xml; charset=utf-8",
 }
 
 

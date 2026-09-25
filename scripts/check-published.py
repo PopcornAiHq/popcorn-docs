@@ -54,6 +54,7 @@ EXPECTED_TYPE = {
     ".md": "text/markdown",
     ".txt": "text/plain",
     ".json": "application/json",
+    ".xml": "application/xml",
 }
 
 
@@ -97,6 +98,7 @@ def main() -> int:
     # The bare domain. Someone handed the domain types exactly this.
     check(site + "/", failures)
     check(site + "/robots.txt", failures)
+    check(site + "/sitemap.xml", failures)
 
     index = check(site + "/llms.txt", failures)
     if not index:
