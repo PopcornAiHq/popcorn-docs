@@ -49,10 +49,17 @@ authoritative.
 **Audience:** an agent that needs exact argument names, and a person checking
 one.
 
-**Contains:** the activity catalog. The flow rules, the CLI command surface,
-the `template check` rule codes and a per-app states rendering belong here
-too, and land here only once something generates them — never hand-written
-in the meantime.
+**Contains:** the activity catalog, the CLI's commands and the MCP server's
+tools, each with the script that generates it (`sync-activities.py`,
+`sync-cli.py`, `sync-mcp.py`). The flow rules, the `template check` rule codes
+and a per-app states rendering belong here too, and land here only once
+something generates them — never hand-written in the meantime.
+
+**The one exception** is the MCP page's "Proposed tools": tools that are
+designed and not built, so nothing can generate them. The text lives in
+`sync-mcp.py` rather than the page, so the page still has one writer, and it
+says plainly that nothing depends on the tools arriving. Each tool leaves that
+section when it ships and the generator starts finding it.
 
 **The test:** *is there a symbol in the backend that already enforces this?*
 Then it is generated, and hand-writing it creates a second source that will

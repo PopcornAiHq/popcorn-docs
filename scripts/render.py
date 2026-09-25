@@ -42,6 +42,7 @@ _ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 _TERM = re.compile(r"^\*\*([^*]+)\*\*")
 
 SITE = "https://docs.popcorn.ai"
+SOURCE = "https://github.com/PopcornAiHq/popcorn-docs"
 # A link to one of this site's pages, as the Markdown writes it: absolute and
 # ending `.md`, because the Markdown twin is what an agent follows.
 _PAGE = re.compile(r"^(?:" + re.escape(SITE) + r")?(?P<path>/[\w/-]+)\.md(?P<frag>#[\w-]*)?$")
@@ -491,7 +492,15 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .menu { display: none; margin: 0; font-size: 1.2rem; }
 .layout { display: grid; grid-template-columns: 15rem minmax(0, 44rem) 13rem; gap: 3rem;
   max-width: var(--frame); margin: 0 auto; padding: 0 1.25rem; }
-main { min-width: 0; padding: 2.5rem 0 6rem; }
+main { min-width: 0; padding: 2.5rem 0 4rem; }
+/* The footer is a cell of the grid, under the page's column, so at the widths
+   where the rail drops below the page it follows the rail rather than
+   landing between the page and the rail's links. */
+.site-footer { grid-column: 2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem;
+  padding: 1.25rem 0 3rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .85rem; }
+.site-footer span:last-child { display: flex; gap: 1.25rem; }
+.site-footer a { color: var(--muted); text-decoration: none; }
+.site-footer a:hover { color: var(--accent); }
 .sidebar, .rail { position: sticky; top: var(--header); align-self: start;
   max-height: calc(100vh - var(--header)); overflow-y: auto; padding: 2rem 0 3rem; font-size: .9rem; line-height: 1.45; }
 /* The right padding keeps the filter's border and the current link's fill off
@@ -555,7 +564,7 @@ blockquote p:last-child { margin-bottom: 0; }
 @media (max-width: 72rem) {
   :root { --frame: calc(14rem + 44rem + 2.5rem + 2 * 1.25rem); }
   .layout { grid-template-columns: 14rem minmax(0, 44rem); gap: 2.5rem; }
-  .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 4rem; margin-top: -3rem; }
+  .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 2.5rem; margin-top: -1.5rem; }
   .rail .toc, .rail .lookup, .rail .filter, .rail > .rail-title { display: none; }
   .actions { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
 }
@@ -566,7 +575,7 @@ blockquote p:last-child { margin-bottom: 0; }
   .bar { padding: 0 1rem; }
   .site .brand { padding-left: 0; }
   .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 1rem; }
-  .rail { grid-column: 1; }
+  .rail, .site-footer { grid-column: 1; }
   .sidebar { position: static; max-height: none; padding: 1.5rem 0 0; }
   html.js .menu { display: inline-block; }
   /* align-self is reset because Chrome honours it on a fixed box too: at
@@ -753,6 +762,8 @@ def document(
 {content}
 </main>
 <aside class="rail">{rail}</aside>
+<footer class="site-footer"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>
+<span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
 <script>{_THEME_TOGGLE}{_NAV}</script>
 </body>
