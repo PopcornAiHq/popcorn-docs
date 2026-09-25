@@ -20,6 +20,9 @@ So this asks what those failures answer to:
     is each one served as its own type        a .md delivered as
                                               application/octet-stream is a
                                               download prompt, not a page
+    does robots.txt serve                     a missing one is a 403 from the
+                                              bucket, which crawlers read as
+                                              "disallow all"
 
 It runs after a publish, against the real domain, and is the only check here
 that needs the network. That makes it the only one that can fail for reasons
@@ -93,6 +96,7 @@ def main() -> int:
 
     # The bare domain. Someone handed the domain types exactly this.
     check(site + "/", failures)
+    check(site + "/robots.txt", failures)
 
     index = check(site + "/llms.txt", failures)
     if not index:

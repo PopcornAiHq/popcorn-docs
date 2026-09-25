@@ -16,6 +16,9 @@ Outputs, under `build/`:
                      its llms.txt entry advertises
     <section>/<id>.html  the same page for a person with a browser
     index.html       the landing page, every concept with its summary
+    robots.txt       allow everything. Without one the bucket answers 403 for
+                     the missing key, and a crawler that reads a 403 robots.txt
+                     as "disallow all" refuses every page on the site
 
 `llms.txt` is the file most likely to be fetched by something we do not
 control, so it carries summaries and not bodies. A reader that wants
@@ -341,11 +344,12 @@ def main() -> int:
     (BUILD / "llms.txt").write_text("\n".join(index))
     (BUILD / "llms-full.txt").write_text("\n".join(full))
     (BUILD / "index.html").write_text(landing(pages))
+    (BUILD / "robots.txt").write_text("User-agent: *\nAllow: /\n")
 
     size = (BUILD / "llms.txt").stat().st_size
     sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
-          f"llms-full.txt, index.html, {sections}(.md + .html)")
+          f"llms-full.txt, index.html, robots.txt, {sections}(.md + .html)")
     return 0
 
 

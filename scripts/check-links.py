@@ -37,7 +37,7 @@ BUILD = ROOT / "build"
 SITE = "https://docs.popcorn.ai"
 
 # The corpus-level files, reached directly rather than as a page.
-INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html"}
+INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html", "robots.txt"}
 
 _HREF = re.compile(r'href="([^"]+)"')
 
