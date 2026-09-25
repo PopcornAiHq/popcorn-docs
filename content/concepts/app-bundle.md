@@ -2,6 +2,7 @@
 id: app-bundle
 title: App bundles
 order: 1
+group: What a bundle holds
 summary: >
   An app bundle is a directory of YAML plus optional code that turns an empty
   channel into an application — tables, flows, schedules and webhooks. Every

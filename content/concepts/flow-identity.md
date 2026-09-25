@@ -2,6 +2,7 @@
 id: flow-identity
 title: A flow's identity is its name
 order: 2
+group: What a bundle holds
 summary: >
   A flow is identified by the name inside the YAML, not by its filename. A
   channel resolves flows by name from the version it runs, so changing

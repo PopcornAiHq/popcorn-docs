@@ -34,6 +34,7 @@ _TABLE_SEP = re.compile(r"^\|?[\s:|-]+\|[\s:|-]*$")
 _CODE = re.compile(r"`([^`]+)`")
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 _ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
+_TERM = re.compile(r"^\*\*([^*]+)\*\*")
 
 
 def inline(text: str) -> str:
@@ -95,21 +96,138 @@ def _slug(text: str, seen: set[str]) -> str:
     return anchor
 
 
-def toc(rendered: str, minimum: int = 6) -> str:
-    """A contents list of a rendered page's second-level headings.
+def toc(rendered: str, minimum: int = 2) -> str:
+    """"On this page" for the right rail: the page's second-level headings.
 
-    Empty below ``minimum``: a short page is its own contents, and a box
-    listing three headings is furniture.
+    The rail sits beside the text rather than above it, so a short list costs
+    the reader nothing; only a page with a single heading has nothing to
+    navigate between.
     """
     entries = _H2.findall(rendered)
     if len(entries) < minimum:
         return ""
     items = "".join(f'<li><a href="#{a}">{h}</a></li>' for a, h in entries)
-    return f'<nav class="toc" aria-label="Contents"><p>Contents</p><ol>{items}</ol></nav>'
+    return (
+        '<nav class="toc spy" aria-label="On this page">'
+        f'<p class="rail-title">On this page</p><ol>{items}</ol></nav>'
+    )
 
 
-def body(md: str) -> str:
-    """Render a concept body. Block constructs first, inline within them."""
+_ENTRY = re.compile(
+    r'<h(?P<level>[23]) id="(?P<id>[^"]+)">(?P<html>.*?)<a class="anchor"'
+    r'|<li id="(?P<term_id>[^"]+)"><strong>(?P<term>.*?)</strong>'
+)
+
+
+def lookup_index(rendered: str, title: str) -> str:
+    """The left column of a lookup page: its own entries, filterable.
+
+    Built from the rendered page rather than the Markdown, so an entry is
+    listed exactly when it has an anchor to link to. Second-level headings are
+    the groups; third-level headings and glossary terms are the entries. An
+    entry that repeats its group's name as a prefix — `foundation.agent.invoke`
+    under `foundation.agent` — is listed by the part that differs, which is
+    what fits in the column.
+    """
+    groups: list[tuple[str, str, list[tuple[str, str, str]]]] = []
+    for m in _ENTRY.finditer(rendered):
+        if m.group("level") == "2":
+            groups.append((m.group("id"), _TAG.sub("", m.group("html")), []))
+            continue
+        anchor = m.group("id") or m.group("term_id")
+        name = _TAG.sub("", m.group("html") or m.group("term"))
+        if not groups:
+            groups.append(("", "", []))
+        prefix = groups[-1][1] + "."
+        label = name[len(prefix):] if name.startswith(prefix) else name
+        groups[-1][2].append((anchor, name, label))
+
+    blocks = []
+    for anchor, heading, entries in groups:
+        items = "".join(
+            f'<li data-name="{html.escape(name.lower(), quote=True)}">'
+            f'<a href="#{a}">{label}</a></li>'
+            for a, name, label in entries
+        )
+        if not heading:
+            blocks.append(f"<ul>{items}</ul>")
+            continue
+        blocks.append(
+            f'<details open data-name="{html.escape(heading.lower(), quote=True)}">'
+            f'<summary><a href="#{anchor}">{heading}</a></summary><ul>{items}</ul></details>'
+        )
+    return (
+        '<a class="back" href="/">\u2190 All docs</a>'
+        f'<p class="lookup-title">{title}</p>'
+        '<input class="filter" type="search" placeholder="Filter\u2026" '
+        'aria-label="Filter this page\'s entries" hidden>'
+        '<nav class="lookup spy" aria-label="Entries">' + "".join(blocks) + "</nav>"
+    )
+
+
+# (title, href, current) — one link in the site sidebar.
+Link = tuple[str, str, bool]
+
+
+def site_nav(sections: list[tuple[str, list[tuple[str, list[Link]]]]]) -> str:
+    """The left column on every other page: the whole site, in reading order.
+
+    Each section is (label, groups) and each group is (label, links), where an
+    empty group label means the links sit directly under the section. A
+    section holding one ungrouped page of the same name — the glossary — is
+    listed as that one link rather than as a heading over itself.
+    """
+    def link(title: str, href: str, current: bool) -> str:
+        attrs = ' aria-current="page"' if current else ""
+        return f'<li><a href="{href}"{attrs}>{title}</a></li>'
+
+    out = []
+    for label, groups in sections:
+        if len(groups) == 1 and not groups[0][0] and len(groups[0][1]) == 1 \
+                and _TAG.sub("", groups[0][1][0][0]) == label:
+            out.append(f'<ul class="solo">{link(*groups[0][1][0])}</ul>')
+            continue
+        parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>']
+        for group, links in groups:
+            items = "".join(link(*l) for l in links)
+            if group:
+                parts.append(
+                    f"<details open><summary>{html.escape(group, quote=False)}</summary>"
+                    f"<ul>{items}</ul></details>"
+                )
+            else:
+                parts.append(f"<ul>{items}</ul>")
+        out.append("<div>" + "".join(parts) + "</div>")
+    return '<nav class="site-nav" aria-label="Docs">' + "".join(out) + "</nav>"
+
+
+def rail(*, contents: str = "", markdown: str = "", related: list[Link] = ()) -> str:
+    """The right column: where you are in this page, and what to do with it.
+
+    Most concept pages have two or three headings, so the contents list alone
+    would leave the column empty on most of the site; the Markdown twin and
+    the related pages are what fill it everywhere.
+    """
+    parts = [contents] if contents else []
+    if markdown:
+        parts.append(
+            '<div class="actions">'
+            f'<button class="copy" type="button" data-src="{markdown}" hidden>Copy as Markdown</button>'
+            f'<a href="{markdown}">View as Markdown</a></div>'
+        )
+    if related:
+        items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in related)
+        parts.append(f'<div class="related"><p class="rail-title">Related</p><ul>{items}</ul></div>')
+    return "".join(parts)
+
+
+def body(md: str, *, terms: bool = False) -> str:
+    """Render a concept body. Block constructs first, inline within them.
+
+    With ``terms``, a bullet that opens with a bold term — a glossary entry —
+    gets an anchor named for the term, so the term can be linked to and listed
+    in the lookup sidebar.
+    """
     seen: set[str] = set()
     lines = md.splitlines()
     out: list[str] = []
@@ -223,9 +341,13 @@ def body(md: str) -> str:
                     i += 1
                     continue
                 break
-            out.append(
-                "<ul>" + "".join(f"<li>{inline(t)}</li>" for t in items) + "</ul>"
-            )
+            def item(text: str) -> str:
+                term = _TERM.match(text) if terms else None
+                if term:
+                    return f'<li id="{_slug(term.group(1), seen)}">{inline(text)}</li>'
+                return f"<li>{inline(text)}</li>"
+
+            out.append("<ul>" + "".join(item(t) for t in items) + "</ul>")
             continue
 
         para = []
@@ -263,6 +385,7 @@ _CSS = """
   --accent: #9a3412; --code-bg: #f4f2ee;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --header: 3.25rem;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {""" + _DARK + """}
@@ -270,11 +393,10 @@ _CSS = """
 :root[data-theme="dark"] {""" + _DARK + """}
 * { box-sizing: border-box; }
 body {
-  margin: 0; padding: 3rem 1rem 6rem; background: var(--bg); color: var(--fg);
+  margin: 0; background: var(--bg); color: var(--fg);
   font-family: var(--font); font-size: 17px; line-height: 1.65;
   -webkit-text-size-adjust: 100%;
 }
-main { max-width: 42rem; margin: 0 auto; }
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .5rem; letter-spacing: -.02em; }
 h2 { font-size: 1.25rem; margin: 2.5rem 0 .75rem; letter-spacing: -.01em; }
@@ -303,14 +425,56 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .index p { color: var(--muted); margin: .3rem 0 0; font-size: .96rem; }
 footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .88rem; }
 footer code { font-size: .85em; }
-.site { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .5rem 1rem;
-  margin-bottom: 2.5rem; padding-bottom: .9rem; border-bottom: 1px solid var(--rule); font-size: .92rem; }
+
+/* The frame: a header across the top, then sidebar | page | rail. */
+.site { position: sticky; top: 0; z-index: 10; height: var(--header); display: flex; align-items: center;
+  gap: 1rem; padding: 0 1.25rem; background: var(--bg); border-bottom: 1px solid var(--rule); font-size: .92rem; }
 .site a { text-decoration: none; }
-.site .brand { color: var(--fg); font-weight: 650; letter-spacing: -.01em; }
-.site nav a { color: var(--muted); margin-left: 1rem; }
+.site .brand { color: var(--fg); font-weight: 650; letter-spacing: -.01em; margin-right: auto; }
+.site nav a { color: var(--muted); }
 .site nav a:hover, .site .brand:hover { color: var(--accent); }
-.site nav a.current { color: var(--fg); font-weight: 600; }
-.eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.theme, .menu { margin-left: 1rem; padding: 0 .2rem; border: 0; background: none; color: var(--muted);
+  font: inherit; font-size: 1rem; line-height: 1; cursor: pointer; }
+.theme:hover, .menu:hover { color: var(--accent); }
+.menu { display: none; margin: 0; font-size: 1.2rem; }
+.layout { display: grid; grid-template-columns: 15rem minmax(0, 44rem) 13rem; gap: 3rem;
+  justify-content: center; padding: 0 1.25rem; }
+main { min-width: 0; padding: 2.5rem 0 6rem; }
+.sidebar, .rail { position: sticky; top: var(--header); align-self: start;
+  max-height: calc(100vh - var(--header)); overflow-y: auto; padding: 2rem 0 3rem; font-size: .9rem; line-height: 1.45; }
+.sidebar ul, .rail ul, .rail ol { list-style: none; margin: 0; padding: 0; }
+.sidebar li, .rail li { margin: 0; }
+.sidebar a { display: block; padding: .3rem .6rem; border-radius: 5px; color: var(--muted); text-decoration: none; }
+.sidebar a:hover { color: var(--fg); }
+.sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg); font-weight: 600; }
+.nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fg); }
+.site-nav > :first-child .nav-section { margin-top: 0; }
+.solo { margin-top: 1.25rem !important; }
+.sidebar details { margin: .2rem 0 .4rem; }
+.sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
+.sidebar details ul { padding-left: .8rem; }
+.back { font-size: .85rem; margin-bottom: .75rem; }
+.lookup-title { margin: 0 .6rem .6rem; font-weight: 650; }
+.filter { display: block; width: 100%; margin: 0 0 1rem; padding: .45rem .6rem; font: inherit; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; }
+.filter:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.lookup summary a { display: inline; padding: 0; color: var(--fg); }
+.lookup a { font-family: var(--mono); font-size: .82rem; padding: .2rem .6rem; }
+.lookup summary { font-family: var(--mono); font-size: .82rem; }
+.rail-title { margin: 0 0 .5rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fg); }
+.rail a { color: var(--muted); text-decoration: none; }
+.rail a:hover { color: var(--accent); }
+.toc li a { display: block; padding: .2rem 0 .2rem .75rem; border-left: 2px solid var(--rule); }
+.toc li a.current { color: var(--accent); border-left-color: var(--accent); }
+.actions { margin: 1.75rem 0; padding-top: 1.25rem; border-top: 1px solid var(--rule); display: grid; gap: .5rem; justify-items: start; }
+.actions:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.copy { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.copy:hover { color: var(--accent); }
+.related li { margin-bottom: .4rem; }
+
+.eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .eyebrow a { color: var(--muted); text-decoration: none; }
 .eyebrow a:hover { color: var(--accent); }
 .section-intro { color: var(--muted); margin: .4rem 0 0; font-size: .95rem; }
@@ -321,26 +485,41 @@ footer code { font-size: .85em; }
 .pager a.next { text-align: right; margin-left: auto; }
 .pager span { display: block; font-size: .78rem; font-weight: 400; color: var(--muted);
   text-transform: uppercase; letter-spacing: .06em; margin-bottom: .15rem; }
-.theme { margin-left: 1rem; padding: 0 .2rem; border: 0; background: none; color: var(--muted);
-  font: inherit; font-size: 1rem; line-height: 1; cursor: pointer; }
-.theme:hover { color: var(--accent); }
 .anchor { margin-left: .4rem; color: var(--rule); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; color: var(--muted); }
-:target { scroll-margin-top: 1.5rem; }
+[id] { scroll-margin-top: calc(var(--header) + 1.25rem); }
+li:target { background: var(--code-bg); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--code-bg); }
 blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--accent); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
-.toc { background: var(--code-bg); border-radius: 6px; padding: .9rem 1.2rem .6rem; margin: 0 0 2.5rem; font-size: .93rem; }
-.toc p { margin: 0 0 .4rem; font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-.toc ol { margin: 0; padding: 0; list-style: none; }
-.toc li { margin-bottom: .25rem; }
-.toc a { text-decoration: none; }
-.toc a:hover { text-decoration: underline; }
 .section-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 3rem 0 0; font-weight: 600; }
-.related { margin-top: 3rem; }
-.related ul { padding-left: 1.3rem; }
-@media (max-width: 30rem) {
-  body { padding-top: 1.5rem; font-size: 16px; }
-  .site nav a { margin-left: .7rem; }
+
+/* Too narrow for the rail: its contents list goes, and the Markdown links
+   and related pages follow the page instead. */
+@media (max-width: 72rem) {
+  .layout { grid-template-columns: 14rem minmax(0, 44rem); gap: 2.5rem; }
+  .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 4rem; margin-top: -3rem; }
+  .rail .toc { display: none; }
+  .actions:first-child { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
+}
+/* Too narrow for the sidebar: it becomes a drawer behind the menu button.
+   Only with JavaScript, which is what opens it; without, it stays in the
+   flow above the page, where it is at least reachable. */
+@media (max-width: 52rem) {
+  body { font-size: 16px; }
+  .site { padding: 0 1rem; }
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 1rem; }
+  .rail { grid-column: 1; }
+  .sidebar { position: static; max-height: none; padding: 1.5rem 0 0; }
+  html.js .menu { display: inline-block; }
+  /* align-self is reset because Chrome honours it on a fixed box too: at
+     `start`, a list taller than the gap under the header is aligned back
+     up over it rather than scrolling inside the drawer. */
+  html.js .sidebar { position: fixed; top: var(--header); left: 0; bottom: 0; z-index: 20; align-self: auto;
+    width: min(20rem, 85vw); max-height: none; padding: 1.5rem 1rem; background: var(--bg);
+    border-right: 1px solid var(--rule); transform: translateX(-100%); visibility: hidden;
+    transition: transform .2s ease, visibility .2s; }
+  html.js.nav-open .sidebar { transform: none; visibility: visible; }
+  main { padding-top: 1.75rem; }
 }
 """
 
@@ -356,9 +535,88 @@ _ICON = (
 # painted in the other theme first. Storage can be unavailable (private
 # windows, blocked site data); the page then simply follows the OS.
 _THEME_EARLY = (
+    'document.documentElement.classList.add("js");'
     'try{var t=localStorage.getItem("theme");'
     'if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}'
 )
+
+# The page's other behaviour, all optional: without it the drawer stays open
+# in the flow, the filter and the copy button stay hidden, and nothing tracks
+# where the reader is.
+#
+# Where-you-are is computed on scroll from the headings' positions rather
+# than with an IntersectionObserver: "the last target above the fold line" is
+# the definition a reader expects, and an observer reports crossings, which
+# lose it when a jump skips several targets at once.
+_NAV = """
+(function () {
+  var root = document.documentElement;
+  var menu = document.querySelector(".menu"), sidebar = document.querySelector(".sidebar");
+  if (menu && sidebar) {
+    menu.addEventListener("click", function () {
+      var open = root.classList.toggle("nav-open");
+      menu.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    sidebar.addEventListener("click", function (e) {
+      if (e.target.closest("a")) { root.classList.remove("nav-open"); menu.setAttribute("aria-expanded", "false"); }
+    });
+  }
+
+  var copy = document.querySelector(".copy");
+  if (copy && navigator.clipboard) {
+    copy.hidden = false;
+    copy.addEventListener("click", function () {
+      fetch(copy.dataset.src).then(function (r) { return r.text(); })
+        .then(function (t) { return navigator.clipboard.writeText(t); })
+        .then(function () { copy.textContent = "Copied"; },
+              function () { copy.textContent = "Copy failed"; })
+        .then(function () { setTimeout(function () { copy.textContent = "Copy as Markdown"; }, 1500); });
+    });
+  }
+
+  var filter = document.querySelector(".filter");
+  if (filter) {
+    filter.hidden = false;
+    filter.addEventListener("input", function () {
+      var q = filter.value.trim().toLowerCase();
+      document.querySelectorAll(".lookup details, .lookup > ul").forEach(function (group) {
+        var groupHit = !q || (group.dataset.name || "").indexOf(q) !== -1, any = false;
+        group.querySelectorAll("li").forEach(function (li) {
+          var hit = groupHit || li.dataset.name.indexOf(q) !== -1;
+          li.hidden = !hit; any = any || hit;
+        });
+        group.hidden = !any && !groupHit;
+        if (q && group.tagName === "DETAILS") group.open = true;
+      });
+    });
+  }
+
+  document.querySelectorAll(".spy").forEach(function (nav) {
+    var links = Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]'));
+    var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+    var scroller = nav.closest(".sidebar, .rail"), shown = null, queued = false;
+    function update() {
+      queued = false;
+      var line = parseFloat(getComputedStyle(root).getPropertyValue("--header")) * 16 + 32, at = -1;
+      for (var i = 0; i < targets.length; i++) {
+        if (targets[i] && targets[i].getBoundingClientRect().top <= line) at = i;
+      }
+      var link = links[at] || null;
+      if (link === shown) return;
+      if (shown) shown.classList.remove("current");
+      shown = link;
+      if (!link) return;
+      link.classList.add("current");
+      if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+        var top = link.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+        if (top < 0 || top > scroller.clientHeight - 40) scroller.scrollTop += top - scroller.clientHeight / 3;
+      }
+    }
+    addEventListener("scroll", function () { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  });
+})();
+"""
 
 # The toggle. The button ships hidden and is revealed here, so a reader
 # without JavaScript never sees a control that does nothing.
@@ -392,20 +650,15 @@ def document(
     content: str,
     *,
     description: str = "",
-    nav: list[tuple[str, str, bool]] = (),
+    sidebar: str = "",
+    rail: str = "",
 ) -> str:
-    """Wrap rendered content in a standalone page.
+    """Wrap rendered content in a standalone page: header, sidebar, page, rail.
 
-    `nav` is (label, href, current) per section; the caller builds it from the
-    sections that have pages, so the header never links to one that does not
-    exist.
+    The caller builds both columns, from `site_nav` or `lookup_index` on the
+    left and `rail` on the right; an empty one still takes its grid column, so
+    the text sits in the same place on every page.
     """
-    current_attrs = ' aria-current="true" class="current"'
-    links = "".join(
-        f'<a href="{href}"{current_attrs if current else ""}>'
-        f"{html.escape(label, quote=False)}</a>"
-        for label, href, current in nav
-    )
     meta = (
         f'\n  <meta name="description" content="{html.escape(description, quote=True)}">'
         if description
@@ -422,14 +675,19 @@ def document(
   <script>{_THEME_EARLY}</script>
 </head>
 <body>
-<main>
-<header class="site"><a class="brand" href="/">Popcorn docs</a><nav>
-{links}<a href="/llms.txt">llms.txt</a>
+<header class="site">
+<button class="menu" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">\u2630</button>
+<a class="brand" href="/">Popcorn docs</a><nav><a href="/llms.txt">llms.txt</a>
 <button class="theme" type="button" hidden></button>
 </nav></header>
+<div class="layout">
+<aside class="sidebar" id="sidebar">{sidebar}</aside>
+<main>
 {content}
 </main>
-<script>{_THEME_TOGGLE}</script>
+<aside class="rail">{rail}</aside>
+</div>
+<script>{_THEME_TOGGLE}{_NAV}</script>
 </body>
 </html>
 """

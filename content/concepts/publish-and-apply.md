@@ -2,6 +2,7 @@
 id: publish-and-apply
 title: Publish and apply
 order: 10
+group: How a version ships
 summary: >
   Publish mints the next version on a fork line and reaches every channel on
   it; its guards check permission and validity, never whether you meant to
