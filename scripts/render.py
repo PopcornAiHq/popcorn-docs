@@ -16,6 +16,11 @@ The CSS is inlined into every page rather than shared. The corpus is small
 and each page is a few KB, so a second request to fetch a stylesheet costs
 more than the duplication does, and it keeps a page that someone saves or
 pipes through a reader self-contained.
+
+The fonts are the one thing fetched from elsewhere: Inter for text and
+JetBrains Mono for code, from Google Fonts. Both stacks fall back to the
+system's own faces, so a page read offline or with the request blocked loses
+the typeface and nothing else.
 """
 
 from __future__ import annotations
@@ -119,15 +124,19 @@ _ENTRY = re.compile(
 )
 
 
-def lookup_index(rendered: str, title: str) -> str:
-    """The left column of a lookup page: its own entries, filterable.
+def lookup_index(rendered: str) -> str:
+    """"On this page" for a lookup page: every entry, filterable.
+
+    It takes the rail's place for the contents list, and the site sidebar
+    stays on the left, so a reader looking a term up can still see where the
+    page sits and leave it in one click.
 
     Built from the rendered page rather than the Markdown, so an entry is
     listed exactly when it has an anchor to link to. Second-level headings are
     the groups; third-level headings and glossary terms are the entries. An
     entry that repeats its group's name as a prefix — `foundation.agent.invoke`
     under `foundation.agent` — is listed by the part that differs, which is
-    what fits in the column.
+    what fits in the rail.
     """
     groups: list[tuple[str, str, list[tuple[str, str, str]]]] = []
     for m in _ENTRY.finditer(rendered):
@@ -157,8 +166,7 @@ def lookup_index(rendered: str, title: str) -> str:
             f'<summary><a href="#{anchor}">{heading}</a></summary><ul>{items}</ul></details>'
         )
     return (
-        '<a class="back" href="/">\u2190 All docs</a>'
-        f'<p class="lookup-title">{title}</p>'
+        '<p class="rail-title">On this page</p>'
         '<input class="filter" type="search" placeholder="Filter\u2026" '
         'aria-label="Filter this page\'s entries" hidden>'
         '<nav class="lookup spy" aria-label="Entries">' + "".join(blocks) + "</nav>"
@@ -202,19 +210,23 @@ def site_nav(sections: list[tuple[str, list[tuple[str, list[Link]]]]]) -> str:
 
 
 def rail(*, contents: str = "", markdown: str = "", related: list[Link] = ()) -> str:
-    """The right column: where you are in this page, and what to do with it.
+    """The right column: what to do with this page, then where you are in it.
 
     Most concept pages have two or three headings, so the contents list alone
     would leave the column empty on most of the site; the Markdown twin and
-    the related pages are what fill it everywhere.
+    the related pages are what fill it everywhere. The Markdown links come
+    first because a lookup page's index runs to a hundred entries, and below
+    it they would be out of reach.
     """
-    parts = [contents] if contents else []
+    parts = []
     if markdown:
         parts.append(
             '<div class="actions">'
             f'<button class="copy" type="button" data-src="{markdown}" hidden>Copy as Markdown</button>'
             f'<a href="{markdown}">View as Markdown</a></div>'
         )
+    if contents:
+        parts.append(contents)
     if related:
         items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in related)
         parts.append(f'<div class="related"><p class="rail-title">Related</p><ul>{items}</ul></div>')
@@ -371,21 +383,30 @@ def body(md: str, *, terms: bool = False) -> str:
     return "\n".join(out)
 
 
+# The palette follows popcorn.ai: warm paper and near-black ink, cobalt for
+# anything a reader can click, and the orange of the site's sun as the brand
+# mark. Orange is too light to read as text on paper, so it only ever marks —
+# the current heading, a quote's rule, the logo — and never carries words.
+#
 # The dark palette, declared once and applied two ways: by the OS setting
 # unless the reader chose light, and by the reader's choice regardless.
 _DARK = """
-    --bg: #1a1917; --fg: #e8e4dd; --muted: #9b958c; --rule: #33302c;
-    --accent: #f0935f; --code-bg: #232120; color-scheme: dark;
+    --bg: #151412; --fg: #f2eee6; --muted: #a29d93; --rule: #2f2c28;
+    --accent: #8ea1ff; --brand: #f26522; --code-bg: #1f1d1a; --wash: #3a2f14; --card: #1c1a18; --edge: #57524a;
+    color-scheme: dark;
 """
 
 _CSS = """
 :root {
   color-scheme: light;
-  --bg: #fdfdfc; --fg: #22201d; --muted: #6b665f; --rule: #e4e0d9;
-  --accent: #9a3412; --code-bg: #f4f2ee;
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --bg: #fffdf8; --fg: #1a1a1e; --muted: #6b6760; --rule: #e9e3d6;
+  --accent: #1a3de8; --brand: #f26522; --code-bg: #fbf6e8; --wash: #fef3c7; --card: #ffffff; --edge: #1a1a1e;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --header: 3.25rem;
+  /* The header's contents span exactly the columns below them, so both read
+     their width from here; each breakpoint redefines it with the grid. */
+  --frame: calc(15rem + 44rem + 13rem + 2 * 3rem + 2 * 1.25rem);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {""" + _DARK + """}
@@ -394,7 +415,8 @@ _CSS = """
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--fg);
-  font-family: var(--font); font-size: 17px; line-height: 1.65;
+  font-family: var(--font); font-size: 16px; line-height: 1.7;
+  font-feature-settings: "cv11", "ss01"; /* Inter's single-storey a and open digits */
   -webkit-text-size-adjust: 100%;
 }
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
@@ -404,7 +426,7 @@ h3 { font-size: 1.05rem; margin: 2rem 0 .5rem; }
 p { margin: 0 0 1.1rem; }
 .summary { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
 code {
-  font-family: var(--mono); font-size: .88em; background: var(--code-bg);
+  font-family: var(--mono); font-size: .85em; background: var(--code-bg);
   padding: .12em .35em; border-radius: 3px;
 }
 pre {
@@ -418,19 +440,28 @@ th { font-weight: 600; }
 ul { margin: 0 0 1.1rem; padding-left: 1.3rem; }
 li { margin-bottom: .4rem; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
-.index { list-style: none; padding: 0; margin: 2.5rem 0 0; }
-.index li { margin-bottom: 1.75rem; }
-.index a { font-weight: 600; font-size: 1.08rem; text-decoration: none; }
-.index a:hover { text-decoration: underline; }
-.index p { color: var(--muted); margin: .3rem 0 0; font-size: .96rem; }
-footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .88rem; }
-footer code { font-size: .85em; }
+/* The home page's way in, one card per section. The hard offset shadow is
+   popcorn.ai's card treatment, scaled down for a page of text. */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 2.25rem 0 3rem; }
+.card { display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.25rem 1rem;
+  border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--fg);
+  text-decoration: none; box-shadow: 4px 4px 0 var(--edge); transition: transform .12s ease, box-shadow .12s ease; }
+.card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
+.card-label { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.card p { flex: 1; margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+.card-start { color: var(--accent); font-weight: 600; font-size: .93rem; }
+@media (max-width: 40rem) { .cards { grid-template-columns: minmax(0, 1fr); } }
 
 /* The frame: a header across the top, then sidebar | page | rail. */
-.site { position: sticky; top: 0; z-index: 10; height: var(--header); display: flex; align-items: center;
-  gap: 1rem; padding: 0 1.25rem; background: var(--bg); border-bottom: 1px solid var(--rule); font-size: .92rem; }
+.site { position: sticky; top: 0; z-index: 10; height: var(--header);
+  background: var(--bg); border-bottom: 1px solid var(--rule); font-size: .92rem; }
+.bar { display: flex; align-items: center; gap: 1rem; height: 100%; max-width: var(--frame);
+  margin: 0 auto; padding: 0 1.25rem; }
 .site a { text-decoration: none; }
-.site .brand { color: var(--fg); font-weight: 650; letter-spacing: -.01em; margin-right: auto; }
+/* Inset like the sidebar's links, so the name lines up with the text under it. */
+.site .brand { display: flex; align-items: center; gap: .5rem; padding-left: .6rem;
+  color: var(--fg); font-weight: 650; letter-spacing: -.01em; margin-right: auto; }
+.mark { width: .85rem; height: .85rem; border-radius: 50%; background: var(--brand); }
 .site nav a { color: var(--muted); }
 .site nav a:hover, .site .brand:hover { color: var(--accent); }
 .theme, .menu { margin-left: 1rem; padding: 0 .2rem; border: 0; background: none; color: var(--muted);
@@ -438,15 +469,19 @@ footer code { font-size: .85em; }
 .theme:hover, .menu:hover { color: var(--accent); }
 .menu { display: none; margin: 0; font-size: 1.2rem; }
 .layout { display: grid; grid-template-columns: 15rem minmax(0, 44rem) 13rem; gap: 3rem;
-  justify-content: center; padding: 0 1.25rem; }
+  max-width: var(--frame); margin: 0 auto; padding: 0 1.25rem; }
 main { min-width: 0; padding: 2.5rem 0 6rem; }
 .sidebar, .rail { position: sticky; top: var(--header); align-self: start;
   max-height: calc(100vh - var(--header)); overflow-y: auto; padding: 2rem 0 3rem; font-size: .9rem; line-height: 1.45; }
+/* The right padding keeps the filter's border and the current link's fill off
+   the scroll edge, where macOS draws its overlay scrollbar on top of them. */
+.sidebar, .rail { padding-right: .75rem; }
 .sidebar ul, .rail ul, .rail ol { list-style: none; margin: 0; padding: 0; }
 .sidebar li, .rail li { margin: 0; }
 .sidebar a { display: block; padding: .3rem .6rem; border-radius: 5px; color: var(--muted); text-decoration: none; }
 .sidebar a:hover { color: var(--fg); }
-.sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg); font-weight: 600; }
+.sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg);
+  font-weight: 600; box-shadow: inset 2px 0 0 var(--brand); }
 .nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: .08em; color: var(--fg); }
 .site-nav > :first-child .nav-section { margin-top: 0; }
@@ -454,22 +489,24 @@ main { min-width: 0; padding: 2.5rem 0 6rem; }
 .sidebar details { margin: .2rem 0 .4rem; }
 .sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
 .sidebar details ul { padding-left: .8rem; }
-.back { font-size: .85rem; margin-bottom: .75rem; }
-.lookup-title { margin: 0 .6rem .6rem; font-weight: 650; }
-.filter { display: block; width: 100%; margin: 0 0 1rem; padding: .45rem .6rem; font: inherit; color: var(--fg);
+.filter { display: block; width: 100%; margin: 0 0 1rem; box-sizing: border-box; padding: .45rem .6rem; font: inherit; color: var(--fg);
   background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; }
-.filter:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-.lookup summary a { display: inline; padding: 0; color: var(--fg); }
-.lookup a { font-family: var(--mono); font-size: .82rem; padding: .2rem .6rem; }
-.lookup summary { font-family: var(--mono); font-size: .82rem; }
+.filter:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.lookup details { margin: 0 0 .5rem; }
+.lookup summary { padding: .2rem 0; cursor: pointer; font-family: var(--mono); font-size: .78rem; }
+.lookup summary a { color: var(--fg); }
+.lookup li a { font-family: var(--mono); font-size: .78rem; overflow-wrap: anywhere; }
 .rail-title { margin: 0 0 .5rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: .08em; color: var(--fg); }
 .rail a { color: var(--muted); text-decoration: none; }
 .rail a:hover { color: var(--accent); }
-.toc li a { display: block; padding: .2rem 0 .2rem .75rem; border-left: 2px solid var(--rule); }
-.toc li a.current { color: var(--accent); border-left-color: var(--accent); }
-.actions { margin: 1.75rem 0; padding-top: 1.25rem; border-top: 1px solid var(--rule); display: grid; gap: .5rem; justify-items: start; }
-.actions:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.toc li a, .lookup li a { display: block; padding: .2rem 0 .2rem .75rem; border-left: 2px solid var(--rule); }
+.toc li a.current, .lookup li a.current { color: var(--fg); border-left-color: var(--brand); }
+.actions { margin: 0 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule);
+  display: grid; gap: .5rem; justify-items: start; }
+.actions:last-child { padding-bottom: 0; border-bottom: 0; }
+.related { margin-top: 1.75rem; }
+.actions + .related { margin-top: 0; }
 .copy { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
 .copy:hover { color: var(--accent); }
 .related li { margin-bottom: .4rem; }
@@ -477,7 +514,6 @@ main { min-width: 0; padding: 2.5rem 0 6rem; }
 .eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .eyebrow a { color: var(--muted); text-decoration: none; }
 .eyebrow a:hover { color: var(--accent); }
-.section-intro { color: var(--muted); margin: .4rem 0 0; font-size: .95rem; }
 .pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; }
 .pager a { flex: 1 1 0; display: block; padding: .8rem 1rem; border: 1px solid var(--rule);
   border-radius: 6px; text-decoration: none; font-weight: 600; }
@@ -488,25 +524,25 @@ main { min-width: 0; padding: 2.5rem 0 6rem; }
 .anchor { margin-left: .4rem; color: var(--rule); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; color: var(--muted); }
 [id] { scroll-margin-top: calc(var(--header) + 1.25rem); }
-li:target { background: var(--code-bg); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--code-bg); }
-blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--accent); color: var(--fg); }
+li:target { background: var(--wash); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--wash); }
+blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--brand); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
-.section-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 3rem 0 0; font-weight: 600; }
 
 /* Too narrow for the rail: its contents list goes, and the Markdown links
    and related pages follow the page instead. */
 @media (max-width: 72rem) {
+  :root { --frame: calc(14rem + 44rem + 2.5rem + 2 * 1.25rem); }
   .layout { grid-template-columns: 14rem minmax(0, 44rem); gap: 2.5rem; }
   .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 4rem; margin-top: -3rem; }
-  .rail .toc { display: none; }
-  .actions:first-child { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
+  .rail .toc, .rail .lookup, .rail .filter, .rail > .rail-title { display: none; }
+  .actions { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
 }
 /* Too narrow for the sidebar: it becomes a drawer behind the menu button.
    Only with JavaScript, which is what opens it; without, it stays in the
    flow above the page, where it is at least reachable. */
 @media (max-width: 52rem) {
-  body { font-size: 16px; }
-  .site { padding: 0 1rem; }
+  .bar { padding: 0 1rem; }
+  .site .brand { padding-left: 0; }
   .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 1rem; }
   .rail { grid-column: 1; }
   .sidebar { position: static; max-height: none; padding: 1.5rem 0 0; }
@@ -522,6 +558,12 @@ blockquote p:last-child { margin-bottom: 0; }
   main { padding-top: 1.75rem; }
 }
 """
+
+
+_FONTS = (
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700"
+    "&family=JetBrains+Mono:wght@400;500;600&display=swap"
+)
 
 
 # An emoji favicon, inline: no file to publish, advertise or keep in sync.
@@ -671,15 +713,18 @@ def document(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title, quote=False)}</title>{meta}
   <link rel="icon" href="{_ICON}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{_FONTS}">
   <style>{_CSS}</style>
   <script>{_THEME_EARLY}</script>
 </head>
 <body>
-<header class="site">
+<header class="site"><div class="bar">
 <button class="menu" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">\u2630</button>
-<a class="brand" href="/">Popcorn docs</a><nav><a href="/llms.txt">llms.txt</a>
+<a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Popcorn docs</a><nav><a href="/llms.txt">llms.txt</a>
 <button class="theme" type="button" hidden></button>
-</nav></header>
+</nav></div></header>
 <div class="layout">
 <aside class="sidebar" id="sidebar">{sidebar}</aside>
 <main>

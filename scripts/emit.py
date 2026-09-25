@@ -170,39 +170,53 @@ def sidebar(pages: list[dict], current: str | None) -> str:
         groups.setdefault(page.get("group", ""), []).append(
             (render.inline(page["title"]), href(page), page["id"] == current)
         )
-    return render.site_nav([
+    # The home page leads the sidebar, current when no page is — `current`
+    # is None only when the landing page is the one being built.
+    home = ("Overview", [("", [("Overview", "/", current is None)])])
+    return render.site_nav([home] + [
         (section_info(section)[0], list(groups.items()))
         for section, groups in sections.items()
     ])
 
 
 def landing(pages: list[dict]) -> str:
-    """The one page a person lands on: every page, grouped by section."""
-    groups: dict[str, list[str]] = {}
+    """The home page: what Popcorn is, what these pages cover, one way in each.
+
+    It does not list every page — the sidebar beside it already does. Each
+    section gets a card that opens its first page in reading order, so the
+    way in follows `order:` rather than being chosen again here.
+    """
+    first: dict[str, dict] = {}
     for page in pages:
-        groups.setdefault(nav_section(page), []).append(
-            f'<li><a href="{href(page)}">{render.inline(page["title"])}</a>'
-            f"<p>{render.inline(page['summary'])}</p></li>"
-        )
-    sections = []
-    for section, items in groups.items():
-        _, heading, blurb = section_info(section)
-        intro = f'<p class="section-intro">{blurb}</p>\n' if blurb else ""
-        sections.append(
-            f'<h2 class="section-title" id="{section}">{heading}</h2>\n'
-            + intro
-            + '<ul class="index">' + "".join(items) + "</ul>"
+        first.setdefault(nav_section(page), page)
+    cards = []
+    for section, page in first.items():
+        label, _, blurb = section_info(section)
+        cards.append(
+            f'<a class="card" id="{section}" href="{href(page)}">'
+            f'<span class="card-label">{label}</span>'
+            f"<p>{blurb}</p>"
+            f'<span class="card-start">{render.inline(page["title"])} \u2192</span></a>'
         )
     return render.document(
-        "Popcorn docs",
-        "<h1>Popcorn docs</h1>\n"
-        '<p class="summary">How app bundles work — the concepts an author or an '
-        "agent needs in order to change what a channel tracks.</p>\n"
-        + "\n".join(sections)
-        + "\n<footer>For agents: the index is <a href=\"/llms.txt\">/llms.txt</a>, "
-        "every body at <a href=\"/llms-full.txt\">/llms-full.txt</a>, "
-        "and one record per page at <a href=\"/chunks.json\">/chunks.json</a>."
-        "</footer>",
+        "Overview — Popcorn docs",
+        "<h1>Overview</h1>\n"
+        '<p class="summary">Popcorn is an AI tracker. Each channel is a tracker '
+        "that updates itself, reading across email, messages and files, and an "
+        "<strong>app bundle</strong> defines what it tracks: its tables, the flows "
+        "that update them, and the schedules and webhooks that bring an update in "
+        "without anyone typing.</p>\n"
+        "<p>These pages are for whoever authors, publishes or operates a bundle — "
+        "a person or an agent. The first guide walks the whole loop once; the "
+        "concepts are where to go when something behaves in a way you did not "
+        "expect.</p>\n"
+        '<div class="cards">' + "".join(cards) + "</div>\n"
+        "<h2>For agents</h2>\n"
+        "<p>Every page has a Markdown twin at the same path, ending "
+        "<code>.md</code> instead of <code>.html</code>. "
+        '<a href="/llms.txt">/llms.txt</a> lists every page with its summary, '
+        '<a href="/llms-full.txt">/llms-full.txt</a> holds every body, and '
+        '<a href="/chunks.json">/chunks.json</a> has one record per page.</p>',
         description="How Popcorn app bundles work: tables, flows, schedules and "
         "webhooks, and what happens when you publish.",
         sidebar=sidebar(pages, None),
@@ -287,8 +301,9 @@ def main() -> int:
             f"# {page['title']}\n\n{page['summary']}\n\n{page['body']}\n"
         )
         # A lookup page — the glossary, the activity reference — is looked up
-        # rather than read through, so its own entries take the left column
-        # and the rail loses the contents list the sidebar now is.
+        # rather than read through, so its own entries replace the rail's
+        # contents list. Its related pages are left out: the entries already
+        # link to them, and a second list would push the index down.
         lookup = page.get("layout") == "lookup"
         rendered = render.body(page["body"], terms=lookup)
         page_file.with_suffix(".html").write_text(
@@ -300,14 +315,11 @@ def main() -> int:
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
                 description=page["summary"],
-                sidebar=(
-                    render.lookup_index(rendered, render.inline(page["title"]))
-                    if lookup else sidebar(pages, page["id"])
-                ),
+                sidebar=sidebar(pages, page["id"]),
                 rail=render.rail(
-                    contents="" if lookup else render.toc(rendered),
+                    contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
                     markdown=f"/{path}",
-                    related=related(page, by_id),
+                    related=[] if lookup else related(page, by_id),
                 ),
             )
         )
