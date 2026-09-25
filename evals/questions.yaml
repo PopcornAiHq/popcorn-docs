@@ -209,3 +209,18 @@
   concept: publish-and-apply, manifest-keys
   pass: no — publish treats it as the line's app, and every install of that version clears app_type and channel_agent on each channel on the line; keep both keys
   trap: says publish refuses a manifest whose app_type differs from its line, so it is safe
+
+- q: Is a channel template something different from an app bundle?
+  concept: glossary, app-bundle
+  pass: no — channel template is the older name for an app and its bundle; it survives in template check, channel templates and channel create --template, which all mean the app
+  trap: describes a channel template as a separate starter layer, a Jinja template, or the bundle's templates/ directory
+
+- q: A script I wrote refers to the channel by its name. Is that safe to keep?
+  concept: glossary
+  pass: no — a channel is identified by its UUID and its name can change; resolve the name once and keep the UUID (the conversation_id on the wire)
+  trap: says the name is the stable identifier, or that name and UUID are interchangeable forever
+
+- q: The API gave me a rev on the channel config. What is it for?
+  concept: glossary
+  pass: it is a revision token for a conditional write — send it back as If-Match on a parameters update, and a mismatch is refused with 409 stale_rev naming the current rev; it is not a version_id
+  trap: treats rev as the bundle version or a semver, or says a mismatch returns 412

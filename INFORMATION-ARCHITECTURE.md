@@ -23,6 +23,11 @@ it.
 few hundred words. The summary is the answer; the body is the explanation. A
 concept whose body is three times its summary is probably two concepts.
 
+**The one exception is `glossary`**: one short entry per term, each naming its
+synonyms and collisions and linking to the concept that explains it. It is
+where a new term is defined first. An entry that grows past three sentences is
+a concept waiting to be written, and the glossary should link to it instead.
+
 ## `content/guides/`
 
 **Audience:** someone doing a task from start to finish, usually once.

@@ -115,7 +115,7 @@ SECTIONS = [
      "each later one builds on it."),
     ("concepts", "Concepts", "Concepts",
      "One idea each, in reading order: what a bundle holds, then how it ships "
-     "and what a publish changes."),
+     "and what a publish changes. The glossary, last, defines every term."),
     ("reference", "Reference", "Reference",
      "Generated from the platform itself, never written by hand."),
 ]
