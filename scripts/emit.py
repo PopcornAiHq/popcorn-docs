@@ -253,6 +253,18 @@ def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
     ]
 
 
+def version_badge(page: dict) -> str:
+    """The release a generated page describes, beside its title.
+
+    Only a page whose generator records a `version:` gets one — the CLI
+    reference, which describes one `popcorn` release and would otherwise
+    mention it only mid-sentence.
+    """
+    if not page.get("version"):
+        return ""
+    return f'<span class="version-badge" title="Generated from this release">v{page["version"]}</span>'
+
+
 def eyebrow(page: dict) -> str:
     """Where the page sits: its section, and its group when it has one.
 
@@ -311,7 +323,9 @@ def main() -> int:
             render.document(
                 f"{page['title']} — Popcorn docs",
                 eyebrow(page)
-                + f"<h1>{render.inline(page['title'])}</h1>\n"
+                + f'<div class="title-row"><div class="title"><h1>{render.inline(page["title"])}</h1>'
+                f"{version_badge(page)}</div>"
+                f"{render.page_actions('/' + path)}</div>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
@@ -319,7 +333,6 @@ def main() -> int:
                 sidebar=sidebar(pages, page["id"]),
                 rail=render.rail(
                     contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
-                    markdown=f"/{path}",
                     related=[] if lookup else related(page, by_id),
                 ),
             )

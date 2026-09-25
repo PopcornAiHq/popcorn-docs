@@ -9,7 +9,8 @@ id: fork-line                  # stable, kebab-case, citable, NEVER renamed
 title: Fork lines              # a noun phrase, not a sentence
 order: 9                       # reading position within its section
 group: How a version ships     # optional: sidebar group within the section
-layout: lookup                 # optional: the page's own entries take the sidebar
+layout: lookup                 # optional: the page's own entries index the rail
+version: 0.57.0                # optional, generated pages only: the release described
 summary: >                     # THE PRODUCT — under 400 characters
   A fork line is a workspace's own version series of an app. Publishing to it
   moves every channel on that line, not just the one you edited.
@@ -60,10 +61,15 @@ the section. Spell a group identically on every page in it — the label is the
 key.
 
 **`layout: lookup`** is for a page read by looking something up in it rather
-than top to bottom — the glossary, the activity reference. Its own entries
-replace the site sidebar, with a filter: each `##` heading is a group, and
-each `###` heading or bold-led bullet (`- **term** — …`) is an entry. It is
-the only value; omit the field for every other page.
+than top to bottom — the glossary and the reference pages. Its own entries
+replace the rail's contents list, with a filter: each `##` heading is a
+group, and each `###` heading or bold-led bullet (`- **term** — …`) is an
+entry, so prose on such a page that needs bold-led points uses a numbered
+list. It is the only value; omit the field for every other page.
+
+**`version`** is written by a generator whose page describes one release of
+something — `sync-cli.py` records the `popcorn` version it read — and is shown
+beside the title. A hand-written page never sets it.
 
 **`applies_to`** records which readers a page is written for — `cli`, `mcp`,
 `human`. Nothing reads it: the build and the MCP server serve every page to

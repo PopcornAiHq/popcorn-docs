@@ -231,28 +231,45 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
     return '<nav class="site-nav" aria-label="Docs">' + "".join(out) + "</nav>"
 
 
-def rail(*, contents: str = "", markdown: str = "", related: list[Link] = ()) -> str:
-    """The right column: what to do with this page, then where you are in it.
-
-    Most concept pages have two or three headings, so the contents list alone
-    would leave the column empty on most of the site; the Markdown twin and
-    the related pages are what fill it everywhere. The Markdown links come
-    first because a lookup page's index runs to a hundred entries, and below
-    it they would be out of reach.
-    """
-    parts = []
-    if markdown:
-        parts.append(
-            '<div class="actions">'
-            f'<button class="copy" type="button" data-src="{markdown}" hidden>Copy as Markdown</button>'
-            f'<a href="{markdown}">View as Markdown</a></div>'
-        )
-    if contents:
-        parts.append(contents)
+def rail(*, contents: str = "", related: list[Link] = ()) -> str:
+    """The right column: where you are in this page, then the pages around it."""
+    parts = [contents] if contents else []
     if related:
         items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in related)
         parts.append(f'<div class="related"><p class="rail-title">Related</p><ul>{items}</ul></div>')
     return "".join(parts)
+
+
+_ICON_COPY = (
+    '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="5" y="5" width="9" height="9" '
+    'rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 '
+    '1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>'
+)
+_ICON_CARET = (
+    '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+)
+
+
+def page_actions(markdown: str) -> str:
+    """What a reader can do with the page's Markdown twin, beside its title.
+
+    Copy is the common case — pasting a page into a model — so it is the
+    button; viewing the twin and copying its address sit behind the caret.
+    The menu is a native <details>, so it opens without JavaScript. Both
+    copies need it, and ship hidden until the script reveals them, which
+    leaves a reader without JavaScript a "Markdown" menu holding the link.
+    """
+    return (
+        '<div class="page-actions">'
+        f'<button class="copy" type="button" data-src="{markdown}" hidden>{_ICON_COPY}<span>Copy page</span></button>'
+        f'<details><summary aria-label="More ways to use this page">'
+        f'<span class="no-copy">Markdown</span>{_ICON_CARET}</summary>'
+        '<div class="page-menu">'
+        f'<a href="{markdown}">View as Markdown</a>'
+        f'<button class="copy-link" type="button" data-src="{markdown}" hidden>Copy Markdown link</button>'
+        "</div></details></div>"
+    )
 
 
 def body(md: str, *, terms: bool = False) -> str:
@@ -533,13 +550,34 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .rail a:hover { color: var(--accent); }
 .toc li a, .lookup li a { display: block; padding: .2rem 0 .2rem .75rem; border-left: 2px solid var(--rule); }
 .toc li a.current, .lookup li a.current { color: var(--fg); border-left-color: var(--brand); }
-.actions { margin: 0 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule);
-  display: grid; gap: .5rem; justify-items: start; }
-.actions:last-child { padding-bottom: 0; border-bottom: 0; }
 .related { margin-top: 1.75rem; }
-.actions + .related { margin-top: 0; }
-.copy { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
-.copy:hover { color: var(--accent); }
+.related:first-child { margin-top: 0; }
+
+/* The title row: the page's name, and the one control for its Markdown twin. */
+.title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.title-row .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .75rem; min-width: 0; }
+.version-badge { padding: .1rem .5rem; border-radius: 999px; background: var(--code-bg); border: 1px solid var(--rule);
+  font-family: var(--mono); font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.page-actions { position: relative; flex-shrink: 0; display: flex; margin-top: .35rem;
+  border: 1px solid var(--rule); border-radius: 7px; background: var(--bg); font-size: .85rem; }
+.page-actions button, .page-actions summary { display: flex; align-items: center; gap: .4rem; padding: .35rem .6rem;
+  border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.page-actions button:hover, .page-actions summary:hover, .page-actions details[open] summary { color: var(--fg); }
+.page-actions summary { list-style: none; padding: .35rem .5rem; }
+/* The display rules above would otherwise override `hidden` on the two copy
+   buttons, showing controls that cannot work until the script reveals them. */
+.page-actions [hidden] { display: none; }
+.page-actions summary::-webkit-details-marker { display: none; }
+.page-actions .copy:not([hidden]) + details summary { border-left: 1px solid var(--rule); }
+/* With Copy revealed, the caret alone says "more"; without it, the menu
+   needs its name. */
+.page-actions .copy:not([hidden]) + details .no-copy { display: none; }
+.page-menu { position: absolute; right: -1px; top: calc(100% + .35rem); z-index: 5; min-width: 12rem;
+  display: grid; padding: .3rem; background: var(--card); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .08); }
+.page-menu a, .page-menu button { display: block; width: 100%; padding: .45rem .6rem; border-radius: 5px; text-align: left;
+  color: var(--fg); text-decoration: none; }
+.page-menu a:hover, .page-menu button:hover { background: var(--code-bg); color: var(--fg); }
 .related li { margin-bottom: .4rem; }
 
 .eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
@@ -559,14 +597,14 @@ li:target { background: var(--wash); border-radius: 4px; box-shadow: 0 0 0 .4rem
 blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--brand); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
 
-/* Too narrow for the rail: its contents list goes, and the Markdown links
-   and related pages follow the page instead. */
+/* Too narrow for the rail: its contents list goes, and the related pages
+   follow the page instead. */
 @media (max-width: 72rem) {
   :root { --frame: calc(14rem + 44rem + 2.5rem + 2 * 1.25rem); }
   .layout { grid-template-columns: 14rem minmax(0, 44rem); gap: 2.5rem; }
   .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 2.5rem; margin-top: -1.5rem; }
   .rail .toc, .rail .lookup, .rail .filter, .rail > .rail-title { display: none; }
-  .actions { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
+  .related { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
 }
 /* Too narrow for the sidebar: it becomes a drawer behind the menu button.
    Only with JavaScript, which is what opens it; without, it stays in the
@@ -635,16 +673,36 @@ _NAV = """
     });
   }
 
-  var copy = document.querySelector(".copy");
-  if (copy && navigator.clipboard) {
-    copy.hidden = false;
-    copy.addEventListener("click", function () {
-      fetch(copy.dataset.src).then(function (r) { return r.text(); })
-        .then(function (t) { return navigator.clipboard.writeText(t); })
-        .then(function () { copy.textContent = "Copied"; },
-              function () { copy.textContent = "Copy failed"; })
-        .then(function () { setTimeout(function () { copy.textContent = "Copy as Markdown"; }, 1500); });
-    });
+  // Copy the page's Markdown, or its address. Each button says what happened
+  // for a moment, then goes back to its label.
+  function flash(button, text) {
+    var label = button.querySelector("span") || button, original = label.textContent;
+    label.textContent = text;
+    setTimeout(function () { label.textContent = original; }, 1500);
+  }
+  var copy = document.querySelector(".copy"), copyLink = document.querySelector(".copy-link");
+  var menu = document.querySelector(".page-actions details");
+  if (navigator.clipboard) {
+    if (copy) {
+      copy.hidden = false;
+      copy.addEventListener("click", function () {
+        fetch(copy.dataset.src).then(function (r) { return r.text(); })
+          .then(function (t) { return navigator.clipboard.writeText(t); })
+          .then(function () { flash(copy, "Copied"); }, function () { flash(copy, "Copy failed"); });
+      });
+    }
+    if (copyLink) {
+      copyLink.hidden = false;
+      copyLink.addEventListener("click", function () {
+        navigator.clipboard.writeText(location.origin + copyLink.dataset.src)
+          .then(function () { flash(copyLink, "Link copied"); }, function () { flash(copyLink, "Copy failed"); });
+      });
+    }
+  }
+  // A menu closes the way menus do: a click elsewhere, or Escape.
+  if (menu) {
+    document.addEventListener("click", function (e) { if (!menu.contains(e.target)) menu.open = false; });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") menu.open = false; });
   }
 
   var filter = document.querySelector(".filter");
