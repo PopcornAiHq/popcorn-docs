@@ -2,6 +2,7 @@
 id: bundle-version
 title: Bundle versions
 order: 7
+group: How a version ships
 summary: >
   Publishing mints an immutable, content-addressed version on a line;
   installing it is a separate step that can be blocked. The same semver with

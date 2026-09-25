@@ -104,22 +104,37 @@ def parse(path: pathlib.Path) -> dict:
     return meta
 
 
-# The order sections appear on the landing page. A guide is where a person
-# starts; the concepts are what it and every agent answer points into.
 # The sections in the order a reader meets them: (directory, nav label,
-# landing heading, what the section is for). A section not listed here still
-# publishes, after these, under its directory name.
+# landing heading, what the section is for). A guide is where a person starts;
+# the concepts are what it and every agent answer points into. A section not
+# listed here still publishes, after these, under its directory name.
 SECTIONS = [
     ("guides", "Guides", "Start here",
      "Walkthroughs, in reading order. The first is the whole authoring loop; "
      "each later one builds on it."),
     ("concepts", "Concepts", "Concepts",
      "One idea each, in reading order: what a bundle holds, then how it ships "
-     "and what a publish changes. The glossary, last, defines every term."),
+     "and what a publish changes."),
+    ("glossary", "Glossary", "Glossary",
+     "Every term, with its synonyms and the collisions worth knowing."),
     ("reference", "Reference", "Reference",
      "Generated from the platform itself, never written by hand."),
 ]
 _KNOWN = [name for name, *_ in SECTIONS]
+
+# Pages the navigation lists under a section other than their directory's.
+# Only the navigation moves: the URL is still `<directory>/<id>`, because
+# that path is in llms.txt and in other pages' links, and an id is permanent
+# by contract, which is what makes naming one here safe.
+NAV_SECTION = {"glossary": "glossary"}
+
+
+def nav_section(page: dict) -> str:
+    return NAV_SECTION.get(page["id"], page["section"])
+
+
+def href(page: dict, suffix: str = ".html") -> str:
+    return f"/{page['section']}/{page['id']}{suffix}"
 
 
 def section_info(section: str) -> tuple[str, str, str]:
@@ -136,28 +151,37 @@ def reading_order(page: dict) -> tuple:
     which put an advanced guide ahead of the one it builds on. A page with
     no `order:` goes after the ordered ones in its section.
     """
-    section = page["section"]
+    section = nav_section(page)
     rank = _KNOWN.index(section) if section in _KNOWN else len(_KNOWN)
     order = page.get("order")
     return (rank, section, order is None, order or 0, page["title"].lower())
 
 
-def nav(pages: list[dict], current: str | None) -> list[tuple[str, str, bool]]:
-    """One nav entry per section that has pages, linking to its landing anchor."""
-    present = []
+def sidebar(pages: list[dict], current: str | None) -> str:
+    """The site sidebar: sections in reading order, then `group:` within them.
+
+    A group sits where its first page does, so groups follow the reading
+    order rather than needing an order of their own; pages without a group
+    sit directly under their section.
+    """
+    sections: dict[str, dict[str, list]] = {}
     for page in pages:
-        if page["section"] not in present:
-            present.append(page["section"])
-    return [(section_info(s)[0], f"/#{s}", s == current) for s in present]
+        groups = sections.setdefault(nav_section(page), {})
+        groups.setdefault(page.get("group", ""), []).append(
+            (render.inline(page["title"]), href(page), page["id"] == current)
+        )
+    return render.site_nav([
+        (section_info(section)[0], list(groups.items()))
+        for section, groups in sections.items()
+    ])
 
 
 def landing(pages: list[dict]) -> str:
     """The one page a person lands on: every page, grouped by section."""
     groups: dict[str, list[str]] = {}
     for page in pages:
-        href = f"/{page['section']}/{page['id']}.html"
-        groups.setdefault(page["section"], []).append(
-            f'<li><a href="{href}">{render.inline(page["title"])}</a>'
+        groups.setdefault(nav_section(page), []).append(
+            f'<li><a href="{href(page)}">{render.inline(page["title"])}</a>'
             f"<p>{render.inline(page['summary'])}</p></li>"
         )
     sections = []
@@ -181,40 +205,52 @@ def landing(pages: list[dict]) -> str:
         "</footer>",
         description="How Popcorn app bundles work: tables, flows, schedules and "
         "webhooks, and what happens when you publish.",
-        nav=nav(pages, None),
+        sidebar=sidebar(pages, None),
     )
 
 
 def pager(page: dict, pages: list[dict]) -> str:
     """Previous and next within the page's own section, in reading order."""
-    peers = [p for p in pages if p["section"] == page["section"]]
+    peers = [p for p in pages if nav_section(p) == nav_section(page)]
     i = next(n for n, p in enumerate(peers) if p["id"] is page["id"])
     links = []
     if i > 0:
         prev = peers[i - 1]
-        links.append(f'<a class="prev" rel="prev" href="/{prev["section"]}/{prev["id"]}.html">'
+        links.append(f'<a class="prev" rel="prev" href="{href(prev)}">'
                      f'<span>Previous</span>{render.inline(prev["title"])}</a>')
     if i + 1 < len(peers):
         nxt = peers[i + 1]
-        links.append(f'<a class="next" rel="next" href="/{nxt["section"]}/{nxt["id"]}.html">'
+        links.append(f'<a class="next" rel="next" href="{href(nxt)}">'
                      f'<span>Next</span>{render.inline(nxt["title"])}</a>')
-    return f'<nav class="pager" aria-label="{section_info(page["section"])[0]}">' + "".join(links) + "</nav>\n" if links else ""
+    return f'<nav class="pager" aria-label="{section_info(nav_section(page))[0]}">' + "".join(links) + "</nav>\n" if links else ""
 
 
-def related(page: dict, by_id: dict[str, dict]) -> str:
+def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
     """"See also" from the page's `concepts:` — only ids that exist.
 
     An id naming no page is dropped rather than linked, so a typo costs a
     missing link, not a 404 on the published site.
     """
-    links = [
-        f'<li><a href="/{by_id[i]["section"]}/{i}.html">{render.inline(by_id[i]["title"])}</a></li>'
+    return [
+        (render.inline(by_id[i]["title"]), href(by_id[i]), False)
         for i in page.get("concepts", [])
         if i in by_id and i != page["id"]
     ]
-    if not links:
+
+
+def eyebrow(page: dict) -> str:
+    """Where the page sits: its section, and its group when it has one.
+
+    Omitted when the section is the page itself — "Glossary" over "Glossary".
+    """
+    section = nav_section(page)
+    label = section_info(section)[0]
+    if label == page["title"]:
         return ""
-    return '<section class="related"><h2>Related</h2><ul>' + "".join(links) + "</ul></section>\n"
+    trail = f'<a href="/#{section}">{label}</a>'
+    if page.get("group"):
+        trail += f" \u203a {render.inline(page['group'])}"
+    return f'<p class="eyebrow">{trail}</p>\n'
 
 
 def main() -> int:
@@ -250,21 +286,29 @@ def main() -> int:
         page_file.write_text(
             f"# {page['title']}\n\n{page['summary']}\n\n{page['body']}\n"
         )
-        rendered = render.body(page["body"])
+        # A lookup page — the glossary, the activity reference — is looked up
+        # rather than read through, so its own entries take the left column
+        # and the rail loses the contents list the sidebar now is.
+        lookup = page.get("layout") == "lookup"
+        rendered = render.body(page["body"], terms=lookup)
         page_file.with_suffix(".html").write_text(
             render.document(
                 f"{page['title']} — Popcorn docs",
-                f'<p class="eyebrow"><a href="/#{page["section"]}">'
-                f"{section_info(page['section'])[0]}</a></p>\n"
-                f"<h1>{render.inline(page['title'])}</h1>\n"
+                eyebrow(page)
+                + f"<h1>{render.inline(page['title'])}</h1>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
-                f"{render.toc(rendered)}{rendered}\n"
-                f"{related(page, by_id)}"
-                f"{pager(page, pages)}"
-                "<footer>This page as Markdown: "
-                f'<a href="/{path}">/{path}</a></footer>',
+                f"{rendered}\n"
+                f"{pager(page, pages)}",
                 description=page["summary"],
-                nav=nav(pages, page["section"]),
+                sidebar=(
+                    render.lookup_index(rendered, render.inline(page["title"]))
+                    if lookup else sidebar(pages, page["id"])
+                ),
+                rail=render.rail(
+                    contents="" if lookup else render.toc(rendered),
+                    markdown=f"/{path}",
+                    related=related(page, by_id),
+                ),
             )
         )
 

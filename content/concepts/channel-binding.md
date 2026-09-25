@@ -2,6 +2,7 @@
 id: channel-binding
 title: How a channel runs a version
 order: 8
+group: How a version ships
 summary: >
   A channel points at exactly one bundle version. A run reads it once at start
   and is pinned for its whole life, including the flows it calls, so an upgrade

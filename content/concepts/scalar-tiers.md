@@ -2,6 +2,7 @@
 id: scalar-tiers
 title: The three scalar tiers
 order: 4
+group: What a bundle holds
 summary: >
   `scalars:` are written on first install and fast-forwarded on update unless
   the channel changed them. `default_scalars:` write once, only if absent — the

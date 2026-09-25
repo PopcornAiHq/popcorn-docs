@@ -2,6 +2,7 @@
 id: glossary
 title: Glossary
 order: 11
+layout: lookup
 summary: >
   The platform's nouns, each with its current synonyms and the collisions
   worth knowing. An app is the thing, such as a claim coordinator; its app

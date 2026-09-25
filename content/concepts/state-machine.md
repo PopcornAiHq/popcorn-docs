@@ -2,6 +2,7 @@
 id: state-machine
 title: State machines in a bundle
 order: 6
+group: What a bundle holds
 summary: >
   A bundle declares its own state machines — states, transitions, and the
   button on each edge — and the platform runs them. A row's status is a

@@ -19,6 +19,8 @@ Checks, in the order a writer meets them:
   and exactly why nobody sees it: the reference just silently stops working
 * `order`, when present, is a whole number from 1 — the build sorts by it, and
   a value it cannot read would crash the build rather than fail here by name
+* `layout`, when present, is `lookup` — the only layout the build knows, so
+  anything else would silently render as an ordinary page
 """
 
 from __future__ import annotations
@@ -35,6 +37,8 @@ _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _ID = re.compile(r"^id:\s*(\S+)", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
+_LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
+LAYOUTS = {"lookup"}
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 
 
@@ -74,6 +78,10 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         problems.append(f"order '{order.group('value').strip()}' is not a whole number")
     elif order and int(order.group("value")) < 1:
         problems.append("order starts at 1")
+
+    layout = _LAYOUT.search(front)
+    if layout and layout.group("value").strip() not in LAYOUTS:
+        problems.append(f"layout '{layout.group('value').strip()}' is not one of {sorted(LAYOUTS)}")
 
     words = len(body.split())
     if words < BODY_MIN_WORDS:
