@@ -18,7 +18,12 @@ Outputs, under `build/`:
     index.html       the landing page, every concept with its summary
     robots.txt       allow everything. Without one the bucket answers 403 for
                      the missing key, and a crawler that reads a 403 robots.txt
-                     as "disallow all" refuses every page on the site
+                     as "disallow all" refuses every page on the site. It
+                     names the sitemap
+    sitemap.xml      every HTML page, for search engines. Some agents — Gemini's
+                     browsing among them — open a URL only when it was pasted
+                     or a search returned it, never by following a link, so a
+                     page a search engine has not indexed is out of their reach
 
 `llms.txt` is the file most likely to be fetched by something we do not
 control, so it carries summaries and not bodies. A reader that wants
@@ -344,12 +349,21 @@ def main() -> int:
     (BUILD / "llms.txt").write_text("\n".join(index))
     (BUILD / "llms-full.txt").write_text("\n".join(full))
     (BUILD / "index.html").write_text(landing(pages))
-    (BUILD / "robots.txt").write_text("User-agent: *\nAllow: /\n")
+    (BUILD / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
+    )
+    locs = [f"{SITE}/"] + [f"{SITE}/{p['section']}/{p['id']}.html" for p in pages]
+    (BUILD / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"  <url><loc>{loc}</loc></url>\n" for loc in locs)
+        + "</urlset>\n"
+    )
 
     size = (BUILD / "llms.txt").stat().st_size
     sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
-          f"llms-full.txt, index.html, robots.txt, {sections}(.md + .html)")
+          f"llms-full.txt, index.html, robots.txt, sitemap.xml, {sections}(.md + .html)")
     return 0
 
 

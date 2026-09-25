@@ -37,9 +37,10 @@ BUILD = ROOT / "build"
 SITE = "https://docs.popcorn.ai"
 
 # The corpus-level files, reached directly rather than as a page.
-INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html", "robots.txt"}
+INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html", "robots.txt", "sitemap.xml"}
 
 _HREF = re.compile(r'href="([^"]+)"')
+_LOC = re.compile(r"<loc>([^<]+)</loc>")
 
 
 def advertised() -> list[str]:
@@ -89,6 +90,13 @@ def main() -> int:
     dead = [u for u in urls if u not in files]
     orphans = sorted(pages - set(urls))
     broken = [(src, t) for src, t in hrefs() if t not in files]
+    # The sitemap is what a search engine indexes, so a dead entry there is a
+    # dead search result.
+    sitemap = BUILD / "sitemap.xml"
+    for loc in _LOC.findall(sitemap.read_text()) if sitemap.exists() else []:
+        target = loc[len(SITE):].lstrip("/") or "index.html"
+        if target not in files:
+            broken.append(("sitemap.xml", target))
 
     for path in dead:
         print(f"✖  {SITE}/{path} is advertised but was not emitted", file=sys.stderr)
