@@ -288,7 +288,12 @@ def main() -> int:
             print(f"      ✖ {exc}", file=sys.stderr)
         entries.append((n, q, answer))
 
-    bodies = (kit.BUILD / "llms-full.txt").read_text().rstrip("\n")
+    # From chunks.json, not llms-full.txt: that file leaves the generated
+    # reference pages' bodies out, and an answer may defer to one of them —
+    # "check the CLI reference for the flag" — which the grader can only
+    # judge with the page in front of it.
+    pages = json.loads((kit.BUILD / "chunks.json").read_text())["pages"]
+    bodies = "\n".join(f"# {p['title']}\n\n{p['summary']}\n\n{p['body']}\n" for p in pages).rstrip("\n")
     print(transcript(prompt, scoring_rules(), entries, model, bodies))
     failed = sum(a.startswith("[request failed") for _, _, a in entries)
     print(f"✔  {len(entries) - failed} of {len(entries)} answered by {model}", file=sys.stderr)
