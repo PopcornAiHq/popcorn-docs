@@ -115,9 +115,12 @@ has a script that writes it and a `--check` that exits 1 when it is stale.
 `.github/workflows/sync-cli.yml` installs the latest `popcorn-cli` release
 every day, runs `scripts/sync-cli.py`, and when the page differs opens a pull
 request from the `automation/sync-cli` branch — or updates the one already
-open. It runs the leak guard and the content checks on the new page first. A
-pull request a workflow opens does not start CI, so **close and reopen it** to
-run the required checks, then merge. Run it on demand from the Actions tab.
+open. It runs the leak guard on the new page before pushing, since a pushed
+branch is public. It pushes and opens the pull request as the docs bot, a
+GitHub App installed on this repository, so CI runs on the pull request as on
+any other. The App is configured by the `DOCS_BOT_CLIENT_ID` repository
+variable and the `DOCS_BOT_PRIVATE_KEY` secret; until both exist the sync is
+skipped with a notice. Run it on demand from the Actions tab.
 
 PR CI does not run `sync-cli.py --check`: a CLI release would otherwise fail
 every open pull request until someone regenerated the page. To regenerate by
