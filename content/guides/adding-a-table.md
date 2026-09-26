@@ -1,7 +1,7 @@
 ---
 id: adding-a-table
 title: Adding a table
-order: 3
+order: 4
 summary: >
   Adding a table to an app that already exists: declare it under `tables:`,
   write it from a flow with `foundation.store.*`, run `template check`, then
