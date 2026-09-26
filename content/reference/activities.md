@@ -3,6 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
+platform: 2026-09-26
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -1123,8 +1124,8 @@ The lock is `column`: the claim reads the row with its `rev`,
 refuses if another holder is already in the column, checks every
 `refuse_when` rule against the row, then patches
 `{column: holder}` conditionally on that rev. A write that landed in
-between (another claimant, an edit) makes the store answer `409
-stale_rev` and this run is refused `held_code` — among concurrent
+between (another claimant, an edit) makes the store answer
+`stale_rev` and this run is refused `held_code` — among concurrent
 claimants exactly one matches the rev it read. A retry of the same
 holder finds its own id in the column and returns without writing
 (`claimed: false`) BEFORE the rules run: the claim it holds was
