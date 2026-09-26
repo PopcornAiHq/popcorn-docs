@@ -28,7 +28,7 @@ content/
 ├── concepts/         one addressable idea per file — the unit an agent retrieves
 └── guides/           task-shaped walkthroughs
 evals/
-└── questions.yaml    the validation set for the concept summaries
+└── questions.yaml    the validation set for the page summaries
 assets/fonts/         the self-hosted typefaces and their licences, copied into build/
 scripts/              build, checks and publish — python3 only, no dependencies
 server/               the docs MCP server over build/chunks.json
