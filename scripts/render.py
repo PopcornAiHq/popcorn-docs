@@ -37,6 +37,8 @@ from __future__ import annotations
 import html
 import re
 
+import highlight
+
 _FENCE = re.compile(r"^```")
 _RULE = re.compile(r"^-{3,}\s*$")
 _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
@@ -334,6 +336,30 @@ def page_actions(markdown: str) -> str:
     )
 
 
+# Every code block's copy button. It ships hidden and the script reveals it,
+# the same as the page's own Copy, so a reader without JavaScript — or without
+# a clipboard — never sees a control that cannot work.
+_COPY_CODE = (
+    '<button class="code-copy" type="button" aria-label="Copy code" hidden>'
+    f'{_ICON_COPY}<span class="code-copy-done" aria-live="polite"></span></button>'
+)
+
+
+def code_block(code: str, lang: str = "") -> str:
+    """One code block, with its copy button beside it.
+
+    The wrapper is what the button is positioned against. The <pre> itself
+    scrolls sideways, and a button inside it would scroll away with the text.
+    A YAML block is highlighted here, at build time, so the page needs no
+    script to show it; every other language is escaped and nothing more.
+    """
+    if lang in highlight.LANGUAGES:
+        inner = f'<code class="language-yaml">{highlight.yaml(code)}</code>'
+    else:
+        inner = f"<code>{html.escape(code)}</code>"
+    return f'<div class="code"><pre>{inner}</pre>{_COPY_CODE}</div>'
+
+
 def body(md: str, *, terms: bool = False) -> str:
     """Render a concept body. Block constructs first, inline within them.
 
@@ -354,13 +380,14 @@ def body(md: str, *, terms: bool = False) -> str:
             continue
 
         if _FENCE.match(line):
+            lang = line.strip()[3:].strip().lower()
             i += 1
             code = []
             while i < len(lines) and not _FENCE.match(lines[i]):
                 code.append(lines[i])
                 i += 1
             i += 1  # closing fence
-            out.append(f"<pre><code>{html.escape(chr(10).join(code))}</code></pre>")
+            out.append(code_block(chr(10).join(code), lang))
             continue
 
         # An indented block is code too. Tables and lists are matched first,
@@ -370,9 +397,7 @@ def body(md: str, *, terms: bool = False) -> str:
             while i < len(lines) and (lines[i].startswith("    ") or not lines[i].strip()):
                 code.append(lines[i][4:])
                 i += 1
-            out.append(
-                f"<pre><code>{html.escape(chr(10).join(code).strip(chr(10)))}</code></pre>"
-            )
+            out.append(code_block(chr(10).join(code).strip(chr(10))))
             continue
 
         heading = _HEADING.match(line)
@@ -494,6 +519,7 @@ def body(md: str, *, terms: bool = False) -> str:
 _DARK = """
     --bg: #151412; --fg: #f2eee6; --muted: #a29d93; --rule: #2f2c28;
     --accent: #8ea1ff; --brand: #f26522; --code-bg: #1f1d1a; --wash: #3a2f14; --card: #1c1a18; --edge: #57524a;
+    --hl-key: #9fb0ff; --hl-string: #9ccc8a; --hl-literal: #f0a36b; --hl-comment: #8c867c; --hl-anchor: #d6a4e8;
     color-scheme: dark;
 """
 
@@ -523,6 +549,7 @@ main:focus { outline: none; }
   color-scheme: light;
   --bg: #fffdf8; --fg: #1a1a1e; --muted: #6b6760; --rule: #e9e3d6;
   --accent: #1a3de8; --brand: #f26522; --code-bg: #fbf6e8; --wash: #fef3c7; --card: #ffffff; --edge: #1a1a1e;
+  --hl-key: #1a3de8; --hl-string: #2e6b1f; --hl-literal: #b3470c; --hl-comment: #6e695f; --hl-anchor: #8a2f9e;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --header: 3.25rem;
@@ -556,6 +583,31 @@ pre {
   overflow-x: auto; font-size: .85rem; line-height: 1.5;
 }
 pre code { background: none; padding: 0; font-size: inherit; }
+/* A code block and its copy button. The button sits over the block's top
+   corner rather than beside it, so revealing it moves nothing. */
+.code { position: relative; }
+.code-copy { position: absolute; top: .45rem; right: .45rem; display: flex; align-items: center; gap: .35rem;
+  padding: .3rem .4rem; border: 1px solid var(--rule); border-radius: 5px; background: var(--code-bg);
+  color: var(--muted); font: inherit; font-size: .75rem; line-height: 1; cursor: pointer; opacity: 0;
+  transition: opacity .12s ease; }
+/* The display rule above would otherwise override `hidden`, showing a button
+   that cannot copy until the script reveals it. */
+.code-copy[hidden] { display: none; }
+.code:hover .code-copy, .code-copy:focus-visible, .code-copy.done { opacity: 1; }
+.code-copy:hover { color: var(--fg); border-color: var(--muted); }
+.code-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.code-copy-done:empty { display: none; }
+/* A touch screen has no hover to reveal the button with. */
+@media (hover: none) { .code-copy { opacity: 1; } }
+/* YAML, highlighted at build time; the classes are `highlight.py`'s. Keys
+   take the link colour's hue and strings a green, so the two things a reader
+   scans a block for differ in hue as well as in weight. */
+.language-yaml .k { color: var(--hl-key); }
+.language-yaml .s { color: var(--hl-string); }
+.language-yaml .n { color: var(--hl-literal); }
+.language-yaml .c { color: var(--hl-comment); font-style: italic; }
+.language-yaml .a { color: var(--hl-anchor); }
+.language-yaml .p { color: var(--muted); }
 table { border-collapse: collapse; width: 100%; margin: 0 0 1.4rem; font-size: .93rem; display: block; overflow-x: auto; }
 th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-weight: 600; }
@@ -852,6 +904,23 @@ _NAV = """
           .then(function () { flash(copyLink, "Link copied"); }, function () { flash(copyLink, "Copy failed"); });
       });
     }
+  }
+  // Each code block's copy button copies the block's text — the text, not
+  // its markup, so a highlighted block pastes exactly as it was written.
+  if (navigator.clipboard) {
+    document.querySelectorAll(".code-copy").forEach(function (button) {
+      var code = button.parentNode.querySelector("code"), done = button.firstElementChild.nextElementSibling, timer;
+      button.hidden = false;
+      button.addEventListener("click", function () {
+        navigator.clipboard.writeText(code.textContent).then(function () { return "Copied"; }, function () { return "Copy failed"; })
+          .then(function (text) {
+            clearTimeout(timer);
+            done.textContent = text;
+            button.classList.add("done");
+            timer = setTimeout(function () { done.textContent = ""; button.classList.remove("done"); }, 1500);
+          });
+      });
+    });
   }
   // A menu closes the way menus do: a click elsewhere, or Escape.
   if (menu) {
