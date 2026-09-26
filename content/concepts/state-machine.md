@@ -6,8 +6,8 @@ group: What a bundle holds
 summary: >
   A bundle declares its own state machines — states, transitions, and the
   button on each edge — and the platform runs them. A row's status is a
-  projection of those machines, so it changes by firing an event, never by
-  writing the column. Publish proves the graph's structure; its intent is the
+  projection of those machines, so it changes by firing an event; a value
+  written to the column lasts until the next projection. Publish proves the graph's structure; its intent is the
   author's to check — states no event fires, terminals reached too early.
 concepts: [manifest-keys, channel-binding, states-authoring]
 applies_to: [cli, mcp, human]
@@ -87,8 +87,8 @@ to legality, what a transition writes — belongs to the engine.
 The status chip is composed from the tuple by a precedence rule: the first
 `status.compose` rule whose `when` holds; otherwise the first overlay, in
 declaration order, that is not `none`; otherwise the first non-overlay machine.
-Nothing hand-writes it — a bundle's own writes may not touch the projection
-columns — which is why changing a row's status means firing an event
+Nothing should hand-write it — a transition's own writes may not touch the
+projection columns, though a plain store write is not refused — which is why changing a row's status means firing an event
 rather than setting a value: set the value and the next projection overwrites
 it.
 

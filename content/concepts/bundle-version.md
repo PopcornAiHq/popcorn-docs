@@ -12,7 +12,7 @@ summary: >
   back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
 applies_to: [cli, mcp, human]
-source: [publish_tree, BundleImmutabilityError, BundleDigestCollisionError, bundle_digest, _line_version]
+source: [publish_tree, BundleImmutabilityError, BundleDigestCollisionError, bundle_digest, readable_on_line]
 ---
 
 A version is minted by a publish and never changes afterwards. Installing it
