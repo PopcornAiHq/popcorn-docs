@@ -51,6 +51,16 @@ CONTENT_TYPES = {
     ".txt": "text/plain; charset=utf-8",
     ".json": "application/json",
     ".xml": "application/xml; charset=utf-8",
+    ".woff2": "font/woff2",
+}
+
+# Everything else is rewritten on every publish and must reach readers within
+# the CDN's short TTL, so it carries no Cache-Control and the browser
+# revalidates. A font is the exception: its file name carries its upstream
+# version and a new font takes a new name (see render.py), so a browser can
+# keep one for a year without ever holding a stale copy.
+CACHE_CONTROL = {
+    ".woff2": "public, max-age=31536000, immutable",
 }
 
 
@@ -124,12 +134,14 @@ def main() -> int:
 
     for key, path in files.items():
         ctype = CONTENT_TYPES[path.suffix]
+        cache = CACHE_CONTROL.get(path.suffix)
         if args.dry_run:
-            print(f"   would upload {key}  ({ctype})")
+            print(f"   would upload {key}  ({ctype}{', ' + cache if cache else ''})")
             continue
         aws(
             "s3", "cp", str(path), f"s3://{args.bucket}/{key}",
             "--content-type", ctype,
+            *(["--cache-control", cache] if cache else []),
         )
 
     orphans = sorted(remote_keys(args.bucket) - set(files))

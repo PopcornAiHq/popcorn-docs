@@ -4,18 +4,27 @@
 Deliberately one script rather than one per artifact. Sites that grew a second
 transform for their LLM exports ended up with the two disagreeing, and the
 fix was always to collapse them back into a single walk of the source. So
-`chunks.json`, `llms.txt`, `llms-full.txt` and the per-page Markdown all come
-out of the same read here, and a fifth output belongs in this file too.
+`chunks.json`, `llms.txt`, `llms-full.txt`, `search.json` and the per-page
+Markdown all come out of the same read here, and the next output belongs in
+this file too.
 
 Outputs, under `build/`:
 
     chunks.json      one record per concept — what the MCP server serves
     llms.txt         the index: id, title, summary. The whole corpus, cheaply.
-    llms-full.txt    every body concatenated, for a reader that wants it all
+    llms-full.txt    every written page's body concatenated, for a reader that
+                     wants it all. A generated reference page contributes its
+                     title, summary and URL but not its body: those pages are
+                     looked up one entry at a time, and inlined they would
+                     outweigh everything written by hand
     <section>/<id>.md  the plain-Markdown twin of each page, at the path
                      its llms.txt entry advertises
     <section>/<id>.html  the same page for a person with a browser
     index.html       the landing page, every concept with its summary
+    404.html         what a missing path is answered with, in the site's own
+                     chrome, so a stale link still leaves the reader somewhere
+                     they can navigate from
+    fonts/           the self-hosted typefaces, copied from `assets/fonts/`
     robots.txt       allow everything. Without one the bucket answers 403 for
                      the missing key, and a crawler that reads a 403 robots.txt
                      as "disallow all" refuses every page on the site. It
@@ -24,10 +33,17 @@ Outputs, under `build/`:
                      browsing among them — open a URL only when it was pasted
                      or a search returned it, never by following a link, so a
                      page a search engine has not indexed is out of their reach
+    search.json      what the site's own search reads: per page its title, URL,
+                     section, summary and every heading or lookup entry with
+                     its anchor. No bodies — chunks.json carries those, and
+                     the browser fetches this whole on a reader's first search
 
 `llms.txt` is the file most likely to be fetched by something we do not
 control, so it carries summaries and not bodies. A reader that wants
-everything asks for `llms-full.txt` and knows what it is paying for.
+everything asks for `llms-full.txt` and knows what it is paying for — and
+what it pays for is prose. The reference pages stay in `chunks.json` and at
+their own URLs, which is where an agent that needs one argument name should
+get it.
 
 Pages are written under their section, mirroring the URL in the index, so
 that the link an agent follows is the file that was emitted. They were once
@@ -58,6 +74,7 @@ import render
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 BUILD = ROOT / "build"
+FONTS = ROOT / "assets" / "fonts"
 SITE = render.SITE
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
@@ -112,23 +129,29 @@ def parse(path: pathlib.Path) -> dict:
     return meta
 
 
-# The sections in the order a reader meets them: (directory, nav label,
-# landing heading, what the section is for). The concepts come first: they
+# The sections in the order a reader meets them: (directory, label, what the
+# section is for). The label heads the section in the sidebar and on its
+# Overview card; the blurb is the card's text. The concepts come first: they
 # are what every guide and every agent answer points into, so they lead the
 # sidebar and the index. A section not listed here still publishes, after
 # these, under its directory name.
 SECTIONS = [
-    ("concepts", "Concepts", "Concepts",
+    ("concepts", "Concepts",
      "One idea each, in reading order: what a bundle holds, then how it ships "
      "and what a publish changes."),
-    ("guides", "Guides", "Start here",
+    ("guides", "Guides",
      "Walkthroughs, in reading order. The first is the whole authoring loop; "
      "each later one builds on it."),
-    ("glossary", "Glossary", "Glossary",
+    ("glossary", "Glossary",
      "Every term, with its synonyms and the collisions worth knowing."),
-    ("reference", "Reference", "Reference",
+    ("reference", "Reference",
      "Generated from the platform itself, never written by hand."),
 ]
+
+# The sections whose pages a generator writes. llms-full.txt names them
+# without inlining them; see the module docstring.
+GENERATED = {"reference"}
+
 _KNOWN = [name for name, *_ in SECTIONS]
 
 # Pages the navigation lists under a section other than their directory's.
@@ -146,11 +169,16 @@ def href(page: dict, suffix: str = ".html") -> str:
     return f"/{page['section']}/{page['id']}{suffix}"
 
 
-def section_info(section: str) -> tuple[str, str, str]:
-    for name, label, heading, blurb in SECTIONS:
+def url(page: dict | None) -> str:
+    """A page's canonical address — the one the sitemap lists. None is the home page."""
+    return f"{SITE}/" if page is None else f"{SITE}{href(page)}"
+
+
+def section_info(section: str) -> tuple[str, str]:
+    for name, label, blurb in SECTIONS:
         if name == section:
-            return label, heading, blurb
-    return section.title(), section.title(), ""
+            return label, blurb
+    return section.title(), ""
 
 
 def reading_order(page: dict) -> tuple:
@@ -200,7 +228,7 @@ def landing(pages: list[dict]) -> str:
         first.setdefault(nav_section(page), page)
     cards = []
     for section, page in first.items():
-        label, _, blurb = section_info(section)
+        label, blurb = section_info(section)
         cards.append(
             f'<a class="card" id="{section}" href="{href(page)}">'
             f'<span class="card-label">{label}</span>'
@@ -224,11 +252,36 @@ def landing(pages: list[dict]) -> str:
         "<p>Every page has a Markdown twin at the same path, ending "
         "<code>.md</code> instead of <code>.html</code>. "
         '<a href="/llms.txt">/llms.txt</a> lists every page with its summary, '
-        '<a href="/llms-full.txt">/llms-full.txt</a> holds every body, and '
+        '<a href="/llms-full.txt">/llms-full.txt</a> holds every written page in '
+        "full and names the generated reference pages, and "
         '<a href="/chunks.json">/chunks.json</a> has one record per page.</p>',
         description="How Popcorn app bundles work: tables, flows, schedules and "
         "webhooks, and what happens when you publish.",
         sidebar=sidebar(pages, None),
+        url=url(None),
+    )
+
+
+def not_found(pages: list[dict]) -> str:
+    """The page a missing path is answered with.
+
+    It is served at whatever path was asked for, not at `/404.html`, so every
+    link on it is root-relative — the sidebar's already are. No page is
+    current, and it asks not to be indexed: a search result pointing at it
+    would be a dead link that looks like a page.
+    """
+    return render.document(
+        "Page not found — Popcorn docs",
+        "<h1>Page not found</h1>\n"
+        '<p class="summary">Nothing is published at this address. The page may '
+        "have moved, or the link may have a typo in it.</p>\n"
+        '<p>Start again from the <a href="/">Overview</a>, or, if you are an '
+        'agent, from <a href="/llms.txt">/llms.txt</a>, which lists every page '
+        "with its summary.</p>",
+        # Not the landing page, and not any section's: "" matches no page id,
+        # and the Overview link is current only for None.
+        sidebar=sidebar(pages, ""),
+        noindex=True,
     )
 
 
@@ -309,13 +362,23 @@ def main() -> int:
         json.dumps({"site": SITE, "pages": pages}, indent=2) + "\n"
     )
 
+    search = []
     index = ["# Popcorn docs", ""]
-    full = ["# Popcorn docs — full text", ""]
+    full = [
+        "# Popcorn docs — full text",
+        "",
+        "Every written page in full. A generated reference page is listed by its "
+        "title, summary and URL: fetch it there when you need its entries.",
+        "",
+    ]
     by_id = {page["id"]: page for page in pages}
     for page in pages:
         path = f"{page['section']}/{page['id']}.md"
         index += [f"## {page['title']}", f"{SITE}/{path}", "", page["summary"], ""]
-        full += [f"# {page['title']}", "", page["summary"], "", page["body"], ""]
+        if page["section"] in GENERATED:
+            full += [f"# {page['title']}", "", page["summary"], "", f"Full reference: {SITE}/{path}", ""]
+        else:
+            full += [f"# {page['title']}", "", page["summary"], "", page["body"], ""]
         page_file = BUILD / path
         page_file.parent.mkdir(parents=True, exist_ok=True)
         page_file.write_text(
@@ -335,6 +398,7 @@ def main() -> int:
                 f"{version_badge(page)}</div>"
                 f"{render.page_actions('/' + path)}</div>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
+                f"{render.on_this_page(rendered, lookup=lookup)}"
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
                 description=page["summary"],
@@ -343,16 +407,38 @@ def main() -> int:
                     contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
                     related=[] if lookup else related(page, by_id),
                 ),
+                url=url(page),
             )
         )
 
+        search.append({
+            "title": render.plain(page["title"]),
+            "url": href(page),
+            "section": section_info(nav_section(page))[0],
+            "summary": render.plain(page["summary"]),
+            "headings": render.search_entries(rendered),
+        })
+
     (BUILD / "llms.txt").write_text("\n".join(index))
+    (BUILD / "search.json").write_text(
+        json.dumps({"pages": search}, ensure_ascii=False, separators=(",", ":")) + "\n"
+    )
     (BUILD / "llms-full.txt").write_text("\n".join(full))
     (BUILD / "index.html").write_text(landing(pages))
+    (BUILD / "404.html").write_text(not_found(pages))
+    # The fonts are committed rather than generated, and the pages name them
+    # by path, so a missing file is a page quietly set in the fallback face.
+    # Checking here makes it a failed build instead.
+    shutil.copytree(FONTS, BUILD / "fonts")
+    missing = [f for f in render.FONT_FILES if not (BUILD / f.lstrip("/")).is_file()]
+    if missing:
+        print(f"✖  the pages load {', '.join(missing)}, which assets/fonts/ does not hold",
+              file=sys.stderr)
+        return 1
     (BUILD / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
     )
-    locs = [f"{SITE}/"] + [f"{SITE}/{p['section']}/{p['id']}.html" for p in pages]
+    locs = [url(None)] + [url(p) for p in pages]
     (BUILD / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -363,7 +449,8 @@ def main() -> int:
     size = (BUILD / "llms.txt").stat().st_size
     sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
-          f"llms-full.txt, index.html, robots.txt, sitemap.xml, {sections}(.md + .html)")
+          f"llms-full.txt, search.json ({(BUILD / 'search.json').stat().st_size:,}B), "
+          f"index.html, 404.html, robots.txt, sitemap.xml, fonts/, {sections}(.md + .html)")
     return 0
 
 
