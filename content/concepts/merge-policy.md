@@ -65,9 +65,11 @@ send the starting count.
 
 When the history matters more than the number, `concat` keeps the history:
 one entry per write, newest last, separated by a newline unless
-`merge_separator` says otherwise. It is not idempotent — a retried step
-appends again, and the only duplicate it skips is an incoming value equal to
-the whole stored value. Because `concat` requires a string column, a timestamp
+`merge_separator` says otherwise. A step's own retry does not append twice:
+a store write carries its run and step, and a retry of a write that already
+committed replays the stored response. Anything else that sends the value
+again — a new run, another step — appends it, and the only duplicate `concat`
+skips is an incoming value equal to the whole stored value. Because `concat` requires a string column, a timestamp
 history is a **string** column, not a datetime one.
 
 ## Merge keys must be indexed strings
