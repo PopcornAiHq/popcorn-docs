@@ -28,7 +28,7 @@ content/
 ├── concepts/         one addressable idea per file — the unit an agent retrieves
 └── guides/           task-shaped walkthroughs
 evals/
-└── questions.yaml    the validation set for the concept summaries
+└── questions.yaml    the validation set for the page summaries
 assets/fonts/         the self-hosted typefaces and their licences, copied into build/
 scripts/              build, checks and publish — python3 only, no dependencies
 server/               the docs MCP server over build/chunks.json
@@ -54,6 +54,7 @@ python3 scripts/check-content.py     # frontmatter contract
 python3 scripts/emit.py              # rebuild build/ from empty
 python3 scripts/check-links.py       # every advertised URL and page link resolves
 python3 scripts/check-retrieval.py   # every eval question surfaces its concept
+python3 scripts/check-highlight.py   # YAML highlighting never changes a block's text
 ./scripts/check-public-repo.sh       # no internal references — reads the STAGED tree
 ```
 
@@ -65,7 +66,7 @@ yet needs a `git add` before it passes. To see the site, serve the build:
 python3 -m http.server -d build 8000   # http://localhost:8000
 ```
 
-CI runs the same five on every push and pull request; the content and leak
+CI runs the same six on every push and pull request; the content and leak
 checks are required to merge.
 
 ## Checking the pages against the backend
