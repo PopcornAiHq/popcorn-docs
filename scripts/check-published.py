@@ -105,6 +105,8 @@ def main() -> int:
     check(site + "/", failures)
     check(site + "/robots.txt", failures)
     check(site + "/sitemap.xml", failures)
+    # The site's search fetches this; missing, every search reports an error.
+    check(site + "/search.json", failures)
     for font in render.FONT_FILES:
         check(site + font, failures)
 

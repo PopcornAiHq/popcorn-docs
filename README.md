@@ -12,10 +12,11 @@ browser. The agent-facing files sit at the root.
 
 | Path | For |
 |---|---|
-| `/` | the landing page — guides, then every concept with its summary |
+| `/` | the Overview — what Popcorn is, and one way into each section |
 | `/llms.txt` | the index: every title, URL and summary, cheap enough to fetch whole |
 | `/llms-full.txt` | every written page in full; the generated reference pages by title, summary and URL |
 | `/chunks.json` | one record per page — what the MCP server reads |
+| `/search.json` | titles, headings and entry names per page — what the site's search reads |
 | `/<section>/<id>.md` | one page as Markdown |
 | `/<section>/<id>.html` | the same page for a person |
 

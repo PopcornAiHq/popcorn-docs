@@ -131,6 +131,15 @@ def _slug(text: str, seen: set[str]) -> str:
     return anchor
 
 
+def _toc_nav(rendered: str, minimum: int, title: str) -> str:
+    """The page's second-level headings as a list, under an optional title."""
+    entries = _H2.findall(rendered)
+    if len(entries) < minimum:
+        return ""
+    items = "".join(f'<li><a href="#{a}">{h}</a></li>' for a, h in entries)
+    return f'<nav class="toc spy" aria-label="On this page">{title}<ol>{items}</ol></nav>'
+
+
 def toc(rendered: str, minimum: int = 2) -> str:
     """"On this page" for the right rail: the page's second-level headings.
 
@@ -138,14 +147,7 @@ def toc(rendered: str, minimum: int = 2) -> str:
     the reader nothing; only a page with a single heading has nothing to
     navigate between.
     """
-    entries = _H2.findall(rendered)
-    if len(entries) < minimum:
-        return ""
-    items = "".join(f'<li><a href="#{a}">{h}</a></li>' for a, h in entries)
-    return (
-        '<nav class="toc spy" aria-label="On this page">'
-        f'<p class="rail-title">On this page</p><ol>{items}</ol></nav>'
-    )
+    return _toc_nav(rendered, minimum, '<p class="rail-title">On this page</p>')
 
 
 _ENTRY = re.compile(
@@ -154,12 +156,8 @@ _ENTRY = re.compile(
 )
 
 
-def lookup_index(rendered: str) -> str:
-    """"On this page" for a lookup page: every entry, filterable.
-
-    It takes the rail's place for the contents list, and the site sidebar
-    stays on the left, so a reader looking a term up can still see where the
-    page sits and leave it in one click.
+def _lookup_entries(rendered: str) -> str:
+    """A lookup page's entries and the filter over them.
 
     Built from the rendered page rather than the Markdown, so an entry is
     listed exactly when it has an anchor to link to. Second-level headings are
@@ -196,11 +194,66 @@ def lookup_index(rendered: str) -> str:
             f'<summary><a href="#{anchor}">{heading}</a></summary><ul>{items}</ul></details>'
         )
     return (
-        '<p class="rail-title">On this page</p>'
         '<input class="filter" type="search" placeholder="Filter\u2026" '
         'aria-label="Filter this page\'s entries" hidden>'
         '<nav class="lookup spy" aria-label="Entries">' + "".join(blocks) + "</nav>"
     )
+
+
+def lookup_index(rendered: str) -> str:
+    """"On this page" for a lookup page: every entry, filterable.
+
+    It takes the rail's place for the contents list, and the site sidebar
+    stays on the left, so a reader looking a term up can still see where the
+    page sits and leave it in one click.
+    """
+    return '<p class="rail-title">On this page</p>' + _lookup_entries(rendered)
+
+
+def on_this_page(rendered: str, *, lookup: bool) -> str:
+    """The rail's contents list again, collapsed above the page's text.
+
+    Below the width that fits a rail, the rail's list is hidden and only its
+    related pages follow the page, which left no way to move within a page on
+    a laptop or a phone. This is that list, shown only at those widths.
+
+    It is a second copy rather than the rail's own list moved into place. The
+    page and the rail are each one cell of the layout grid, so no rule can
+    lift the rail's list in between the page's summary and its text — only
+    above or below the whole page. The copy repeats markup already on the
+    page, which compression all but erases, and the rail stays exactly what
+    it was on a wide screen.
+
+    A native <details>, so it opens without JavaScript and starts collapsed:
+    the text is what the reader came for, and the list is one tap away.
+    """
+    contents = _lookup_entries(rendered) if lookup else _toc_nav(rendered, 2, "")
+    if not contents:
+        return ""
+    return (
+        '<details class="on-page"><summary>On this page</summary>'
+        f'<div class="on-page-body">{contents}</div></details>\n'
+    )
+
+
+def plain(text: str) -> str:
+    """A line of the Markdown subset as the reader sees it: no marks, no tags."""
+    return html.unescape(_TAG.sub("", inline(text)))
+
+
+def search_entries(rendered: str) -> list[list[str]]:
+    """Every place in a page that search can land on: [text, anchor] pairs.
+
+    The same anchors the contents lists are built from — second- and
+    third-level headings, and on the glossary each term — because on a lookup
+    page the entry names are exactly what a reader types into search, and a
+    hit on one should open the page at it rather than at the top.
+    """
+    return [
+        [html.unescape(_TAG.sub("", m.group("html") or m.group("term"))).strip(),
+         m.group("id") or m.group("term_id")]
+        for m in _ENTRY.finditer(rendered)
+    ]
 
 
 # (title, href, current) — one link in the site sidebar.
@@ -569,6 +622,9 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .sidebar details ul { padding-left: .8rem; }
 .filter { display: block; width: 100%; margin: 0 0 1rem; box-sizing: border-box; padding: .45rem .6rem; font: inherit; color: var(--fg);
   background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; }
+/* The display rule above would otherwise override `hidden`, showing a filter
+   that does nothing until the script reveals it. */
+.filter[hidden] { display: none; }
 .filter:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .lookup details { margin: 0 0 .5rem; }
 .lookup summary { padding: .2rem 0; cursor: pointer; font-family: var(--mono); font-size: .78rem; }
@@ -582,6 +638,68 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .toc li a.current, .lookup li a.current { color: var(--fg); border-left-color: var(--brand); }
 .related { margin-top: 1.75rem; }
 .related:first-child { margin-top: 0; }
+
+/* "On this page" above the text: only at the widths where the rail's list is
+   hidden, so the two are never on screen together. */
+.on-page { display: none; margin: 0 0 2rem; border: 1px solid var(--rule); border-radius: 8px;
+  font-size: .9rem; line-height: 1.45; }
+.on-page > summary { display: flex; align-items: center; justify-content: space-between; padding: .6rem .85rem;
+  list-style: none; cursor: pointer; font-size: .75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fg); }
+.on-page > summary::-webkit-details-marker { display: none; }
+.on-page > summary::after { content: ""; width: .4rem; height: .4rem; margin: 0 .2rem .2rem 0;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
+.on-page[open] > summary::after { margin: .2rem .2rem 0 0; transform: rotate(-135deg); }
+/* A lookup page lists every entry, which on a phone is several screens; the
+   list scrolls inside its box so the text stays a short scroll away. */
+.on-page-body { max-height: min(60vh, 30rem); overflow-y: auto; padding: .75rem .85rem .85rem;
+  border-top: 1px solid var(--rule); }
+.on-page ul, .on-page ol { list-style: none; margin: 0; padding: 0; }
+.on-page li { margin: 0; }
+.on-page a { color: var(--muted); text-decoration: none; }
+.on-page a:hover { color: var(--accent); }
+
+/* Search: a button in the header, and the dialog it opens. */
+.search-open { display: flex; align-items: center; gap: .5rem; min-width: 13rem; padding: .3rem .45rem .3rem .6rem;
+  border: 1px solid var(--rule); border-radius: 7px; background: var(--bg); color: var(--muted);
+  font: inherit; font-size: .85rem; line-height: 1.4; cursor: pointer; }
+.search-open:hover { color: var(--fg); border-color: var(--muted); }
+/* The display rule above would otherwise override `hidden`, and search needs
+   the script. */
+.search-open[hidden] { display: none; }
+.search-open kbd, .search-field kbd { margin-left: auto; padding: .05rem .35rem; border: 1px solid var(--rule);
+  border-radius: 4px; background: var(--code-bg); font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+html:has(.search[open]) { overflow: hidden; }
+.search { width: min(40rem, calc(100vw - 2rem)); max-height: min(36rem, calc(100vh - 8rem)); margin: 10vh auto auto;
+  padding: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); color: var(--fg);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .22); overflow: hidden; }
+.search[open] { display: flex; flex-direction: column; }
+.search::backdrop { background: rgba(20, 18, 16, .45); }
+.search-field { display: flex; align-items: center; gap: .65rem; padding: .8rem 1rem; border-bottom: 1px solid var(--rule);
+  color: var(--muted); }
+.search-field input { flex: 1; min-width: 0; padding: 0; border: 0; outline: none; background: none;
+  font: inherit; font-size: 1.05rem; color: var(--fg); }
+.search-field input::-webkit-search-cancel-button { display: none; }
+.search-status { margin: 0; padding: 1rem 1.1rem; color: var(--muted); font-size: .9rem; }
+.search-status[hidden] { display: none; }
+.search-results { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: .4rem; }
+.search-results:empty { display: none; }
+.search-results li { margin: 0; }
+.search-results a { display: block; padding: .55rem .75rem; border-radius: 7px; color: var(--fg); text-decoration: none;
+  line-height: 1.4; }
+.search-results [aria-selected="true"] a { background: var(--code-bg); box-shadow: inset 2px 0 0 var(--brand); }
+.search-results .hit-title { font-weight: 600; }
+.search-results .hit-section { margin-left: .5rem; font-size: .72rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); }
+.search-results .hit-heading { display: block; margin-top: .1rem; color: var(--accent); font-size: .9rem; }
+.search-results .hit-summary { display: -webkit-box; margin-top: .15rem; overflow: hidden; color: var(--muted);
+  font-size: .84rem; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+/* A hit on a heading already says where it lands; its page's summary is
+   context, so one line of it is enough. */
+.search-results .hit-heading + .hit-summary { -webkit-line-clamp: 1; }
+/* The wash alone nearly vanishes on the dark theme's selected row; the brand
+   underline carries the mark there, which is the one job orange has. */
+.search mark { background: var(--wash); color: inherit; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--brand); }
 
 /* The title row: the page's name, and the one control for its Markdown twin. */
 .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
@@ -634,6 +752,7 @@ blockquote p:last-child { margin-bottom: 0; }
   .layout { grid-template-columns: 14rem minmax(0, 44rem); gap: 2.5rem; }
   .rail { grid-column: 2; position: static; max-height: none; padding: 0 0 2.5rem; margin-top: -1.5rem; }
   .rail .toc, .rail .lookup, .rail .filter, .rail > .rail-title { display: none; }
+  .on-page { display: block; }
   .related { padding-top: 1.25rem; border-top: 1px solid var(--rule); }
 }
 /* Too narrow for the sidebar: it becomes a drawer behind the menu button.
@@ -646,6 +765,10 @@ blockquote p:last-child { margin-bottom: 0; }
   .rail, .site-footer { grid-column: 1; }
   .sidebar { position: static; max-height: none; padding: 1.5rem 0 0; }
   html.js .menu { display: inline-block; }
+  /* The header has no room for the labelled field: search becomes an icon
+     beside the other controls. */
+  .search-open { min-width: 0; padding: .2rem; border: 0; background: none; }
+  .search-open span, .search-open kbd { display: none; }
   /* align-self is reset because Chrome honours it on a fixed box too: at
      `start`, a list taller than the gap under the header is aligned back
      up over it rather than scrolling inside the drawer. */
@@ -655,6 +778,7 @@ blockquote p:last-child { margin-bottom: 0; }
     transition: transform .2s ease, visibility .2s; }
   html.js.nav-open .sidebar { transform: none; visibility: visible; }
   main { padding-top: 1.75rem; }
+  .search { margin-top: .75rem; max-height: calc(100vh - 1.5rem); }
 }
 """
 
@@ -729,12 +853,14 @@ _NAV = """
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") menu.open = false; });
   }
 
-  var filter = document.querySelector(".filter");
-  if (filter) {
+  // Each copy of a lookup index — the rail's, and the one above the text at
+  // narrow widths — has its own filter, which narrows only the list beside it.
+  document.querySelectorAll(".filter").forEach(function (filter) {
+    var scope = filter.parentNode;
     filter.hidden = false;
     filter.addEventListener("input", function () {
       var q = filter.value.trim().toLowerCase();
-      document.querySelectorAll(".lookup details, .lookup > ul").forEach(function (group) {
+      scope.querySelectorAll(".lookup details, .lookup > ul").forEach(function (group) {
         var groupHit = !q || (group.dataset.name || "").indexOf(q) !== -1, any = false;
         group.querySelectorAll("li").forEach(function (li) {
           var hit = groupHit || li.dataset.name.indexOf(q) !== -1;
@@ -744,7 +870,13 @@ _NAV = """
         if (q && group.tagName === "DETAILS") group.open = true;
       });
     });
-  }
+  });
+
+  // Picking an entry from the list above the text closes it before the jump,
+  // so the page lands on the section and not on a list still open over it.
+  document.querySelectorAll(".on-page").forEach(function (list) {
+    list.addEventListener("click", function (e) { if (e.target.closest("a")) list.open = false; });
+  });
 
   document.querySelectorAll(".spy").forEach(function (nav) {
     var links = Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]'));
@@ -798,6 +930,187 @@ _THEME_TOGGLE = """
   label();
 })();
 """
+
+# Search over every page, from `search.json`. The button and the shortcuts
+# exist only here, so without JavaScript there is no control that cannot work.
+# The index is fetched on the first open rather than with the page: most
+# visits never search, and they should not pay for it.
+#
+# Ranking, per candidate — a page by its title, or one of its headings or
+# lookup entries: an exact name, then a name the query starts, then a word
+# inside a name the query starts, then the query anywhere in a name. At each
+# of those a title outranks a heading, since a page about the thing beats a
+# section that mentions it; a match in a summary ranks below every name.
+# Names are compared with `_`, `.`, `-` and `/` read as spaces, so
+# `post message` finds `post_message` and `agent.invoke` finds
+# `foundation.agent.invoke`.
+_SEARCH = """
+(function () {
+  var button = document.querySelector(".search-open"), dialog = document.querySelector(".search");
+  if (!button || !dialog || !dialog.showModal || !window.fetch) return;
+  var input = dialog.querySelector("input"), list = dialog.querySelector(".search-results");
+  var status = dialog.querySelector(".search-status"), pages = null, loading = null, active = -1;
+  if (!/Mac|iPhone|iPad/.test(navigator.platform)) button.querySelector("kbd").textContent = "Ctrl K";
+  button.hidden = false;
+
+  function norm(text) { return text.toLowerCase().replace(/[\\s_.\\/-]+/g, " ").trim(); }
+  function rank(name, q) {
+    var t = norm(name), i = t.indexOf(q);
+    if (i < 0) return 0;
+    if (t === q) return 4;
+    if (i === 0) return 3;
+    return t.charAt(i - 1) === " " ? 2 : 1;
+  }
+  function search(raw, q) {
+    var hits = [], loose = [];
+    // Words are what the reader separated with spaces. `post_message` is one
+    // name, not two words, and splitting it would match every page that
+    // mentions posting and messages somewhere.
+    var words = raw.toLowerCase().split(/\\s+/).map(norm);
+    pages.forEach(function (page) {
+      var title = rank(page.title, q);
+      if (title) hits.push({ page: page, score: title * 10 + 2 });
+      else if (norm(page.summary).indexOf(q) !== -1) hits.push({ page: page, score: 5 });
+      else if (words.length > 1) {
+        var all = norm(page.title + " " + page.summary + " " + page.headings.map(function (h) { return h[0]; }).join(" "));
+        if (words.every(function (w) { return all.indexOf(w) !== -1; })) loose.push({ page: page, score: 1 });
+      }
+      page.headings.forEach(function (h) {
+        var r = rank(h[0], q);
+        if (r) hits.push({ page: page, heading: h, score: r * 10 + 1 });
+      });
+    });
+    // Several words that appear nowhere as a phrase still find the pages
+    // holding every one of them — but only then, since beside a phrase
+    // match they are mostly pages that happen to use both words.
+    if (!hits.length) hits = loose;
+    return hits.sort(function (a, b) { return b.score - a.score; }).slice(0, 40);
+  }
+
+  // Marks the first place the query matches, allowing the same separators
+  // that `norm` reads as spaces. Text only: nothing from the index is ever
+  // parsed as HTML.
+  function marked(text, q) {
+    var span = document.createElement("span");
+    var pattern = q.split(" ").map(function (w) { return w.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&"); })
+      .join("[\\\\s_.\\\\/-]+");
+    var m = new RegExp(pattern, "i").exec(text);
+    if (!m) { span.textContent = text; return span; }
+    var mark = document.createElement("mark");
+    mark.textContent = m[0];
+    span.append(text.slice(0, m.index), mark, text.slice(m.index + m[0].length));
+    return span;
+  }
+  function el(tag, cls, child) {
+    var node = document.createElement(tag);
+    node.className = cls;
+    if (typeof child === "string") node.textContent = child; else node.appendChild(child);
+    return node;
+  }
+
+  function select(i) {
+    var items = list.children;
+    if (active >= 0 && items[active]) items[active].setAttribute("aria-selected", "false");
+    active = items.length ? (i + items.length) % items.length : -1;
+    if (active < 0) { input.removeAttribute("aria-activedescendant"); return; }
+    items[active].setAttribute("aria-selected", "true");
+    input.setAttribute("aria-activedescendant", items[active].id);
+    items[active].scrollIntoView({ block: "nearest" });
+  }
+  function show(message) { status.textContent = message; status.hidden = !message; }
+  function run() {
+    var raw = input.value.trim(), q = norm(raw);
+    list.textContent = "";
+    active = -1;
+    if (!pages) return;
+    if (!q) { show("Search every page by title, heading or term."); return; }
+    var hits = search(raw, q);
+    show(hits.length ? "" : "Nothing matches \u201c" + raw + "\u201d.");
+    hits.forEach(function (hit, n) {
+      var a = document.createElement("a"), li = document.createElement("li");
+      a.href = hit.page.url + (hit.heading ? "#" + hit.heading[1] : "");
+      a.tabIndex = -1;
+      var head = el("span", "hit-title", marked(hit.page.title, q));
+      a.append(head);
+      head.after(el("span", "hit-section", hit.page.section));
+      if (hit.heading) a.append(el("span", "hit-heading", marked(hit.heading[0], q)));
+      a.append(el("span", "hit-summary", hit.page.summary));
+      li.id = "search-hit-" + n;
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", "false");
+      li.append(a);
+      list.append(li);
+    });
+    select(0);
+  }
+
+  function open() {
+    if (dialog.open) return;
+    dialog.showModal();
+    input.select();
+    if (pages) { run(); return; }
+    show("Loading\u2026");
+    loading = loading || fetch("/search.json")
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (index) { pages = index.pages; run(); },
+            function () { loading = null; show("Search could not load its index. Try again in a moment."); });
+  }
+
+  button.addEventListener("click", open);
+  input.addEventListener("input", run);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      select(active + (e.key === "ArrowDown" ? 1 : -1));
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      list.children[active].querySelector("a").click();
+    }
+  });
+  list.addEventListener("mousemove", function (e) {
+    var li = e.target.closest("li");
+    if (li) select(Array.prototype.indexOf.call(list.children, li));
+  });
+  // A hit on this same page only moves to an anchor, so the dialog has to be
+  // closed by hand; on another page it goes with the navigation anyway.
+  list.addEventListener("click", function (e) { if (e.target.closest("a")) dialog.close(); });
+  // The dialog's own box fills with its contents, so a click that lands on
+  // the dialog itself landed on the backdrop around it.
+  dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      if (dialog.open) dialog.close(); else open();
+      return;
+    }
+    var t = e.target;
+    if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey && !dialog.open
+        && !(t.closest && t.closest("input, textarea, select, [contenteditable]"))) {
+      e.preventDefault();
+      open();
+    }
+  });
+})();
+"""
+
+_ICON_SEARCH = (
+    '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.75" fill="none" '
+    'stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" fill="none" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round"/></svg>'
+)
+
+# The search dialog. Empty until the script fills it; a closed <dialog> is
+# not rendered at all, so without JavaScript it is simply never there.
+_SEARCH_DIALOG = (
+    '<dialog class="search" aria-label="Search the docs">'
+    f'<div class="search-field">{_ICON_SEARCH}'
+    '<input type="search" placeholder="Search the docs" aria-label="Search the docs" role="combobox" '
+    'aria-controls="search-results" aria-expanded="true" aria-autocomplete="list" autocomplete="off" spellcheck="false">'
+    "<kbd>Esc</kbd></div>"
+    '<p class="search-status" role="status" hidden></p>'
+    '<ul class="search-results" id="search-results" role="listbox" aria-label="Results"></ul>'
+    "</dialog>"
+)
 
 
 def document(
@@ -857,7 +1170,9 @@ def document(
 <a class="skip" href="#content">Skip to content</a>
 <header class="site"><div class="bar">
 <button class="menu" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">\u2630</button>
-<a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Popcorn docs</a><nav><a href="/llms.txt">llms.txt</a>
+<a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Popcorn docs</a>
+<button class="search-open" type="button" aria-label="Search the docs" aria-keyshortcuts="Meta+K Control+K /" hidden>{_ICON_SEARCH}<span>Search</span><kbd>\u2318K</kbd></button>
+<nav><a href="/llms.txt">llms.txt</a>
 <button class="theme" type="button" hidden></button>
 </nav></div></header>
 <div class="layout">
@@ -869,7 +1184,8 @@ def document(
 <footer class="site-footer"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>
 <span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
-<script>{_THEME_TOGGLE}{_NAV}</script>
+{_SEARCH_DIALOG}
+<script>{_THEME_TOGGLE}{_NAV}{_SEARCH}</script>
 </body>
 </html>
 """
