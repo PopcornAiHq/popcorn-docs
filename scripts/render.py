@@ -694,9 +694,15 @@ html:has(.search[open]) { overflow: hidden; }
 .search-results .hit-heading { display: block; margin-top: .1rem; color: var(--accent); font-size: .9rem; }
 .search-results .hit-summary { display: -webkit-box; margin-top: .15rem; overflow: hidden; color: var(--muted);
   font-size: .84rem; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-/* A hit on a heading already says where it lands; its page's summary is
-   context, so one line of it is enough. */
-.search-results .hit-heading + .hit-summary { -webkit-line-clamp: 1; }
+/* A page with entries under it is already explained by them; one line of its
+   summary is enough context. */
+.search-results .hit-page:has(+ .hit-entry) .hit-summary { -webkit-line-clamp: 1; }
+/* A page's entries hang under it, indented on a rule, and each page after
+   the first starts a new group. */
+.search-results .hit-page + .hit-page, .search-results .hit-entry + .hit-page { margin-top: .35rem; }
+.search-results .hit-entry a { margin-left: .75rem; padding: .3rem .75rem; border-left: 2px solid var(--rule);
+  border-radius: 0 7px 7px 0; }
+.search-results .hit-entry .hit-heading { margin-top: 0; }
 /* The wash alone nearly vanishes on the dark theme's selected row; the brand
    underline carries the mark there, which is the one job orange has. */
 .search mark { background: var(--wash); color: inherit; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--brand); }
@@ -936,14 +942,16 @@ _THEME_TOGGLE = """
 # The index is fetched on the first open rather than with the page: most
 # visits never search, and they should not pay for it.
 #
-# Ranking, per candidate — a page by its title, or one of its headings or
-# lookup entries: an exact name, then a name the query starts, then a word
-# inside a name the query starts, then the query anywhere in a name. At each
-# of those a title outranks a heading, since a page about the thing beats a
-# section that mentions it; a match in a summary ranks below every name.
-# Names are compared with `_`, `.`, `-` and `/` read as spaces, so
-# `post message` finds `post_message` and `agent.invoke` finds
-# `foundation.agent.invoke`.
+# Results are pages, each with the headings or lookup entries in it that
+# matched listed underneath, so a page that matches in several places appears
+# once. A page ranks by its title first: any title match outranks any match in
+# a page's entries, because a page about the thing beats an entry that names
+# it — "fork" finds Fork lines before the glossary's "fork". Within each of
+# those two bands an exact name beats a name the query starts, which beats a
+# word inside a name the query starts, which beats the query anywhere in a
+# name. A match only in a summary ranks below every name. Names are compared
+# with `_`, `.`, `-` and `/` read as spaces, so `post message` finds
+# `post_message` and `agent.invoke` finds `foundation.agent.invoke`.
 _SEARCH = """
 (function () {
   var button = document.querySelector(".search-open"), dialog = document.querySelector(".search");
@@ -961,30 +969,42 @@ _SEARCH = """
     if (i === 0) return 3;
     return t.charAt(i - 1) === " " ? 2 : 1;
   }
+  // At most this many entries under one page; the page itself is one more
+  // click away and lists the rest.
+  var ENTRIES_PER_PAGE = 3;
   function search(raw, q) {
     var hits = [], loose = [];
     // Words are what the reader separated with spaces. `post_message` is one
     // name, not two words, and splitting it would match every page that
     // mentions posting and messages somewhere.
-    var words = raw.toLowerCase().split(/\\s+/).map(norm);
-    pages.forEach(function (page) {
+    var words = raw.toLowerCase().split(/\s+/).map(norm);
+    pages.forEach(function (page, order) {
       var title = rank(page.title, q);
-      if (title) hits.push({ page: page, score: title * 10 + 2 });
-      else if (norm(page.summary).indexOf(q) !== -1) hits.push({ page: page, score: 5 });
-      else if (words.length > 1) {
-        var all = norm(page.title + " " + page.summary + " " + page.headings.map(function (h) { return h[0]; }).join(" "));
-        if (words.every(function (w) { return all.indexOf(w) !== -1; })) loose.push({ page: page, score: 1 });
-      }
-      page.headings.forEach(function (h) {
+      var entries = [];
+      page.headings.forEach(function (h, at) {
         var r = rank(h[0], q);
-        if (r) hits.push({ page: page, heading: h, score: r * 10 + 1 });
+        if (r) entries.push({ heading: h, rank: r, at: at });
       });
+      entries.sort(function (a, b) { return b.rank - a.rank || a.at - b.at; });
+      var score = title ? 100 + title * 10
+        : entries.length ? entries[0].rank * 10
+        : norm(page.summary).indexOf(q) !== -1 ? 5 : 0;
+      if (score) {
+        hits.push({ page: page, score: score, order: order, byTitle: title > 0,
+                    entries: entries.slice(0, ENTRIES_PER_PAGE) });
+      } else if (words.length > 1) {
+        var all = norm(page.title + " " + page.summary + " " + page.headings.map(function (h) { return h[0]; }).join(" "));
+        if (words.every(function (w) { return all.indexOf(w) !== -1; })) {
+          loose.push({ page: page, score: 1, order: order, entries: [] });
+        }
+      }
     });
     // Several words that appear nowhere as a phrase still find the pages
     // holding every one of them — but only then, since beside a phrase
     // match they are mostly pages that happen to use both words.
     if (!hits.length) hits = loose;
-    return hits.sort(function (a, b) { return b.score - a.score; }).slice(0, 40);
+    // Equal scores keep the site's reading order, so ties are predictable.
+    return hits.sort(function (a, b) { return b.score - a.score || a.order - b.order; }).slice(0, 20);
   }
 
   // Marks the first place the query matches, allowing the same separators
@@ -1024,24 +1044,34 @@ _SEARCH = """
     active = -1;
     if (!pages) return;
     if (!q) { show("Search every page by title, heading or term."); return; }
-    var hits = search(raw, q);
+    var hits = search(raw, q), n = 0;
     show(hits.length ? "" : "Nothing matches \u201c" + raw + "\u201d.");
-    hits.forEach(function (hit, n) {
+    // One option per page and one per entry under it, in a single list, so
+    // the arrow keys walk the entries as well as the pages.
+    function option(cls, href, parts) {
       var a = document.createElement("a"), li = document.createElement("li");
-      a.href = hit.page.url + (hit.heading ? "#" + hit.heading[1] : "");
+      a.href = href;
       a.tabIndex = -1;
-      var head = el("span", "hit-title", marked(hit.page.title, q));
-      a.append(head);
-      head.after(el("span", "hit-section", hit.page.section));
-      if (hit.heading) a.append(el("span", "hit-heading", marked(hit.heading[0], q)));
-      a.append(el("span", "hit-summary", hit.page.summary));
-      li.id = "search-hit-" + n;
+      parts.forEach(function (part) { a.append(part); });
+      li.className = cls;
+      li.id = "search-hit-" + n++;
       li.setAttribute("role", "option");
       li.setAttribute("aria-selected", "false");
       li.append(a);
       list.append(li);
+    }
+    hits.forEach(function (hit) {
+      var head = el("span", "hit-title", marked(hit.page.title, q));
+      option("hit-page", hit.page.url, [head, el("span", "hit-section", hit.page.section),
+        el("span", "hit-summary", hit.page.summary)]);
+      hit.entries.forEach(function (e) {
+        option("hit-entry", hit.page.url + "#" + e.heading[1], [el("span", "hit-heading", marked(e.heading[0], q))]);
+      });
     });
-    select(0);
+    // Enter should land where the match is. When the best page matched only
+    // through an entry — `post_message` is a tool on the MCP page, not the
+    // page — start on that entry rather than on the top of its page.
+    select(hits.length && !hits[0].byTitle && hits[0].entries.length ? 1 : 0);
   }
 
   function open() {
