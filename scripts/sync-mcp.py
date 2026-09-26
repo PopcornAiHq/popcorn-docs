@@ -8,15 +8,21 @@ is generated, never hand-written, for the same reason as the activity
 reference — the definitions are what the server serves, and a hand-kept list
 is a second source that can only drift from them.
 
-The server lives in the private backend, so this runs locally only, against a
-checkout named by `$POPCORN_BACKEND` (default `$HOME/popcorn/backend`), the
-same checkout `scripts/drift.py` reads. With none there it prints a notice
+The server lives in the private backend, so this runs only where a backend
+checkout exists, named by `$POPCORN_BACKEND` (default `$HOME/popcorn/backend`),
+the same checkout `scripts/drift.py` reads. With none there it prints a notice
 and exits 0. It reads the source with `ast` and imports nothing, so it needs
 none of the backend's dependencies. Check the checkout is on current main
 before running: the page describes whatever that checkout defines.
 
     python3 scripts/sync-mcp.py            # read the checkout, write the page
     python3 scripts/sync-mcp.py --check    # exit 1 if the page is stale
+    python3 scripts/sync-mcp.py --platform-version V
+
+After each prod deploy the backend's deploy pipeline runs the last form
+against the deployed checkout with the deploy's version, then opens a pull
+request here as the docs bot when the page changed. `--platform-version` sets
+the page's `platform:` date; `platform_version.py` says when that line moves.
 
 The page also carries a "Proposed tools" section, which is the one part of
 the reference no source generates: tools that are designed but not built.
@@ -38,6 +44,8 @@ import os
 import pathlib
 import re
 import sys
+
+import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGE = ROOT / "content" / "reference" / "mcp.md"
@@ -284,9 +292,10 @@ def page(found: list[dict]) -> str:
         "`whoami` last selected, with that person's permissions.",
         "",
         "This page is generated from the server's tool definitions by",
-        "`scripts/sync-mcp.py` and never edited by hand. The access line under each",
-        "tool is the hint the server declares to the host; a host may use it to",
-        "decide what to ask before calling.",
+        "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
+        "date beside the title is the day of the deploy that last changed it. The",
+        "access line under each tool is the hint the server declares to the host; a",
+        "host may use it to decide what to ask before calling.",
         "",
         "## Tools",
         "",
@@ -308,19 +317,20 @@ def page(found: list[dict]) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="exit 1 if the page differs, write nothing")
+    platform_version.add_argument(ap)
     args = ap.parse_args()
 
     root = backend()
     if root is None:
         print("ℹ  no backend checkout found. The MCP server's source is in the private "
-              "backend, so this runs locally only; set POPCORN_BACKEND to point at one.")
+              "backend, so this runs only beside a checkout; set POPCORN_BACKEND to point at one.")
         return 0
     found = tools(root)
     if not found:
         sys.exit("✖  no @mcp.tool definitions found — has the server moved in the checkout?")
 
-    text = page(found)
     current = PAGE.read_text() if PAGE.exists() else ""
+    text = platform_version.stamp(page(found), current, args.platform)
     if args.check:
         if text != current:
             print(f"✖  {PAGE.relative_to(ROOT)} is stale — run scripts/sync-mcp.py", file=sys.stderr)
