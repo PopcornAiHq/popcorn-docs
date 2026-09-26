@@ -574,9 +574,11 @@ h2 { font-size: 1.25rem; margin: 2.5rem 0 .75rem; letter-spacing: -.01em; }
 h3 { font-size: 1.05rem; margin: 2rem 0 .5rem; }
 p { margin: 0 0 1.1rem; }
 .summary { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
+/* No ligatures in code: JetBrains Mono would draw `!=` as a single sign, and
+   a reader copying by eye would type a character the platform does not read. */
 code {
   font-family: var(--mono); font-size: .85em; background: var(--code-bg);
-  padding: .12em .35em; border-radius: 3px;
+  padding: .12em .35em; border-radius: 3px; font-variant-ligatures: none;
 }
 pre {
   background: var(--code-bg); padding: 1rem; border-radius: 6px;
