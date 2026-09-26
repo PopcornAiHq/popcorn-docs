@@ -31,3 +31,5 @@ jobs:
         run: scripts/check-links.py
       - name: Every eval question surfaces its concept
         run: scripts/check-retrieval.py
+      - name: Highlighting never changes a code block's text
+        run: scripts/check-highlight.py

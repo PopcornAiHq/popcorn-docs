@@ -224,3 +224,75 @@
   concept: glossary
   pass: it is a revision token for a conditional write — send it back as If-Match on a parameters update, and a mismatch is refused with 409 stale_rev naming the current rev; it is not a version_id
   trap: treats rev as the bundle version or a semver, or says a mismatch returns 412
+
+# The generated reference pages. Their summaries say what each page lists, not
+# the entries themselves, so a question here is usually answered in two calls:
+# the summary points at the page and the entry answers. The deferral PASS above
+# covers that — "read the CLI reference" is a pass when the entry answers the
+# question. The grader checks a deferral against the page's body in
+# chunks.json, since llms-full.txt carries a reference page by summary only.
+
+- q: Can I install the popcorn CLI from PyPI?
+  concept: cli
+  pass: no — the CLI installs from its GitHub repository, not PyPI
+  trap: gives a pip install command for a package on PyPI
+
+- q: With POPCORN_AGENT=1 set, popcorn app publish refuses to run without a prompt.
+  concept: cli, glossary, template-authoring
+  pass: agent mode defaults --json, --quiet and --no-color but does not imply --yes, and app publish requires --yes (or POPCORN_ASSUME_YES=1) in agent mode even on a TTY
+  trap: says agent mode implies --yes, or to unset POPCORN_AGENT or pipe an answer into the prompt
+
+- q: How does my script tell an expired login apart from a server error when a popcorn command fails?
+  concept: cli
+  pass: run it with --json and branch on the failure envelope's error_code — unauthorized versus server_error, which is retryable — or on the exit code, 2 for auth and 4 for server; not on the legacy code field
+  trap: parses the human-readable error message, or branches on the code field
+
+- q: webhook list does not show the URL to post payloads to.
+  concept: cli
+  pass: pass --show-url to webhook list or webhook get; the ingest URL embeds a secret token, so it is hidden by default
+  trap: says to build the URL from the webhook id, or that it cannot be read back after create
+
+- q: Which popcorn command stops every running run of a flow?
+  concept: cli
+  pass: flow runs cancel --flow <name> --channel <channel>, a cooperative cancel; --force terminates on the spot
+  trap: loops over the runs cancelling one id at a time, invents a flow stop or disable command, or deletes the flow
+
+- q: A popcorn command with --json returned one page of results. How do I get the rest?
+  concept: cli
+  pass: data.pagination.next is a map of CLI flags to values to pass back to the same command; it is null when there are no more
+  trap: invents a --page flag, or says to raise --limit until everything fits
+
+- q: Can I publish an app through the Popcorn MCP server?
+  concept: mcp
+  pass: no — the hosted tools cover identity, channels, search, messages and reactions; the app tools are proposed and not built, so publish with the CLI's app publish
+  trap: describes app_publish, or its preview and confirm, as a tool that exists today
+
+- q: How do I reply in a thread with the MCP tools?
+  concept: mcp
+  pass: post_message with message_id set to the message whose thread it replies in, in place of conversation_id
+  trap: invents a reply tool, or a thread_id argument on post_message
+
+- q: The MCP search tool keeps returning channels from the wrong workspace.
+  concept: mcp
+  pass: every call runs in the workspace whoami last selected; call whoami with workspace_id to switch, or with none to list the workspaces available
+  trap: says to reconnect or re-authenticate the server, or to pass a workspace to search
+
+- q: The MCP search tool fails when I search messages without any text.
+  concept: mcp
+  pass: query is required when type is messages; it is optional only when listing channels, dms or users
+  trap: blames permissions, or an empty message history
+
+- q: What arguments does foundation.store.upsert_rows take?
+  concept: activities
+  pass: conversation_id and table_name, and exactly one of rows or rows_file_key; merge_on updates a match instead of duplicating it, on_conflict is replace by default or merge to keep omitted columns, and change_kind and change_action name the write in the audit log
+  trap: invents arguments such as table or records, or says rows and rows_file_key may both be given
+
+- q: How do I make a flow step act as one specific connected account?
+  concept: activities
+  pass: every activity accepts integration_id, normally $channel.integrations.<name>.id, or integration_name to resolve a named channel integration instead
+  trap: invents a credentials or account argument, or says the account can only be set for the whole channel
+
+- q: popcorn flow activities lists an activity the activity reference does not. Is the reference out of date?
+  concept: activities
+  pass: not necessarily — the reference lists only foundation and feature activities at release or beta; alpha, deprecated and app-specific ones appear only in popcorn flow activities, and --name <wire.name> prints one's arguments
+  trap: says the reference is stale and needs regenerating, or that the activity was removed

@@ -32,8 +32,19 @@ _STOP = frozenset(
 )
 
 
+# A lookup page's entries, as the frontmatter contract defines them: each `###`
+# heading, and each bullet that opens with a bold term.
+_ENTRY = re.compile(r"^(?:### (?P<head>.+)|- \*\*(?P<term>.+?)\*\*)", re.M)
+
+
 def load(path: pathlib.Path) -> list[dict[str, Any]]:
-    return json.loads(path.read_text())["pages"]
+    pages = json.loads(path.read_text())["pages"]
+    for page in pages:
+        page["_entries"] = [
+            _terms(m.group("head") or m.group("term"))
+            for m in _ENTRY.finditer(page.get("body", ""))
+        ] if page.get("layout") == "lookup" else []
+    return pages
 
 
 def _stem(word: str) -> str:
@@ -66,15 +77,29 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
 
     Frequency would reward a long body, which is the opposite of what should
     rank: the pages that answer in one call are the short ones.
+
+    A lookup page — the glossary, a reference — answers from one entry, and
+    its summary cannot name them all. A question that names an entry in full
+    ("webhook list", "flow runs cancel") is asking for that entry, so the
+    longest one it names counts above a scattered body hit and below the
+    page's own summary. Naming only part of an entry counts nothing extra:
+    entry names share words like "app" and "flow" with every concept, and
+    partial hits would let a large reference outrank the concept that
+    answers.
     """
     if not terms:
         return 0
     ident = _terms(page["id"]) | _terms(page["title"])
     summary = _terms(page["summary"])
     body = _terms(page.get("body", ""))
+    named = max(
+        (len(e) for e in page.get("_entries", ()) if e and e <= terms),
+        default=0,
+    )
     return (
         8 * len(terms & ident)
         + 4 * len(terms & summary)
+        + 2 * named
         + 1 * len(terms & body)
     )
 
