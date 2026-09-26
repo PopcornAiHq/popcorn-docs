@@ -109,8 +109,8 @@ has a script that writes it and a `--check` that exits 1 when it is stale.
 | Page | Script | Refreshed |
 |---|---|---|
 | `cli.md` | `scripts/sync-cli.py` | automatically, daily |
-| `activities.md` | `scripts/sync-activities.py` | by hand — reads prod through an authenticated CLI |
-| `mcp.md` | `scripts/sync-mcp.py` | by hand — reads a local backend checkout |
+| `activities.md` | `scripts/sync-activities.py` | after each prod deploy, by the backend's deploy pipeline; or by hand through an authenticated CLI |
+| `mcp.md` | `scripts/sync-mcp.py` | after each prod deploy, by the backend's deploy pipeline; or by hand against a local backend checkout |
 
 ### The CLI reference
 
@@ -150,6 +150,32 @@ publishes `foundation` and `feature` activities at `release` or `beta`. The
 descriptions are backend docstrings, so the leak guard can fail on them; the
 fix for that is the docstring, and the page can be regenerated once the fix is
 deployed.
+
+### After each prod deploy
+
+The activity and MCP references describe the deployed platform, so they are
+regenerated from it: after each prod deploy the backend's deploy pipeline
+saves the activity catalog and runs
+
+```bash
+python3 scripts/sync-activities.py --from DIR --platform-version V
+POPCORN_BACKEND=<deployed checkout> python3 scripts/sync-mcp.py --platform-version V
+```
+
+where `DIR` holds `foundation.json` and `feature.json`, each the catalog API's
+`{"activities": [...]}` response, and `V` is the deploy's version,
+`vYYYYMMDD-HHMMSS-<sha>`. When either page changed it opens a pull request
+here as the docs bot — the GitHub App the CLI sync above uses — and a person
+reviews and merges it like any other.
+
+Each page records only the deploy's date, as `platform: YYYY-MM-DD` beside
+its title — the version's commit hash is from a private repository and is
+never written here. The date moves only when something else on the page does,
+so a deploy that changes neither the catalog nor the tools leaves both pages
+byte-identical and opens nothing. A hand run without `--platform-version`
+that changes a page drops the line, since it cannot know which deploy it
+read; `--check` ignores the line either way. `scripts/platform_version.py`
+holds the rule.
 
 ## Validating the summaries
 

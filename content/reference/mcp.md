@@ -20,9 +20,10 @@ call runs as the person who connected the server, in the workspace
 `whoami` last selected, with that person's permissions.
 
 This page is generated from the server's tool definitions by
-`scripts/sync-mcp.py` and never edited by hand. The access line under each
-tool is the hint the server declares to the host; a host may use it to
-decide what to ask before calling.
+`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
+date beside the title is the day of the deploy that last changed it. The
+access line under each tool is the hint the server declares to the host; a
+host may use it to decide what to ask before calling.
 
 ## Tools
 
