@@ -99,6 +99,8 @@ def main() -> int:
     check(site + "/", failures)
     check(site + "/robots.txt", failures)
     check(site + "/sitemap.xml", failures)
+    # The site's search fetches this; missing, every search reports an error.
+    check(site + "/search.json", failures)
 
     index = check(site + "/llms.txt", failures)
     if not index:

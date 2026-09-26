@@ -4,8 +4,9 @@
 Deliberately one script rather than one per artifact. Sites that grew a second
 transform for their LLM exports ended up with the two disagreeing, and the
 fix was always to collapse them back into a single walk of the source. So
-`chunks.json`, `llms.txt`, `llms-full.txt` and the per-page Markdown all come
-out of the same read here, and a fifth output belongs in this file too.
+`chunks.json`, `llms.txt`, `llms-full.txt`, `search.json` and the per-page
+Markdown all come out of the same read here, and the next output belongs in
+this file too.
 
 Outputs, under `build/`:
 
@@ -24,6 +25,10 @@ Outputs, under `build/`:
                      browsing among them — open a URL only when it was pasted
                      or a search returned it, never by following a link, so a
                      page a search engine has not indexed is out of their reach
+    search.json      what the site's own search reads: per page its title, URL,
+                     section, summary and every heading or lookup entry with
+                     its anchor. No bodies — chunks.json carries those, and
+                     the browser fetches this whole on a reader's first search
 
 `llms.txt` is the file most likely to be fetched by something we do not
 control, so it carries summaries and not bodies. A reader that wants
@@ -309,6 +314,7 @@ def main() -> int:
         json.dumps({"site": SITE, "pages": pages}, indent=2) + "\n"
     )
 
+    search = []
     index = ["# Popcorn docs", ""]
     full = ["# Popcorn docs — full text", ""]
     by_id = {page["id"]: page for page in pages}
@@ -335,6 +341,7 @@ def main() -> int:
                 f"{version_badge(page)}</div>"
                 f"{render.page_actions('/' + path)}</div>\n"
                 f'<p class="summary">{render.inline(page["summary"])}</p>\n'
+                f"{render.on_this_page(rendered, lookup=lookup)}"
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
                 description=page["summary"],
@@ -346,7 +353,18 @@ def main() -> int:
             )
         )
 
+        search.append({
+            "title": render.plain(page["title"]),
+            "url": href(page),
+            "section": section_info(nav_section(page))[0],
+            "summary": render.plain(page["summary"]),
+            "headings": render.search_entries(rendered),
+        })
+
     (BUILD / "llms.txt").write_text("\n".join(index))
+    (BUILD / "search.json").write_text(
+        json.dumps({"pages": search}, ensure_ascii=False, separators=(",", ":")) + "\n"
+    )
     (BUILD / "llms-full.txt").write_text("\n".join(full))
     (BUILD / "index.html").write_text(landing(pages))
     (BUILD / "robots.txt").write_text(
@@ -363,7 +381,8 @@ def main() -> int:
     size = (BUILD / "llms.txt").stat().st_size
     sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
-          f"llms-full.txt, index.html, robots.txt, sitemap.xml, {sections}(.md + .html)")
+          f"llms-full.txt, search.json ({(BUILD / 'search.json').stat().st_size:,}B), "
+          f"index.html, robots.txt, sitemap.xml, {sections}(.md + .html)")
     return 0
 
 
