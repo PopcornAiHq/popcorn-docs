@@ -705,8 +705,9 @@ the projection columns:
 writes for record 12 touch projection columns ['Status']; the engine writes them from the tuple
 ```
 
-That is the rule from the concept, enforced: change a row's status by firing
-an event, never by writing the column.
+That is the rule from the concept, enforced on the transition path: change a
+row's status by firing an event. A plain store write to the column is not
+refused, but the next projection overwrites it.
 
 ## 6. Check it
 
