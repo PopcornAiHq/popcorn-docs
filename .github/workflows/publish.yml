@@ -20,6 +20,7 @@ on:
     paths:
       - 'content/**'
       - 'scripts/**'
+      - 'assets/**'
       - '.github/workflows/publish.yml'
   # Re-publish without a commit. Useful because some fixes never change a file:
   # a content type or a deletion leaves bodies byte-identical, so CloudFront

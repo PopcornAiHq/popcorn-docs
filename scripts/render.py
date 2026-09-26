@@ -17,10 +17,19 @@ and each page is a few KB, so a second request to fetch a stylesheet costs
 more than the duplication does, and it keeps a page that someone saves or
 pipes through a reader self-contained.
 
-The fonts are the one thing fetched from elsewhere: Inter for text and
-JetBrains Mono for code, from Google Fonts. Both stacks fall back to the
-system's own faces, so a page read offline or with the request blocked loses
-the typeface and nothing else.
+The fonts are served from this site, not a font CDN: Inter for text and
+JetBrains Mono for code, committed under `assets/fonts/` with their licences
+and copied into the build. A third-party request on every page view tells
+that party who is reading, and Google Fonts' copy of Inter drops the
+character variants the body text asks for (`cv11`, `ss01`), so those settings
+did nothing. Each file is the project's own variable release cut down with
+fontTools — `varLib.instancer` to the weight range the CSS uses and Inter's
+text optical size, then `pyftsubset` to Latin plus the arrows, keeping every
+layout feature. The files are named for their upstream version and served
+with a long cache lifetime, so a replacement takes a new name rather than
+overwriting one a browser has cached. Both stacks still fall back to the
+system's own faces, so a font that fails to load costs the typeface and
+nothing else.
 """
 
 from __future__ import annotations
@@ -488,7 +497,28 @@ _DARK = """
     color-scheme: dark;
 """
 
+# The two typefaces, by the path the build serves them at. emit.py fails the
+# build if either is missing, and check-published.py fetches them, so these
+# names are what ties the CSS to the files in `assets/fonts/`.
+FONT_TEXT = "/fonts/inter-4.1-latin.woff2"
+FONT_MONO = "/fonts/jetbrains-mono-2.304-latin.woff2"
+FONT_FILES = (FONT_TEXT, FONT_MONO)
+
+# `swap` shows the text in the fallback face at once and changes face when the
+# file arrives, rather than holding the page blank for it. The weight ranges
+# are the ranges each file was instanced to, so the browser never synthesises
+# a weight the file already has.
 _CSS = """
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(""" + FONT_TEXT + """) format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400 600; font-display: swap;
+  src: url(""" + FONT_MONO + """) format("woff2"); }
+/* Off-screen until it takes focus, so it costs a sighted mouse user nothing
+   and is the first thing a keyboard reader reaches. */
+.skip { position: absolute; left: 1rem; top: 0; z-index: 30; padding: .5rem .9rem; border-radius: 0 0 6px 6px;
+  background: var(--accent); color: var(--bg); font-weight: 600; text-decoration: none; transform: translateY(-110%); }
+.skip:focus { transform: none; outline: 2px solid var(--brand); outline-offset: 2px; }
+main:focus { outline: none; }
 :root {
   color-scheme: light;
   --bg: #fffdf8; --fg: #1a1a1e; --muted: #6b6760; --rule: #e9e3d6;
@@ -751,12 +781,6 @@ blockquote p:last-child { margin-bottom: 0; }
   .search { margin-top: .75rem; max-height: calc(100vh - 1.5rem); }
 }
 """
-
-
-_FONTS = (
-    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700"
-    "&family=JetBrains+Mono:wght@400;500;600&display=swap"
-)
 
 
 # An emoji favicon, inline: no file to publish, advertise or keep in sync.
@@ -1096,18 +1120,41 @@ def document(
     description: str = "",
     sidebar: str = "",
     rail: str = "",
+    url: str = "",
+    noindex: bool = False,
 ) -> str:
     """Wrap rendered content in a standalone page: header, sidebar, page, rail.
 
     The caller builds both columns, from `site_nav` or `lookup_index` on the
     left and `rail` on the right; an empty one still takes its grid column, so
     the text sits in the same place on every page.
+
+    ``url`` is the page's canonical address, the same one the sitemap lists.
+    It becomes `<link rel="canonical">` and the Open Graph URL, which is what
+    a chat app or a search engine files the page under whichever way it was
+    reached. A page with no single address — the not-found page, served at
+    every missing path — passes none, and ``noindex`` keeps it out of search.
     """
-    meta = (
-        f'\n  <meta name="description" content="{html.escape(description, quote=True)}">'
-        if description
-        else ""
-    )
+    attr = lambda text: html.escape(text, quote=True)
+    head = [f'<meta name="description" content="{attr(description)}">'] if description else []
+    if noindex:
+        head.append('<meta name="robots" content="noindex">')
+    if url:
+        head.append(f'<link rel="canonical" href="{attr(url)}">')
+    # A link pasted into a chat app unfurls from these. There is no og:image:
+    # a card image per page would need an image pipeline, and "summary" is
+    # the card type that looks deliberate without one.
+    head += [
+        '<meta property="og:site_name" content="Popcorn docs">',
+        f'<meta property="og:title" content="{attr(title)}">',
+        f'<meta property="og:type" content="{"website" if url == SITE + "/" else "article"}">',
+    ]
+    if url:
+        head.append(f'<meta property="og:url" content="{attr(url)}">')
+    if description:
+        head.append(f'<meta property="og:description" content="{attr(description)}">')
+    head.append('<meta name="twitter:card" content="summary">')
+    meta = "".join(f"\n  {tag}" for tag in head)
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1115,13 +1162,12 @@ def document(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title, quote=False)}</title>{meta}
   <link rel="icon" href="{_ICON}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="{_FONTS}">
+  <link rel="preload" href="{FONT_TEXT}" as="font" type="font/woff2" crossorigin>
   <style>{_CSS}</style>
   <script>{_THEME_EARLY}</script>
 </head>
 <body>
+<a class="skip" href="#content">Skip to content</a>
 <header class="site"><div class="bar">
 <button class="menu" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">\u2630</button>
 <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Popcorn docs</a>
@@ -1131,7 +1177,7 @@ def document(
 </nav></div></header>
 <div class="layout">
 <aside class="sidebar" id="sidebar">{sidebar}</aside>
-<main>
+<main id="content" tabindex="-1">
 {content}
 </main>
 <aside class="rail">{rail}</aside>
