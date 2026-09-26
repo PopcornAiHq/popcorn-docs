@@ -6,11 +6,11 @@ summary: >
   Adding a table to an app that already exists: declare it under `tables:`,
   write it from a flow with `foundation.store.*`, run `template check`, then
   `app publish` from a fork line. Install creates the table, and each later
-  install adds to it and never removes. A merge policy other than `replace`
-  survives every later publish, so choose each before the first.
+  install adds to it and never removes. No later publish can move a column
+  off a merge policy other than `replace`, so choose each before the first.
 concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
 applies_to: [cli, human]
-source: [ColumnDef, SchemaDef, MergeKeyDef, apply_tables, reconcile_columns, carry_merge_forward, validate_record, upsert_rows]
+source: [ColumnDef, SchemaDef, MergeKeyDef, apply_tables, reconcile_columns, carry_merge_forward, apply_column_merge, validate_record, upsert_rows]
 ---
 
 This guide adds one table to an app a channel already runs, and ends with
@@ -62,25 +62,26 @@ tables:
       on_conflict: merge
 ```
 
-A column has a `name` and a `type`, and everything else is optional:
+A column needs a `name` and a `type`. The authoring guide's §5 lists the
+rest: `display`, the governance flags, `index` and `unique`. Two things it
+does not say:
 
-| Key | Values |
-|---|---|
-| `type` | `string`, `number`, `boolean`, `datetime` (an ISO-8601 string), `json` |
-| `format` | checked on every write. `string`: `uuid`, `email`, `url`, `phone`, `ipv4`, `ipv6`, `hex_color`, `slug`. `number`: `integer`. `datetime`: `date`. `boolean` and `json` take none |
-| `display` | a rendering hint such as `status:…`, `currency:USD` or `relative`. Only the part before the first `:` is checked |
-| `label` | the heading clients show in place of `name` |
-| `required` | every row written must carry a non-null value |
-| `index`, `unique` | indexes the column for filtering and sorting, and `unique` also rejects a duplicate value. `string`, `number` and `datetime` only |
-| `merge`, `merge_separator`, `merge_when` | what a merging write does to the stored value (step 3) |
-| `internal`, `pii`, `restricted`, … | governance flags, listed in the authoring guide's §5 |
+- **Each `format` belongs to one `type`.** `string` takes `uuid`, `email`,
+  `url`, `phone`, `ipv4`, `ipv6`, `hex_color` or `slug`. `number` takes
+  `integer`, and `datetime` takes `date`. `boolean` and `json` take none.
+  Every write is checked against the format.
+- **`label` is the heading clients show in place of `name`.** It is the one
+  way to change what a column is called on screen.
 
-Pick the column names now, because install never renames a column. The
-`name` is the key every row is stored under, and a changed `name` adds a new
-column next to the old one. To change what people see, change `label`
-instead. A column a flow reads as `$row.<name>` must have no spaces in its
-name. `TicketId` is written that way for that reason, while `First Seen` is
-only ever written or filtered on, so the space does no harm.
+Choose the names now, because install never renames a column. The `name`
+is the key every row is stored under, so a changed `name` adds a new column
+next to the old one. A change of case alone adds nothing. The installed
+spelling stays, and a flow that writes the new spelling is refused with a
+"did you mean". A column that any `$` reference reads, such
+as `$row.TicketId` in a `foreach`, needs a name made only of letters, digits
+and underscores that does not start with a digit. The authoring guide's §5
+has the rule. `First Seen` is only ever written or filtered on, so its space
+does no harm.
 
 A table declared with no columns is skipped. Install does not create it.
 
@@ -89,19 +90,11 @@ A table declared with no columns is skipped. Install does not create it.
 This is the step that is hard to undo, so it comes before any flow is
 written.
 
-**The merge key decides which row a write lands on.** `merge_key.any_of`
-names the columns that identify a row, so a write whose `TicketId` matches an
-existing row updates that row rather than inserting a new one. Each merge-key
-column must be a `string` column (or a computed one) and must be indexed,
-with `unique: true` or `index: true`. While the table declares a merge key,
-the per-call `merge_on` and `on_conflict` arguments of
-`foundation.store.upsert_rows` are ignored, and the table's
-`merge_key.on_conflict` (default `merge`) applies to every write.
-
-**The merge policy decides what happens to each column on that row.** There
-are four policies, `replace`, `concat`, `keep` and `increment_on_change`, and
-[column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md) is
-the authoritative page for them. The example uses three:
+The merge key decides which row a write lands on, and each column's merge
+policy decides what happens to that column on that row. Both are explained
+in [column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md).
+Keep `on_conflict: merge`: `replace` swaps the whole row for the incoming one
+and applies no column policy at all. The example uses three policies:
 
 - `First Seen: keep`: the first hand-off's time stays, however often the
   ticket comes back.
@@ -109,14 +102,22 @@ the authoritative page for them. The example uses three:
 - `Reopened: increment_on_change`: counts `done` → `open` transitions of
   `Stage`, and ignores the value the write sends.
 
-**Choose each policy before the first publish.** Install writes the table as
-the platform, and when the platform changes a schema, the store keeps any
-policy other than `replace` that a column already has. You can add a policy
-to a `replace` column by publishing a new version. Once a column is `concat`,
-`keep` or `increment_on_change`, though, a later manifest that says
-`merge: replace`, or a different policy, is overridden and the old policy
-stays. The publish succeeds and nothing reports the override. If you need a
-different policy, add a new column.
+**Choose each policy before the first publish.** An install changes a schema
+as a non-human caller. When a non-human caller changes a schema, the store
+keeps any policy other than `replace` that a column already has. You can add
+a policy to a `replace` column with a later publish. Once a column is
+`concat`, `keep` or `increment_on_change`, though, no manifest can move it
+off that policy:
+
+- On a `keep` column, or a `concat` column with the default separator,
+  naming `replace` or another policy is overridden. The publish and the
+  install both succeed, and the old policy stays.
+- On an `increment_on_change` column, or a `concat` column with its own
+  `merge_separator`, naming another policy fails the install.
+- Retyping a `concat` or `increment_on_change` column without naming a
+  policy also fails the install.
+
+If you need a different policy, add a new column.
 
 ## 4. Write to it from a flow
 
@@ -139,7 +140,6 @@ steps:
 
   - id: write
     activity: foundation.store.upsert_rows
-    on_error: { policy: fail, retry: 0 }
     args:
       conversation_id: $inputs.conversation_id
       table_name: handoffs
@@ -152,29 +152,30 @@ steps:
           Reopened: 0
 ```
 
-The write sends every column on every call, and that is deliberate. On the
-first write the row is inserted, and it holds exactly what was sent, so
-`Reopened` starts at `0`. On every later write the policies apply, and the
-accumulating ones act only on columns the write carries. A write that left
-out `Reopened` would never count, and one that left out `First Seen` would
-leave a first-time row without it.
+The write sends every column on every call. The first write inserts the
+row exactly as sent, so `Reopened` starts at `0`. After that, the
+accumulating policies act only on columns a write carries (see
+[column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md)).
 
 The other activities you will usually need are:
 
 - `foundation.store.list_rows`: `filter` selects rows in the database, and
   each row in `.output.rows` carries `_record_id`.
 - `foundation.store.patch_row`: changes named cells of one row by
-  `record_id`. Pass `expected_rev` (the row's `_rev`) when another writer may
-  have changed the row since you read it.
+  `record_id`. It is a merging write, so the policies apply: a `concat` cell
+  appends, a `keep` cell that holds a value ignores the patch, and a counter
+  ignores the value it is sent. Pass `expected_rev` (the row's `_rev`) when
+  another writer may have changed the row since you read it.
 - `foundation.store.get_record`: reads one row by id.
 
 Their arguments are in the
 [activity reference](https://docs.popcorn.ai/reference/activities.md).
 
 The store checks each value against its column's `type`, `format` and
-`required`. It does not check column names: a key it does not know is stored
-silently, unless the key differs from a declared column only by case. A
-write to a table the channel does not have fails the step.
+`required`. On a merging write, including `patch_row`, it checks the whole
+merged row, not only the cells the write sent. The store trims whitespace
+from keys, but it does not check that a key names a column: an unknown key
+is stored silently, unless it differs from a declared column only by case.
 
 ## 5. Check it offline
 
@@ -191,13 +192,13 @@ check everything, though, and a problem it misses shows up at a later stage:
 | `merge: concat` on a column that is not a string | `template check`: `concat-requires-string` |
 | a flow writing a column the table does not declare | `template check`: `undeclared-column` |
 | a filter on an undeclared column | `template check`, as a warning: `unknown-filter-column` |
-| an unknown `type`, a `format` that does not suit the type, `increment_on_change` without `merge_when`, an index on a `boolean` or `json` column | install, which fails |
-| a `table_name` misspelled in a flow | the run, whose step fails |
+| any other invalid column definition: an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case | install, which fails |
+| a `table_name` misspelled in a flow | the run: a write fails the step, while a `list_rows` with `missing_ok: true` reads the missing table as empty |
 
 Publish does not validate column definitions, so the mistakes in the fifth
-row get through a publish and then fail the install. Check every `table_name` by eye,
-because `template check` only compares columns for tables the manifest
-declares.
+row get through a publish and then fail the install. Check every
+`table_name` by eye, because `template check` only compares columns for
+tables the manifest declares.
 
 ## 6. Publish
 
@@ -208,28 +209,36 @@ popcorn app publish . --bump patch -m "add handoffs table" --yes
 Publishing needs workspace-admin rights. The publish mints the next version
 on the fork line and starts an install on this channel. That install creates
 the `handoffs` table before it binds the channel to the new version, so no
-run on the new version can reach a channel without the table. Every other
-channel on the line gets the table at its own daily update. The publish
-prints how many channels that is, but only after the version exists. See
-[publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+run on the new version can reach a channel without the table. The other
+channels on the line get the table at their own daily update, apart from the
+ones that take no updates (see
+[publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md)).
+The publish prints how many channels will update, but only after the version
+exists.
 
 If a column definition is invalid, the publish still succeeds, but the
-install fails before it binds. The channel then stays on its previous
-version, and so does every other channel that tries to update. The fix is
-another publish.
+install fails before it binds. The channel keeps its previous version, but
+not necessarily its previous tables: a table listed before the invalid one
+may already have been created or changed. Every other channel that tries to
+update fails the same way. The fix is another publish.
 
 ## 7. Confirm it landed
 
 ```bash
-popcorn app status .                                    # install_state: current?
+popcorn app status .
 popcorn table schema handoffs --channel '#example-intake'
 ```
 
-`app status` says whether the channel runs the line's head. `table schema`
-prints the installed columns with `unique`, `required`, `internal`, `pii`,
-`restricted` and `concat` flagged. It does not show `keep`,
-`increment_on_change`, `index` or the merge key, so add `--json` to see the
-whole schema.
+Inside a checkout, `app status` says either that the channel runs the line's
+head, or that it is behind because the install has not landed. From outside
+a checkout, `app status --channel` reports `install_state` as `current` or
+`pending`. `pending` cannot tell an install still running from one that
+failed, and `app apply` retries both.
+
+`table schema` prints each column's name and type, and flags `unique`,
+`required`, `internal`, `pii`, `restricted` and `concat`. To see everything
+else, including the other policies, `format`, `display`, `label` and the
+merge key, add `--json`.
 
 Then write a row, write it again, and read it back:
 
@@ -259,10 +268,14 @@ adds to it:
   unless the manifest states a new one. Deleting `unique: true` leaves the
   column unique; write `unique: false`. A `merge_key` the manifest declares
   replaces the installed one, and one it leaves out stays in place.
-- **Never changes:** a column is never removed or renamed, and a column's
-  existing policy other than `replace` stays (step 3). Columns are matched
-  by name, ignoring case and extra whitespace, and a matched column keeps its
-  installed spelling.
+- **Never changes:** a column is never removed or renamed, and a policy
+  other than `replace` stays (step 3). Columns are matched by name, ignoring
+  case and extra whitespace, and a matched column keeps its installed
+  spelling.
+- **Existing rows are not rewritten.** A new `type`, `format` or `required`
+  applies to the rows already stored the next time anything merges into
+  them. A merging write or a `patch_row` checks the whole merged row, so it
+  can fail on an old value in a column the write never touched.
 
 A column you stop declaring stays on the table with its data, after the
 declared ones. Removing a column from the manifest does not remove it from
