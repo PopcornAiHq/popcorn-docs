@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.57.0
+version: 0.57.1
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The 79 commands `popcorn` 0.57.0 lists in its help menu, under the
+The 79 commands `popcorn` 0.57.1 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -287,7 +287,7 @@ Start a flow run
 
 | Argument | Required | Notes |
 |---|---|---|
-| `<flow_id>` | yes | Flow UUID |
+| `<flow_id>` | yes | Flow name (as `flow list` prints it) |
 | `--channel <value>` | yes | Channel name (#general) or UUID |
 | `--inputs <str>` |  | JSON object of flow inputs (use '@-' for stdin, '@path' for a file) |
 | `--wait` |  | Poll until the server reports the run finished |

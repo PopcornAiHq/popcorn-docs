@@ -7,7 +7,7 @@ summary: >
   Publish mints the next version on a fork line and reaches every channel on
   it; its guards check permission and validity, never whether you meant to
   reach everyone, and a manifest missing `app_type` is not refused — it clears
-  the app on every channel. Apply brings one channel up to its line's head,
+  the app on every channel. Apply brings a fork-line channel up to its head,
   takes no version, and is the durable retry when an install was blocked.
 concepts: [fork-line, bundle-version]
 applies_to: [cli, mcp, human]
@@ -20,7 +20,8 @@ Two operations people conflate, doing different jobs.
 channel it names. It is a line operation: every other channel on the line
 converges to the new head on its own.
 
-**Apply** brings one channel up to its own line's head. It takes no version
+**Apply** brings one channel on a fork line up to that line's head; what it
+does to a channel still on the product version is below. It takes no version
 from you — there is no parameter through which one channel's content reaches
 another — and reports `already_current` if there is nothing to do.
 
