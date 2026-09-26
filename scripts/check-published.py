@@ -23,6 +23,9 @@ So this asks what those failures answer to:
     does robots.txt serve                     a missing one is a 403 from the
                                               bucket, which crawlers read as
                                               "disallow all"
+    do the fonts serve, as fonts              a missing one sets every page in
+                                              the fallback face, and nothing
+                                              else would notice
 
 It runs after a publish, against the real domain, and is the only check here
 that needs the network. That makes it the only one that can fail for reasons
@@ -37,6 +40,8 @@ import argparse
 import sys
 import urllib.error
 import urllib.request
+
+import render
 
 DEFAULT_SITE = "https://docs.popcorn.ai"
 TIMEOUT = 20
@@ -55,6 +60,7 @@ EXPECTED_TYPE = {
     ".txt": "text/plain",
     ".json": "application/json",
     ".xml": "application/xml",
+    ".woff2": "font/woff2",
 }
 
 
@@ -99,6 +105,8 @@ def main() -> int:
     check(site + "/", failures)
     check(site + "/robots.txt", failures)
     check(site + "/sitemap.xml", failures)
+    for font in render.FONT_FILES:
+        check(site + font, failures)
 
     index = check(site + "/llms.txt", failures)
     if not index:
