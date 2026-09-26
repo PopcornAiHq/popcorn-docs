@@ -101,10 +101,43 @@ publish workflow publishes the site: `.github/workflows/publish.yml` reruns the
 checks, uploads `build/`, invalidates the CDN and then reads the live site back
 with `scripts/check-published.py`. Nothing needs to be run by hand.
 
-## Regenerating the activity reference
+## Generated reference pages
+
+The pages under `content/reference/` are generated, never edited by hand. Each
+has a script that writes it and a `--check` that exits 1 when it is stale.
+
+| Page | Script | Refreshed |
+|---|---|---|
+| `cli.md` | `scripts/sync-cli.py` | automatically, daily |
+| `activities.md` | `scripts/sync-activities.py` | by hand — reads prod through an authenticated CLI |
+| `mcp.md` | `scripts/sync-mcp.py` | by hand — reads a local backend checkout |
+
+### The CLI reference
+
+`.github/workflows/sync-cli.yml` installs the latest `popcorn-cli` release
+every day, runs `scripts/sync-cli.py`, and when the page differs opens a pull
+request from the `automation/sync-cli` branch — or updates the one already
+open. It runs the leak guard on the new page before pushing, since a pushed
+branch is public. It pushes and opens the pull request as the docs bot, a
+GitHub App installed on this repository, so CI runs on the pull request as on
+any other. The App is configured by the `DOCS_BOT_CLIENT_ID` repository
+variable and the `DOCS_BOT_PRIVATE_KEY` secret; until both exist the sync is
+skipped with a notice. Run it on demand from the Actions tab.
+
+PR CI does not run `sync-cli.py --check`: a CLI release would otherwise fail
+every open pull request until someone regenerated the page. To regenerate by
+hand, upgrade the CLI first, since the page describes whichever one is
+installed:
+
+```bash
+popcorn upgrade
+python3 scripts/sync-cli.py
+```
+
+### The activity reference
 
 `content/reference/activities.md` is generated from the deployed activity
-catalog and never edited by hand:
+catalog:
 
 ```bash
 python3 scripts/sync-activities.py           # reads prod through the popcorn CLI

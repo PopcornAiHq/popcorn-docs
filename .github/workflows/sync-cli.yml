@@ -1,0 +1,188 @@
+name: Sync CLI reference
+
+# Keeps content/reference/cli.md in step with the latest popcorn CLI release.
+#
+# The page is generated from the CLI's own help and schema, and the CLI ships
+# on its own schedule, so the page goes stale without any change here. This
+# regenerates it daily and, when it differs, proposes the new page as a pull
+# request on one fixed branch. It never pushes to main: the change still goes
+# through review and the same required checks as any other.
+#
+# It is deliberately not a check in CI. A new CLI release would then fail every
+# unrelated pull request until someone regenerated the page, which blames the
+# wrong change and blocks work that has nothing to do with the CLI.
+#
+# It pushes and opens the pull request as the docs bot, a GitHub App installed
+# on this repository, rather than with GITHUB_TOKEN. Two reasons: the
+# organization does not let GITHUB_TOKEN open pull requests — the same setting
+# would also let workflows approve them — and a pull request GITHUB_TOKEN opens
+# never starts CI, so its required checks would never report. One opened with
+# an App token is treated like a person's, and CI runs on it as usual.
+#
+# Until the App is configured — the DOCS_BOT_CLIENT_ID variable and the
+# DOCS_BOT_PRIVATE_KEY secret — the sync job is skipped with a notice rather
+# than failing every day.
+#
+# The activity and MCP pages are not synced here: one reads prod through an
+# authenticated CLI and the other reads a private checkout, and neither is
+# available to a public repository's workflow.
+
+on:
+  schedule:
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+
+concurrency:
+  # Two runs would race to force-push the same branch. Queue rather than
+  # cancel, so a manual run is never dropped for a scheduled one.
+  group: sync-cli
+  cancel-in-progress: false
+
+# Nothing at the workflow level. GITHUB_TOKEN only reads; every write goes
+# through the App's token, which is scoped to this repository.
+permissions: {}
+
+jobs:
+  configured:
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - id: check
+        env:
+          CLIENT_ID: ${{ vars.DOCS_BOT_CLIENT_ID }}
+          HAS_KEY: ${{ secrets.DOCS_BOT_PRIVATE_KEY != '' }}
+        run: |
+          if [ -n "$CLIENT_ID" ] && [ "$HAS_KEY" = "true" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::The docs bot is not configured (DOCS_BOT_CLIENT_ID variable, DOCS_BOT_PRIVATE_KEY secret); skipping the CLI sync."
+          fi
+
+  sync:
+    needs: configured
+    if: needs.configured.outputs.ok == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      BRANCH: automation/sync-cli
+      PAGE: content/reference/cli.md
+      # Agent mode keeps the CLI from ever prompting. It also implies no update
+      # check; that is set explicitly too, because an auto-upgrade mid-run would
+      # regenerate the page from a different release than the one installed.
+      POPCORN_AGENT: '1'
+      POPCORN_NO_UPDATE_CHECK: '1'
+    steps:
+      # Only the two permissions the job uses, and only on this repository,
+      # whatever else the App is ever granted.
+      - name: Token for the docs bot
+        id: app
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.DOCS_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # Checked out with the App's token, so the branch push is the bot's too.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app.outputs.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The CLI installs from its GitHub repository, not PyPI. Pin the install
+      # to the latest release's tag rather than the default branch: the page
+      # describes what an author gets from a release, and main runs ahead.
+      - name: Install the latest CLI release
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          tag=$(gh release view --repo PopcornAiHq/popcorn-cli --json tagName --jq .tagName)
+          python -m pip install --quiet "git+https://github.com/PopcornAiHq/popcorn-cli@${tag}"
+          popcorn version
+
+      - name: Regenerate the page
+        run: python3 scripts/sync-cli.py
+
+      - name: Has it changed
+        id: diff
+        run: |
+          if git diff --quiet -- "$PAGE"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- "$PAGE"
+          fi
+
+      # The page is current, so any open proposal is stale — most likely the
+      # page was regenerated by hand and merged. Close it rather than leave a
+      # pull request that duplicates main.
+      - name: Close a stale pull request
+        if: steps.diff.outputs.changed == 'false'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          state=$(gh pr view "$BRANCH" --json state --jq .state 2>/dev/null || true)
+          if [ "$state" = "OPEN" ]; then
+            gh pr close "$BRANCH" --delete-branch \
+              --comment "Main already matches the latest CLI release; nothing to sync."
+          fi
+
+      # CI runs on the pull request, but a pushed branch is public the moment it
+      # is pushed, merged or not. So the leak guard runs here, before the push.
+      # The CLI's descriptions are its own help text, which can carry anything;
+      # a hit here is fixed in the CLI, not on the page.
+      - name: No internal references
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git add -- "$PAGE"
+          scripts/check-public-repo.sh
+
+      # The branch is rebuilt from main on every run and force-pushed, so it
+      # always holds exactly one commit: the regenerated page on current main.
+      # When the branch already carries this exact page, the push is skipped,
+      # so a run with no new release leaves the pull request and its CI alone.
+      - name: Open or update the pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          # The version the page itself records, so the title cannot disagree
+          # with the badge the page shows.
+          version=$(sed -n 's/^version: //p' "$PAGE")
+          title="docs: the CLI reference matches popcorn ${version}"
+
+          # Commit as the App's bot user, so the commit is attributed to it.
+          bot_id=$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git commit --quiet -m "$title" -- "$PAGE"
+
+          if git fetch --quiet origin "$BRANCH" 2>/dev/null \
+            && git diff --quiet FETCH_HEAD -- "$PAGE"; then
+            echo "$BRANCH already carries this page; not pushing."
+          else
+            git push --force origin "$BRANCH"
+          fi
+
+          body=$(cat <<EOF
+          Regenerated \`${PAGE}\` from popcorn ${version}, the latest CLI release, by \`scripts/sync-cli.py\`.
+
+          Opened by the docs bot from \`.github/workflows/sync-cli.yml\`. CI runs on this pull request as on any other; merge it when the checks pass.
+          EOF
+          )
+
+          state=$(gh pr view "$BRANCH" --json state --jq .state 2>/dev/null || true)
+          if [ "$state" = "OPEN" ]; then
+            gh pr edit "$BRANCH" --title "$title" --body "$body"
+          else
+            gh pr create --base main --head "$BRANCH" --title "$title" --body "$body"
+          fi
