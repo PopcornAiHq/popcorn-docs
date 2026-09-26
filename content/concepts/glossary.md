@@ -251,10 +251,12 @@ is close behind: see *bundle version*.
   `$channel.integrations.<name>` and set with
   `popcorn channel-config integrations set`. An **integration requirement** is
   what a bundle needs connected: a flow's `required_integrations:`, or the
-  manifest's `connections:`. Only `required_integrations:` is enforced: a run
-  missing one, or bound to an account of another provider, ends at once
-  without error and reports `missing_integrations`. `connections:` declares
-  what to connect and stops nothing. The product also calls these
+  manifest's `connections:`. Only `required_integrations:` is enforced, and a
+  run missing one (or bound to an account of another provider) does nothing:
+  started by a schedule, webhook, message trigger or another flow it ends
+  without error; a person's or agent's `flow run` is refused with 409
+  `missing_integrations`. `connections:` declares what to connect and stops
+  nothing. The product also calls these
   *connections*.
 - **channel agent** — The agent members talk to in a channel. The manifest's
   `channel_agent:` proposes it and is written or cleared on every install; a

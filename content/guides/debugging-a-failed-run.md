@@ -19,8 +19,8 @@ publishing are the loop in
 [authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md);
 this page is the reading half of it.
 
-Every command takes the channel as `--channel`, a `#name` or a UUID. The
-examples write `<id>` for it.
+Commands that act on a channel take it as `--channel`, a `#name` or a UUID;
+the examples write `<channel>`.
 
 ## 1. Find the run
 
@@ -29,13 +29,13 @@ started it:
 
 | Started by | Where its `workflow_id` is |
 |---|---|
-| `popcorn flow run` | printed as `workflow_id:`; with `--wait`, also on stderr as `Waiting for <id>...` |
+| `popcorn flow run` | printed as `workflow_id:`. With `--wait` nothing is printed until the run succeeds; a failure or timeout names the id in its error, and stderr shows `Waiting for <workflow-id>...` unless `--quiet` or agent mode |
 | a webhook delivery | `wh-<delivery id>` — the `id` that `popcorn webhook deliveries` lists |
 | anything else | `popcorn flow runs list` |
 
 ```bash
-popcorn flow runs list --channel <id> --flow <name>                  # newest first
-popcorn flow runs list --channel <id> --flow <name> --status closed --json
+popcorn flow runs list --channel <channel> --flow <name>                  # newest first
+popcorn flow runs list --channel <channel> --flow <name> --status closed --json
 ```
 
 `--flow` takes the flow's `name:`, which is also what the list prints last on
@@ -43,8 +43,9 @@ each line. Two things about the list are easy to get wrong:
 
 - **`--status failed` misses failures.** It selects the one status
   `Failed`. A run that timed out, was terminated or was cancelled also ended
-  `failed` (§2) and is not in it. To see every finished run, use
-  `--status closed` and read each run's `outcome`.
+  `failed` (§2) and is not in it. Use `--status closed` and read each run's
+  `outcome` — `closed` means "not `Running`", so it also holds
+  `ContinuedAsNew` runs, which are `still_running`.
 - **The text output has no `outcome` column.** It prints the raw status.
   `--json` carries `outcome` on every run, beside `trigger_source` (who asked
   for it: `app_user`, `agent`, `message`, `webhook`, … — a scheduled fire has
@@ -79,17 +80,20 @@ nothing.
 ## 3. Read why it failed
 
 ```bash
-popcorn flow runs get <workflow-id> --channel <id> --include-errors
+popcorn flow runs get <workflow-id> --channel <channel> --include-errors
 ```
 
-Without `--include-errors` a failed run still shows its `failure`; the flag
+Without `--include-errors` a `Failed` run still shows its `failure`; the flag
 adds the activity failures that led to it, and on a run that succeeded it is
-the only way to see a step that failed and was skipped. What each part says:
+the only way to see a step that failed and was skipped. A run that timed out,
+was terminated or was cancelled has `failure: null` — only a `Failed` run
+records one. `details` and `outputs` are in `--json` only; the text output
+omits them. What each part says:
 
 | Field | What it is |
 |---|---|
 | `failure` | The error that ended the run: `type`, `message`, and a `cause` chain the text output prints as `caused by:` lines. When the flow failed itself with `foundation.workflow.fail`, the `details:` map it passed is in that chain as `details`. |
-| `error_history` | The activities that failed, most recent last, each with its `activity_type`, `attempt` and `message`. Capped to the newest entries. |
+| `error_history` | The activities that failed, most recent last, each with its `activity_type`, `attempt` and `message`. Capped to the newest entries. An activity that timed out rather than failed is not listed. |
 | `current_activities` | On a live run only: what is in flight, its attempt against its maximum, and `last_failure`, the error behind the current retry. This is why a run is stuck. |
 | `outputs` | On a completed run only: the flow's declared `outputs:`. |
 
@@ -104,15 +108,20 @@ The failures you will meet most:
   arguments are resolved, before the activity is called, so `on_error` never
   sees it and a retry cannot fix it. Guarantee the key upstream: make the
   property `required` in the `output_schema` that produced it, or select rows
-  with `$exists: true`. A `$channel.<name>` reference to a parameter the
+  with `$exists: true`. The one place a missing key does not fail the run is
+  the flow's top-level `outputs:`: resolved after the last step, it is retried
+  by the engine and the run stays `Running` with nothing in flight — cancel it
+  and fix the reference. A `$channel.<name>` reference to a parameter the
   channel has not set fails the same way; `channel-config show` (§4) finds
   those before a run does.
 - **An activity's own error.** The top of the chain is the activity failing,
   with no `type`; its `cause` carries the activity's error type and message.
-  It arrives after the step's retries
-  ran out: with no `on_error`, a step gets up to 4 attempts, and
-  `on_error.retry: N` means N retries after the first. A non-idempotent step
-  should set `retry: 0`, or a partial failure repeats its side effect.
+  A retryable error arrives after the step's retries ran out: without
+  `on_error.retry` a step gets up to 4 attempts, and `retry: N` means N
+  retries after the first. A non-retryable error — `foundation.workflow.fail`,
+  or an activity's typed refusal — fails on the first attempt. A
+  non-idempotent step should set `retry: 0`, or a partial failure repeats its
+  side effect.
 - **`PredicateError`** — a `when:` expression that could not be evaluated,
   such as an ordered comparison between mismatched types. Like a reference
   error it is an authoring bug, and it fails the run at once.
@@ -121,7 +130,7 @@ The failures you will meet most:
   connected (§4). The parent fails rather than read empty outputs.
 
 `on_error: {policy: skip}` turns a step's failure into a null output and puts
-the error at `$steps.<id>.error`, as `type` and `message`, so a later step
+the error at `$steps.<channel>.error`, as `type` and `message`, so a later step
 can still fail by the original error once cleanup has run. `policy: fallback`
 is accepted but runs as `fail`.
 
@@ -136,7 +145,7 @@ channel nobody has configured yet must not fail every interval. The run
 detail does not say why it did nothing, so ask the channel:
 
 ```bash
-popcorn channel-config show --channel <id> --strict
+popcorn channel-config show --channel <channel> --strict
 ```
 
 It compares every flow's `$channel.*` references and required integrations
@@ -146,7 +155,8 @@ with what the channel has. `missing_integrations`, `missing_parameters` and
 `popcorn channel-config integrations set`.
 
 A run started by a person or an agent — `popcorn flow run` among them — is
-refused at the start instead, with `missing_integrations` and the names, so
+refused at the start instead: HTTP 409 `missing_integrations` with the names,
+which the CLI exits 3 on. So
 this quiet ending belongs to schedules, webhooks, message triggers and flows
 started by other flows.
 
@@ -156,17 +166,18 @@ the run succeeded.
 
 **It launched a run and finished.** `foundation.workflow.start_flow` starts a
 separate run and returns at once, so the parent succeeds whatever the child
-does. Find the child in `flow runs list --flow <child>`. When the parent needs
-the child's result, a `call_flow` step with `mode: wait` fails with it.
+does; so does a `call_flow` step with `mode: detach`. Find the child in
+`flow runs list --flow <child>`. When the parent needs the child's result, a
+`call_flow` step with `mode: wait` fails with it.
 
 ## 5. A run that never started
 
 **From a schedule.**
 
 ```bash
-popcorn schedule list --channel <id>
-popcorn schedule get <slug> --channel <id>
-popcorn app status --channel <id>
+popcorn schedule list --channel <channel>
+popcorn schedule get <slug> --channel <channel>
+popcorn app status --channel <channel>
 ```
 
 `schedule get` shows whether the schedule is paused, its next and last run,
@@ -174,15 +185,17 @@ and counts of fires skipped because the previous run was still going
 (`skipped (overlap)`) and fires missed (`missed (catchup)`). Its `note` is
 written by whatever last rewrote the schedule, and is usually the only
 explanation of a cadence that differs from the manifest. `app status` compares
-the channel's armed schedules with the manifest's and exits non-zero on
-drift. A schedule whose flow was renamed is dropped at install, with no error
+the channel's armed schedules with the manifest's. It prints a difference the
+platform explains — a `set_app_mode` retune, a spread offset — as a `note`,
+and exits non-zero only on one it cannot: a cadence or a pause nothing
+explains, or a declared schedule that was never installed. A schedule whose flow was renamed is dropped at install, with no error
 — see [a flow's identity is its name](https://docs.popcorn.ai/concepts/flow-identity.md).
 
 **From a webhook.**
 
 ```bash
-popcorn webhook deliveries --channel <id> --status failed --json
-popcorn webhook deliveries --channel <id> --include payload_raw --limit 5
+popcorn webhook deliveries --channel <channel> --status failed --json
+popcorn webhook deliveries --channel <channel> --include payload_raw --limit 5
 ```
 
 The text output lists each delivery's `id`, webhook and time; its `status`
@@ -193,52 +206,57 @@ reads its run's ending, then `completed` or `failed`, with the run's error in
 `error_message`. So a delivery can read `processing` for a while after its run
 has ended, and the run itself (`wh-<delivery id>`) is the faster read. A
 delivery is also `failed`, with no run at all, when its flow could not be
-resolved — the webhook names no flow, or a flow the channel no longer has.
+resolved — the webhook names no flow, or a flow the channel no longer has —
+or its body yields no flow inputs, with the parse error in `error_message`.
 One whose run aged out of retention before the reconcile read it is `failed`
 too.
 
-A delivery whose body is byte-identical to one received in the last five
-minutes is answered `{"status": "ok", "deduplicated": true}` and leaves no
-delivery row, so it appears nowhere. When replaying a payload, change a field
+A body byte-identical to one the same webhook accepted less than five minutes
+earlier is answered `{"status": "ok", "deduplicated": true}` and leaves no
+delivery row, so it appears nowhere. The window runs from the first accepted
+copy, and repeats do not extend it. When replaying a payload, change a field
 that is not part of the identity your flow merges on.
 
-**From anything.** `popcorn flow get <name> --channel <id>` prints the
+**From anything.** `popcorn flow get <name> --channel <channel>` prints the
 trigger report: every schedule, webhook, message trigger, document, state and
-flow that starts this one. A flow nothing starts is not broken; nothing asks
-for it.
+flow that starts this one. An empty report means only a direct run — `flow
+run`, or an agent running it — starts this flow.
 
 ## 6. Which version the run ran
 
 A run reads the channel's bound version once, when it starts, and keeps it to
-the end, including the flows it calls — see
+the end. Its `call_flow` children share that version; a run started with
+`start_flow` reads the binding afresh — see
 [how a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
 A fix published while a run is going does not reach that run, and a run that
 started before the install landed ran the old version.
 
 The run detail does not name the version. `popcorn flow run` does, in its
-first line — `Started flow '<name>' (v<version_id>)` — and `app status` tells
+first line — `Started flow '<name>' (v<version_id>)`, printed with `--wait`
+only once the run succeeds — and `app status` tells
 you whether the channel is on its line's head yet:
 
 ```bash
-popcorn app status --channel <id>    # run outside a checkout
+popcorn app status --channel <channel>    # run outside a checkout
 ```
 
 `Install: CURRENT` means new runs get the head. `Install: PENDING` means the
 channel still runs an older version, and the API cannot tell an install still
-running from one that failed. `popcorn app apply --channel <id>` retries it
+running from one that failed. `popcorn app apply --channel <channel>` retries it
 either way — see [publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
-Run from a checkout, `popcorn app status` says the same in other words —
-`Channel runs the same version`, or `Channel still runs …` — and also diffs
-your working copy against the head. `--json` carries `channel_behind` in both
-forms.
+Run from a checkout, `popcorn app status` never prints those lines, even with
+`--channel`: when the checkout is at the line's head it says `Channel runs the
+same version` or `Channel still runs …`, and otherwise `Fork line moved to …`
+or `A past version …`. `--json` answers in every form: `channel_behind` is
+`false` once the channel runs the head.
 
 ## 7. Fix it and run it again
 
 1. Stop what is still running, if it should not finish:
 
    ```bash
-   popcorn flow runs cancel <workflow-id> --channel <id>
-   popcorn flow runs cancel --flow <name> --channel <id>   # every running run of it
+   popcorn flow runs cancel <workflow-id> --channel <channel>
+   popcorn flow runs cancel --flow <name> --channel <channel>   # every running run of it
    ```
 
    A cancel lands at the run's next activity boundary; `--force` terminates on
@@ -249,12 +267,13 @@ forms.
    just told you.
 3. Publish: `popcorn app publish . --bump patch -m "..." --yes`. A publish
    reaches every channel on the line, not only this one.
-4. Wait until `popcorn app status --channel <id>` reports `Install: CURRENT`,
-   so the next run gets the fix.
-5. Run it again the way it failed. `popcorn flow run <name> --channel <id>
-   --inputs '...' --wait` for a direct run — check the version in its first
-   line. For a webhook flow, `popcorn webhook send <webhook> @payload.json
-   --channel <id>` with a body that differs from the last one (§5).
+4. Wait until `channel_behind` is `false` — `Install: CURRENT` from
+   `popcorn app status --channel <channel>` outside a checkout — so the next
+   run gets the fix.
+5. Run it again the way it failed. `popcorn flow run <name> --channel <channel>
+   --inputs '...'` for a direct run — without `--wait` it prints the version
+   at once; then read the run with `flow runs get`. For a webhook flow, `popcorn webhook send <webhook> @payload.json
+   --channel <channel>` with a body that differs from the last one (§5).
 6. Confirm the effect, not the outcome: read the rows the run should have
-   written (`popcorn table rows <table> --channel <id>`), since §4 is a list of
+   written (`popcorn table rows <table> --channel <channel>`), since §4 is a list of
    runs that succeeded without writing any.
