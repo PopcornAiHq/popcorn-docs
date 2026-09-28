@@ -66,7 +66,9 @@ may be locked against app updates. That is reported separately from whether
 the publish succeeded, because the version publishes either way. An install
 reported as started has not necessarily landed either: it re-checks when it
 runs, and can still skip. `popcorn app status` shows what the channel actually
-runs.
+runs, and whether an install is running, retrying, failed, skipped or locked:
+a failed install with its error, a skipped one with its reason, and a `Next:`
+line saying what moves the channel on — on a fork line, usually apply.
 
 Apply is how you finish the job afterwards. It works from server state alone,
 so it survives the conversation or session that published ending, which is the

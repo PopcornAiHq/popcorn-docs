@@ -230,10 +230,11 @@ popcorn table schema handoffs --channel '#example-intake'
 ```
 
 Inside a checkout, `app status` says either that the channel runs the line's
-head, or that it is behind because the install has not landed. From outside
-a checkout, `app status --channel` reports `install_state` as `current` or
-`pending`. `pending` cannot tell an install still running from one that
-failed, and `app apply` retries both.
+head, or that it is behind, and then why: an install still running or
+retrying, or one that failed, was skipped or is locked out. A failed install
+shows its error, and a `Next:` line says what moves the channel on — usually
+`app apply`. In `--json`, from a checkout or from outside one with
+`--channel`, branch on `install.state`.
 
 `table schema` prints each column's name and type, and flags `unique`,
 `required`, `internal`, `pii`, `restricted` and `concat`. To see everything
