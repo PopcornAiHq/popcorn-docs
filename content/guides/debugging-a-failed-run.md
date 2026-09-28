@@ -191,6 +191,16 @@ and exits non-zero only on one it cannot: a cadence or a pause nothing
 explains, or a declared schedule that was never installed. A schedule whose flow was renamed is dropped at install, with no error
 — see [a flow's identity is its name](https://docs.popcorn.ai/concepts/flow-identity.md).
 
+To re-run a scheduled flow without waiting for its next fire,
+`popcorn schedule trigger <slug> --channel <channel>` runs it once now, with
+the inputs the schedule stores. It takes the same slug, flow id or
+`schedule_id` as `schedule get`, and runs only a schedule the channel's bound
+manifest declares. It prints the run's `workflow_id` and the `flow runs get`
+command to follow it. When a run is already in flight and the schedule's
+overlap policy drops this one, it says `Not run`; `--overlap-policy allow_all`
+runs it anyway. `Triggered …, but no run was seen starting yet` is not a
+failure: the run may be deferred behind a running one, or slow to record.
+
 **From a webhook.**
 
 ```bash
@@ -240,15 +250,36 @@ you whether the channel is on its line's head yet:
 popcorn app status --channel <channel>    # run outside a checkout
 ```
 
-`Install: CURRENT` means new runs get the head. `Install: PENDING` means the
-channel still runs an older version, and the API cannot tell an install still
-running from one that failed. `popcorn app apply --channel <channel>` retries it
-either way — see [publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
-Run from a checkout, `popcorn app status` never prints those lines, even with
-`--channel`: when the checkout is at the line's head it says `Channel runs the
-same version` or `Channel still runs …`, and otherwise `Fork line moved to …`
-or `A past version …`. `--json` answers in every form: `channel_behind` is
-`false` once the channel runs the head.
+`Install: CURRENT` means new runs get the head. Every other state means the
+channel still runs an older version, and says why:
+
+| State | What it means |
+|---|---|
+| `INSTALLING` | an install is running, on its first attempt |
+| `RETRYING` | the running install has failed at least once; the last error follows |
+| `LOCKED` | app updates are locked on the channel, so nothing will move it |
+| `FAILED` | the last install failed, with its error and attempt count |
+| `SKIPPED` | the last install was skipped, with its reason |
+| `BEHIND` | nothing explains it: no install was started, or it is gone from history |
+
+A `Next:` line says what moves the channel on: on a fork line, usually
+`app apply`, followed by the full `popcorn app apply --channel '<channel>'`;
+for a locked channel, unlocking it first; on a product channel, the daily
+auto-update. `INSTALLING` and `RETRYING` have no `Next:`, since the install is
+still running. When the install workflow could not be read, the report says the
+answer comes from the database alone, and a running install does not show.
+See [publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+
+In `--json`, branch on `install.state`, one of the lowercase names above; the
+`install` block carries the error, attempt counts, reason and `retry_hint` as
+the server sent them. `install_state` is only `current` or `pending`, and
+`channel_behind` is `false` once the channel runs the head.
+
+Run from a checkout, `popcorn app status` prints the same install lines
+whenever the state is not `current`, after its own line: `Channel runs the
+same version`, `Channel still runs …`, `Fork line moved to …` or `A past
+version …`. Its `--json` carries the same `install` block, but no
+`install_state`.
 
 ## 7. Fix it and run it again
 
@@ -267,12 +298,14 @@ or `A past version …`. `--json` answers in every form: `channel_behind` is
    just told you.
 3. Publish: `popcorn app publish . --bump patch -m "..." --yes`. A publish
    reaches every channel on the line, not only this one.
-4. Wait until `channel_behind` is `false` — `Install: CURRENT` from
-   `popcorn app status --channel <channel>` outside a checkout — so the next
-   run gets the fix.
+4. Wait until `install.state` is `current` — `Install: CURRENT` from
+   `popcorn app status --channel <channel>` — so the next run gets the fix.
+   `FAILED`, `SKIPPED`, `LOCKED` or `BEHIND` will not clear by waiting: follow
+   its `Next:` line (§6).
 5. Run it again the way it failed. `popcorn flow run <name> --channel <channel>
    --inputs '...'` for a direct run — without `--wait` it prints the version
-   at once; then read the run with `flow runs get`. For a webhook flow, `popcorn webhook send <webhook> @payload.json
+   at once; then read the run with `flow runs get`. For a scheduled flow,
+   `popcorn schedule trigger <slug> --channel <channel>` (§5). For a webhook flow, `popcorn webhook send <webhook> @payload.json
    --channel <channel>` with a body that differs from the last one (§5).
 6. Confirm the effect, not the outcome: read the rows the run should have
    written (`popcorn table rows <table> --channel <channel>`), since §4 is a list of

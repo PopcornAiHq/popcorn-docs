@@ -195,14 +195,17 @@ question against server state alone — no working copy needed:
 
 ```bash
 popcorn app status --channel '#chan'
-popcorn app status --channel '#chan' --json | jq -r '.data.install_state'
+popcorn app status --channel '#chan' --json | jq -r '.data.install.state'
 ```
 
-`install_state` is `current` (the channel runs its fork line's head) or
-`pending` (it does not). Poll that field rather than grepping a semver out of
-`app list` output. One caveat worth knowing: the API exposes no status for the
-install job itself, so `pending` cannot distinguish an install still running
-from one that failed — `app apply --channel <channel>` is the retry for both.
+`install.state` is `current` (the channel runs its fork line's head) or says
+why it does not: `installing`, `retrying`, `locked`, `failed`, `skipped` or
+`behind`. Poll that field rather than grepping a semver out of `app list`
+output. A failed install comes with its error and attempt count, a skipped one
+with its reason, and the text output carries a `Next:` line saying what moves
+the channel on — for a failed, skipped or behind fork channel, `app apply
+--channel <channel>`. The older `install_state` field is still there, as
+`current` or `pending` for every other state.
 
 `--fork` takes an optional line name (`--fork=experiment`); bare, it names the
 line it is about to use and asks, because a workspace's single existing line

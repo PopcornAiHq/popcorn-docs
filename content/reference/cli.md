@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.57.1
+version: 0.58.0
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The 79 commands `popcorn` 0.57.1 lists in its help menu, under the
+The 80 commands `popcorn` 0.58.0 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -346,6 +346,16 @@ Show one scheduled flow's cadence and run counters
 |---|---|---|
 | `<schedule>` | yes | Schedule slug, flow id, or full schedule_id |
 | `--channel <value>` | yes | Channel name (#general) or UUID |
+
+### `schedule trigger`
+
+Run a declared schedule now, with its stored inputs
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<schedule>` | yes | Schedule slug, flow id, or full schedule_id |
+| `--channel <value>` | yes | Channel name (#general) or UUID |
+| `--overlap-policy <value>` |  | Overlap policy for this run only (default: the schedule's own); allow_all runs it even while another is in flight |
 
 ## Templates
 
