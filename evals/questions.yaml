@@ -222,8 +222,8 @@
 
 - q: The API gave me a rev on the channel config. What is it for?
   concept: glossary
-  pass: it is a revision token for a conditional write — send it back as If-Match on a parameters update, and a mismatch is refused with 409 stale_rev naming the current rev; it is not a version_id
-  trap: treats rev as the bundle version or a semver, or says a mismatch returns 412
+  pass: it is a revision token for a conditional write — send it back as If-Match on a parameters update, and a mismatch is refused with 412 stale_rev naming the current rev; it is not a version_id
+  trap: treats rev as the bundle version or a semver, or says a mismatch returns 409
 
 # The generated reference pages. Their summaries say what each page lists, not
 # the entries themselves, so a question here is usually answered in two calls:
