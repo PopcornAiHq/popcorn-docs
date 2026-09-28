@@ -237,8 +237,8 @@ is close behind: see *bundle version*.
   carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
   `foundation.store.patch_row`); the channel config carries a string `rev`,
   which a per-key parameters patch accepts as `If-Match: "<rev>"`. A mismatch
-  is refused with `error: stale_rev` and the current `rev` — status 409 for a
-  row, 412 for the channel config — and the CLI reports either as a
+  is refused with status 412, `error: stale_rev` and the current `rev`, for a
+  row and for the channel config alike, and the CLI reports it as a
   `conflict`. `popcorn channel-config params set` sends no `If-Match`, so it
   never meets this refusal. *Not to be confused with* a `version_id`.
 
