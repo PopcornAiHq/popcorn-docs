@@ -3,6 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
+platform: 2026-09-29
 summary: >
   The tools the hosted Popcorn MCP server exposes — identity, channel
   details, search, message history, posting and reactions — with their
@@ -13,7 +14,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 6 tools. They cover the conversation
+The hosted MCP server exposes 7 tools. They cover the conversation
 surface: who you are, a channel's details, search, message history,
 posting and reactions. Reads accept a channel's `#name` or its ID. Every
 call runs as the person who connected the server, in the workspace
@@ -34,6 +35,18 @@ Read-only. Get channel details.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `channel` | `str` | yes | Channel name (e.g. "#my-app") or conversation ID |
+
+### `get_user`
+
+Read-only. Look up a person in this workspace.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `user` | `str` | yes | "me" for yourself, or a user ID, email, or username ("@name" works too). "me" always means you, even if someone's username is "me"; look them up by email or ID. |
+
+### `get_workspace`
+
+Read-only. The Popcorn workspace this connection is bound to. Every tool acts in this one workspace. It was chosen when the user connected Popcorn and can't be changed from here: to use a different workspace, the user reconnects Popcorn.
 
 ### `post_message`
 
@@ -75,14 +88,6 @@ Read-only. Search channels, DMs, users, or messages.
 |---|---|---|---|
 | `type` | one of `channels`, `dms`, `users`, `messages` | yes | "channels", "dms", "users", or "messages" |
 | `query` | `str` |  | Filter text (required for messages) |
-
-### `whoami`
-
-Writes. Your workspace and user identity.
-
-| Argument | Type | Required | Notes |
-|---|---|---|---|
-| `workspace_id` | `str` |  | Switch to this workspace (UUID). Omit to show current workspace and all available workspaces (if you belong to more than one). |
 
 ## Proposed tools
 
