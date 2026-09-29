@@ -35,21 +35,20 @@ started it:
 
 ```bash
 popcorn flow runs list --channel <channel> --flow <name>                  # newest first
-popcorn flow runs list --channel <channel> --flow <name> --status closed --json
+popcorn flow runs list --channel <channel> --flow <name> --status failed --json
 ```
 
 `--flow` takes the flow's `name:`, which is also what the list prints last on
-each line. Two things about the list are easy to get wrong:
+each line. `--status` filters by outcome (§2): `failed` is every run whose
+outcome is `failed`, whether it failed, timed out, was terminated or was
+cancelled, and `closed` is every run that finished either way. A
+`ContinuedAsNew` run is in neither, and not in `running` either: its work
+carries on in the new run, which `running` lists.
 
-- **`--status failed` misses failures.** It selects the one status
-  `Failed`. A run that timed out, was terminated or was cancelled also ended
-  `failed` (§2) and is not in it. Use `--status closed` and read each run's
-  `outcome` — `closed` means "not `Running`", so it also holds
-  `ContinuedAsNew` runs, which are `still_running`.
-- **The text output has no `outcome` column.** It prints the raw status.
-  `--json` carries `outcome` on every run, beside `trigger_source` (who asked
-  for it: `app_user`, `agent`, `message`, `webhook`, … — a scheduled fire has
-  none) and `task_queue`.
+The text output has no `outcome` column; it prints the raw status. `--json`
+carries `outcome` on every run, beside `trigger_source` (who asked for it:
+`app_user`, `agent`, `message`, `webhook`, … — a scheduled fire has none) and
+`task_queue`.
 
 ## 2. Read the outcome, not the status
 
