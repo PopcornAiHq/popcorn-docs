@@ -5,12 +5,13 @@ order: 3
 summary: >
   The loop after a flow run goes wrong: find the run, read its `outcome`
   rather than its status, read the failure with `flow runs get
-  --include-errors`, fix, publish, and run again once the install lands. Also
+  --include-errors` and the steps with `flow runs timeline`, fix, publish, and
+  run again with the same inputs once the install lands. Also
   the runs that end `succeeded` having done nothing (a missing required
   integration, a skipped step) and the ones that never start.
 concepts: [channel-binding, publish-and-apply, flow-identity, template-authoring]
 applies_to: [cli, human]
-source: [run_outcome, get_workflow_execution_detail, missing_required_integrations, InterpreterOutput, OnError, derive_delivery_status, reconcile_inflight_trigger_workflows, check_exact_dedup]
+source: [run_outcome, get_workflow_execution_detail, get_workflow_execution_timeline, missing_required_integrations, InterpreterOutput, OnError, derive_delivery_status, reconcile_inflight_trigger_workflows, check_exact_dedup]
 ---
 
 This guide starts from a flow run that did the wrong thing, or from one you
@@ -95,10 +96,25 @@ omits them. What each part says:
 | `error_history` | The activities that failed, most recent last, each with its `activity_type`, `attempt` and `message`. Capped to the newest entries. An activity that timed out rather than failed is not listed. |
 | `current_activities` | On a live run only: what is in flight, its attempt against its maximum, and `last_failure`, the error behind the current retry. This is why a run is stuck. |
 | `outputs` | On a completed run only: the flow's declared `outputs:`. |
+| `inputs` | The inputs the run was started with — what to pass to run it again. A child started by `call_flow` may lack a large input it reads from its parent's history instead. |
+| `version_id` | The bundle version the run pinned, printed as `version:`. Null (`-`) until the run has pinned, and on runs older than the field. |
 
 The detail names **activities, not step ids** — `foundation.store.upsert_rows`,
-not `record_alert`. When a flow calls the same activity from several steps,
-the message is what tells them apart.
+not `record_alert`. The timeline names both:
+
+```bash
+popcorn flow runs timeline <workflow-id> --channel <channel>
+```
+
+It lists every activity, timer and signal in the run, newest first, one per
+line: the event id, when it was scheduled, its kind and outcome, how long it
+took, the attempt, the activity or timer name and — last — the step id (`-`
+when there is none), with a failed step's message under it. The run's own status and outcome head the page. A
+page holds 50 entries unless `--limit` (up to 200) says otherwise; when older
+ones remain, the last line gives the `--before <n> --run-id <id>` flags that
+fetch them, and `--json` carries the same flags as `pagination.next`. Keep
+the run id on every page: without it the command reads the workflow's latest
+run.
 
 The failures you will meet most:
 
@@ -240,10 +256,11 @@ the end. Its `call_flow` children share that version; a run started with
 A fix published while a run is going does not reach that run, and a run that
 started before the install landed ran the old version.
 
-The run detail does not name the version. `popcorn flow run` does, in its
+`popcorn flow runs get` names the version the run pinned, as `version:`
+(`version_id` in `--json`). `popcorn flow run` prints the same number in its
 first line — `Started flow '<name>' (v<version_id>)`, printed with `--wait`
-only once the run succeeds — and `app status` tells
-you whether the channel is on its line's head yet:
+only once the run succeeds. `app status` tells you whether the channel is on
+its line's head yet:
 
 ```bash
 popcorn app status --channel <channel>    # run outside a checkout
@@ -312,10 +329,12 @@ version …`. Its `--json` carries the same `install` block, but no
    `popcorn app status --channel <channel>` — so the next run gets the fix.
    `FAILED`, `SKIPPED`, `LOCKED` or `BEHIND` will not clear by waiting: follow
    its `Next:` line (§6).
-5. Run it again the way it failed. `popcorn flow run <name> --channel <channel>
-   --inputs '...'` for a direct run — without `--wait` it prints the version
-   at once; then read the run with `flow runs get`. For a scheduled flow,
-   `popcorn schedule trigger <slug> --channel <channel>` (§5). For a webhook flow, `popcorn webhook send <webhook> @payload.json
+5. Run it again the way it failed. For a direct run, pass the failed run's
+   `inputs` from `flow runs get --json` to
+   `popcorn flow run <name> --channel <channel> --inputs '...'` — without
+   `--wait` it prints the version at once; then read the run with
+   `flow runs get` and check its `version:` is the one you just published.
+   For a scheduled flow, `popcorn schedule trigger <slug> --channel <channel>` (§5). For a webhook flow, `popcorn webhook send <webhook> @payload.json
    --channel <channel>` with a body that differs from the last one (§5).
 6. Confirm the effect, not the outcome: read the rows the run should have
    written (`popcorn table rows <table> --channel <channel>`), since §4 is a list of
