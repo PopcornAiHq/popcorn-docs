@@ -8,7 +8,7 @@ summary: >
   installing it is a separate step that can be blocked. The same semver with
   different content is refused, and so is a new semver whose content matches an
   earlier version — change something, such as the changelog, and publish
-  forward. An old version can be read back by id, but nothing moves a channel
+  forward. An old version can be read back by id, but nothing rolls a channel
   back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
 applies_to: [cli, mcp, human]
