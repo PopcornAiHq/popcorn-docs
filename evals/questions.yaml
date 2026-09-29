@@ -225,6 +225,11 @@
   pass: it is a revision token for a conditional write — send it back as If-Match on a parameters update, and a mismatch is refused with 412 stale_rev naming the current rev; it is not a version_id
   trap: treats rev as the bundle version or a semver, or says a mismatch returns 409
 
+- q: What does a 412 mean?
+  concept: glossary
+  pass: a conditional write carried a stale rev — the row or channel config changed since it was read; the refusal is 412 stale_rev with the current rev, so re-read and retry with that rev
+  trap: calls it a validation or permission error, says to retry unchanged, or says a stale write returns 409
+
 # The generated reference pages. Their summaries say what each page lists, not
 # the entries themselves, so a question here is usually answered in two calls:
 # the summary points at the page and the entry answers. The deferral PASS above
