@@ -125,13 +125,29 @@ is close behind: see *bundle version*.
   channel is identified by its UUID; its `#name` can change, so a script or
   a note should hold the UUID. The CLI accepts either and resolves a name to
   the UUID. On the wire the id is `conversation_id`, because the API's older
-  noun, *conversation*, covers direct messages too. See
+  noun, *conversation* (see its entry), covers direct messages too. See
   [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
 - **tracker** — The product's word for a channel that runs an app, as in
   "each channel is a tracker". Many apps also name their main table
   `tracker`, and the state-machine page's "tracker row" means a row of it.
-- **workspace** — The tenant: it owns channels, members and fork lines.
+- **workspace** — The tenant: it owns channels, users and fork lines. Its
+  users are its members, each with a workspace role (see *member*).
   `popcorn workspace switch` changes which one the CLI acts on.
+- **conversation** — The API's noun for anything messages are posted in,
+  named by its `type`: a channel (`workspace_channel`, `public_channel`,
+  `private_channel`, `shared_channel` or `shared_private_channel`), a direct
+  message (`dm`), a group direct message (`group_dm`), or a self-DM
+  (`self_dm`), the conversation every user has with themselves. Its id is
+  `conversation_id` on the wire. Prefer *channel* when you mean a channel.
+  *Not to be confused with* a thread, which is replies inside a conversation.
+- **shared channel** — A public or private channel with a member from
+  another workspace. It becomes `shared_channel` or `shared_private_channel`
+  when the first such person joins; a `workspace_channel` cannot be shared.
+  It keeps one home workspace, its `workspace_id`. Someone from another
+  workspace reaches it only through their channel membership, and app
+  operations there treat them as a workspace guest, whatever their role at
+  home. In the home workspace, a `shared_channel` can be read without joining,
+  like a public channel; a `shared_private_channel` needs membership.
 - **channel config** — A per-channel document holding the channel
   parameters and the channel integrations, among other sections; the prompts
   and templates a bundle seeds are folded into the parameters, as
@@ -145,6 +161,54 @@ is close behind: see *bundle version*.
   `$channel.<name>`. The manifest's `channel_parameters:` seeds them per key
   and leaves a value the channel changed alone on update. The CLI calls them
   `params`: `popcorn channel-config params set` and `unset`.
+
+## People and messages
+
+- **user** — A person's account in one workspace. There is one user per
+  workspace, so one email address in two workspaces is two users, with two
+  ids. Within a workspace, username and email are each unique. The MCP tool
+  `get_user` looks a user up by id, email or username, and takes `me` for the
+  caller. A bot is a user too (see *bot*).
+- **member**, **role** — Always qualify them. A **workspace member** is a
+  user of that workspace, and its **workspace role** is `owner`, `admin`,
+  `member`, `guest` or `workspace_agent`. A **channel member** is a user with
+  a membership of one channel, and its **channel role** is `owner`, `admin`,
+  `member`, `guest`, `agent` or `channel_agent`; a channel's creator is its
+  owner. The two roles are separate, and `owner`, `admin`, `member` and
+  `guest` exist at both levels: someone who joins a channel by invitation
+  from another workspace is a channel `guest` whatever their workspace role.
+  A channel's admin actions are open to its owners and admins and to
+  workspace admins. `get_user` reports the workspace role.
+- **bot**, **workspace agent** — A bot is a user with `is_bot` set. Every
+  workspace is created with one, the **workspace agent**: a bot user with the
+  workspace role `workspace_agent`, named after the workspace's agent
+  identity. App installs run as the workspace agent, never as the person who
+  asked, and it can read every conversation in its workspace. The API that
+  people sign in to refuses a request made as a bot. *Not to be confused with* the channel agent or an
+  app agent (see *Integrations and agents*), which a channel and a bundle
+  configure.
+- **active**, **deactivated** — Whether a user still belongs to its
+  workspace. Removing a user from a workspace deactivates it and marks it
+  deleted; the row stays, and the platform no longer finds the user by email
+  or username, so its requests to that workspace are refused with
+  `user_not_found`. Joining the same workspace again with the same email
+  reactivates the same user, id included.
+- **presence** — Whether a user is `online`, `away`, `busy` or `offline`. A
+  user can set themselves away, and an online user who has not been seen for
+  a while is moved to away. On the wire, and in `get_user`'s output, it is
+  called `status`. *Not to be confused with* a row's Status column (see
+  *Status*) or a run's status.
+- **message** — One post in a conversation, with an id (`message_id`), an
+  author (`user_id`) and content; it can be edited and deleted. *Not to be
+  confused with* a message trigger (see *trigger*), a manifest entry that
+  runs a flow for each message in a channel.
+- **thread**, **reply** — The replies under one message. A reply carries
+  `parent_message_id`, the message it answers, and `thread_id`, the id of the
+  message that started the thread; a reply to a reply joins the same thread
+  rather than starting a new one. The starting message carries
+  `thread_message_count` and `thread_last_reply_at`.
+- **reaction** — An emoji on a message. A message's `reactions` maps each
+  emoji to the ids of the users who added it.
 
 ## Flows and runs
 
@@ -295,4 +359,5 @@ is close behind: see *bundle version*.
   it by firing an event. A state transition or projected patch that writes
   it is refused; a plain store write is not, and lasts only until the
   engine next projects the row. *Not to be
-  confused with* a run's status or outcome.
+  confused with* a run's status or outcome, or a user's presence, which the
+  API also calls `status`.
