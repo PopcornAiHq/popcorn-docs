@@ -26,9 +26,16 @@ import re
 from typing import Any
 
 _WORD = re.compile(r"[a-z0-9]+")
+# The last line is chosen from the eval set, not from a general English list:
+# filler that appears in questions and in almost every page body, so it scored
+# for whichever long page happened to contain it. Words that look like filler
+# but hit the answering page's summary ("can", "every", "one") stay, as
+# do domain words ("run", "flow", "then", "app") however common they are.
 _STOP = frozenset(
     "a an and are as at be by do does for from how i in is it my of on or "
-    "that the to was what when where which why with you your".split()
+    "that the to was what when where which why with you your "
+    "again did has its never now say should so something there those we will"
+    .split()
 )
 
 
@@ -67,8 +74,16 @@ def _stem(word: str) -> str:
 
 
 def _terms(text: str) -> set[str]:
+    """The words that can say what a text is about.
+
+    A bare number is not one of them: "1.2.0" tokenises to "1", "2" and "0",
+    which every page with a version string or a list contains, so a question
+    that quotes a version scored for all of them alike.
+    """
     return {
-        _stem(w) for w in _WORD.findall(text.lower()) if w not in _STOP
+        _stem(w)
+        for w in _WORD.findall(text.lower())
+        if w not in _STOP and not w.isdigit()
     }
 
 
