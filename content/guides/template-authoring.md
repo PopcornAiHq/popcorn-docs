@@ -201,8 +201,10 @@ popcorn app status --channel '#chan' --json | jq -r '.data.install.state'
 `install.state` is `current` (the channel runs its fork line's head) or says
 why it does not: `installing`, `retrying`, `locked`, `failed`, `skipped` or
 `behind`. Poll that field rather than grepping a semver out of `app list`
-output. A failed install comes with its error and attempt count, a skipped one
-with its reason, and the text output carries a `Next:` line saying what moves
+output. A failed install comes with its error, an `error_code` and its attempt
+count — only `invalid_manifest`, `invalid_schedule` and `bundle_rejected` mean
+the head needs fixing, and `internal` means the platform failed, so no edit or
+publish helps (report it with the workflow id) — a skipped one with its reason, and the text output carries a `Next:` line saying what moves
 the channel on — for a failed, skipped or behind fork channel, `app apply
 --channel <channel>`. The older `install_state` field is still there, as
 `current` or `pending` for every other state.
