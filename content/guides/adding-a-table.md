@@ -232,7 +232,7 @@ popcorn table schema handoffs --channel '#example-intake'
 Inside a checkout, `app status` says either that the channel runs the line's
 head, or that it is behind, and then why: an install still running or
 retrying, or one that failed, was skipped or is locked out. A failed install
-shows its error, and a `Next:` line says what moves the channel on — usually
+shows its error and error code, and a `Next:` line says what moves the channel on — usually
 `app apply`. In `--json`, from a checkout or from outside one with
 `--channel`, branch on `install.state`.
 

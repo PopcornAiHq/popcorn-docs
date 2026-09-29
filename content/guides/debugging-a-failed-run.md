@@ -258,7 +258,7 @@ channel still runs an older version, and says why:
 | `INSTALLING` | an install is running, on its first attempt |
 | `RETRYING` | the running install has failed at least once; the last error follows |
 | `LOCKED` | app updates are locked on the channel, so nothing will move it |
-| `FAILED` | the last install failed, with its error and attempt count |
+| `FAILED` | the last install failed, with its error, error code and attempt count |
 | `SKIPPED` | the last install was skipped, with its reason |
 | `BEHIND` | nothing explains it: no install was started, or it is gone from history |
 
@@ -268,12 +268,23 @@ for a locked channel, unlocking it first; on a product channel, the daily
 auto-update. `INSTALLING` and `RETRYING` have no `Next:`, since the install is
 still running. When the install workflow could not be read, the report says the
 answer comes from the database alone, and a running install does not show.
+A failed or retrying install whose error the server classified also prints a
+`Code:` line under `Error:`; for `internal`, a further line says the failure is
+inside the platform, not in the bundle, and names the install workflow.
 See [publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
 
 In `--json`, branch on `install.state`, one of the lowercase names above; the
-`install` block carries the error, attempt counts, reason and `retry_hint` as
-the server sent them. `install_state` is only `current` or `pending`, and
-`channel_behind` is `false` once the channel runs the head.
+`install` block carries the error, `error_code`, attempt counts, reason and
+`retry_hint` as the server sent them. For a `failed` install, `error_code` says
+what kind of failure it was: `invalid_manifest`, `invalid_schedule` and
+`bundle_rejected` are the bundle's own and are fixed by publishing a corrected
+head; `app_mismatch` and `fork_line_conflict` mean the install targeted another
+app or line, and on a fork line `app apply` moves the channel to its own head;
+`bundle_unavailable` means no published version was available; `internal` is a
+platform failure that no edit or publish fixes: report it with `workflow_id`.
+`retry_hint` already follows the code. `install_state` is only `current` or
+`pending`, and `channel_behind` is `false` only when `install.state` is
+`current`.
 
 Run from a checkout, `popcorn app status` prints the same install lines
 whenever the state is not `current`, after its own line: `Channel runs the

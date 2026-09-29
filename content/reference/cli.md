@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.58.0
+version: 0.58.2
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The 80 commands `popcorn` 0.58.0 lists in its help menu, under the
+The 82 commands `popcorn` 0.58.2 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -817,6 +817,18 @@ Dump CLI schema as JSON for programmatic discovery
 ### `doctor`
 
 Diagnose local setup: auth, API reachability, env, config
+
+### `version`
+
+Show version (--check to check for updates)
+
+| Argument | Required | Notes |
+|---|---|---|
+| `--check` |  | Force an update check and report the result on stdout |
+
+### `upgrade`
+
+Upgrade popcorn to the latest version
 
 ## Global options
 
