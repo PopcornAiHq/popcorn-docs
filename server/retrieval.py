@@ -76,14 +76,16 @@ def _stem(word: str) -> str:
 def _terms(text: str) -> set[str]:
     """The words that can say what a text is about.
 
-    A bare number is not one of them: "1.2.0" tokenises to "1", "2" and "0",
-    which every page with a version string or a list contains, so a question
-    that quotes a version scored for all of them alike.
+    A lone digit is not one of them: "1.2.0" tokenises to "1", "2" and "0",
+    which every page with a version string or a numbered list contains, so a
+    question that quotes a version scored for all of them alike. A number of
+    two or more digits stays, because here it is usually an HTTP status or an
+    exit code, and a question that quotes one is asking what it means.
     """
     return {
         _stem(w)
         for w in _WORD.findall(text.lower())
-        if w not in _STOP and not w.isdigit()
+        if w not in _STOP and not (w.isdigit() and len(w) == 1)
     }
 
 
