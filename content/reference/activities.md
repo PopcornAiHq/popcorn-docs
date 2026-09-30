@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-platform: 2026-09-29
+platform: 2026-09-30
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -3241,7 +3241,8 @@ bytes are durably stored.
 
 ### `feature.gdrive.ensure_folder`
 
-The app's folder carrying `tag`, made in My Drive if none does.
+The app's folder carrying `tag`, made in `parent_id` (My Drive's
+root when omitted) if none does.
 
 **Arguments**
 
@@ -3250,6 +3251,7 @@ The app's folder carrying `tag`, made in My Drive if none does.
 | `conversation_id` | string | yes | The flow's own conversation UUID. |
 | `name` | string | yes | The folder's name when it has to be made. |
 | `tag` | string | yes | What identifies the folder across runs, renames and moves, e.g. `signed_documents:<conversation_id>`. |
+| `parent_id` | string, optional | no | The folder to make it in when no live folder carries the tag, e.g. another ensure_folder's `folder_id`; My Drive's root when omitted. A folder that already carries the tag is returned wherever it now lives, so a folder the firm moved is followed, never duplicated. |
 
 **Returns**
 
