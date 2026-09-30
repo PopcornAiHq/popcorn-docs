@@ -101,4 +101,7 @@ column is gone.
 
 The columns in a schema's `merge_key.any_of` must be indexed — `index: true`,
 `unique: true`, or computed — and string-typed unless computed. `app publish`
-refuses a manifest that breaks either rule, so it never reaches an install.
+refuses a manifest that breaks either rule, so it never reaches an install. A
+merge key set on the channel rather than in the manifest is checked when the
+install writes the table, so a manifest that declares `index: false` on one
+of its columns fails that install.

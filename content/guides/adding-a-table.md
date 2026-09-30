@@ -214,7 +214,7 @@ The CLI prints the refusal to stderr and exits 3:
 ```
 Error: manifest tables: the agent store would refuse these at install, so the bundle cannot be published:
   tables.handoffs: column 'Stage': display: unknown display kind 'statu'; valid: [...]
-  tables.handoffs: column 'Notes': column 'Notes': merge='concat' requires a string column, got type 'number'
+  tables.handoffs: column 'Notes': merge='concat' requires a string column, got type 'number'
 ```
 
 Each line names the table and, where there is one, the column. The findings
@@ -230,7 +230,9 @@ the manifest with the columns already live there. A combination only that
 channel has can still fail the install: retyping a column the channel
 already indexes to `boolean` or `json`, for instance, without writing
 `index: false` and `unique: false`, since those keep their installed value
-unless the manifest states one. A failed install stops before it binds. The
+unless the manifest states one. The reverse fails too: `index: false` on a
+column the channel's own merge key uses, because a merge key's columns must
+stay indexed. A failed install stops before it binds. The
 channel keeps its previous version, but not necessarily its previous tables:
 a table listed before the failing one may already have been created or
 changed. The fix is another publish.
@@ -277,11 +279,14 @@ adds to it:
   manifest's. On a column already there, `type`, `format`, `display` and
   `label` are set to exactly what the manifest says, and removed if the
   manifest leaves them out.
-- **Changes only when declared:** `index`, `unique`, `required` and the
-  governance flags keep their installed value unless the manifest states a
-  new one. Deleting `unique: true` leaves the
-  column unique; write `unique: false`. A `merge_key` the manifest declares
-  replaces the installed one, and one it leaves out stays in place.
+- **Changes only when declared:** for `index`, `unique`, `required`, the
+  governance flags and the table's `merge_key`, a value the manifest states
+  wins, whether it turns the setting on or off, and a key it leaves out keeps
+  the installed value. Deleting `unique: true` leaves the column unique; to
+  turn it off, write `unique: false`. A declared `merge_key` replaces the
+  installed one; `merge_key: null` removes it; leaving `merge_key` out keeps
+  it. A bare `merge_key:` with nothing after it is YAML for `null`, so it
+  removes the merge key too.
 - **Merge policy follows a declared `merge:`.** A `merge:` that differs from
   the installed one replaces it, and the old policy's `merge_separator` or
   `merge_when` is dropped unless the manifest restates one. An omitted

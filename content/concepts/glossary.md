@@ -280,8 +280,9 @@ is close behind: see *bundle version*.
 - **table** — A named collection of rows with a schema: its columns, their
   merge policies and an optional merge key. The manifest's `tables:`
   reconciles additively — columns are added, never dropped or renamed — while
-  a matched column's type, format, display and label, the column order, and
-  any merge policy the manifest declares follow the manifest.
+  a matched column's type, format, display and label and the column order
+  follow the manifest, and any other setting it declares, on or off, wins; a
+  setting it leaves out keeps its installed value.
   `popcorn table schema <name>` prints one.
 - **row**, **record** — One entry in a table. *Row* is the word in the CLI
   (`popcorn table rows`, `table row get`), these pages and most `store`
