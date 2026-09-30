@@ -6,11 +6,12 @@ summary: >
   Adding a table to an app that already exists: declare it under `tables:`,
   write it from a flow with `foundation.store.*`, run `template check`, then
   `app publish` from a fork line. Install creates the table, and each later
-  install adds to it and never removes. No later publish can move a column
-  off a merge policy other than `replace`, so choose each before the first.
+  install adds to it and never removes. Publish refuses a column the store
+  would reject. A later publish can change a merge policy; stored rows keep
+  values until their next write.
 concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
 applies_to: [cli, human]
-source: [ColumnDef, SchemaDef, MergeKeyDef, apply_tables, reconcile_columns, carry_merge_forward, apply_column_merge, validate_record, upsert_rows]
+source: [ColumnDef, SchemaDef, MergeKeyDef, manifest_table_errors, apply_tables, reconcile_columns, carry_merge_forward, apply_column_merge, validate_record, upsert_rows]
 ---
 
 This guide adds one table to an app a channel already runs, and ends with
@@ -87,8 +88,8 @@ A table declared with no columns is skipped. Install does not create it.
 
 ## 3. Decide what a repeat write does
 
-This is the step that is hard to undo, so it comes before any flow is
-written.
+This step comes before any flow is written, because the flows are built
+around it and a later change does not rewrite what is already stored.
 
 The merge key decides which row a write lands on, and each column's merge
 policy decides what happens to that column on that row. Both are explained
@@ -102,22 +103,11 @@ and applies no column policy at all. The example uses three policies:
 - `Reopened: increment_on_change`: counts `done` → `open` transitions of
   `Stage`, and ignores the value the write sends.
 
-**Choose each policy before the first publish.** An install changes a schema
-as a non-human caller. When a non-human caller changes a schema, the store
-keeps any policy other than `replace` that a column already has. You can add
-a policy to a `replace` column with a later publish. Once a column is
-`concat`, `keep` or `increment_on_change`, though, no manifest can move it
-off that policy:
-
-- On a `keep` column, or a `concat` column with the default separator,
-  naming `replace` or another policy is overridden. The publish and the
-  install both succeed, and the old policy stays.
-- On an `increment_on_change` column, or a `concat` column with its own
-  `merge_separator`, naming another policy fails the install.
-- Retyping a `concat` or `increment_on_change` column without naming a
-  policy also fails the install.
-
-If you need a different policy, add a new column.
+**Choose each policy before the first publish.** A later publish can change
+a column's policy (see "Changing the table later" below),
+but it does not rewrite the values already stored: a row that accumulated
+text under `concat` keeps it until its next write. Choosing now avoids a
+table whose older rows were built under a different rule.
 
 ## 4. Write to it from a flow
 
@@ -192,13 +182,12 @@ check everything, though, and a problem it misses shows up at a later stage:
 | `merge: concat` on a column that is not a string | `template check`: `concat-requires-string` |
 | a flow writing a column the table does not declare | `template check`: `undeclared-column` |
 | a filter on an undeclared column | `template check`, as a warning: `unknown-filter-column` |
-| any other invalid column definition: an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case | install, which fails |
+| any other invalid column definition: an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case, two table names that differ only by case, a table or column name containing U+FDD0 or U+FDD1 | `app publish`, which refuses it |
 | a `table_name` misspelled in a flow | the run: a write fails the step, while a `list_rows` with `missing_ok: true` reads the missing table as empty |
 
-Publish does not validate column definitions, so the mistakes in the fifth
-row get through a publish and then fail the install. Check every
-`table_name` by eye, because `template check` only compares columns for
-tables the manifest declares.
+`template check` does not report the fifth row; `app publish` does, before
+any version exists (step 6). Check every `table_name` by eye, because
+`template check` only compares columns for tables the manifest declares.
 
 ## 6. Publish
 
@@ -216,11 +205,37 @@ ones that take no updates (see
 The publish prints how many channels will update, but only after the version
 exists.
 
-If a column definition is invalid, the publish still succeeds, but the
-install fails before it binds. The channel keeps its previous version, but
-not necessarily its previous tables: a table listed before the invalid one
-may already have been created or changed. Every other channel that tries to
-update fails the same way. The fix is another publish.
+Publish runs every `tables:` entry through the same validation the store
+applies at install, and refuses the whole publish if any would be rejected.
+Nothing is written: no version is minted, and a `--bump` is not saved to
+`manifest.yaml`, so re-running the same command after the fix is the retry.
+The CLI prints the refusal to stderr and exits 3:
+
+```
+Error: manifest tables: the agent store would refuse these at install, so the bundle cannot be published:
+  tables.handoffs: column 'Stage': display: unknown display kind 'statu'; valid: [...]
+  tables.handoffs: column 'Notes': merge='concat' requires a string column, got type 'number'
+```
+
+Each line names the table and, where there is one, the column. The findings
+for every table come back in one refusal, although the checks that compare
+columns with each other (a `merge_when` reference, duplicate names, the
+merge key) run only once each column of that table is valid on its own. With
+`--json`, the same text is the `error` field, with `status: 422` and
+`error_code: validation`.
+
+Publish checks the manifest's columns on their own. It cannot see a
+channel's table, and the install validates the schema it builds by merging
+the manifest with the columns already live there. A combination only that
+channel has can still fail the install: retyping a column the channel
+already indexes to `boolean` or `json`, for instance, without writing
+`index: false` and `unique: false`, since those keep their installed value
+unless the manifest states one. The reverse fails too: `index: false` on a
+column the channel's own merge key uses, because a merge key's columns must
+stay indexed. A failed install stops before it binds. The
+channel keeps its previous version, but not necessarily its previous tables:
+a table listed before the failing one may already have been created or
+changed. The fix is another publish.
 
 ## 7. Confirm it landed
 
@@ -264,18 +279,27 @@ adds to it:
   manifest's. On a column already there, `type`, `format`, `display` and
   `label` are set to exactly what the manifest says, and removed if the
   manifest leaves them out.
-- **Changes only when declared:** `index`, `unique`, `required`, the
-  governance flags and a `replace` column's `merge` keep their installed value
-  unless the manifest states a new one. Deleting `unique: true` leaves the
-  column unique; write `unique: false`. A `merge_key` the manifest declares
-  replaces the installed one, and one it leaves out stays in place.
-- **Never changes:** a column is never removed or renamed, and a policy
-  other than `replace` stays (step 3). Columns are matched by name, ignoring
+- **Changes only when declared:** for `index`, `unique`, `required`, the
+  governance flags and the table's `merge_key`, a value the manifest states
+  wins, whether it turns the setting on or off, and a key it leaves out keeps
+  the installed value. Deleting `unique: true` leaves the column unique; to
+  turn it off, write `unique: false`. A declared `merge_key` replaces the
+  installed one; `merge_key: null` removes it; leaving `merge_key` out keeps
+  it. A bare `merge_key:` with nothing after it is YAML for `null`, so it
+  removes the merge key too.
+- **Merge policy follows a declared `merge:`.** A `merge:` that differs from
+  the installed one replaces it, and the old policy's `merge_separator` or
+  `merge_when` is dropped unless the manifest restates one. An omitted
+  `merge:` keeps the installed policy, unless the same publish retypes the
+  column out of what that policy requires (`concat` off `string`,
+  `increment_on_change` off `number`); then the column becomes `replace`.
+- **Never changes:** a column is never removed or renamed. Columns are matched by name, ignoring
   case and extra whitespace, and a matched column keeps its installed
   spelling.
-- **Existing rows are not rewritten.** A new `type`, `format` or `required`
-  applies to the rows already stored the next time anything merges into
-  them. A merging write or a `patch_row` checks the whole merged row, so it
+- **Existing rows are not rewritten.** A new `type`, `format`, `required`
+  or merge policy applies to the rows already stored the next time anything
+  merges into them. After `concat` becomes `replace`, a row keeps its
+  accumulated text until its next write replaces it. A merging write or a `patch_row` checks the whole merged row, so it
   can fail on an old value in a column the write never touched.
 
 A column you stop declaring stays on the table with its data, after the
