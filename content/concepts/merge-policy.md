@@ -7,11 +7,12 @@ summary: >
   A column's merge policy decides what an upsert does to an existing row:
   replace (the default, last-write-wins), concat (append to a string), keep
   (first-write-wins) or increment_on_change (a counter that rises when another
-  column makes a declared transition). Policies apply only when the write
-  merges, which is not the upsert default.
+  column makes a declared transition). Policies apply only on a merging
+  write. An install sets the declared policy; stored values change on their
+  next write.
 concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
-source: [ColumnDef, MergeWhenDef, apply_column_merge]
+source: [ColumnDef, MergeWhenDef, apply_column_merge, reconcile_columns, carry_merge_forward]
 ---
 
 A table column carries a merge policy that decides what happens when a write
@@ -72,9 +73,32 @@ again — a new run, another step — appends it, and the only duplicate `concat
 skips is an incoming value equal to the whole stored value. Because `concat` requires a string column, a timestamp
 history is a **string** column, not a datetime one.
 
+## Changing a column's policy
+
+A bundle install sets each column's policy to what the manifest declares:
+
+- A `merge:` that differs from the installed one replaces it. The old
+  policy's `merge_separator` or `merge_when` goes with it unless the
+  manifest restates one.
+- Restating the same policy with a new `merge_separator` changes the
+  separator; leaving it out keeps the installed one.
+- An omitted `merge:` keeps the installed policy, unless the same install
+  retypes the column out of what the policy requires (`concat` off `string`,
+  `increment_on_change` off `number`). Then the column becomes `replace`.
+
+**Stored values are not rewritten.** The new policy applies to a row the
+next time a write merges into it. After `concat` becomes `replace`, a row
+keeps its accumulated text until its next write replaces it; after `replace`
+becomes `keep`, the value a row already holds is the one kept.
+
+A schema change made by the channel's agent cannot change a policy: the
+store carries the installed one forward. It drops to `replace` only when
+that change leaves the column unable to hold it: retyped out of what the
+policy requires, or an `increment_on_change` column whose `merge_when`
+column is gone.
+
 ## Merge keys must be indexed strings
 
 The columns in a schema's `merge_key.any_of` must be indexed — `index: true`,
-`unique: true`, or computed — and string-typed unless computed. A table that
-breaks either rule is refused when its schema is validated, so the install
-fails rather than producing duplicate rows.
+`unique: true`, or computed — and string-typed unless computed. `app publish`
+refuses a manifest that breaks either rule, so it never reaches an install.

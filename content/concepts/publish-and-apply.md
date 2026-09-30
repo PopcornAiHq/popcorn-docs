@@ -11,7 +11,7 @@ summary: >
   takes no version, and is the durable retry when an install was blocked.
 concepts: [fork-line, bundle-version]
 applies_to: [cli, mcp, human]
-source: [publish_fork_version, apply_app]
+source: [publish_fork_version, apply_app, manifest_table_errors]
 ---
 
 Two operations people conflate, doing different jobs.
@@ -45,6 +45,11 @@ A publish is refused when:
 - the manifest has no `version:`, a version that does not advance, or a
   different `app_type` from its line
 - a flow name is not a slug, or a flow declares its own `trigger:`
+- a `tables:` entry would be refused by the store at install — an unknown
+  `type` or `display` kind, a `format` that does not suit its type, a merge
+  setting without the policy it belongs to, and the other column rules in
+  [adding a table](https://docs.popcorn.ai/guides/adding-a-table.md). The
+  refusal names each table and column
 - the version or its content already exists (see `bundle-version`)
 
 A manifest with **no** `app_type:` is not refused: publish treats it as the
