@@ -3,22 +3,33 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-09-29
+platform: 2026-10-01
 summary: >
-  The tools the hosted Popcorn MCP server exposes — identity, channel
-  details, search, message history, posting and reactions — with their
-  arguments, generated from the server's own definitions. None changes an
-  app: that is the CLI's `app` commands. Tools for checking out, forking,
-  publishing and applying an app are proposed, listed apart, and not built.
+  The tools the hosted Popcorn MCP server exposes — people, channels,
+  messages and a channel's app bundle — with their arguments, generated
+  from the server's own definitions. They read a bundle, fork it and install
+  a version; editing and publishing it is the CLI's `app` commands, and a
+  publish tool is proposed, listed apart, and not built.
 concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 7 tools. They cover the conversation
-surface: who you are, a channel's details, search, message history,
-posting and reactions. Reads accept a channel's `#name` or its ID. Every
-call runs as the person who connected the server, in the workspace
-`whoami` last selected, with that person's permissions.
+The hosted MCP server exposes 16 tools. They cover people, channels,
+messages and a channel's app bundle: find people and channels, read and
+search a channel's messages, send messages and reactions, read a bundle's
+files, fork it onto the workspace's own line, bring a channel on a fork
+line to its line's head, or move it onto another line. They work on
+channels only; direct messages are out of reach.
+
+Every call runs as the person who connected the server, with that person's
+permissions, in the one workspace the connection is bound to; every
+response starts with that workspace's name. To use another workspace,
+reconnect. Read tools accept a channel's `#name` or its ID; tools that
+write into a channel take `channel_id`, the ID only. A listing returns one
+page and a `next_cursor` to pass back with the same arguments. A fork, and
+an install that moves a channel onto another line, are a dry run until
+called again with `confirm=true`; an install that brings a channel to its
+own line's head starts at once.
 
 This page is generated from the server's tool definitions by
 `scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
@@ -28,162 +39,190 @@ host may use it to decide what to ask before calling.
 
 ## Tools
 
-### `get_channel`
+### `add_reaction`
 
-Read-only. Get channel details.
+Writes, idempotent. Add your emoji reaction to a channel message. Adding one that's already there succeeds and changes nothing.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `channel` | `str` | yes | Channel name (e.g. "#my-app") or conversation ID |
+| `message_id` | `str` | yes | The message's ID. |
+| `emoji` | `str` | yes | A Unicode emoji, e.g. "👍". |
+
+### `fork_app_bundle`
+
+Writes, destructive. Fork the app a channel runs into a new, named fork line. The line starts as a byte-identical copy of the product version the channel runs, and the channel moves onto it. That's one-way: the channel never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to. These tools can't publish yet: a fork line's changes are published with the Popcorn CLI (`popcorn app checkout`, then `popcorn app publish`). To change how a tracker behaves on one channel, check its settings first; fork only for what settings can't express. Validate an edit before forking, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel_id` | `str` | yes | The channel's ID (not its name). |
+| `name` | `str` | yes | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a channel onto a line that exists, use install_app_bundle(line=...). |
+| `confirm` | `bool` |  | true to fork. Show the user the dry run first. Default `False`. |
+
+### `get_channel`
+
+Read-only. Show one channel: its details, your membership, and the app it runs, with the version it's on, the head of its line, and whether the latest install landed. list_channel_members lists who's in it.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel` | `str` | yes | The channel's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one channel has it, the call lists them with their IDs; pass an ID instead. |
 
 ### `get_user`
 
-Read-only. Look up a person in this workspace.
+Read-only. Look up a person by handle: yourself, a member of this workspace, or someone from another workspace you share a channel or DM with. For a member: ID, username, display name, email, workspace role, whether they're active (no once deactivated or removed) and whether they're a bot. For someone from another workspace: display name, username and bot only. To find someone by name, use list_workspace_members. Someone from another workspace is found by user ID only, and so is a deactivated member: usernames and emails are looked up among this workspace's active members, since a username is unique only within one workspace. list_channel_members shows the IDs.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `user` | `str` | yes | "me" for yourself, or a user ID, email, or username ("@name" works too). "me" always means you, even if someone's username is "me"; look them up by email or ID. |
+| `user` | `str` |  | "me" (the default) for yourself, or a user ID, email, or username ("@name" works too). "me" always means you, even if someone's username is "me"; look them up by email or ID. Other spellings such as "self" are refused. |
 
 ### `get_workspace`
 
 Read-only. The Popcorn workspace this connection is bound to. Every tool acts in this one workspace. It was chosen when the user connected Popcorn and can't be changed from here: to use a different workspace, the user reconnects Popcorn.
 
-### `post_message`
+### `install_app_bundle`
 
-Writes. Post a message to a channel or reply to a thread. Provide conversation_id for a new message, or message_id for a thread reply.
-
-| Argument | Type | Required | Notes |
-|---|---|---|---|
-| `content` | `str` | yes | Message text (markdown), or file content if filename set |
-| `conversation_id` | `str` |  | Post new message to this channel |
-| `message_id` | `str` |  | Reply in this message's thread |
-| `filename` | `str` |  | Upload content as this file (e.g. "report.md") |
-
-### `react`
-
-Writes, idempotent. React to a message with an emoji.
+Writes, destructive. Install the newest version of a channel's line on the channel. Without line, this is a catch-up (as `popcorn app apply`): a channel on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_channel shows the channel behind its line. With line, or when a product-line channel would join the workspace's only fork line, it's an adoption: the channel moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a channel that has none, and product versions reach product-line channels through the daily update, not through this tool. To change how a tracker behaves on one channel, check its settings first; a move between lines is one-way.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `message_id` | `str` | yes | Message to react to |
-| `emoji` | `str` | yes | Emoji (e.g. "👍") |
-| `action` | one of `add`, `remove` |  | "add" (default) or "remove" |
+| `channel_id` | `str` | yes | The channel's ID (not its name). |
+| `line` | `str` |  | A fork line of this channel's app to move onto. |
+| `confirm` | `bool` |  | true to make an adoption. Show the user the dry run first. Default `False`. |
 
-### `read_messages`
+### `list_app_bundle_files`
 
-Read-only. Read message history.
-
-| Argument | Type | Required | Notes |
-|---|---|---|---|
-| `conversation_id` | `str` | yes | Channel or DM ID |
-| `thread_id` | `str` |  | Read this thread's replies instead |
-| `time_range` | `str` |  | "start..end", "start..", or "..end" ISO datetime (ignored for threads) |
-| `limit` | `int` |  | Max messages (default 25, threads 50) |
-
-### `search`
-
-Read-only. Search channels, DMs, users, or messages.
+Read-only. List the files of the app a channel runs, with sizes and sha256. The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the channel runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_bundle_file. To change how a tracker behaves on one channel, check its settings first: a fork is one-way, and a publish reaches every channel on the line.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `type` | one of `channels`, `dms`, `users`, `messages` | yes | "channels", "dms", "users", or "messages" |
-| `query` | `str` |  | Filter text (required for messages) |
+| `channel` | `str` | yes | Channel name ("#intake") or ID. |
+| `version_id` | `int` |  | Another version of the channel's own line, to read history. Omit for the publish base. |
+| `paths` | `list[str]` |  | Only files matching any of these: an exact path or a glob ("flows/*", "code/**"). |
+| `cursor` | `str` |  | next_cursor from the previous page. |
+
+### `list_channel_members`
+
+Read-only. List the people in a channel, with each one's role in it. Includes people from other workspaces in a shared channel (marked [other workspace], shown without email), whom list_workspace_members doesn't list.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel` | `str` | yes | The channel's ID, or its name ("#intake" or "intake"). |
+| `include_bots` | `bool` |  | Also list bots (marked [bot]). Default `False`. |
+| `cursor` | `str` |  | The next_cursor from the previous page, with the same other arguments. |
+
+### `list_channels`
+
+Read-only. List the channels you can see in this workspace: the ones you're in (including channels shared in from another workspace) and the ones you can view without joining (marked [not joined]). Direct messages are not listed. Each row shows the channel's name, the app it runs, your unread count and mentions, and its ID. get_channel shows one channel's version and install state.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `query` | `str` |  | Case-insensitive substring of the channel name. |
+| `app` | `str` |  | Only channels running this app, by its slug (e.g. "claimcoordinator"). |
+| `include_archived` | `bool` |  | Also list archived channels (marked [archived]). Default `False`. |
+| `sort` | one of `name`, `recent` |  | "name" (default), or "recent": pinned first, then by last message. |
+| `cursor` | `str` |  | The next_cursor from the previous page, with the same other arguments. |
+
+### `list_messages`
+
+Read-only. A channel's messages, newest first, or one thread's replies. Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read a channel agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a channel the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A channel set to reply in the channel posts top-level instead, so if the thread stays empty, list the channel with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel` | `str` | yes | Channel ID or "#name". |
+| `thread_id` | `str` |  | List this thread's replies instead. A thread's ID is its first message's ID; a reply's ID finds its thread too. |
+| `after` | `str` |  | Only messages after this ISO timestamp or message ID. |
+| `before` | `str` |  | Only messages before this ISO timestamp or message ID. |
+| `cursor` | `str` |  | next_cursor from the previous page. |
+
+### `list_workspace_members`
+
+Read-only. List the members of this workspace, alphabetically by name. This workspace's members only: someone from another workspace who is in a shared channel isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use get_user.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `query` | `str` |  | Case-insensitive text to find in a username, display name or email, e.g. "dana". A leading "@" also matches the username after it ("@dsmith"), and still matches inside emails, so "@acme.example" finds everyone at that domain. |
+| `include_bots` | `bool` |  | Also list bots. Default `False`. |
+| `cursor` | `str` |  | The next_cursor of the previous page, to continue. Pass the same query and include_bots as that call. |
+
+### `read_app_bundle_file`
+
+Read-only. Read one file of the app a channel runs, exactly as stored. The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and next_cursor reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel` | `str` | yes | Channel name ("#intake") or ID. |
+| `path` | `str` | yes | The file's path, as list_app_bundle_files shows it. |
+| `version_id` | `int` |  | Another version of the channel's own line. Omit for the publish base. |
+| `cursor` | `str` |  | next_cursor from the previous range. |
+
+### `read_message`
+
+Read-only. One channel message in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours).
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `message_id` | `str` | yes | The message's ID. |
+| `include_parts` | `bool` |  | Also list every part's kind and fields, including tool calls with their arguments and integration payloads: what an agent actually did. Large; leave off unless needed. The parts are paged: a response ends with next_cursor when more follow. Default `False`. |
+| `cursor` | `str` |  | next_cursor from the previous page of parts. A later page holds only the parts, not the message text again. |
+
+### `remove_reaction`
+
+Writes, idempotent. Remove your emoji reaction from a channel message. Removing one that isn't there succeeds and changes nothing.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `message_id` | `str` | yes | The message's ID. |
+| `emoji` | `str` | yes | The emoji to remove, e.g. "👍". |
+
+### `search_messages`
+
+Read-only. Search message text across the channels you can see, ranked by relevance (or newest first with sort="recent"). Direct messages are never searched. Each result names its channel; read_message returns a result in full, and list_messages(channel, after=<id>) shows what followed it. To page through one channel in time order, use list_messages.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `query` | `str` | yes | Words to search for. |
+| `channel` | `str` |  | Only this channel (ID or "#name"). |
+| `author` | `str` |  | Only messages from this person: "@username", email, user ID, or "me". |
+| `after` | `str` |  | Only messages from this ISO timestamp on (inclusive), or from this message's time on, the message itself left out. |
+| `before` | `str` |  | Only messages up to this ISO timestamp (inclusive), or up to this message's time, the message itself left out. |
+| `sort` | one of `relevance`, `recent` |  | "relevance" (default) or "recent". |
+| `cursor` | `str` |  | next_cursor from the previous page. |
+
+### `send_message`
+
+Writes. Post a message in a channel, as you, visible to its members. Whether the channel's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; a tracker or app channel's agent answers most messages, other channel agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the channel's member list) in `mentions`. There is no answer in a channel homed in another workspace, and while the agent is already running a task in the channel, your message joins that task instead of getting its own reply. Replies arrive asynchronously, in a thread under a top-level message (unless the channel is set to reply in the channel). The response gives the new message's ID and the list_messages call that reads the answer.
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `channel_id` | `str` | yes | The channel's ID (get_channel returns it). |
+| `text` | `str` |  | Message text (markdown). Optional with an attachment. |
+| `thread_id` | `str` |  | Reply in this thread (its first message's ID). |
+| `mentions` | `list[str]` |  | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
+| `attachment` | `Attachment` |  | A text file to attach. |
 
 ## Proposed tools
 
-**None of these tools exist yet, and nothing depends on them arriving.** They
-are a design for changing an app from an MCP host: check out a channel's
-bundle, edit it, prove the edit with a publish dry run, fork if the channel is
-still on the product version, publish to its fork line, and watch the
-install. The dry run comes before the fork because the fork is the step that
-cannot be undone. They are listed so an author can see
-what is being considered; names and arguments may change before any ships.
-Today an app is changed with the CLI's `app` commands.
+**This tool does not exist yet, and nothing depends on it arriving.** It is
+listed so an author can see what is being considered; its arguments may change
+before it ships. Today a bundle's files are edited and published with the
+CLI's `app` commands.
 
-Three rules run through the design:
+### `publish_app_bundle`
 
-1. **Every write is previewed by the server.** A call without `confirm=true`
-  runs the real operation with the write removed and returns what would
-  happen, with a `preview_id`. The confirming call passes that id back, and
-  the server refuses a confirm whose id does not match a preview of the same
-  arguments by the same caller. This proves a dry run happened; whether a
-  person read it is up to the host.
-2. **Writes take the channel's UUID**, never a `#name`: names are not unique,
-  and a publish is the worst place to resolve one to the wrong channel.
-3. **Publish takes edits, not whole files** — each edit replaces text that
-  must be non-empty and occur exactly once in the file, edits apply in the
-  order given, and the file is checked against its hash — so a one-line change
-  costs one line.
-
-### `app_status`
-
-Read-only. What a channel runs: the app, its line, the bound version and the
-line's head, the install state and why, and the other channels on the line.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID or `#name` |
-
-### `app_checkout`
-
-Read-only. Without `paths`, lists the bundle's files with sizes, hashes and
-the `base_version_id` a publish must name. With `paths`, returns those files,
-and never a truncated one: a file that does not fit in the response is listed
-as not returned, to ask for again, and a file too large for any response comes
-back in byte ranges with its hash.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID or `#name` |
-| `ref` | `head` | `head` is a publish base; `bound` reads what runs and says when it is not a base |
-| `paths` | | Files to return whole |
-| `version_id` | | A past version, for reading; never a publish base. Wins over `ref`, and the response reports `ref` as `version` |
-
-### `app_fork`
-
-Moves a channel from the product version onto a fork line. One-way. Without
-`confirm`, previews whether it would create a line, adopt an existing one, do
-nothing because the channel is already on a fork, or refuse because more than
-one line could be meant.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID |
-| `line` | | The line to fork to or adopt |
-| `confirm` | `false` | Perform the previewed fork |
-| `preview_id` | | The id the preview returned; required with `confirm` |
-
-### `app_publish`
-
-Publishes a new version to the channel's line. Without `confirm`, a dry run of
-the real publish: the version it would mint, a diff summary, every check the
-publish runs, warnings, and how many channels on the line it reaches. Published
-is not installed: the channel installs it, and the rest of the line follows.
+Publishes a new version of the channel's bundle to its fork line. Without
+`confirm=true`, a dry run of the real publish: the version it would mint, a
+diff summary, every check the publish runs, warnings, and how many channels on
+the line it reaches. Published is not installed: the channel installs it, and
+the rest of the line follows.
 
 Publishing is for workspace admins only, because a publish reaches every
-channel on the line. The dry run also accepts the product version as a base,
-so an edit can be proven before the channel forks; only the confirmed publish
-needs the fork line.
+channel on the line. It takes edits rather than whole files, so a one-line
+change costs one line; the exact shape of an edit is not settled.
 
 | Argument | Default | Notes |
 |---|---|---|
-| `channel` | | Channel UUID; the channel that installs first |
+| `channel_id` | | Channel ID; the channel that installs first |
 | `base_version_id` | | The head the edits were made against |
-| `edits` | `[]` | `{path, old, new}`, applied in order; `old` must be non-empty and occur exactly once |
-| `files` | `{}` | New files only |
-| `deletes` | `[]` | Paths to remove |
+| `changes` | | The edits, applied in order; shape not settled |
 | `expected_sha256` | `{}` | Per path; refuses a publish against bytes that changed |
 | `changelog` | | What changed |
-| `confirm` | `false` | Perform the previewed publish |
-| `preview_id` | | The id the preview returned; required with `confirm` |
-
-### `app_apply`
-
-Installs the line's head on a channel. Catching up on the line the channel is
-already on needs no confirmation; adopting a different line does.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID |
-| `confirm` | `false` | Perform an adoption |
-| `preview_id` | | The id the adoption preview returned; required with `confirm` |
+| `confirm` | `false` | Perform the publish the dry run showed |
