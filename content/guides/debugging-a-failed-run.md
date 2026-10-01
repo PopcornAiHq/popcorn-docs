@@ -319,8 +319,8 @@ version …`. Its `--json` carries the same `install` block, but no
 
    A cancel lands at the run's next activity boundary; `--force` terminates on
    the spot, for a run that will not cancel.
-2. Fix the bundle, then run the offline checks:
-   `popcorn template check .` and `popcorn flow validate <flow>.yaml`. Neither
+2. Fix the bundle, then run the checks:
+   `popcorn app validate .` and `popcorn flow validate <flow>.yaml`. Neither
    catches a reference that is absent only at runtime — that is what the run
    just told you.
 3. Publish: `popcorn app publish . --bump patch -m "..." --yes`. A publish

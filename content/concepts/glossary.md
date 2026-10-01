@@ -7,7 +7,7 @@ summary: >
   The platform's nouns, each with its current synonyms and the collisions
   worth knowing. An app is the thing, such as a claim coordinator; its app
   bundle is its files. "Channel template" is the older name for both, still in
-  `template check` and `channel create --template`. A channel is what an app
+  `channel templates` and `channel create --template`. A channel is what an app
   installs into, identified by its UUID because a name can change.
 concepts: [app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
 applies_to: [cli, mcp, human]
@@ -37,8 +37,8 @@ is close behind: see *bundle version*.
   directory, which holds email text. See
   [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md).
 - **channel template** — The older name for an app and its bundle. It
-  survives in `popcorn template check`, `popcorn channel templates` and
-  `popcorn channel create --template <app>`, which all mean the app. Prefer
+  survives in `popcorn channel templates` and
+  `popcorn channel create --template <app>`, which both mean the app. Prefer
   *app* or *app bundle* in prose. See
   [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
 - **manifest** — `manifest.yaml` at the bundle root; `config.yaml` is still

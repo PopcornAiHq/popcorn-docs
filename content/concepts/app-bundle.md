@@ -65,7 +65,7 @@ agent at publish and refuses one it could not run.
 
 Anything outside that shape is not part of the bundle. The server refuses a
 publish containing an unrecognised path; the CLI leaves such paths behind
-before uploading and lists what it left. `template check` reports them as
+before uploading and lists what it left. `app validate` reports them as
 `path-not-published`, which fails `--strict`.
 
 So sample payloads live **outside** the bundle directory. A `fixtures/`

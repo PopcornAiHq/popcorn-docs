@@ -51,7 +51,7 @@ one.
 
 **Contains:** the activity catalog, the CLI's commands and the MCP server's
 tools, each with the script that generates it (`sync-activities.py`,
-`sync-cli.py`, `sync-mcp.py`). The flow rules, the `template check` rule codes
+`sync-cli.py`, `sync-mcp.py`). The flow rules, the `app validate` rule codes
 and a per-app states rendering belong here too, and land here only once
 something generates them — never hand-written in the meantime.
 

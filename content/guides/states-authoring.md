@@ -22,7 +22,7 @@ and where the two overlap that page is authoritative.
 The loop is the ordinary one from
 [authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md):
 edit `manifest.yaml`, `popcorn app publish`, read the error, repeat. One thing
-is different. `popcorn template check` does not look inside `states:`; the
+is different. `popcorn app validate` does not look inside `states:`; the
 graph is checked only when the server parses the manifest at publish. The
 check stops at the first problem, so a new graph usually takes several
 publishes to pass, one error at a time.

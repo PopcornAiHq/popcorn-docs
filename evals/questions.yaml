@@ -212,7 +212,7 @@
 
 - q: Is a channel template something different from an app bundle?
   concept: glossary, app-bundle
-  pass: no — channel template is the older name for an app and its bundle; it survives in template check, channel templates and channel create --template, which all mean the app
+  pass: no — channel template is the older name for an app and its bundle; it survives in channel templates and channel create --template, which both mean the app
   trap: describes a channel template as a separate starter layer, a Jinja template, or the bundle's templates/ directory
 
 - q: A script I wrote refers to the channel by its name. Is that safe to keep?
