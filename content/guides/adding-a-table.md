@@ -175,7 +175,7 @@ popcorn app validate .
 
 `app validate` reads the manifest and the flows together. Run from a fork
 checkout of the line's head, logged in, with a channel (`--channel`, else the
-checkout's), it also sends the edits to the server, which runs the checks
+checkout's), and with edits since the checkout, it also sends them to the server, which runs the checks
 `app publish` runs without publishing anything. It does not check everything,
 though, and a problem it misses shows up at a later stage:
 

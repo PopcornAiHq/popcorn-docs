@@ -42,7 +42,7 @@ bug. `app validate` works from a copy of the server's rules that ships with
 the CLI, so an older CLI can reject a construct the platform accepts. When the
 two disagree, upgrade the CLI before changing the bundle. Run from a fork
 checkout of the line's head, logged in, with a channel (`--channel`, else the
-checkout's), it also sends the edits to the server, which runs the checks
+checkout's), and with edits since the checkout, it also sends them to the server, which runs the checks
 `app publish` runs without publishing: the manifest's `tables:` among them, so
 it reports a column the store would refuse. Otherwise it runs everything else
 and prints `server checks: skipped` with the reason.
