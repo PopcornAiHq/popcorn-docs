@@ -3,7 +3,7 @@ id: template-authoring
 title: Authoring an app bundle
 order: 1
 summary: >
-  An app bundle is a directory of YAML that turns an empty channel into an app. The whole authoring loop: what a bundle holds, how it reaches a channel, manifest keys, flow grammar, table schemas, traps. `flow validate` is the authority on a flow; `app validate` checks the bundle on rules shipped with the CLI, and on publish's table rules if logged in. Upgrade a CLI that rejects a valid bundle.
+  An app bundle is a directory of YAML that turns an empty channel into an app. The whole authoring loop: what a bundle holds, how it reaches a channel, manifest keys, flow grammar, table schemas, traps. `flow validate` is the authority on a flow; `app validate` checks the bundle on the CLI's rules and, logged in from a fork checkout, on publish's own. Upgrade a CLI that rejects a valid bundle.
 concepts: [app-bundle, manifest-keys, publish-and-apply, fork-line, merge-policy]
 applies_to: [cli, mcp, human]
 ---
@@ -40,12 +40,14 @@ popcorn app validate ./mytemplate              # does the bundle hold together?
 guide and the validator disagree, the validator is right and this guide has a
 bug. `app validate` works from a copy of the server's rules that ships with
 the CLI, so an older CLI can reject a construct the platform accepts. When the
-two disagree, upgrade the CLI before changing the bundle. Logged in, it also
-sends the manifest's `tables:` through the check `app publish` runs, so it
-reports a column the store would refuse; offline it runs everything else and
-says it skipped the table rules.
+two disagree, upgrade the CLI before changing the bundle. Run from a fork
+checkout of the line's head, logged in, with a channel (`--channel`, else the
+checkout's), it also sends the edits to the server, which runs the checks
+`app publish` runs without publishing: the manifest's `tables:` among them, so
+it reports a column the store would refuse. Otherwise it runs everything else
+and prints `server checks: skipped` with the reason.
 
-`app validate` answers a different question, with no channel:
+Its own checks answer a different question, and need no channel:
 will install do what you think, and do the files agree with each other?
 Everything it reports passes `flow validate` cleanly — a fixture named
 `.yaml`, a write to an undeclared column, a schedule naming a flow that is not
@@ -903,7 +905,7 @@ Three loops now, and picking the right one is most of the speed. The **inner**
 loop publishes nothing and runs as often as you like:
 
 ```bash
-popcorn app validate .                               # no channel; table rules need a login
+popcorn app validate .                               # server checks: logged in, in a fork checkout
 popcorn flow activities --name <wire.name>           # what do I pass it?
 popcorn flow validate my_flow.yaml                   # per file, fast
 ```
