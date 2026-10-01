@@ -68,7 +68,7 @@ change is not touched at all, so a member's pause survives.
 no `app_type:` strips whatever the channel had, which changes the client's
 entire interface; one with no `channel_agent:` hands members back to the
 default agent. Never install an untyped bundle into a channel running a real
-app. `template check` warns with `clears-app-type`.
+app. `app validate` warns with `clears-app-type`.
 
 **Table changes are additive, so a rename is not a rename.** The reconcile adds
 the new column and orphans the old one, with the data still in the old.

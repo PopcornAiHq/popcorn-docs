@@ -4,7 +4,7 @@ title: Adding a table
 order: 4
 summary: >
   Adding a table to an app that already exists: declare it under `tables:`,
-  write it from a flow with `foundation.store.*`, run `template check`, then
+  write it from a flow with `foundation.store.*`, run `app validate`, then
   `app publish` from a fork line. Install creates the table, and each later
   install adds to it and never removes. Publish refuses a column the store
   would reject. A later publish can change a merge policy; stored rows keep
@@ -167,27 +167,30 @@ merged row, not only the cells the write sent. The store trims whitespace
 from keys, but it does not check that a key names a column: an unknown key
 is stored silently, unless it differs from a declared column only by case.
 
-## 5. Check it offline
+## 5. Validate it
 
 ```bash
-popcorn template check .
+popcorn app validate .
 ```
 
-`template check` reads the manifest and the flows together. It does not
-check everything, though, and a problem it misses shows up at a later stage:
+`app validate` reads the manifest and the flows together. Logged in, it also
+sends the manifest's `tables:` to the server, which runs the check
+`app publish` runs without publishing anything. It does not check everything,
+though, and a problem it misses shows up at a later stage:
 
 | Mistake | Caught by |
 |---|---|
-| a merge-key column that is undeclared, not a string, or not indexed | `template check`: `merge-key-unknown-column`, `merge-key-not-string`, `merge-key-not-indexed` |
-| `merge: concat` on a column that is not a string | `template check`: `concat-requires-string` |
-| a flow writing a column the table does not declare | `template check`: `undeclared-column` |
-| a filter on an undeclared column | `template check`, as a warning: `unknown-filter-column` |
-| any other invalid column definition: an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case, two table names that differ only by case, a table or column name containing U+FDD0 or U+FDD1 | `app publish`, which refuses it |
+| a merge-key column that is undeclared, not a string, or not indexed | `app validate`: `merge-key-unknown-column`, `merge-key-not-string`, `merge-key-not-indexed` |
+| `merge: concat` on a column that is not a string | `app validate`: `concat-requires-string` |
+| a flow writing a column the table does not declare | `app validate`: `undeclared-column` |
+| a filter on an undeclared column | `app validate`, as a warning: `unknown-filter-column` |
+| any other invalid column definition: an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case, two table names that differ only by case, a table or column name containing U+FDD0 or U+FDD1 | `app validate` when logged in; `app publish` refuses it either way |
 | a `table_name` misspelled in a flow | the run: a write fails the step, while a `list_rows` with `missing_ok: true` reads the missing table as empty |
 
-`template check` does not report the fifth row; `app publish` does, before
-any version exists (step 6). Check every `table_name` by eye, because
-`template check` only compares columns for tables the manifest declares.
+Offline, `app validate` cannot report the fifth row: it runs the other checks
+and says it skipped the table rules. `app publish` still refuses such a table
+before any version exists (step 6). Check every `table_name` by eye, because
+`app validate` only compares columns for tables the manifest declares.
 
 ## 6. Publish
 

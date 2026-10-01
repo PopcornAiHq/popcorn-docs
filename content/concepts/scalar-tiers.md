@@ -47,7 +47,7 @@ it whenever it has not — a cursor that is still at its declared starting value
 is reset to whatever the new version declares.
 
 Declare only what install should own. Let flows create their own keys; nothing
-requires a scalar to be declared before it is written. `template check` warns
+requires a scalar to be declared before it is written. `app validate` warns
 with `runtime-state-in-scalars` when a flow sets a scalar the manifest also
 declares.
 

@@ -3,15 +3,15 @@ id: template-authoring
 title: Authoring an app bundle
 order: 1
 summary: >
-  An app bundle is a directory of YAML that turns an empty channel into an app. The whole authoring loop: what a bundle holds, how it reaches a channel, manifest keys, flow grammar, table schemas and the traps. `flow validate` is the authority on a flow; `template check` runs offline on rules shipped with the CLI, so upgrade the CLI before changing a bundle it rejects.
+  An app bundle is a directory of YAML that turns an empty channel into an app. The whole authoring loop: what a bundle holds, how it reaches a channel, manifest keys, flow grammar, table schemas, traps. `flow validate` is the authority on a flow; `app validate` checks the bundle on rules shipped with the CLI, and on publish's table rules if logged in. Upgrade a CLI that rejects a valid bundle.
 concepts: [app-bundle, manifest-keys, publish-and-apply, fork-line, merge-policy]
 applies_to: [cli, mcp, human]
 ---
 
 An **app bundle** is a directory of YAML that turns an empty Popcorn channel
 into an app: tables to hold state, flows to do work, schedules and webhooks to
-invoke them. The CLI's `template` commands and `--template` flags name the
-same thing.
+invoke them. The CLI's `channel templates` command and `--template` flag name
+the same thing.
 
 > **Which path you are on decides how fast you can iterate.** A *new* app type
 > is not self-serve: the set of installable templates is fixed on the server,
@@ -21,7 +21,7 @@ same thing.
 > deploy in it. Both paths are §2.
 >
 > Everything else in this guide applies to both: the grammar, the manifest
-> semantics, and `popcorn template check` are about the bundle itself, not
+> semantics, and `popcorn app validate` are about the bundle itself, not
 > about how it gets installed.
 
 This guide is what you need that the API cannot tell you. It deliberately does
@@ -33,16 +33,19 @@ popcorn flow activities --summary              # what can I call?
 popcorn flow activities --name <wire.name>     # what do I pass it?
 popcorn flow activities --json                 # full arg + result schemas
 popcorn flow validate my_flow.yaml             # is this reference real?
-popcorn template check ./mytemplate            # does the bundle hold together?
+popcorn app validate ./mytemplate              # does the bundle hold together?
 ```
 
 `flow validate` asks the server and is the authority on a flow. When this
 guide and the validator disagree, the validator is right and this guide has a
-bug. `template check` works offline from a copy of the server's rules that
-ships with the CLI, so an older CLI can reject a construct the platform
-accepts. When the two disagree, upgrade the CLI before changing the bundle.
+bug. `app validate` works from a copy of the server's rules that ships with
+the CLI, so an older CLI can reject a construct the platform accepts. When the
+two disagree, upgrade the CLI before changing the bundle. Logged in, it also
+sends the manifest's `tables:` through the check `app publish` runs, so it
+reports a column the store would refuse; offline it runs everything else and
+says it skipped the table rules.
 
-`template check` answers a different question, offline and with no channel:
+`app validate` answers a different question, with no channel:
 will install do what you think, and do the files agree with each other?
 Everything it reports passes `flow validate` cleanly — a fixture named
 `.yaml`, a write to an undeclared column, a schedule naming a flow that is not
@@ -60,7 +63,7 @@ of that app, and is behind most of the rules below. Read it as a record: it
 says so itself, and some of its findings predate the merge policies in §5.
 
 > **Do not copy a bundle out of a repo.** The cut-down bundles under the CLI
-> repo's `tests/fixtures/bundles/` exist to exercise `template check`; none
+> repo's `tests/fixtures/bundles/` exist to exercise `app validate`; none
 > declares a `version:`, so none can publish, and they do not match what the
 > platform ships. **Get bundle source from the server** — see §2b, where
 > `app checkout` hands you the deployed version of a real one.
@@ -80,7 +83,7 @@ mytemplate/
 Only `manifest.yaml` is meaningful on its own, and a publish needs it — with
 a `version:` — so everything else is optional. Sample payloads and
 notes belong **outside** the bundle directory — anything the format does not
-name is left behind at publish and reported by `template check` (§2).
+name is left behind at publish and reported by `app validate` (§2).
 
 ## 2. How a bundle gets installed
 
@@ -126,7 +129,7 @@ and no hand-off to anyone:
 # fork onto this workspace's own line, then check its head out — one command
 popcorn app checkout --channel '#chan' --fork
 # ... edit
-popcorn template check ./<app>
+popcorn app validate ./<app>
 popcorn app publish ./<app> --bump patch -m "what changed" --yes
 popcorn app status ./<app>              # has the install landed?
 ```
@@ -163,7 +166,7 @@ product version is refused. `app publish` also starts the install that moves
 your channel onto the new version, and that install converges on its own —
 `app status` confirms it rather than causing it.
 
-The bump is not optional either, and inside a checkout `template check` is
+The bump is not optional either, and inside a checkout `app validate` is
 where you find that out. A published version is immutable, so `version:` must
 strictly advance past the one the checkout came from; leaving it alone gets you
 a `version-not-advanced` error offline instead of a server refusal after the
@@ -180,7 +183,7 @@ checkout.
 A checkout writes two files that are not bundle content: `.popcorn-app.json`,
 the baseline above, and `CLAUDE.md`, which tells a coding agent opening a file
 in the directory that this is a bundle and that an edit is not a release until
-`template check` and `app publish` have run. Neither publishes. `CLAUDE.md` is
+`app validate` and `app publish` have run. Neither publishes. `CLAUDE.md` is
 yours once written — a re-checkout leaves your edits to it alone unless you
 pass `--force` — and it is not `AGENT.md`, which *is* bundle content and ships
 to every channel that installs the app.
@@ -273,7 +276,7 @@ The registry reads your directory off disk and classifies every path:
   Most shipped templates carry a `strings.yaml`; it is optional.
 - **Treats every other root-level `.yaml` / `.yml` as a flow.** Flows are read
   from the bundle root only, so a stray `.yaml` there is installed as a flow
-  (`template check` reports one with no `name:`/`steps:`), while a nested
+  (`app validate` reports one with no `name:`/`steps:`), while a nested
   `.yaml` is not a flow at all.
 - **Descends `prompts/` and `templates/`**, one level, seeding
   `$channel.prompts.<stem>` and `$channel.templates.<stem>`.
@@ -292,7 +295,7 @@ The registry reads your directory off disk and classifies every path:
   bundle file. Anything else under `agents/` is left behind and reported as
   `path-not-published`.
 - **Does not read anything else.** A `fixtures/` directory, a `notes.txt`, a
-  file nested a level too deep: `template check` reports each as
+  file nested a level too deep: `app validate` reports each as
   `path-not-published` (a warning, so `--strict` fails), `app publish` leaves
   it behind, and the server refuses such a path if one reaches it. Only
   dotfiles and `__pycache__` are dropped without comment. Move fixtures
@@ -300,13 +303,13 @@ The registry reads your directory off disk and classifies every path:
   part of the format.
 
 A block file may carry any extension, `.yaml` included, and is block source
-rather than a flow. `template check` reports `code-file-outside-block` for a
+rather than a flow. `app validate` reports `code-file-outside-block` for a
 loose file directly under `code/` and `code-block-name-invalid` for a name that
 is not a slug — both are trees `app publish` refuses.
 
 **Keep flows at the root.** A flow in a subdirectory is not a flow: through
 `app publish` it never gets that far — the CLI reports it and leaves it behind
-— and `template check` flags the nesting.
+— and `app validate` flags the nesting.
 
 **Flow identity is the `name:` inside the YAML, not the filename.** A name
 matches `^[a-z0-9][a-z0-9_-]{0,62}$`: lowercase, digits,
@@ -359,7 +362,7 @@ one end to end, with every publish error it can raise, is
 > `app_type:` key strips whatever was there, which changes the client's whole
 > interface paradigm. Never install an untyped bundle into a channel running a
 > real app. A fork publish does not refuse one: it reaches every channel on
-> the line and clears `app_type` and `channel_agent` on each. `template check`
+> the line and clears `app_type` and `channel_agent` on each. `app validate`
 > warns you (`clears-app-type`); treat that warning as an error on a fork.
 
 ### Runtime state must not appear under `scalars:`
@@ -377,7 +380,7 @@ state a flow maintains. If a flow writes a `last_swept_at` key the manifest
 also declares, a fresh install resets it, and an update overwrites it whenever
 the live value happens to equal the old declared one. Declare only
 install-time configuration; let flows create their own runtime keys.
-`template check` warns (`runtime-state-in-scalars`) when it sees a flow write
+`app validate` warns (`runtime-state-in-scalars`) when it sees a flow write
 a scalar the manifest declares.
 
 ### Schedules address their own channel
@@ -398,7 +401,7 @@ schedules:
       conversation_id: <channel-conversation-id>
 ```
 
-Each entry names exactly one of `interval:` or `cron:`. `template check`
+Each entry names exactly one of `interval:` or `cron:`. `app validate`
 reports one naming both (`schedule-two-triggers`). If it reaches the server,
 the install fails for a new schedule; a schedule that already exists is
 instead skipped and kept exactly as it was, and the install reports it as
@@ -540,7 +543,7 @@ arithmetic, no `${}` interpolation.
 > one compares. And a string that routes to the expression rail but fails to
 > parse is an **error** — never a fallback to literal truthiness.
 
-`template check` does not police any of this: mirroring the routing rule
+`app validate` does not police any of this: mirroring the routing rule
 offline means reimplementing the predicate parser, and a near-miss
 reimplementation reports valid clauses as broken. It
 checks the references inside a `when:` and leaves the grammar to `flow
@@ -595,7 +598,7 @@ started. A child runs exactly once, so `on_error.retry` is refused on it —
 
 Blocks nest three lists deep, counting the flow's own `steps:` as the first —
 so a block inside a block is the deepest legal shape and a third level is
-rejected. `template check` reports it as `block-too-deep`; without that you
+rejected. `app validate` reports it as `block-too-deep`; without that you
 would not hear about it until the install failed.
 
 ```yaml
@@ -897,10 +900,10 @@ because nothing downstream parses it.
 ## 7. The authoring loop
 
 Three loops now, and picking the right one is most of the speed. The **inner**
-loop is offline and runs as often as you like:
+loop publishes nothing and runs as often as you like:
 
 ```bash
-popcorn template check .                             # no channel, no server
+popcorn app validate .                               # no channel; table rules need a login
 popcorn flow activities --name <wire.name>           # what do I pass it?
 popcorn flow validate my_flow.yaml                   # per file, fast
 ```
@@ -957,7 +960,7 @@ popcorn table schema alerts --channel <id>
 ```
 
 Because the outer loop is expensive, a bundle that installs but is wrong costs
-a whole deploy cycle to correct — which is the argument for `template check`
+a whole deploy cycle to correct — which is the argument for `app validate`
 and `flow validate` being pedantic, and for exercising boundaries (below) the
 first time you get a real channel rather than the third.
 
@@ -997,12 +1000,12 @@ cleanly, because they were runtime semantics rather than bad references: a
 merge policy overwriting a first-seen timestamp, an LLM inventing a row, an
 optional schema property going missing, a write to an undeclared column.
 
-`template check` was written from that list and now catches the last two —
+`app validate` was written from that list and now catches the last two —
 plus the whole class of cross-file mistakes a per-file validator cannot see:
 
 ```bash
-popcorn template check .            # errors exit non-zero
-popcorn template check . --strict   # warnings do too — this is the CI form
+popcorn app validate .            # errors exit non-zero
+popcorn app validate . --strict   # warnings do too — this is the CI form
 ```
 
 It cannot catch the first two. A merge policy is only wrong relative to what

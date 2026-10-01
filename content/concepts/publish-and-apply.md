@@ -55,7 +55,7 @@ A publish is refused when:
 A manifest with **no** `app_type:` is not refused: publish treats it as the
 line's own app. Every install of that version then clears `app_type` and
 `channel_agent` on each channel it reaches — every channel on the line. Keep
-both keys in every version, and treat `template check`'s `clears-app-type`
+both keys in every version, and treat `app validate`'s `clears-app-type`
 warning as an error when publishing to a fork.
 
 Every one of those asks *is this allowed and well-formed*. None of them asks

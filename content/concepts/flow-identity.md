@@ -16,7 +16,7 @@ source: [FLOW_NAME_RE, build_flow_index, analyze_flow_triggers]
 A flow is identified by the `name:` inside the YAML. The filename is not part
 of its identity — any root-level `.yaml` or `.yml` name that is not reserved
 will do. If `name:` is missing the filename stem stands in, which is why
-`template check` treats a missing name as an error.
+`app validate` treats a missing name as an error.
 
 ```yaml
 name: nudge_stale_rows     # this is the identity
@@ -42,7 +42,7 @@ happens to the things that addressed the old name depends on what they are:
 | a webhook that already exists | never updated, so it keeps pointing at the old name |
 | a trigger, document or state transition | the publish fails |
 
-Rename the references in the same change, or don't rename. `template check`
+Rename the references in the same change, or don't rename. `app validate`
 reports `schedule-unknown-flow` and `webhook-unknown-flow` before you publish.
 
 `popcorn flow get <name> --channel <channel>` reports everything that starts
