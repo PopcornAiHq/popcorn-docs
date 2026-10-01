@@ -1022,7 +1022,7 @@ _THEME_TOGGLE = """
 # word inside a name the query starts, which beats the query anywhere in a
 # name. A match only in a summary ranks below every name. Names are compared
 # with `_`, `.`, `-` and `/` read as spaces, so `post message` finds
-# `post_message` and `agent.invoke` finds `foundation.agent.invoke`.
+# `send_message` and `agent.invoke` finds `foundation.agent.invoke`.
 _SEARCH = """
 (function () {
   var button = document.querySelector(".search-open"), dialog = document.querySelector(".search");
@@ -1045,7 +1045,7 @@ _SEARCH = """
   var ENTRIES_PER_PAGE = 3;
   function search(raw, q) {
     var hits = [], loose = [];
-    // Words are what the reader separated with spaces. `post_message` is one
+    // Words are what the reader separated with spaces. `send_message` is one
     // name, not two words, and splitting it would match every page that
     // mentions posting and messages somewhere.
     var words = raw.toLowerCase().split(/\s+/).map(norm);
@@ -1140,7 +1140,7 @@ _SEARCH = """
       });
     });
     // Enter should land where the match is. When the best page matched only
-    // through an entry — `post_message` is a tool on the MCP page, not the
+    // through an entry — `send_message` is a tool on the MCP page, not the
     // page — start on that entry rather than on the top of its page.
     select(hits.length && !hits[0].byTitle && hits[0].entries.length ? 1 : 0);
   }

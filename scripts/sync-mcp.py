@@ -60,102 +60,31 @@ _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
 PROPOSED = """\
 ## Proposed tools
 
-**None of these tools exist yet, and nothing depends on them arriving.** They
-are a design for changing an app from an MCP host: check out a channel's
-bundle, edit it, prove the edit with a publish dry run, fork if the channel is
-still on the product version, publish to its fork line, and watch the
-install. The dry run comes before the fork because the fork is the step that
-cannot be undone. They are listed so an author can see
-what is being considered; names and arguments may change before any ships.
-Today an app is changed with the CLI's `app` commands.
+**This tool does not exist yet, and nothing depends on it arriving.** It is
+listed so an author can see what is being considered; its arguments may change
+before it ships. Today a bundle's files are edited and published with the
+CLI's `app` commands.
 
-Three rules run through the design:
+### `publish_app_bundle`
 
-1. **Every write is previewed by the server.** A call without `confirm=true`
-  runs the real operation with the write removed and returns what would
-  happen, with a `preview_id`. The confirming call passes that id back, and
-  the server refuses a confirm whose id does not match a preview of the same
-  arguments by the same caller. This proves a dry run happened; whether a
-  person read it is up to the host.
-2. **Writes take the channel's UUID**, never a `#name`: names are not unique,
-  and a publish is the worst place to resolve one to the wrong channel.
-3. **Publish takes edits, not whole files** — each edit replaces text that
-  must be non-empty and occur exactly once in the file, edits apply in the
-  order given, and the file is checked against its hash — so a one-line change
-  costs one line.
-
-### `app_status`
-
-Read-only. What a channel runs: the app, its line, the bound version and the
-line's head, the install state and why, and the other channels on the line.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID or `#name` |
-
-### `app_checkout`
-
-Read-only. Without `paths`, lists the bundle's files with sizes, hashes and
-the `base_version_id` a publish must name. With `paths`, returns those files,
-and never a truncated one: a file that does not fit in the response is listed
-as not returned, to ask for again, and a file too large for any response comes
-back in byte ranges with its hash.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID or `#name` |
-| `ref` | `head` | `head` is a publish base; `bound` reads what runs and says when it is not a base |
-| `paths` | | Files to return whole |
-| `version_id` | | A past version, for reading; never a publish base. Wins over `ref`, and the response reports `ref` as `version` |
-
-### `app_fork`
-
-Moves a channel from the product version onto a fork line. One-way. Without
-`confirm`, previews whether it would create a line, adopt an existing one, do
-nothing because the channel is already on a fork, or refuse because more than
-one line could be meant.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID |
-| `line` | | The line to fork to or adopt |
-| `confirm` | `false` | Perform the previewed fork |
-| `preview_id` | | The id the preview returned; required with `confirm` |
-
-### `app_publish`
-
-Publishes a new version to the channel's line. Without `confirm`, a dry run of
-the real publish: the version it would mint, a diff summary, every check the
-publish runs, warnings, and how many channels on the line it reaches. Published
-is not installed: the channel installs it, and the rest of the line follows.
+Publishes a new version of the channel's bundle to its fork line. Without
+`confirm=true`, a dry run of the real publish: the version it would mint, a
+diff summary, every check the publish runs, warnings, and how many channels on
+the line it reaches. Published is not installed: the channel installs it, and
+the rest of the line follows.
 
 Publishing is for workspace admins only, because a publish reaches every
-channel on the line. The dry run also accepts the product version as a base,
-so an edit can be proven before the channel forks; only the confirmed publish
-needs the fork line.
+channel on the line. It takes edits rather than whole files, so a one-line
+change costs one line; the exact shape of an edit is not settled.
 
 | Argument | Default | Notes |
 |---|---|---|
-| `channel` | | Channel UUID; the channel that installs first |
+| `channel_id` | | Channel ID; the channel that installs first |
 | `base_version_id` | | The head the edits were made against |
-| `edits` | `[]` | `{path, old, new}`, applied in order; `old` must be non-empty and occur exactly once |
-| `files` | `{}` | New files only |
-| `deletes` | `[]` | Paths to remove |
+| `changes` | | The edits, applied in order; shape not settled |
 | `expected_sha256` | `{}` | Per path; refuses a publish against bytes that changed |
 | `changelog` | | What changed |
-| `confirm` | `false` | Perform the previewed publish |
-| `preview_id` | | The id the preview returned; required with `confirm` |
-
-### `app_apply`
-
-Installs the line's head on a channel. Catching up on the line the channel is
-already on needs no confirmation; adopting a different line does.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel` | | Channel UUID |
-| `confirm` | `false` | Perform an adoption |
-| `preview_id` | | The id the adoption preview returned; required with `confirm` |
+| `confirm` | `false` | Perform the publish the dry run showed |
 """
 
 
@@ -276,20 +205,28 @@ def page(found: list[dict]) -> str:
         "order: 3",
         "layout: lookup",
         "summary: >",
-        "  The tools the hosted Popcorn MCP server exposes — identity, channel",
-        "  details, search, message history, posting and reactions — with their",
-        "  arguments, generated from the server's own definitions. None changes an",
-        "  app: that is the CLI's `app` commands. Tools for checking out, forking,",
-        "  publishing and applying an app are proposed, listed apart, and not built.",
+        "  The tools the hosted Popcorn MCP server exposes — people, channels,",
+        "  messages and a channel's app bundle — with their arguments, generated",
+        "  from the server's own definitions. They read a bundle, fork it and install",
+        "  a version; editing and publishing it is the CLI's `app` commands, and a",
+        "  publish tool is proposed, listed apart, and not built.",
         "concepts: [app-bundle, publish-and-apply, fork-line]",
         "applies_to: [cli, mcp, human]",
         "---",
         "",
-        f"The hosted MCP server exposes {len(found)} tools. They cover the conversation",
-        "surface: who you are, a channel's details, search, message history,",
-        "posting and reactions. Reads accept a channel's `#name` or its ID. Every",
-        "call runs as the person who connected the server, in the workspace",
-        "`whoami` last selected, with that person's permissions.",
+        f"The hosted MCP server exposes {len(found)} tools. They cover people, channels,",
+        "messages and a channel's app bundle: find people and channels, read and",
+        "search a channel's messages, send messages and reactions, read a bundle's",
+        "files, fork it onto the workspace's own line, and install a version onto a",
+        "channel. They work on channels only; direct messages are out of reach.",
+        "",
+        "Every call runs as the person who connected the server, with that person's",
+        "permissions, in the one workspace the connection is bound to; every",
+        "response starts with that workspace's name. To use another workspace,",
+        "reconnect. Read tools accept a channel's `#name` or its ID; write tools take",
+        "`channel_id`, the ID only. A listing returns one page and a `next_cursor`",
+        "to pass back with the same arguments. Forking and installing are a dry run",
+        "until called again with `confirm=true`.",
         "",
         "This page is generated from the server's tool definitions by",
         "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
