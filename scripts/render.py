@@ -47,10 +47,12 @@ import highlight
 _FENCE = re.compile(r"^```")
 _RULE = re.compile(r"^-{3,}\s*$")
 _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
-_ORDERED = re.compile(r"^\d+\.\s+(?P<text>.+)$")
+# A list item may be indented up to three spaces, as Markdown allows; four is
+# where an indented code block begins.
+_ORDERED = re.compile(r"^ {0,3}\d+\.\s+(?P<text>.+)$")
 _LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 _HEADING = re.compile(r"^(?P<level>#{2,4})\s+(?P<text>.+)$")
-_BULLET = re.compile(r"^[-*]\s+(?P<text>.+)$")
+_BULLET = re.compile(r"^ {0,3}[-*]\s+(?P<text>.+)$")
 _TABLE_SEP = re.compile(r"^\|?[\s:|-]+\|[\s:|-]*$")
 _CODE = re.compile(r"`([^`]+)`")
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
@@ -127,8 +129,16 @@ def _continues(line: str) -> bool:
     return bool(line.strip()) and line[0] in " \t" and not _FENCE.match(line.strip())
 
 
+_PIPE = re.compile(r"(?<!\\)\|")
+
+
 def _cells(row: str) -> list[str]:
-    return [c.strip() for c in row.strip().strip("|").split("|")]
+    """A table row's cells. As in GitHub's tables, an escaped pipe, `\\|`, is
+    a literal one — inside code too — and only an unescaped pipe divides."""
+    row = row.strip()
+    row = row[1:] if row.startswith("|") else row
+    row = row[:-1] if row.endswith("|") and not row.endswith("\\|") else row
+    return [c.strip().replace("\\|", "|") for c in _PIPE.split(row)]
 
 
 _TAG = re.compile(r"<[^>]+>")
