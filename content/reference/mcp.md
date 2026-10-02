@@ -20,42 +20,6 @@ files, fork it onto the workspace's own line, bring a channel on a fork
 line to its line's head, or move it onto another line. They work on
 channels only; direct messages are out of reach.
 
-**Workspace and people**
-
-| Tool | Access | What it does |
-|---|---|---|
-| [`get_workspace`](#get-workspace) | [read-only] | The Popcorn workspace this connection is bound to. |
-| [`get_user`](#get-user) | [read-only] | Look up a person by handle: yourself, a member of this workspace, or someone from another workspace you share a channel or DM with. |
-| [`list_workspace_members`](#list-workspace-members) | [read-only] | List the members of this workspace, alphabetically by name. |
-
-**Channels**
-
-| Tool | Access | What it does |
-|---|---|---|
-| [`list_channels`](#list-channels) | [read-only] | List the channels you can see in this workspace: the ones you're in (including channels shared in from another workspace) and the ones you can view without joining (marked [not joined]). |
-| [`get_channel`](#get-channel) | [read-only] | Show one channel: its details, your membership, and the app it runs, with the version it's on, the head of its line, and whether the latest install landed. list_channel_members lists who's in it. |
-| [`list_channel_members`](#list-channel-members) | [read-only] | List the people in a channel, with each one's role in it. |
-
-**Messages**
-
-| Tool | Access | What it does |
-|---|---|---|
-| [`list_messages`](#list-messages) | [read-only] | A channel's messages, newest first, or one thread's replies. |
-| [`read_message`](#read-message) | [read-only] | One channel message in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours). |
-| [`send_message`](#send-message) | [writes] | Post a message in a channel, as you, visible to its members. |
-| [`add_reaction`](#add-reaction) | [writes] [idempotent] | Add your emoji reaction to a channel message. |
-| [`remove_reaction`](#remove-reaction) | [writes] [idempotent] | Remove your emoji reaction from a channel message. |
-| [`search_messages`](#search-messages) | [read-only] | Search message text across the channels you can see, ranked by relevance (or newest first with sort="recent"). |
-
-**App bundle**
-
-| Tool | Access | What it does |
-|---|---|---|
-| [`list_app_bundle_files`](#list-app-bundle-files) | [read-only] | List the files of the app a channel runs, with sizes and sha256. |
-| [`read_app_bundle_file`](#read-app-bundle-file) | [read-only] | Read one file of the app a channel runs, exactly as stored. |
-| [`fork_app_bundle`](#fork-app-bundle) | [writes] [destructive] | Fork the app a channel runs into a new, named fork line. |
-| [`install_app_bundle`](#install-app-bundle) | [writes] [destructive] | Install the newest version of a channel's line on the channel. |
-
 Every call runs as the person who connected the server, with that person's
 permissions, in the one workspace the connection is bound to; every
 response starts with that workspace's name. To use another workspace,
