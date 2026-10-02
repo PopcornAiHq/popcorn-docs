@@ -31,6 +31,13 @@ never edited by hand, and it is deleted as the tools ship and start being
 generated like the rest. Nothing in it may name a ticket, a pull request, a
 private repository or a design document; describe the tool and stop.
 
+Some tools carry a worked example: a request a person might make, the calls
+an assistant makes for it, and what each returns. The backend writes these as
+`services/mcp/examples/<tool>.json` by running the real tools against fixed
+sample data in its own tests, which fail when a tool's output stops matching
+its file; this script only reads them. An example naming a tool the server
+does not define stops the sync, since a rename must carry its example along.
+
 Descriptions come from backend docstrings, which can carry internal
 references a public page must not; the leak guard runs on the generated page
 like any other, and the fix for a hit is the docstring, not this script.
@@ -40,6 +47,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import json
 import os
 import pathlib
 import re
@@ -51,6 +59,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGE = ROOT / "content" / "reference" / "mcp.md"
 DEFAULT_BACKEND = pathlib.Path.home() / "popcorn" / "backend"
 TOOLS_DIR = ("services", "mcp", "tools")
+EXAMPLES_DIR = ("services", "mcp", "examples")
 
 _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
 
@@ -182,6 +191,48 @@ def tools(root: pathlib.Path) -> list[dict]:
     return sorted(found, key=lambda t: t["name"])
 
 
+def examples(root: pathlib.Path, names: set[str]) -> dict[str, dict]:
+    """The worked examples by the tool each documents.
+
+    Every call in an example must name a tool the server defines: a stale
+    example would show a call nobody can make, so it stops the sync instead.
+    """
+    found = {}
+    for path in sorted(root.joinpath(*EXAMPLES_DIR).glob("*.json")):
+        example = json.loads(path.read_text())
+        unknown = {c["tool"] for c in example["calls"]} - names
+        if example["tool"] not in names or unknown:
+            sys.exit(f"✖  example {path.name} calls a tool the server doesn't define: "
+                     f"{sorted(unknown | ({example['tool']} - names))}")
+        found[example["tool"]] = example
+    return found
+
+
+def call(tool: str, arguments: dict) -> str:
+    """A call as the server's own responses write one: `name(arg="value")`."""
+    args = ", ".join(f"{k}={json.dumps(v, ensure_ascii=False)}" for k, v in arguments.items())
+    return f"{tool}({args})"
+
+
+def worked(example: dict) -> list[str]:
+    """The example under a tool's arguments: the request, then each call and
+    its response. A call is inline code when it fits a sentence; the response
+    is always a block, since its line breaks are part of the payload."""
+    out = ["**Example.** Asked:", ""]
+    out += ["> " + line for line in example["prompt"].splitlines()]
+    for i, c in enumerate(example["calls"]):
+        written = call(c["tool"], c["arguments"])
+        lead = "the assistant calls" if i == 0 else "Then it calls"
+        if i == 0:
+            lead = lead[0].upper() + lead[1:]
+        if "`" in written:
+            out += ["", f"{lead}:", "", "```text", written, "```", "", "which returns:"]
+        else:
+            out += ["", f"{lead} `{written}`, which returns:"]
+        out += ["", "```text", c["response"], "```"]
+    return out + [""]
+
+
 def access(h: dict[str, bool]) -> str:
     if h.get("readOnlyHint"):
         return "Read-only."
@@ -197,7 +248,7 @@ def cell(text: str) -> str:
     return " ".join(str(text).split()).replace("|", "\\|")
 
 
-def page(found: list[dict]) -> str:
+def page(found: list[dict], shown: dict[str, dict]) -> str:
     out = [
         "---",
         "id: mcp",
@@ -237,6 +288,13 @@ def page(found: list[dict]) -> str:
         "access line under each tool is the hint the server declares to the host; a",
         "host may use it to decide what to ask before calling.",
         "",
+        "Under some tools is an example: a request a person might make, the call",
+        "an assistant makes for it, and what the tool returns. The response is the",
+        "server's real output for sample data — the workspace Acme — produced by",
+        "running the tool in the server's tests, so it changes when the tool's",
+        "output does. IDs are shortened, as `8c1f…e2`, and a long listing keeps its",
+        "first rows.",
+        "",
         "## Tools",
         "",
     ]
@@ -251,6 +309,8 @@ def page(found: list[dict]) -> str:
                     note = f"{note} Default `{a['default']}`.".strip()
                 out.append(f"| `{a['name']}` | {a['type']} | {'yes' if a['required'] else ''} | {note} |")
             out.append("")
+        if tool["name"] in shown:
+            out += worked(shown[tool["name"]])
     return "\n".join(out) + "\n" + PROPOSED
 
 
@@ -270,7 +330,8 @@ def main() -> int:
         sys.exit("✖  no @mcp.tool definitions found — has the server moved in the checkout?")
 
     current = PAGE.read_text() if PAGE.exists() else ""
-    text = platform_version.stamp(page(found), current, args.platform)
+    shown = examples(root, {t["name"] for t in found})
+    text = platform_version.stamp(page(found, shown), current, args.platform)
     if args.check:
         if text != current:
             print(f"✖  {PAGE.relative_to(ROOT)} is stale — run scripts/sync-mcp.py", file=sys.stderr)
