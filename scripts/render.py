@@ -4,7 +4,7 @@
 Not a Markdown implementation. It covers the constructs that appear in
 `content/`, the same way `emit.parse` covers only the frontmatter shapes
 `content/_frontmatter.md` documents: headings, paragraphs, bullet lists,
-tables, fenced and indented code, and inline code, bold and italic. A page
+tables, fenced and indented code, and inline code, bold, italic and badges. A page
 that reaches for anything else renders as literal text, which is visible in
 review rather than silently wrong.
 
@@ -34,8 +34,13 @@ nothing else.
 
 from __future__ import annotations
 
+import datetime
+import functools
 import html
+import pathlib
 import re
+import subprocess
+import zoneinfo
 
 import highlight
 
@@ -51,9 +56,20 @@ _CODE = re.compile(r"`([^`]+)`")
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 _ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 _TERM = re.compile(r"^\*\*([^*]+)\*\*")
+# A badge is a word from this closed list in square brackets, `[read-only]`,
+# which reads as itself in the Markdown an agent gets. The list is closed so
+# a bracketed word in prose stays prose; the class says which colour it takes.
+# The generated MCP reference writes them, for a tool's access hints and for
+# a required argument.
+_BADGES = {"read-only": "safe", "writes": "write", "destructive": "danger",
+           "idempotent": "plain", "required": "plain"}
+_BADGE = re.compile(r"\[(" + "|".join(map(re.escape, _BADGES)) + r")\](?!\()")
+_BADGE_LINE = re.compile(r"^(?:\s*" + _BADGE.pattern + r")+\s*$")
 
 SITE = "https://docs.popcorn.ai"
 SOURCE = "https://github.com/PopcornAiHq/popcorn-docs"
+# The team's time zone; the abbreviation follows daylight saving, PST or PDT.
+_PACIFIC = zoneinfo.ZoneInfo("America/Los_Angeles")
 # A link to one of this site's pages, as the Markdown writes it: absolute and
 # ending `.md`, because the Markdown twin is what an agent follows.
 _PAGE = re.compile(r"^(?:" + re.escape(SITE) + r")?(?P<path>/[\w/-]+)\.md(?P<frag>#[\w-]*)?$")
@@ -87,6 +103,7 @@ def inline(text: str) -> str:
         return f"\x00{len(spans) - 1}\x00"
 
     out = _CODE.sub(stash, out)
+    out = _BADGE.sub(lambda m: f'<span class="badge {_BADGES[m.group(1)]}">{m.group(1)}</span>', out)
     out = _LINK.sub(
         lambda m: f'<a href="{_href(m.group(2)).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
         out,
@@ -506,7 +523,11 @@ def body(md: str, *, terms: bool = False) -> str:
             para.append(lines[i].strip())
             i += 1
         if para:
-            out.append(f"<p>{inline(' '.join(para))}</p>")
+            text = " ".join(para)
+            # A paragraph of nothing but badges labels what follows it, and
+            # the stylesheet sets the paragraph after it as that entry's lead.
+            cls = ' class="badges"' if _BADGE_LINE.match(text) else ""
+            out.append(f"<p{cls}>{inline(text)}</p>")
         else:
             i += 1
 
@@ -618,6 +639,17 @@ pre code { background: none; padding: 0; font-size: inherit; }
 table { border-collapse: collapse; width: 100%; margin: 0 0 1.4rem; font-size: .93rem; display: block; overflow-x: auto; }
 th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-weight: 600; }
+.badge { display: inline-block; padding: 0 .45rem; border: 1px solid currentColor; border-radius: 999px;
+  font-family: var(--mono); font-size: .7rem; line-height: 1.5; white-space: nowrap; vertical-align: .08em; }
+.badge.safe { color: var(--hl-string); }
+.badge.write { color: var(--accent); }
+.badge.danger { color: var(--hl-literal); }
+.badge.plain { color: var(--muted); }
+p.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+/* After an entry's badges: its first paragraph is the lead, and the one
+   after that is detail, set smaller so the leads are what a scan reads. */
+p.badges + p { font-weight: 500; }
+p.badges + p + p { font-size: .9rem; color: var(--muted); }
 ul { margin: 0 0 1.1rem; padding-left: 1.3rem; }
 li { margin-bottom: .4rem; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
@@ -657,7 +689,9 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
    landing between the page and the rail's links. */
 .site-footer { grid-column: 2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem;
   padding: 1.25rem 0 3rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .85rem; }
-.site-footer span:last-child { display: flex; gap: 1.25rem; }
+.site-footer > span:last-child { display: flex; gap: 1.25rem; }
+/* The copyright and the date stack, so the links keep the right-hand side. */
+.site-meta { display: flex; flex-direction: column; gap: .25rem; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent); }
 .sidebar, .rail { position: sticky; top: var(--header); align-self: start;
@@ -1219,6 +1253,27 @@ _SEARCH_DIALOG = (
 )
 
 
+@functools.cache
+def last_updated() -> str:
+    """The footer's "Last updated" line: when the commit being built was made.
+
+    The commit's time rather than the build's, so building one commit twice
+    gives the same bytes, and a re-publish with no new commit does not claim
+    the content changed. Outside a git checkout there is no such time, and
+    the footer leaves the line out rather than guess.
+    """
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cI"], capture_output=True,
+                             text=True, check=True, cwd=pathlib.Path(__file__).parent).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+    if not out:
+        return ""
+    when = datetime.datetime.fromisoformat(out).astimezone(_PACIFIC)
+    shown = f"{when:%b} {when.day}, {when.year}, {when.hour % 12 or 12}:{when:%M %p %Z}"
+    return f'<span>Last updated <time datetime="{when.isoformat()}">{shown}</time></span>'
+
+
 def document(
     title: str,
     content: str,
@@ -1287,7 +1342,7 @@ def document(
 {content}
 </main>
 <aside class="rail">{rail}</aside>
-<footer class="site-footer"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>
+<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{last_updated()}</span>
 <span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}
