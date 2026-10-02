@@ -54,14 +54,19 @@ CONTENT_TYPES = {
     ".woff2": "font/woff2",
 }
 
-# Everything else is rewritten on every publish and must reach readers within
-# the CDN's short TTL, so it carries no Cache-Control and the browser
-# revalidates. A font is the exception: its file name carries its upstream
-# version and a new font takes a new name (see render.py), so a browser can
-# keep one for a year without ever holding a stale copy.
-CACHE_CONTROL = {
-    ".woff2": "public, max-age=31536000, immutable",
-}
+# Everything but a font is rewritten on every publish, so a browser must ask
+# before reusing its copy: `no-cache` means revalidate, which costs a 304 when
+# nothing changed. Leaving the header off does not mean that — a browser then
+# guesses a lifetime from Last-Modified and serves its stale copy without
+# asking, which is how a reader kept seeing a page after its publish. The CDN
+# is unaffected: the distribution's minimum TTL outranks `no-cache`, and each
+# publish invalidates it instead.
+#
+# A font is the exception: its file name carries its upstream version and a
+# new font takes a new name (see render.py), so a browser can keep one for a
+# year without ever holding a stale copy.
+FONT_CACHE = "public, max-age=31536000, immutable"
+CACHE_CONTROL = {suffix: "no-cache" for suffix in CONTENT_TYPES} | {".woff2": FONT_CACHE}
 
 
 def aws(*args: str) -> str:
