@@ -117,6 +117,21 @@ change costs one line; the exact shape of an edit is not settled.
 """
 
 
+def proposed(defined: set[str]) -> str:
+    """`PROPOSED` without the tools the server already defines.
+
+    A tool's entry stays in `PROPOSED` until someone deletes it, but the
+    server can ship the tool first; the page then lists it once, as
+    generated. With no proposed tool left, the section goes.
+    """
+    intro, _, rest = PROPOSED.partition("\n### ")
+    sections = ["### " + part for part in rest.split("\n### ")] if rest else []
+    kept = [s for s in sections if re.match(r"### `(\w+)`", s).group(1) not in defined]
+    if not kept:
+        return ""
+    return intro + "\n" + "\n".join(kept)
+
+
 def backend() -> pathlib.Path | None:
     path = pathlib.Path(os.environ.get("POPCORN_BACKEND") or DEFAULT_BACKEND).expanduser()
     return path if path.joinpath(*TOOLS_DIR).is_dir() else None
@@ -379,7 +394,7 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
             out.append("")
         if tool["name"] in shown:
             out += worked(shown[tool["name"]])
-    return "\n".join(out) + "\n" + PROPOSED
+    return "\n".join(out) + "\n" + proposed({t["name"] for t in found})
 
 
 def main() -> int:
