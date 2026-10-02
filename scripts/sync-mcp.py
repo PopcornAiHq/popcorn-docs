@@ -56,6 +56,7 @@ import re
 import sys
 
 import platform_version
+import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGE = ROOT / "content" / "reference" / "mcp.md"
@@ -64,6 +65,21 @@ TOOLS_DIR = ("services", "mcp", "tools")
 EXAMPLES_DIR = ("services", "mcp", "examples")
 
 _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
+# The end of a description's first sentence: a stop followed by a capital, so
+# an "e.g." mid-sentence does not end it.
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+
+# The page's sections, in reading order, by the tool module each one covers.
+# The server already files its tools by area, one module per area, so the
+# grouping is the server's; this only names it. A module missing here stops
+# the sync, so a new area gets a heading rather than going unlisted.
+GROUPS = {
+    "context": "Workspace and people",
+    "details": "Channels",
+    "messages": "Messages",
+    "search_messages": "Messages",
+    "app_bundle": "App bundle",
+}
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
@@ -164,9 +180,15 @@ def hints(decorator: ast.Call) -> dict[str, bool]:
 
 
 def tools(root: pathlib.Path) -> list[dict]:
+    """Every tool, in page order: by module as `GROUPS` orders them, then in
+    the order its module defines them, which keeps a listing beside the reads
+    it leads to. Two modules under one heading follow one another."""
     found = []
     for path in sorted(root.joinpath(*TOOLS_DIR).glob("*.py")):
-        for node in ast.walk(ast.parse(path.read_text())):
+        source = path.read_text()
+        if "@mcp.tool" in source and path.stem not in GROUPS:
+            sys.exit(f"✖  tool module {path.stem!r} has no section in GROUPS — name its area")
+        for node in ast.walk(ast.parse(source)):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
             decorator = next(
@@ -190,9 +212,10 @@ def tools(root: pathlib.Path) -> list[dict]:
                     else ast.unparse(default).strip("'\""),
                     "text": described.get(param.arg, ""),
                 })
-            found.append({"name": node.name, "summary": summary,
+            found.append({"name": node.name, "summary": summary, "group": GROUPS[path.stem],
+                          "at": (list(GROUPS).index(path.stem), node.lineno),
                           "hints": hints(decorator), "args": args})
-    return sorted(found, key=lambda t: t["name"])
+    return sorted(found, key=lambda t: t["at"])
 
 
 def examples(root: pathlib.Path, names: set[str]) -> dict[str, dict]:
@@ -241,14 +264,42 @@ def worked(example: dict) -> list[str]:
 
 
 def access(h: dict[str, bool]) -> str:
+    """The tool's access hints as badges, which the renderer colours."""
     if h.get("readOnlyHint"):
-        return "Read-only."
-    words = ["Writes"]
+        return "[read-only]"
+    words = ["writes"]
     if h.get("destructiveHint"):
         words.append("destructive")
     if h.get("idempotentHint"):
         words.append("idempotent")
-    return ", ".join(words) + "."
+    return " ".join(f"[{w}]" for w in words)
+
+
+def lead(summary: str) -> tuple[str, str]:
+    """A description split into its first sentence and the rest."""
+    parts = _SENTENCE_END.split(" ".join(summary.split()), maxsplit=1)
+    return parts[0], parts[1] if len(parts) > 1 else ""
+
+
+def anchor(name: str) -> str:
+    """The anchor the renderer gives a tool's heading, from the renderer itself:
+    nothing checks a link's fragment, so a second copy of the rule could drift."""
+    return render._slug(f"`{name}`", set())
+
+
+def overview(found: list[dict]) -> list[str]:
+    """Every tool on one screen: a small table per area, each row its access
+    and its first sentence, linking to its entry. A table per area rather than
+    an area column, which would take the width the sentences need."""
+    out: list[str] = []
+    group = None
+    for t in found:
+        if t["group"] != group:
+            group = t["group"]
+            out += ([""] if out else []) + [f"**{group}**", "", "| Tool | Access | What it does |", "|---|---|---|"]
+        out.append(f"| [`{t['name']}`](#{anchor(t['name'])}) | {access(t['hints'])} "
+                   f"| {cell(lead(t['summary'])[0])} |")
+    return out + [""]
 
 
 def cell(text: str) -> str:
@@ -279,6 +330,7 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "line to its line's head, or move it onto another line. They work on",
         "channels only; direct messages are out of reach.",
         "",
+        *overview(found),
         "Every call runs as the person who connected the server, with that person's",
         "permissions, in the one workspace the connection is bound to; every",
         "response starts with that workspace's name. To use another workspace,",
@@ -292,8 +344,10 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "This page is generated from the server's tool definitions by",
         "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
         "date beside the title is the day of the deploy that last changed it. The",
-        "access line under each tool is the hint the server declares to the host; a",
-        "host may use it to decide what to ask before calling.",
+        "badges under each tool are the access hints the server declares to the",
+        "host — `[read-only]`, or `[writes]` with `[destructive]` or `[idempotent]`",
+        "— and a host may use them to decide what to ask before calling. An argument",
+        "marked `[required]` must be passed; every other one may be left out.",
         "",
         "Under some tools is an example: a request a person might make, then each",
         "call an assistant makes for it, marked `→`, followed by what the tool",
@@ -303,19 +357,25 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "every response opens with. IDs are shortened, as `8c1f…e2`, a cursor keeps",
         "its first characters, and a long listing keeps its first rows.",
         "",
-        "## Tools",
-        "",
     ]
+    group = None
     for tool in found:
-        out += [f"### `{tool['name']}`", "", f"{access(tool['hints'])} {cell(tool['summary'])}", ""]
+        if tool["group"] != group:
+            group = tool["group"]
+            out += [f"## {group}", ""]
+        first, rest = lead(tool["summary"])
+        out += [f"### `{tool['name']}`", "", access(tool["hints"]), "", cell(first), ""]
+        if rest:
+            out += [cell(rest), ""]
         if tool["args"]:
-            out += ["| Argument | Type | Required | Notes |", "|---|---|---|---|"]
+            out += ["| Argument | Type | Notes |", "|---|---|---|"]
             for a in tool["args"]:
                 note = cell(a["text"])
                 # A docstring often states its own default; say it once.
                 if a["default"] is not None and "default" not in note.lower():
                     note = f"{note} Default `{a['default']}`.".strip()
-                out.append(f"| `{a['name']}` | {a['type']} | {'yes' if a['required'] else ''} | {note} |")
+                name = f"`{a['name']}`" + (" [required]" if a["required"] else "")
+                out.append(f"| {name} | {a['type']} | {note} |")
             out.append("")
         if tool["name"] in shown:
             out += worked(shown[tool["name"]])

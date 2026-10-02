@@ -4,7 +4,7 @@
 Not a Markdown implementation. It covers the constructs that appear in
 `content/`, the same way `emit.parse` covers only the frontmatter shapes
 `content/_frontmatter.md` documents: headings, paragraphs, bullet lists,
-tables, fenced and indented code, and inline code, bold and italic. A page
+tables, fenced and indented code, and inline code, bold, italic and badges. A page
 that reaches for anything else renders as literal text, which is visible in
 review rather than silently wrong.
 
@@ -56,6 +56,15 @@ _CODE = re.compile(r"`([^`]+)`")
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 _ITALIC = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 _TERM = re.compile(r"^\*\*([^*]+)\*\*")
+# A badge is a word from this closed list in square brackets, `[read-only]`,
+# which reads as itself in the Markdown an agent gets. The list is closed so
+# a bracketed word in prose stays prose; the class says which colour it takes.
+# The generated MCP reference writes them, for a tool's access hints and for
+# a required argument.
+_BADGES = {"read-only": "safe", "writes": "write", "destructive": "danger",
+           "idempotent": "plain", "required": "plain"}
+_BADGE = re.compile(r"\[(" + "|".join(map(re.escape, _BADGES)) + r")\](?!\()")
+_BADGE_LINE = re.compile(r"^(?:\s*" + _BADGE.pattern + r")+\s*$")
 
 SITE = "https://docs.popcorn.ai"
 SOURCE = "https://github.com/PopcornAiHq/popcorn-docs"
@@ -94,6 +103,7 @@ def inline(text: str) -> str:
         return f"\x00{len(spans) - 1}\x00"
 
     out = _CODE.sub(stash, out)
+    out = _BADGE.sub(lambda m: f'<span class="badge {_BADGES[m.group(1)]}">{m.group(1)}</span>', out)
     out = _LINK.sub(
         lambda m: f'<a href="{_href(m.group(2)).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
         out,
@@ -513,7 +523,11 @@ def body(md: str, *, terms: bool = False) -> str:
             para.append(lines[i].strip())
             i += 1
         if para:
-            out.append(f"<p>{inline(' '.join(para))}</p>")
+            text = " ".join(para)
+            # A paragraph of nothing but badges labels what follows it, and
+            # the stylesheet sets the paragraph after it as that entry's lead.
+            cls = ' class="badges"' if _BADGE_LINE.match(text) else ""
+            out.append(f"<p{cls}>{inline(text)}</p>")
         else:
             i += 1
 
@@ -625,6 +639,17 @@ pre code { background: none; padding: 0; font-size: inherit; }
 table { border-collapse: collapse; width: 100%; margin: 0 0 1.4rem; font-size: .93rem; display: block; overflow-x: auto; }
 th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-weight: 600; }
+.badge { display: inline-block; padding: 0 .45rem; border: 1px solid currentColor; border-radius: 999px;
+  font-family: var(--mono); font-size: .7rem; line-height: 1.5; white-space: nowrap; vertical-align: .08em; }
+.badge.safe { color: var(--hl-string); }
+.badge.write { color: var(--accent); }
+.badge.danger { color: var(--hl-literal); }
+.badge.plain { color: var(--muted); }
+p.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+/* After an entry's badges: its first paragraph is the lead, and the one
+   after that is detail, set smaller so the leads are what a scan reads. */
+p.badges + p { font-weight: 500; }
+p.badges + p + p { font-size: .9rem; color: var(--muted); }
 ul { margin: 0 0 1.1rem; padding-left: 1.3rem; }
 li { margin-bottom: .4rem; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
