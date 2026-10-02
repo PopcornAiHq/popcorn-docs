@@ -34,8 +34,13 @@ nothing else.
 
 from __future__ import annotations
 
+import datetime
+import functools
 import html
+import pathlib
 import re
+import subprocess
+import zoneinfo
 
 import highlight
 
@@ -54,6 +59,8 @@ _TERM = re.compile(r"^\*\*([^*]+)\*\*")
 
 SITE = "https://docs.popcorn.ai"
 SOURCE = "https://github.com/PopcornAiHq/popcorn-docs"
+# The team's time zone; the abbreviation follows daylight saving, PST or PDT.
+_PACIFIC = zoneinfo.ZoneInfo("America/Los_Angeles")
 # A link to one of this site's pages, as the Markdown writes it: absolute and
 # ending `.md`, because the Markdown twin is what an agent follows.
 _PAGE = re.compile(r"^(?:" + re.escape(SITE) + r")?(?P<path>/[\w/-]+)\.md(?P<frag>#[\w-]*)?$")
@@ -657,7 +664,9 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
    landing between the page and the rail's links. */
 .site-footer { grid-column: 2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem;
   padding: 1.25rem 0 3rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .85rem; }
-.site-footer span:last-child { display: flex; gap: 1.25rem; }
+.site-footer > span:last-child { display: flex; gap: 1.25rem; }
+/* The copyright and the date stack, so the links keep the right-hand side. */
+.site-meta { display: flex; flex-direction: column; gap: .25rem; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent); }
 .sidebar, .rail { position: sticky; top: var(--header); align-self: start;
@@ -1219,6 +1228,27 @@ _SEARCH_DIALOG = (
 )
 
 
+@functools.cache
+def last_updated() -> str:
+    """The footer's "Last updated" line: when the commit being built was made.
+
+    The commit's time rather than the build's, so building one commit twice
+    gives the same bytes, and a re-publish with no new commit does not claim
+    the content changed. Outside a git checkout there is no such time, and
+    the footer leaves the line out rather than guess.
+    """
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cI"], capture_output=True,
+                             text=True, check=True, cwd=pathlib.Path(__file__).parent).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+    if not out:
+        return ""
+    when = datetime.datetime.fromisoformat(out).astimezone(_PACIFIC)
+    shown = f"{when:%b} {when.day}, {when.year}, {when.hour % 12 or 12}:{when:%M %p %Z}"
+    return f'<span>Last updated <time datetime="{when.isoformat()}">{shown}</time></span>'
+
+
 def document(
     title: str,
     content: str,
@@ -1287,7 +1317,7 @@ def document(
 {content}
 </main>
 <aside class="rail">{rail}</aside>
-<footer class="site-footer"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>
+<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{last_updated()}</span>
 <span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}
