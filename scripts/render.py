@@ -357,7 +357,11 @@ def code_block(code: str, lang: str = "") -> str:
         inner = f'<code class="language-yaml">{highlight.yaml(code)}</code>'
     else:
         inner = f"<code>{html.escape(code)}</code>"
-    return f'<div class="code"><pre>{inner}</pre>{_COPY_CODE}</div>'
+    # A `text` block is prose-shaped output (a tool's response, an error
+    # message), not code whose indentation carries meaning, so it wraps
+    # instead of scrolling sideways.
+    wrap = " code-text" if lang == "text" else ""
+    return f'<div class="code{wrap}"><pre>{inner}</pre>{_COPY_CODE}</div>'
 
 
 def body(md: str, *, terms: bool = False) -> str:
@@ -585,6 +589,7 @@ pre {
   overflow-x: auto; font-size: .85rem; line-height: 1.5;
 }
 pre code { background: none; padding: 0; font-size: inherit; }
+.code-text pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 /* A code block and its copy button. The button sits over the block's top
    corner rather than beside it, so revealing it moves nothing. */
 .code { position: relative; }
