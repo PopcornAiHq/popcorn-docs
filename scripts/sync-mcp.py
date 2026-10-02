@@ -56,7 +56,6 @@ import re
 import sys
 
 import platform_version
-import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGE = ROOT / "content" / "reference" / "mcp.md"
@@ -296,27 +295,6 @@ def lead(summary: str) -> tuple[str, str]:
     return parts[0], parts[1] if len(parts) > 1 else ""
 
 
-def anchor(name: str) -> str:
-    """The anchor the renderer gives a tool's heading, from the renderer itself:
-    nothing checks a link's fragment, so a second copy of the rule could drift."""
-    return render._slug(f"`{name}`", set())
-
-
-def overview(found: list[dict]) -> list[str]:
-    """Every tool on one screen: a small table per area, each row its access
-    and its first sentence, linking to its entry. A table per area rather than
-    an area column, which would take the width the sentences need."""
-    out: list[str] = []
-    group = None
-    for t in found:
-        if t["group"] != group:
-            group = t["group"]
-            out += ([""] if out else []) + [f"**{group}**", "", "| Tool | Access | What it does |", "|---|---|---|"]
-        out.append(f"| [`{t['name']}`](#{anchor(t['name'])}) | {access(t['hints'])} "
-                   f"| {cell(lead(t['summary'])[0])} |")
-    return out + [""]
-
-
 def cell(text: str) -> str:
     return " ".join(str(text).split()).replace("|", "\\|")
 
@@ -345,7 +323,6 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "line to its line's head, or move it onto another line. They work on",
         "channels only; direct messages are out of reach.",
         "",
-        *overview(found),
         "Every call runs as the person who connected the server, with that person's",
         "permissions, in the one workspace the connection is bound to; every",
         "response starts with that workspace's name. To use another workspace,",
