@@ -418,6 +418,7 @@ def main() -> int:
                     related=[] if lookup else related(page, by_id),
                 ),
                 url=url(page),
+                lookup=lookup,
             )
         )
 

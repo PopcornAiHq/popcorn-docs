@@ -610,6 +610,15 @@ pre {
   overflow-x: auto; font-size: .85rem; line-height: 1.5;
 }
 pre code { background: none; padding: 0; font-size: inherit; }
+/* Code in a heading is the heading's own word, so it keeps the heading's size
+   rather than shrinking like code in a sentence, and needs no chip to stand
+   out from the words around it. */
+h2 code, h3 code, h4 code { font-size: .95em; background: none; padding: 0; }
+/* On a page of entries each third-level heading starts one: larger than the
+   entry's lead sentence, with a rule above, so an entry does not run on from
+   the example that closes the one before it. */
+.lookup-page h3 { font-size: 1.3rem; margin-top: 2.75rem; padding-top: 1.75rem; border-top: 1px solid var(--rule); }
+.lookup-page h2 + h3 { margin-top: 0; padding-top: 0; border-top: 0; }
 .code-text pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 /* A code block and its copy button. The button sits over the block's top
    corner rather than beside it, so revealing it moves nothing. */
@@ -1283,6 +1292,7 @@ def document(
     rail: str = "",
     url: str = "",
     noindex: bool = False,
+    lookup: bool = False,
 ) -> str:
     """Wrap rendered content in a standalone page: header, sidebar, page, rail.
 
@@ -1295,6 +1305,9 @@ def document(
     a chat app or a search engine files the page under whichever way it was
     reached. A page with no single address — the not-found page, served at
     every missing path — passes none, and ``noindex`` keeps it out of search.
+
+    ``lookup`` marks a page of entries, the reference pages, where each
+    third-level heading starts an entry and is styled as one.
     """
     attr = lambda text: html.escape(text, quote=True)
     head = [f'<meta name="description" content="{attr(description)}">'] if description else []
@@ -1338,7 +1351,7 @@ def document(
 </nav></div></header>
 <div class="layout">
 <aside class="sidebar" id="sidebar">{sidebar}</aside>
-<main id="content" tabindex="-1">
+<main id="content" tabindex="-1"{' class="lookup-page"' if lookup else ""}>
 {content}
 </main>
 <aside class="rail">{rail}</aside>
