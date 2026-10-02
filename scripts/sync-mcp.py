@@ -35,8 +35,10 @@ Some tools carry a worked example: a request a person might make, the calls
 an assistant makes for it, and what each returns. The backend writes these as
 `services/mcp/examples/<tool>.json` by running the real tools against fixed
 sample data in its own tests, which fail when a tool's output stops matching
-its file; this script only reads them. An example naming a tool the server
-does not define stops the sync, since a rename must carry its example along.
+its file; this script only reads them, and trims what it shows — the
+workspace line and long cursors — without changing the files. An example
+naming a tool the server does not define stops the sync, since a rename must
+carry its example along.
 
 Descriptions come from backend docstrings, which can carry internal
 references a public page must not; the leak guard runs on the generated page
@@ -62,6 +64,8 @@ TOOLS_DIR = ("services", "mcp", "tools")
 EXAMPLES_DIR = ("services", "mcp", "examples")
 
 _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
+# Long enough that no word or shortened ID matches, only an opaque token.
+_LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
 # Designed, not built. See the module docstring before adding to this.
 # The design rules are a numbered list, not bullets: on a lookup page a bullet
@@ -214,23 +218,26 @@ def call(tool: str, arguments: dict) -> str:
     return f"{tool}({args})"
 
 
+def shown_response(response: str) -> str:
+    """A response as the page shows it: without the workspace line every
+    response opens with, which the page's introduction states once, and with
+    any long opaque token, such as a cursor, cut to its first characters. The
+    point of an example is the response's shape, which neither carries."""
+    lines = response.splitlines()
+    if lines and lines[0].startswith("Workspace: "):
+        lines = lines[1:]
+    return "\n".join(_LONG_TOKEN.sub(lambda m: m.group()[:8] + "…", line) for line in lines)
+
+
 def worked(example: dict) -> list[str]:
-    """The example under a tool's arguments: the request, then each call and
-    its response. A call is inline code when it fits a sentence; the response
-    is always a block, since its line breaks are part of the payload."""
-    out = ["**Example.** Asked:", ""]
-    out += ["> " + line for line in example["prompt"].splitlines()]
+    """The example under a tool's arguments: the request on one line, then one
+    block holding each call, marked `→`, and the response it returns, a blank
+    line apart so the call stands out from the output. The response is a block
+    because its line breaks are part of the payload."""
+    out = [f"**Example** — “{' '.join(example['prompt'].split())}”", "", "```text"]
     for i, c in enumerate(example["calls"]):
-        written = call(c["tool"], c["arguments"])
-        lead = "the assistant calls" if i == 0 else "Then it calls"
-        if i == 0:
-            lead = lead[0].upper() + lead[1:]
-        if "`" in written:
-            out += ["", f"{lead}:", "", "```text", written, "```", "", "which returns:"]
-        else:
-            out += ["", f"{lead} `{written}`, which returns:"]
-        out += ["", "```text", c["response"], "```"]
-    return out + [""]
+        out += ([""] if i else []) + [f"→ {call(c['tool'], c['arguments'])}", "", shown_response(c["response"])]
+    return out + ["```", ""]
 
 
 def access(h: dict[str, bool]) -> str:
@@ -288,12 +295,13 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "access line under each tool is the hint the server declares to the host; a",
         "host may use it to decide what to ask before calling.",
         "",
-        "Under some tools is an example: a request a person might make, the call",
-        "an assistant makes for it, and what the tool returns. The response is the",
-        "server's real output for sample data — the workspace Acme — produced by",
-        "running the tool in the server's tests, so it changes when the tool's",
-        "output does. IDs are shortened, as `8c1f…e2`, and a long listing keeps its",
-        "first rows.",
+        "Under some tools is an example: a request a person might make, then each",
+        "call an assistant makes for it, marked `→`, followed by what the tool",
+        "returns. The response is the server's real output for sample data — the",
+        "workspace Acme — produced by running the tool in the server's tests, so it",
+        "changes when the tool's output does. Examples leave out the workspace line",
+        "every response opens with. IDs are shortened, as `8c1f…e2`, a cursor keeps",
+        "its first characters, and a long listing keeps its first rows.",
         "",
         "## Tools",
         "",

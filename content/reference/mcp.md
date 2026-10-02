@@ -36,12 +36,13 @@ date beside the title is the day of the deploy that last changed it. The
 access line under each tool is the hint the server declares to the host; a
 host may use it to decide what to ask before calling.
 
-Under some tools is an example: a request a person might make, the call
-an assistant makes for it, and what the tool returns. The response is the
-server's real output for sample data — the workspace Acme — produced by
-running the tool in the server's tests, so it changes when the tool's
-output does. IDs are shortened, as `8c1f…e2`, and a long listing keeps its
-first rows.
+Under some tools is an example: a request a person might make, then each
+call an assistant makes for it, marked `→`, followed by what the tool
+returns. The response is the server's real output for sample data — the
+workspace Acme — produced by running the tool in the server's tests, so it
+changes when the tool's output does. Examples leave out the workspace line
+every response opens with. IDs are shortened, as `8c1f…e2`, a cursor keeps
+its first characters, and a long listing keeps its first rows.
 
 ## Tools
 
@@ -64,14 +65,11 @@ Writes, destructive. Fork the app a channel runs into a new, named fork line. Th
 | `name` | `str` | yes | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a channel onto a line that exists, use install_app_bundle(line=...). |
 | `confirm` | `bool` |  | true to fork. Show the user the dry run first. Default `False`. |
 
-**Example.** Asked:
-
-> Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.
-
-The assistant calls `fork_app_bundle(channel_id="c7d2…5b", name="acme-intake")`, which returns:
+**Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 
 ```text
-Workspace: Acme (8c1f…e2)
+→ fork_app_bundle(channel_id="c7d2…5b", name="acme-intake")
+
 Channel: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
@@ -93,14 +91,11 @@ Read-only. Show one channel: its details, your membership, and the app it runs, 
 |---|---|---|---|
 | `channel` | `str` | yes | The channel's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one channel has it, the call lists them with their IDs; pass an ID instead. |
 
-**Example.** Asked:
-
-> Is #intake on the latest version of its app?
-
-The assistant calls `get_channel(channel="#intake")`, which returns:
+**Example** — “Is #intake on the latest version of its app?”
 
 ```text
-Workspace: Acme (8c1f…e2)
+→ get_channel(channel="#intake")
+
 ID: c7d2…5b
 Name: #intake
 Kind: channel
@@ -174,20 +169,17 @@ Read-only. List the channels you can see in this workspace: the ones you're in (
 | `sort` | one of `name`, `recent` |  | "name" (default), or "recent": pinned first, then by last message. |
 | `cursor` | `str` |  | The next_cursor from the previous page, with the same other arguments. |
 
-**Example.** Asked:
-
-> Which of our channels run the claims coordinator app?
-
-The assistant calls `list_channels(app="claimcoordinator")`, which returns:
+**Example** — “Which of our channels run the claims coordinator app?”
 
 ```text
-Workspace: Acme (8c1f…e2)
+→ list_channels(app="claimcoordinator")
+
 50 of 137 channels running claimcoordinator:
 - #claims-central  claimcoordinator  (id: 2af4…0c)
 - #claims-east  claimcoordinator  4 unread, 1 mention  (id: be23…ef)  [pinned]
 - #claims-north  claimcoordinator  (id: bd7d…b9)  [not joined]
 - … 47 more rows
-next_cursor: eyJ2IjoxLCJzb3J0IjoibmFtZSIsInEiOiIiLCJhcHAiOiJjbGFpbWNvb3JkaW5hdG9yIiwiaW5jbHVkZV9hcmNoaXZlZCI6ZmFsc2UsImFmdGVyIjpbImNsYWltcy1yZWdpb24tNDciLCJjMGI0MzYwMy00M2M0LTVkZTYtOGRiOS00MWJhMzc3OGZjZjIiXX0
+next_cursor: eyJ2Ijox…
 ```
 
 ### `list_messages`
@@ -268,22 +260,16 @@ Writes. Post a message in a channel, as you, visible to its members. Whether the
 | `mentions` | `list[str]` |  | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
 | `attachment` | `Attachment` |  | A text file to attach. |
 
-**Example.** Asked:
-
-> Ask the agent in #intake what's still open on claim 4471, and tell me what it says.
-
-The assistant calls `send_message(channel_id="c7d2…5b", text="What's still open on claim 4471?")`, which returns:
+**Example** — “Ask the agent in #intake what's still open on claim 4471, and tell me what it says.”
 
 ```text
-Workspace: Acme (8c1f…e2)
+→ send_message(channel_id="c7d2…5b", text="What's still open on claim 4471?")
+
 Message sent to #intake (id: 7e1a…47).
 Replies arrive asynchronously: a channel agent's answer typically takes seconds to a few minutes. To read them: list_messages(channel="c7d2…5b", thread_id="7e1a…47"). A channel set to reply in the channel posts its answer top-level instead; if the thread stays empty, check list_messages(channel="c7d2…5b", after="7e1a…47").
-```
 
-Then it calls `list_messages(channel="c7d2…5b", thread_id="7e1a…47")`, which returns:
+→ list_messages(channel="c7d2…5b", thread_id="7e1a…47")
 
-```text
-Workspace: Acme (8c1f…e2)
 Channel: #intake (c7d2…5b) · thread: 7e1a…47
 1 of 1 replies, newest first:
 [2026-09-29 14:03] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
