@@ -163,7 +163,7 @@ is close behind: see *bundle version*.
   `$channel.prompts.<name>` and `$channel.templates.<name>`. Flows read the
   parameters and integrations as `$channel.*`, and a run pins them at start.
   `popcorn channel-config show` prints it. *Not to be
-  confused with* scalars, which live in the data store and are not in
+  confused with* scalars, which live in the agent store and are not in
   `$channel.*`. See
   [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
 - **channel parameters** — Typed values in the channel config, read as
@@ -283,9 +283,10 @@ is close behind: see *bundle version*.
 
 ## Data
 
-- **data store** — A channel's tables, scalars and files, scoped to that one
+- **agent store** — A channel's tables, scalars and files, scoped to that one
   channel. The CLI reaches it through `popcorn table`, and flows through the
-  `foundation.store.*` activities. Older pages also call it the agent store.
+  `foundation.store.*` activities. Some API paths and older pages call it the
+  data store.
 - **table** — A named collection of rows with a schema: its columns, their
   merge policies and an optional merge key. The manifest's `tables:`
   reconciles additively — columns are added, never dropped or renamed — while
