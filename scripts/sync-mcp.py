@@ -74,46 +74,21 @@ _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 # the sync, so a new area gets a heading rather than going unlisted.
 GROUPS = {
     "context": "Workspace and people",
-    "details": "Channels",
+    "details": "Projects",
+    "new_project": "Projects",
     "messages": "Messages",
     "search_messages": "Messages",
-    "app_bundle": "App bundle",
+    "app_bundle": "Apps",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
-# Designed, not built. See the module docstring before adding to this.
-# The design rules are a numbered list, not bullets: on a lookup page a bullet
-# that opens in bold is read as a glossary-style entry and indexed.
-PROPOSED = """\
-## Proposed tools
-
-**This tool does not exist yet, and nothing depends on it arriving.** It is
-listed so an author can see what is being considered; its arguments may change
-before it ships. Today a bundle's files are edited and published with the
-CLI's `app` commands.
-
-### `publish_app_bundle`
-
-Publishes a new version of the channel's bundle to its fork line. Without
-`confirm=true`, a dry run of the real publish: the version it would mint, a
-diff summary, every check the publish runs, warnings, and how many channels on
-the line it reaches. Published is not installed: the channel installs it, and
-the rest of the line follows.
-
-Publishing is for workspace admins only, because a publish reaches every
-channel on the line. It takes edits rather than whole files, so a one-line
-change costs one line; the exact shape of an edit is not settled.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `channel_id` | | Channel ID; the channel that installs first |
-| `base_version_id` | | The head the edits were made against |
-| `changes` | | The edits, applied in order; shape not settled |
-| `expected_sha256` | `{}` | Per path; refuses a publish against bytes that changed |
-| `changelog` | | What changed |
-| `confirm` | `false` | Perform the publish the dry run showed |
-"""
+# Designed, not built: none right now. See the module docstring before adding
+# to this. An entry is a "## Proposed tools" intro, then one "### `tool`"
+# section per tool; proposed() drops a section once the server defines that
+# name. Any numbered rules go in a numbered list, not bullets: on a lookup page
+# a bullet that opens in bold is read as a glossary-style entry and indexed.
+PROPOSED = ""
 
 
 def proposed(defined: set[str]) -> str:
@@ -307,31 +282,36 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "order: 3",
         "layout: lookup",
         "summary: >",
-        "  The tools the hosted Popcorn MCP server exposes — people, channels,",
-        "  messages and a channel's app bundle — with their arguments, generated",
-        "  from the server's own definitions. They read a bundle, fork it and install",
-        "  a version; editing and publishing it is the CLI's `app` commands, and a",
-        "  publish tool is proposed, listed apart, and not built.",
+        "  The tools the hosted Popcorn MCP server exposes — people, projects,",
+        "  messages and a project's app — with their arguments, generated from the",
+        "  server's own definitions. They list apps and create a project, read an",
+        "  app's files, fork it, publish changes to a fork line and install a version.",
         "concepts: [app-bundle, publish-and-apply, fork-line]",
         "applies_to: [cli, mcp, human]",
         "---",
         "",
-        f"The hosted MCP server exposes {len(found)} tools. They cover people, channels,",
-        "messages and a channel's app bundle: find people and channels, read and",
-        "search a channel's messages, send messages and reactions, read a bundle's",
-        "files, fork it onto the workspace's own line, bring a channel on a fork",
-        "line to its line's head, or move it onto another line. They work on",
-        "channels only; direct messages are out of reach.",
+        f"The hosted MCP server exposes {len(found)} tools. They cover people, projects,",
+        "messages and a project's app: find people and projects, list the apps a",
+        "new project can run, create a project (optionally running an app), read",
+        "and search a project's messages, send messages and reactions, read the",
+        "files of the app a project runs, fork it onto the workspace's own line,",
+        "publish changes to a fork line, bring a project on a fork line to its",
+        "line's head, or move it onto another line. They work on projects only;",
+        "direct messages are out of reach.",
+        "",
+        "A project is what the CLI and the API call a channel, and an app is what",
+        "they call an app bundle; the `#name` and the IDs are the same.",
         "",
         "Every call runs as the person who connected the server, with that person's",
         "permissions, in the one workspace the connection is bound to; every",
         "response starts with that workspace's name. To use another workspace,",
-        "reconnect. Read tools accept a channel's `#name` or its ID; tools that",
-        "write into a channel take `channel_id`, the ID only. A listing returns one",
-        "page and a `next_cursor` to pass back with the same arguments. A fork, and",
-        "an install that moves a channel onto another line, are a dry run until",
-        "called again with `confirm=true`; an install that brings a channel to its",
-        "own line's head starts at once.",
+        "reconnect. Read tools accept a project's `#name` or its ID; tools that",
+        "write into a project take `project_id`, the ID only. A listing returns one",
+        "page and a `next_cursor` to pass back with the same arguments. A fork, a",
+        "publish, an install that moves a project onto another line, and creating",
+        "a project that runs an app are a dry run until called again with",
+        "`confirm=true`. An install that brings a project to its own line's head",
+        "starts at once, and so does creating a project with no app.",
         "",
         "This page is generated from the server's tool definitions by",
         "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
