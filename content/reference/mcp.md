@@ -3,6 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
+platform: 2026-10-06
 summary: >
   The tools the hosted Popcorn MCP server exposes — people, projects,
   messages and a project's app — with their arguments, generated from the
@@ -220,7 +221,7 @@ Project: #partners-acme (dddb…f2)
 
 List the apps a new project in this workspace can run.
 
-Each row shows the app's name, its slug (what create_project's `app` takes), what it does, and the connections someone sets up before it runs. An app this workspace can't run isn't listed.
+Each row shows the app's name, its slug (what create_project's `app` takes), what it does, and the connections someone sets up before it runs. An app this workspace can't install isn't listed.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -439,13 +440,13 @@ Direct messages are never searched. Each result names its project; read_message 
 
 ## Apps
 
-### `list_app_files`
+### `list_app_bundle_files`
 
 [read-only]
 
 List the files of the app a project runs, with sizes and sha256.
 
-The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how a tracker behaves on one project, check its settings first: a fork is one-way, and a publish reaches every project on the line.
+The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_bundle_file. To change how a tracker behaves on one project, check its settings first: a fork is one-way, and a publish reaches every project on the line.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -457,7 +458,7 @@ The header names the app, its line and the version listed. By default that's the
 **Example** — “What files make up the app #intake runs?”
 
 ```text
-→ list_app_files(project="#intake")
+→ list_app_bundle_files(project="#intake")
 
 Project: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
@@ -468,7 +469,7 @@ App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · he
 - … 3 more rows
 ```
 
-### `read_app_file`
+### `read_app_bundle_file`
 
 [read-only]
 
@@ -479,14 +480,14 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 | Argument | Type | Notes |
 |---|---|---|
 | `project` [required] | `str` | Project name ("#intake") or ID. |
-| `path` [required] | `str` | The file's path, as list_app_files shows it. |
+| `path` [required] | `str` | The file's path, as list_app_bundle_files shows it. |
 | `version_id` | `int` | Another version of the project's own line. Omit for the publish base. |
 | `cursor` | `str` | next_cursor from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
 
 ```text
-→ read_app_file(project="#intake", path="manifest.yaml")
+→ read_app_bundle_file(project="#intake", path="manifest.yaml")
 
 Project: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
@@ -498,24 +499,24 @@ display_name: Claim Coordinator
 version: 0.15.1
 ```
 
-### `fork_app`
+### `fork_app_bundle`
 
 [writes] [destructive]
 
 Fork the app a project runs into a new, named fork line.
 
-The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how a tracker behaves on one project, check its settings first; fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app_bundle. To change how a tracker behaves on one project, check its settings first; fork only for what settings can't express. Validate an edit before forking with publish_app_bundle's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). |
-| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app(line=...). |
+| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app_bundle(line=...). |
 | `confirm` | `bool` | true to fork. Show the user the dry run first. Default `False`. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 
 ```text
-→ fork_app(project_id="c7d2…5b", name="acme-intake")
+→ fork_app_bundle(project_id="c7d2…5b", name="acme-intake")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
@@ -525,18 +526,18 @@ Fork: claimcoordinator 0.15.1 (product line, version_id: 812) → new fork line 
 - #intake moves onto the line. Product updates stop reaching it.
 - One-way: a project on a fork line never returns to the product line. From then on it follows "acme-intake", and versions published there reach it within a day.
 - Reach: this project only. Other projects running claimcoordinator stay where they are.
-- Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_app(line=…)).
+- Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_app_bundle(line=…)).
 
 Call again with `confirm=true` to fork the app into line "acme-intake".
 ```
 
-### `install_app`
+### `install_app_bundle`
 
 [writes] [destructive]
 
 Install the newest version of a project's line on the project.
 
-It installs the app the project already runs, never another one: a project runs another app only by creating a new project with create_project(app=…). Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check its settings first; a move between lines is one-way.
+Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check its settings first; a move between lines is one-way.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -547,7 +548,7 @@ It installs the app the project already runs, never another one: a project runs 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 
 ```text
-→ install_app(project_id="c7d2…5b", line="acme-west")
+→ install_app_bundle(project_id="c7d2…5b", line="acme-west")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
@@ -560,18 +561,18 @@ Install: #intake moves from claimcoordinator 0.15.1 (product line) onto fork lin
 Call again with `confirm=true` to move #intake onto line "acme-west".
 ```
 
-### `publish_app`
+### `publish_app_bundle`
 
 [writes] [destructive]
 
 Publish changes to a project's app as the next version of its line.
 
-A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
+A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app_bundle before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_bundle_files or read_app_bundle_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). It installs the new version first. |
-| `base_version_id` [required] | `int` | The version_id the files were read from, as list_app_files' header shows it: the line's head. |
+| `base_version_id` [required] | `int` | The version_id the files were read from, as list_app_bundle_files' header shows it: the line's head. |
 | `changes` [required] | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` [required] | `str` | What changed and why, in a sentence or two. |
 | `confirm` | `bool` | true to publish. Show the user the dry run first. Default `False`. |
@@ -579,7 +580,7 @@ A publish reaches every project on the project's fork line: this project install
 **Example** — “On #intake, chase estimates at 8 instead of 9, and publish it.”
 
 ```text
-→ publish_app(project_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
+→ publish_app_bundle(project_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
