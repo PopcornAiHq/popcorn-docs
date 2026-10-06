@@ -1425,8 +1425,22 @@ success of the attempt that did). `existed` — false only on the
 Create the table, or patch its schema if it already exists.
 
 Idempotent `store.create_table`: returns `action` of `created`,
-`exists` (schema already matches `schema_def`), or `patched` (schema
-reconciled). Use this when a flow may run repeatedly.
+`exists` (nothing to write), or `patched`. Use this when a flow may
+run repeatedly.
+
+`on_conflict` decides what "already exists" means:
+
+* `replace` (the default) — the stored schema becomes `schema_def`
+  exactly. For a flow declaring its OWN table with its COMPLETE schema,
+  which is every caller that predates the other mode.
+* `merge` — `schema_def`'s columns are DECLARED on the stored table:
+  the ones already there are left exactly as stored, the rest are
+  appended, and nothing else about the stored definition is touched.
+  For a flow reaching into a channel it does not own, where replace
+  would delete every column it has never heard of. `added` names the
+  columns the call declared and `blocked` the ones a stored column
+  already owns on terms the caller cannot write; both are always on a
+  merge answer. This mode never CREATES — see `_declare_columns`.
 
 **Arguments**
 
@@ -1435,6 +1449,7 @@ reconciled). Use this when a flow may run repeatedly.
 | `conversation_id` | string | yes |  |
 | `table_name` | string | yes |  |
 | `schema_def` | object | yes |  |
+| `on_conflict` | `replace` / `merge` | no | Default `"replace"`. |
 | `source_file_key` | string, optional | no |  |
 | `source_filename` | string, optional | no |  |
 | `source_kind` | string, optional | no |  |
@@ -1447,6 +1462,8 @@ Result of ensuring a table exists with a schema.
 |---|---|---|
 | `action` | `created` / `exists` / `patched` | What the ensure did to reach the schema. |
 | `table` | object | The resulting table metadata. |
+| `added` | list of string | Columns this call declared. On every `on_conflict: merge` answer and on no other; empty when the table already declared them all. |
+| `blocked` | list of string | Declared columns a stored column already owns on other terms — a different spelling of the name, another type, internal or computed — so the declaration was not made and a writer keyed on it will not reach them. On every `on_conflict: merge` answer and on no other. |
 
 ### `foundation.store.get_file_url`
 
