@@ -238,8 +238,9 @@ def landing(pages: list[dict]) -> str:
     return render.document(
         "Overview — Popcorn docs",
         "<h1>Overview</h1>\n"
-        '<p class="summary">Popcorn is an AI tracker. Each channel is a tracker '
-        "that updates itself, reading across email, messages and files, and an "
+        '<p class="summary">Popcorn is an AI tracker. Each channel (a project, in '
+        "the app) is a tracker that updates itself, reading across email, "
+        "messages and files, and an "
         "<strong>app bundle</strong> defines what it tracks: its tables, the flows "
         "that update them, and the schedules and webhooks that bring an update in "
         "without anyone typing.</p>\n"
@@ -417,6 +418,7 @@ def main() -> int:
                     related=[] if lookup else related(page, by_id),
                 ),
                 url=url(page),
+                lookup=lookup,
             )
         )
 

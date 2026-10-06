@@ -552,7 +552,7 @@ checks the references inside a `when:` and leaves the grammar to `flow
 validate`, which calls the real parser.
 
 **Even so, prefer a query filter to a gate when you are selecting rows.** The
-data-store filter DSL runs in the database rather than after the fact:
+agent-store filter DSL runs in the database rather than after the fact:
 
 ```yaml
 filter:

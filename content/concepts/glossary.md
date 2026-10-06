@@ -7,8 +7,9 @@ summary: >
   The platform's nouns, each with its current synonyms and the collisions
   worth knowing. An app is the thing, such as a claim coordinator; its app
   bundle is its files. "Channel template" is the older name for both, still in
-  `channel templates` and `channel create --template`. A channel is what an app
-  installs into, identified by its UUID because a name can change.
+  `channel templates` and `channel create --template`. A channel (in the
+  product, a project) is what an app installs into, identified by its UUID
+  because a name can change.
 concepts: [app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
 applies_to: [cli, mcp, human]
 ---
@@ -121,12 +122,20 @@ is close behind: see *bundle version*.
 
 ## Channels and workspaces
 
-- **channel** — What an app installs into. A
+- **channel** — What an app installs into. The product calls it a
+  *project* (see its entry); the API, the CLI and these pages say *channel*. A
   channel is identified by its UUID; its `#name` can change, so a script or
   a note should hold the UUID. The CLI accepts either and resolves a name to
   the UUID. On the wire the id is `conversation_id`, because the API's older
   noun, *conversation* (see its entry), covers direct messages too. See
   [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+- **project** — The product's name for a channel: the space a tracker lives
+  in, with its members, its messages and the app it runs. The web app creates
+  one with "New project", and an app can give its projects a noun of its own.
+  The API and the CLI call a project a *channel*, and the API's wider noun is
+  *conversation*, so a project's id is `conversation_id` on the wire and
+  `#name` still names one. *Not to be confused with* `feature.state.project`,
+  which recomposes a row's Status (see *Status*).
 - **tracker** — The product's word for a channel that runs an app, as in
   "each channel is a tracker". Many apps also name their main table
   `tracker`, and the state-machine page's "tracker row" means a row of it.
@@ -154,7 +163,7 @@ is close behind: see *bundle version*.
   `$channel.prompts.<name>` and `$channel.templates.<name>`. Flows read the
   parameters and integrations as `$channel.*`, and a run pins them at start.
   `popcorn channel-config show` prints it. *Not to be
-  confused with* scalars, which live in the data store and are not in
+  confused with* scalars, which live in the agent store and are not in
   `$channel.*`. See
   [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
 - **channel parameters** — Typed values in the channel config, read as
@@ -274,9 +283,10 @@ is close behind: see *bundle version*.
 
 ## Data
 
-- **data store** — A channel's tables, scalars and files, scoped to that one
+- **agent store** — A channel's tables, scalars and files, scoped to that one
   channel. The CLI reaches it through `popcorn table`, and flows through the
-  `foundation.store.*` activities. Older pages also call it the agent store.
+  `foundation.store.*` activities. Some API paths and older pages call it the
+  data store.
 - **table** — A named collection of rows with a schema: its columns, their
   merge policies and an optional merge key. The manifest's `tables:`
   reconciles additively — columns are added, never dropped or renamed — while
