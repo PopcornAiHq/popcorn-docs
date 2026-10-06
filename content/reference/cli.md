@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.58.2
+version: 0.60.2
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The 82 commands `popcorn` 0.58.2 lists in its help menu, under the
+The 83 commands `popcorn` 0.60.2 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -316,6 +316,18 @@ Get a flow run's detail
 | `--run-id <str>` |  | Specific run ID (optional) |
 | `--include-errors` |  | Include error details in the run |
 
+### `flow runs timeline`
+
+List a flow run's steps, newest first
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<workflow_id>` | yes | Temporal workflow ID |
+| `--channel <value>` | yes | Channel name (#general) or UUID |
+| `--run-id <str>` |  | Specific run ID (default: the latest; pass it on later pages) |
+| `--before <int>` |  | Cursor: the previous page's next_before (see pagination.next) |
+| `--limit <int>` |  | Entries per page, 1-200 (default 50) |
+
 ### `flow runs cancel`
 
 Stop a run, or every running run of a flow (--flow)
@@ -356,18 +368,6 @@ Run a declared schedule now, with its stored inputs
 | `<schedule>` | yes | Schedule slug, flow id, or full schedule_id |
 | `--channel <value>` | yes | Channel name (#general) or UUID |
 | `--overlap-policy <value>` |  | Overlap policy for this run only (default: the schedule's own); allow_all runs it even while another is in flight |
-
-## Templates
-
-### `template check`
-
-Check a bundle's structure offline — no channel, no server
-
-| Argument | Required | Notes |
-|---|---|---|
-| `<directory>` | yes | Bundle directory |
-| `--dir <value>` |  | Bundle directory — the same argument, spelled the way every command accepts |
-| `--strict` |  | Exit non-zero on warnings as well as errors |
 
 ## Apps
 
@@ -421,6 +421,17 @@ Publish a checkout's edits as the next version on its fork line. Every channel o
 | `--message <value>`, `-m <value>`, `--changelog <value>` |  | What changed, recorded on the version (-m, like git commit). --changelog is a deprecated alias |
 | `--bump <value>` |  | Mint the next version off the fork line's head, writing manifest.yaml's 'version:' on a successful publish. Refused when the manifest already advances past the head One of `major`, `minor`, `patch`. |
 | `--channel <value>` |  | Channel to act on (default: the checkout's baseline) |
+
+### `app validate`
+
+Check a bundle before publishing: structure offline, and in a fork checkout while logged in, the server's publish checks too (the manifest's tables among them)
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<directory>` | yes | Bundle directory |
+| `--dir <value>` |  | Bundle directory — the same argument, spelled the way every command accepts |
+| `--strict` |  | Exit non-zero on warnings as well as errors |
+| `--channel <value>` |  | Channel the server checks run against (default: the checkout's baseline); it must run the checkout's fork line |
 
 ### `app apply`
 
