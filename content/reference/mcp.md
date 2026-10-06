@@ -8,18 +8,20 @@ summary: >
   The tools the hosted Popcorn MCP server exposes — people, projects,
   messages and a project's app — with their arguments, generated from the
   server's own definitions. They list apps and create a project, read an
-  app's files, fork it, publish changes to a fork line and install a version.
+  app's files, fork it, publish changes to a fork line and install a version,
+  and start, follow and stop a project's flows.
 concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 19 tools. They cover people, projects,
+The hosted MCP server exposes 25 tools. They cover people, projects,
 messages and a project's app: find people and projects, list the apps a
 new project can run, create a project (optionally running an app), read
 and search a project's messages, send messages and reactions, read the
 files of the app a project runs, fork it onto the workspace's own line,
 publish changes to a fork line, bring a project on a fork line to its
-line's head, or move it onto another line. They work on projects only;
+line's head, or move it onto another line, and list a project's flows,
+run one, and follow or stop its runs. They work on projects only;
 direct messages are out of reach.
 
 A project is what the CLI and the API call a channel, and an app is what
@@ -31,10 +33,10 @@ response starts with that workspace's name. To use another workspace,
 reconnect. Read tools accept a project's `#name` or its ID; tools that
 write into a project take `project_id`, the ID only. A listing returns one
 page and a `next_cursor` to pass back with the same arguments. A fork, a
-publish, an install that moves a project onto another line, and creating
-a project that runs an app are a dry run until called again with
-`confirm=true`. An install that brings a project to its own line's head
-starts at once, and so does creating a project with no app.
+publish, an install that moves a project onto another line, creating a
+project that runs an app, and running a flow are a dry run until called
+again with `confirm=true`. An install that brings a project to its own
+line's head starts at once, and so does creating a project with no app.
 
 This page is generated from the server's tool definitions by
 `scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
@@ -221,7 +223,7 @@ Project: #partners-acme (dddb…f2)
 
 List the apps a new project in this workspace can run.
 
-Each row shows the app's name, its slug (what create_project's `app` takes), what it does, and the connections someone sets up before it runs. An app this workspace can't install isn't listed.
+Each row shows the app's name, its slug (what create_project's `app` takes), what it does, and the connections someone sets up before it runs. An app this workspace can't run isn't listed.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -440,13 +442,13 @@ Direct messages are never searched. Each result names its project; read_message 
 
 ## Apps
 
-### `list_app_bundle_files`
+### `list_app_files`
 
 [read-only]
 
 List the files of the app a project runs, with sizes and sha256.
 
-The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_bundle_file. To change how a tracker behaves on one project, check its settings first: a fork is one-way, and a publish reaches every project on the line.
+The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how a tracker behaves on one project, check its settings first: a fork is one-way, and a publish reaches every project on the line.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -458,7 +460,7 @@ The header names the app, its line and the version listed. By default that's the
 **Example** — “What files make up the app #intake runs?”
 
 ```text
-→ list_app_bundle_files(project="#intake")
+→ list_app_files(project="#intake")
 
 Project: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
@@ -469,7 +471,7 @@ App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · he
 - … 3 more rows
 ```
 
-### `read_app_bundle_file`
+### `read_app_file`
 
 [read-only]
 
@@ -480,14 +482,14 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 | Argument | Type | Notes |
 |---|---|---|
 | `project` [required] | `str` | Project name ("#intake") or ID. |
-| `path` [required] | `str` | The file's path, as list_app_bundle_files shows it. |
+| `path` [required] | `str` | The file's path, as list_app_files shows it. |
 | `version_id` | `int` | Another version of the project's own line. Omit for the publish base. |
 | `cursor` | `str` | next_cursor from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
 
 ```text
-→ read_app_bundle_file(project="#intake", path="manifest.yaml")
+→ read_app_file(project="#intake", path="manifest.yaml")
 
 Project: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
@@ -499,24 +501,24 @@ display_name: Claim Coordinator
 version: 0.15.1
 ```
 
-### `fork_app_bundle`
+### `fork_app`
 
 [writes] [destructive]
 
 Fork the app a project runs into a new, named fork line.
 
-The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app_bundle. To change how a tracker behaves on one project, check its settings first; fork only for what settings can't express. Validate an edit before forking with publish_app_bundle's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how a tracker behaves on one project, check its settings first; fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). |
-| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app_bundle(line=...). |
+| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app(line=...). |
 | `confirm` | `bool` | true to fork. Show the user the dry run first. Default `False`. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 
 ```text
-→ fork_app_bundle(project_id="c7d2…5b", name="acme-intake")
+→ fork_app(project_id="c7d2…5b", name="acme-intake")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
@@ -526,18 +528,18 @@ Fork: claimcoordinator 0.15.1 (product line, version_id: 812) → new fork line 
 - #intake moves onto the line. Product updates stop reaching it.
 - One-way: a project on a fork line never returns to the product line. From then on it follows "acme-intake", and versions published there reach it within a day.
 - Reach: this project only. Other projects running claimcoordinator stay where they are.
-- Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_app_bundle(line=…)).
+- Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_app(line=…)).
 
 Call again with `confirm=true` to fork the app into line "acme-intake".
 ```
 
-### `install_app_bundle`
+### `install_app`
 
 [writes] [destructive]
 
 Install the newest version of a project's line on the project.
 
-Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check its settings first; a move between lines is one-way.
+It installs the app the project already runs, never another one: a project runs another app only by creating a new project with create_project(app=…). Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check its settings first; a move between lines is one-way.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -548,7 +550,7 @@ Without line, this is a catch-up (as `popcorn app apply`): a project on a fork l
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 
 ```text
-→ install_app_bundle(project_id="c7d2…5b", line="acme-west")
+→ install_app(project_id="c7d2…5b", line="acme-west")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
@@ -561,18 +563,18 @@ Install: #intake moves from claimcoordinator 0.15.1 (product line) onto fork lin
 Call again with `confirm=true` to move #intake onto line "acme-west".
 ```
 
-### `publish_app_bundle`
+### `publish_app`
 
 [writes] [destructive]
 
 Publish changes to a project's app as the next version of its line.
 
-A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app_bundle before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_bundle_files or read_app_bundle_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
+A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). It installs the new version first. |
-| `base_version_id` [required] | `int` | The version_id the files were read from, as list_app_bundle_files' header shows it: the line's head. |
+| `base_version_id` [required] | `int` | The version_id the files were read from, as list_app_files' header shows it: the line's head. |
 | `changes` [required] | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` [required] | `str` | What changed and why, in a sentence or two. |
 | `confirm` | `bool` | true to publish. Show the user the dry run first. Default `False`. |
@@ -580,7 +582,7 @@ A publish reaches every project on the project's fork line: this project install
 **Example** — “On #intake, chase estimates at 8 instead of 9, and publish it.”
 
 ```text
-→ publish_app_bundle(project_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
+→ publish_app(project_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
 
 Project: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
@@ -607,5 +609,172 @@ Files:
 Reach: #intake would install it now. 2 other projects on this line will update at their daily check.
 
 Call again with `confirm=true` to publish 0.16.1 to line "acme-intake".
+```
+
+## Flows
+
+### `list_flows`
+
+[read-only]
+
+List the flows of the app a project runs: the updating it does for itself.
+
+Each row shows the flow's name, what it does, its inputs (a ? marks an optional one) and the schedules that run it. get_flow gives one flow's inputs in full and everything that starts it; run_flow runs one; list_flow_runs shows what ran.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `cursor` | `str` | next_cursor from the previous page. |
+
+**Example** — “What does #intake do on its own?”
+
+```text
+→ list_flows(project="#intake")
+
+Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+3 of 3 flows:
+- claim_tick  Move every open claim one step along, chasing what's overdue.  schedules: every 180s
+- daily_digest  Post the morning summary of new, stuck and closed claims.  inputs: window_hours?  schedules: cron '0 8 * * 1-5' (America/Los_Angeles)
+- send_reminder  Email a claimant a reminder of what their claim still needs.  inputs: claim_id, tone?
+```
+
+### `get_flow`
+
+[read-only]
+
+One flow of the app a project runs: what it does, the inputs run_flow takes, the integrations it needs, and everything that starts it (schedules, webhooks, messages, documents, row states, other flows).
+
+Each schedule is shown with the inputs it runs with: to run a scheduled flow now, pass those to run_flow. The flow's steps are its file, read with read_app_file(path="flows/<flow>.yaml").
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `flow` [required] | `str` | The flow's name, as list_flows shows it. |
+
+**Example** — “What starts #intake's daily digest, and what does it take?”
+
+```text
+→ get_flow(project="#intake", flow="daily_digest")
+
+Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Flow: daily_digest  (file: flows/daily_digest.yaml)
+Description: Post the morning summary of new, stuck and closed claims.
+Inputs:
+- window_hours  integer  optional  default 24 — How far back the summary looks.
+Required integrations: gmail
+What starts it:
+- schedule: schedule 'morning' — cron '0 8 * * 1-5' (America/Los_Angeles), next 2026-10-07T15:00:00Z
+  schedule 'morning' runs with inputs: {"window_hours": 24}
+```
+
+### `run_flow`
+
+[writes] [destructive]
+
+Run one of a project's flows now, with the given inputs.
+
+A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project. A run starts in the background and returns its run_id; get_flow_run follows it. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `flow` [required] | `str` | The flow's name, as list_flows shows it. |
+| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. |
+| `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
+
+**Example** — “Send the claimant on C-1042 in #intake a reminder now.”
+
+```text
+→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"})
+
+Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+**Dry run.** Nothing was changed.
+
+Run: send_reminder on #intake, now.
+- Inputs: {"claim_id": "C-1042"}
+- Defaults that apply: {"tone": "friendly"}
+- It runs as the workspace's agent, for you, in the background, and does what the flow does: posts, emails and row changes are real.
+
+Call again with `confirm=true` to run send_reminder.
+
+→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true)
+
+Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Started send_reminder. run_id: acme-int…
+It runs in the background: get_flow_run with this run_id shows its steps and how it ended.
+```
+
+### `list_flow_runs`
+
+[read-only]
+
+List a project's flow runs, newest first: which flow, how each ended (succeeded, failed, still_running), when, and what started it. get_flow_run shows one run's steps, inputs and failure.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `flow` | `str` | Only this flow's runs, by its name. |
+| `status` | `str` | "all", "running", "failed" or "closed". Default `all`. |
+| `cursor` | `str` | next_cursor from the previous page. |
+
+**Example** — “Has #intake's daily digest failed lately?”
+
+```text
+→ list_flow_runs(project="#intake", flow="daily_digest", status="failed")
+
+Project: #intake (c7d2…5b)
+2 runs of "daily_digest", failed, newest first:
+- daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z  (id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z)
+- daily_digest  failed  started 2026-10-02T15:00:00Z  ended 2026-10-02T15:00:38Z  started by a person  (id: acme-int…)
+```
+
+### `get_flow_run`
+
+[read-only]
+
+One flow run: how it ended (or what it's doing now), its inputs, its outputs, the error it failed with, and its newest steps.
+
+A run still going shows the step it's on; call again to follow it.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `run_id` [required] | `str` | The run's ID, as list_flow_runs or run_flow gives it. |
+
+**Example** — “Why did this morning's digest in #intake fail?”
+
+```text
+→ get_flow_run(project="#intake", run_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
+
+Project: #intake (c7d2…5b)
+Run: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z  flow: daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z
+Inputs: {"window_hours": 24}
+Failed with: IntegrationAuthError: gmail: the connected account's token was revoked
+Steps, newest first:
+- email_digest  integrations.gmail.send  failed  2.1s  attempt 3  gmail: the connected account's token was revoked
+- post_summary  foundation.channel.post  completed  0.6s
+- collect  foundation.table.query  completed  0.3s
+```
+
+### `cancel_flow_run`
+
+[writes] [destructive] [idempotent]
+
+Stop one flow run that's still going.
+
+The run stops at its next step, so a step already under way finishes, and what earlier steps did (messages posted, rows changed) stays done. A run that already ended is left as it was. One run per call.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `run_id` [required] | `str` | The run's ID, as list_flow_runs gives it. |
+
+**Example** — “Stop the claim tick that's running in #intake.”
+
+```text
+→ cancel_flow_run(project_id="c7d2…5b", run_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
+
+Project: #intake (c7d2…5b)
+Stopping run acme-int…: it stops at its next step. get_flow_run shows when it has.
 ```
 
