@@ -673,7 +673,7 @@ What starts it:
 
 Run one of a project's flows now, with the given inputs.
 
-A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project. A run starts in the background and returns its run_id; get_flow_run follows it. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
+A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its run_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -681,6 +681,7 @@ A run does what the flow does, for real: it can post messages, send email and ch
 | `flow` [required] | `str` | The flow's name, as list_flows shows it. |
 | `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. |
 | `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
+| `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
 
 **Example** — “Send the claimant on C-1042 in #intake a reminder now.”
 
@@ -694,13 +695,14 @@ Run: send_reminder on #intake, now.
 - Inputs: {"claim_id": "C-1042"}
 - Defaults that apply: {"tone": "friendly"}
 - It runs as the workspace's agent, for you, in the background, and does what the flow does: posts, emails and row changes are real.
+- run_key: Qm7xT2vL…
 
-Call again with `confirm=true` to run send_reminder.
+Call again with `confirm=true` to run send_reminder, with run_key="Qm7xT2vL…" and the same inputs.
 
-→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true)
+→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true, run_key="Qm7xT2vLp9aRk4Ne3d121b61c6573b4a")
 
 Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-Started send_reminder. run_id: acme-int…
+Started send_reminder. run_id: 8c1f3a52…
 It runs in the background: get_flow_run with this run_id shows its steps and how it ended.
 ```
 
