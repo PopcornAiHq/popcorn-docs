@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.60.2
+version: 0.61.2
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The 83 commands `popcorn` 0.60.2 lists in its help menu, under the
+The 83 commands `popcorn` 0.61.2 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -151,8 +151,8 @@ Create a channel
 | Argument | Required | Notes |
 |---|---|---|
 | `<name>` | yes | Channel name |
-| `--type <value>` |  | Conversation type One of `public_channel`, `private_channel`. Default `public_channel`. |
-| `--members <str>` |  | Comma-separated user IDs |
+| `--type <value>` |  | workspace_channel (default): everyone in the workspace is a member, now and as people join; public_channel: anyone can see and join it; private_channel: only invited members One of `workspace_channel`, `public_channel`, `private_channel`. Default `workspace_channel`. |
+| `--members <str>` |  | Comma-separated user IDs (ignored for workspace_channel, which already has everyone) |
 | `--template <str>` |  | Install a channel template (see `popcorn channel templates`) |
 | `--if-not-exists` |  | Return the channel already holding this name (one you are a member of) instead of failing on the duplicate |
 
@@ -601,7 +601,7 @@ Write one scalar
 
 ### `table audit`
 
-Recent data-store audit entries
+Recent agent-store audit entries
 
 | Argument | Required | Notes |
 |---|---|---|
