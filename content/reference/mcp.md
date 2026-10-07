@@ -3,25 +3,28 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-10-06
+platform: 2026-10-07
 summary: >
   The tools the hosted Popcorn MCP server exposes — people, projects,
   messages and a project's app — with their arguments, generated from the
   server's own definitions. They list apps and create a project, read an
   app's files, fork it, publish changes to a fork line and install a version,
-  and start, follow and stop a project's flows.
+  and start, follow and stop a project's flows, and read its settings and
+  tables.
 concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 25 tools. They cover people, projects,
+The hosted MCP server exposes 37 tools. They cover people, projects,
 messages and a project's app: find people and projects, list the apps a
 new project can run, create a project (optionally running an app), read
 and search a project's messages, send messages and reactions, read the
 files of the app a project runs, fork it onto the workspace's own line,
 publish changes to a fork line, bring a project on a fork line to its
-line's head, or move it onto another line, and list a project's flows,
-run one, and follow or stop its runs. They work on projects only;
+line's head, or move it onto another line, list a project's flows, run
+one, and follow or stop its runs, read and change a project's settings,
+and read a project's agent store (its tables, rows and stored values)
+and add, change or delete its rows. They work on projects only;
 direct messages are out of reach.
 
 A project is what the CLI and the API call a channel, and an app is what
@@ -34,9 +37,10 @@ reconnect. Read tools accept a project's `#name` or its ID; tools that
 write into a project take `project_id`, the ID only. A listing returns one
 page and a `next_cursor` to pass back with the same arguments. A fork, a
 publish, an install that moves a project onto another line, creating a
-project that runs an app, and running a flow are a dry run until called
-again with `confirm=true`. An install that brings a project to its own
-line's head starts at once, and so does creating a project with no app.
+project that runs an app, running a flow, changing a setting and
+deleting rows are a dry run until called again with `confirm=true`. An
+install that brings a project to its own line's head starts at once, and
+so does creating a project with no app.
 
 This page is generated from the server's tool definitions by
 `scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
@@ -448,7 +452,7 @@ Direct messages are never searched. Each result names its project; read_message 
 
 List the files of the app a project runs, with sizes and sha256.
 
-The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how a tracker behaves on one project, check its settings first: a fork is one-way, and a publish reaches every project on the line.
+The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how a tracker behaves on one project, check list_project_settings first: a fork is one-way, and a publish reaches every project on the line.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -507,7 +511,7 @@ version: 0.15.1
 
 Fork the app a project runs into a new, named fork line.
 
-The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how a tracker behaves on one project, check its settings first; fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how a tracker behaves on one project, check list_project_settings first: a setting reaches one project and can be set back. Fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -539,7 +543,7 @@ Call again with `confirm=true` to fork the app into line "acme-intake".
 
 Install the newest version of a project's line on the project.
 
-It installs the app the project already runs, never another one: a project runs another app only by creating a new project with create_project(app=…). Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check its settings first; a move between lines is one-way.
+It installs the app the project already runs, never another one: a project runs another app only by creating a new project with create_project(app=…). Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check list_project_settings first; a move between lines is one-way.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -569,7 +573,7 @@ Call again with `confirm=true` to move #intake onto line "acme-west".
 
 Publish changes to a project's app as the next version of its line.
 
-A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
+A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. To change how a tracker behaves on one project, check list_project_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -778,5 +782,384 @@ The run stops at its next step, so a step already under way finishes, and what e
 
 Project: #intake (c7d2…5b)
 Stopping run acme-int…: it stops at its next step. get_flow_run shows when it has.
+```
+
+## Project settings
+
+### `list_project_settings`
+
+[read-only]
+
+List the settings of the app a project runs, set or not.
+
+A setting changes how the tracker behaves on this project alone: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one project, can be set back, and is kept through app updates, so check here before forking the app. (Changing one prompt or template also stops app updates from changing the others; update_project_setting's dry run says so.) Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_project_setting shows one in full; update_project_setting changes one.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `query` | `str` | Only settings whose key or label contains this. |
+| `cursor` | `str` | next_cursor from the previous page. |
+
+**Example** — “What can I change about how #chase-renewals chases people, without forking its app?”
+
+```text
+→ list_project_settings(project="#chase-renewals", query="chase")
+
+Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+4 of 4 settings matching "chase":
+- chase_days  [1, 3, 7]
+- chase_max_followups  5  (changed; app default 10)
+- chase_window_timezone  America/Los_Angeles
+- prompts.chase_email  Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and pl… [truncated; get_project_setting(key="prompts.chase_email") for the full text]
+2 values set on this project are read by nothing and not shown.
+```
+
+### `get_project_setting`
+
+[read-only]
+
+One of a project's settings in full: the whole value (a prompt or template's whole text), the app's default, what it accepts, its description, its options with the warning each one carries, and who may change it.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `key` [required] | `str` | The setting's key, as list_project_settings shows it. |
+
+**Example** — “Show me the email #chase-renewals sends when it chases someone.”
+
+```text
+→ get_project_setting(project="#chase-renewals", key="prompts.chase_email")
+
+Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Setting: prompts.chase_email
+Value:
+Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and please ignore this note.
+
+The {{ firm }} team
+
+App default: the same as the value
+Accepts: text, the shape of the app's default
+Changed by: update_project_setting, by a workspace admin who's also a member of the project.
+```
+
+### `update_project_setting`
+
+[writes] [destructive]
+
+Change one of a project's settings, on this project only.
+
+Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. Setting the app's default value resets the setting. A switch takes one of its options; any other setting keeps the shape of the app's default (a list stays a list, a number a number). Secrets and the recipe aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `key` [required] | `str` | The setting's key, as list_project_settings shows it. |
+| `value` | `Any` | The whole new value: text, a number, a list, a mapping, or null. Omit it to pass changes instead. Default `OMITTED`. |
+| `changes` | `list[Op]` | Text ops on the current text, instead of value. |
+| `confirm` | `bool` | true to change it. Show the user the dry run first. Default `False`. |
+
+**Example** — “Stop chasing after five follow-ups on #chase-renewals.”
+
+```text
+→ update_project_setting(project_id="4b0e…12", key="chase_max_followups", value=5)
+
+Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+**Dry run.** Nothing was changed.
+
+Change: chase_max_followups on #chase-renewals.
+- 10 → 5
+- Reach: this project only. It can be set back with update_project_setting. App updates won't change the new value.
+
+Call again with `confirm=true` to change chase_max_followups.
+
+→ update_project_setting(project_id="4b0e…12", key="chase_max_followups", value=5, confirm=true)
+
+Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Changed chase_max_followups on #chase-renewals: 10 → 5.
+Runs already under way keep the value they started with.
+```
+
+## Agent store
+
+### `list_tables`
+
+[read-only]
+
+List the tables in a project's agent store, with each one's row count.
+
+The agent store is the project's storage: tables of rows the app, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `cursor` | `str` | next_cursor from the previous page. |
+
+**Example** — “What does #intake keep track of?”
+
+```text
+→ list_tables(project="#intake")
+
+Project: #intake (c7d2…5b)
+2 of 2 tables:
+- claims  212 rows
+- Contacts  3 rows
+```
+
+### `get_table`
+
+[read-only]
+
+A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the project's app runs one on it.
+
+A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or increment_on_change (a counter the store keeps). Columns marked as state change only when one of the app's transitions fires, so create_rows and update_row refuse them.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+
+**Example** — “What columns does #intake's claims table have?”
+
+```text
+→ get_table(project="#intake", table="claims")
+
+Project: #intake (c7d2…5b) · table: claims
+Table: claims  (schema version 3)
+Merge key: none; create_rows merges only on the columns its merge_on names.
+Columns (11), in order:
+- claim_no  string  label "Claim #"
+- claimant  string  [personal data]
+- amount  number
+- Status  string  [state: changed only by transitions]
+- Stage  string  [state: changed only by transitions]
+- Decision  string  [fact a transition writes]
+- Notes  string  merge: concat
+- First seen  string  merge: keep
+- api_token  string  [credential: never shown or written]
+- home_address  string  [personal data]
+- summary  string  [personal data]
+State machine:
+- Status column: Status · CTAs: CTAs · sub: Stage
+- funnel (column Stage): open, closed
+```
+
+### `list_rows`
+
+[read-only]
+
+List a table's rows, newest first unless sort says otherwise.
+
+Each row shows its ID, a few columns (long values are cut and marked; get_row shows a row in full) and when it last changed.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `query` | `str` | Text to find in any column, case-insensitively: "4471" finds the row whatever column holds it. Only rows where it appears in a value you can see are listed, so with query (or filter["*"]) a page can come back short, there's no total, and next_cursor goes on to the rest. |
+| `filter` | `dict[str, Any]` | Conditions on columns, all of which must hold: {"Status": "open"} or {"Status": {"$eq": "open"}}, {"amount": {"$gt": 1000}}, {"claimant": {"$contains": "ortiz"}}, {"Status": {"$in": ["open", "waiting"]}}, {"closed_at": {"$exists": false}}. Operators: $eq, $ne, $gt, $gte, $lt, $lte, $in, $exists, $contains. There's no $or. Text compares case-insensitively. |
+| `columns` | `list[str]` | The columns to show, by name. By default, the first few in the table's order (get_table lists them). |
+| `sort` | `str` | "column:asc" or "column:desc". By default, newest first. On a workspace that guards personal data, a column whose values are hidden can't be sorted on. |
+| `cursor` | `str` | next_cursor from the previous page, with the same other arguments. When the rows end exactly at a page's end, the last page comes back empty. |
+
+**Example** — “Find claim 4471 in #intake.”
+
+```text
+→ list_rows(project="#intake", table="claims", query="4471")
+
+Project: #intake (c7d2…5b) · table: claims
+Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] picks others). Empty values are left out.
+2 rows matching "4471", newest first, shown on this page:
+- row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
+- row 88  claim_no: 4471  claimant: Ortiz  amount: 12400  Status: open  Stage: open  (updated 2026-09-29 14:05)
+```
+
+### `get_row`
+
+[read-only]
+
+One row in full: every column, its rev (update_row needs it as expected_rev), when it was created and last changed, and its state if the app's state machine runs on the table.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `row_id` [required] | `int` | The row's ID, as list_rows shows it ("row 88" is 88). |
+
+**Example** — “Show me everything on row 88 of #intake's claims.”
+
+```text
+→ get_row(project="#intake", table="claims", row_id=88)
+
+Project: #intake (c7d2…5b) · table: claims
+Row: 88  rev: 4  created 2026-09-01 10:00  updated 2026-09-29 14:05
+State: Status = open · Stage = open
+- claim_no: 4471
+- claimant: Ortiz
+- amount: 12400
+- Status: open
+- Stage: open
+- Decision: (empty)
+- Notes: (empty)
+- First seen: (empty)
+- api_token: [hidden: holds a credential]
+- home_address: 12 Elm St
+- summary: Ortiz called about the roof
+```
+
+### `list_scalars`
+
+[read-only]
+
+List the single values a project's agent store keeps (scalars), by key: the app's runtime state, values people or agents keep, and the values behind its settings.
+
+This is the raw storage; long values are cut and marked, and get_scalar shows one whole. Credentials are never shown. Stored values that are settings read better through list_project_settings, which says what each one does and what changing it would do. These values are read-only here.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `query` | `str` | Text to find in the key, case-insensitively. |
+| `cursor` | `str` | next_cursor from the previous page, with the same query. |
+
+**Example** — “What values does #intake keep?”
+
+```text
+→ list_scalars(project="#intake")
+
+Project: #intake (c7d2…5b)
+4 of 4 stored values:
+- copy:claims.settings.fields  = [{"key": "popcorn.portal_pin", "label": "Portal PIN", "input": "secret"}]  (updated 2026-09-01 10:00)
+- popcorn.crm_api_key  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
+- popcorn.portal_pin  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
+- project status  = On track  (updated 2026-09-02 10:00)
+Stored values that are settings read better through list_project_settings, which says what each one does.
+```
+
+### `get_scalar`
+
+[read-only]
+
+One value a project's agent store keeps (a scalar), whole, as stored.
+
+A credential is never shown. If the key is a setting, get_project_setting reads it better: it says what the setting does and what its options are. Stored values are read-only here.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `key` [required] | `str` | The value's key, as list_scalars shows it. |
+
+**Example** — “What's the project status note on #intake?”
+
+```text
+→ get_scalar(project="#intake", key="project status")
+
+Project: #intake (c7d2…5b)
+Key: project status
+Updated: 2026-09-02 10:00
+Value:
+On track
+Stored values that are settings read better through list_project_settings, which says what each one does.
+```
+
+### `create_rows`
+
+[writes]
+
+Add rows to one of a project's tables.
+
+A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the app's state or a credential). The response says which rows were added and which merged. Adding rows starts no flow. Columns the app's state machine owns are refused (they change only by a transition), and so are credential columns. Each call adds its rows: if a call timed out, check with list_rows before sending it again.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `rows` [required] | `list[dict[str, Any]]` | The rows, each an object of column: value. At most 50. |
+| `merge_on` | `list[str]` | Columns that identify an existing row to merge into, for a table with no merge key of its own. |
+
+**Example** — “Add claim 5002 for Kim, $900, to #intake, and update 4471's amount to 13,000 while you're at it.”
+
+```text
+→ create_rows(project_id="c7d2…5b", table="claims", rows=[{"claim_no": "5002", "claimant": "Kim", "amount": 900}, {"claim_no": "4471", "amount": 13000}], merge_on=["claim_no"])
+
+Project: #intake (c7d2…5b) · table: claims
+Added 1 row and merged 1 into existing rows:
+- row 301  added
+- row 88  merged into the existing row
+get_row shows one in full.
+```
+
+### `update_row`
+
+[writes] [idempotent]
+
+Change some columns of one row.
+
+Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored. expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again. Changing a row starts no flow. Columns the app's state machine owns are refused (they change only by a transition), and so are credential columns.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `row_id` [required] | `int` | The row's ID ("row 88" is 88). |
+| `data` [required] | `dict[str, Any]` | The columns to change, as column: value. |
+| `expected_rev` [required] | `int` | The row's rev, from get_row. |
+
+**Example** — “Add a note to claim 4471 in #intake that the adjuster called back.”
+
+```text
+→ update_row(project_id="c7d2…5b", table="claims", row_id=88, data={"Notes": "Adjuster called back 10/6."}, expected_rev=4)
+
+Project: #intake (c7d2…5b) · table: claims
+Changed row 88: rev 4 → 5.
+Where the table's merge policy decided what's stored:
+- Notes: the value sent was appended to the stored text (merge: concat).
+The row as stored:
+- claim_no: 4471
+- claimant: Ortiz
+- amount: 12400
+- Status: open
+- Stage: open
+- Decision: (empty)
+- Notes: Claimant called 9/28.
+  Adjuster called back 10/6.
+- First seen: (empty)
+- api_token: [hidden: holds a credential]
+- home_address: 12 Elm St
+- summary: Ortiz called about the roof
+```
+
+### `delete_rows`
+
+[writes] [destructive] [idempotent]
+
+Delete rows from one of a project's tables, by ID.
+
+Without confirm=true this is a dry run that deletes nothing: it lists the rows it would delete. Show the person the dry run, and confirm only once they agree. A deleted row can't be restored with these tools. Rows are deleted one at a time, and the response says which were deleted, which were already gone and which failed.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name). |
+| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `row_ids` [required] | `list[int]` | The rows' IDs ("row 88" is 88). At most 50. |
+| `confirm` | `bool` | true to delete. Show the user the dry run first. Default `False`. |
+
+**Example** — “Delete the duplicate row 91 from #intake's claims.”
+
+```text
+→ delete_rows(project_id="c7d2…5b", table="claims", row_ids=[91])
+
+Project: #intake (c7d2…5b) · table: claims
+**Dry run.** Nothing was changed.
+
+Delete 1 row from claims:
+- row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
+- Warning: the app's state machine runs on this table; a deleted row leaves the app's tracker and its open items.
+- A deleted row can't be restored with these tools. Deleting starts no flow.
+
+Call again with `confirm=true` to delete this row.
+
+→ delete_rows(project_id="c7d2…5b", table="claims", row_ids=[91], confirm=true)
+
+Project: #intake (c7d2…5b) · table: claims
+Deleted 1 of 1 rows: row 91.
 ```
 
