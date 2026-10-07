@@ -5,3 +5,6 @@ __pycache__/
 # the tree is a second copy of the corpus that can disagree with the source,
 # and CI rebuilds it on every run anyway.
 build/
+
+# Git worktrees (.worktrees/<feature>, branch shaun/<feature>)
+.worktrees/
