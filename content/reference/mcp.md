@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-10-07
+platform: 2026-10-08
 summary: >
   The tools the hosted Popcorn MCP server exposes — people, projects,
   messages and a project's app — with their arguments, generated from the
@@ -677,7 +677,7 @@ What starts it:
 
 Run one of a project's flows now, with the given inputs.
 
-A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its run_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
+A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its workflow_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -706,8 +706,8 @@ Call again with `confirm=true` to run send_reminder, with run_key="Qm7xT2vL…" 
 → run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true, run_key="Qm7xT2vLp9aRk4Ne3d121b61c6573b4a")
 
 Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-Started send_reminder. run_id: 8c1f3a52…
-It runs in the background: get_flow_run with this run_id shows its steps and how it ended.
+Started send_reminder. workflow_id: 8c1f3a52…
+It runs in the background: get_flow_run with this workflow_id shows its steps and how it ended.
 ```
 
 ### `list_flow_runs`
@@ -715,6 +715,8 @@ It runs in the background: get_flow_run with this run_id shows its steps and how
 [read-only]
 
 List a project's flow runs, newest first: which flow, how each ended (succeeded, failed, still_running), when, and what started it. get_flow_run shows one run's steps, inputs and failure.
+
+Each row ends with the run's workflow_id, the ID get_flow_run and cancel_flow_run take.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -730,8 +732,8 @@ List a project's flow runs, newest first: which flow, how each ended (succeeded,
 
 Project: #intake (c7d2…5b)
 2 runs of "daily_digest", failed, newest first:
-- daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z  (id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z)
-- daily_digest  failed  started 2026-10-02T15:00:00Z  ended 2026-10-02T15:00:38Z  started by a person  (id: acme-int…)
+- daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z  (workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z)
+- daily_digest  failed  started 2026-10-02T15:00:00Z  ended 2026-10-02T15:00:38Z  started by a person  (workflow_id: acme-int…)
 ```
 
 ### `get_flow_run`
@@ -745,15 +747,17 @@ A run still going shows the step it's on; call again to follow it.
 | Argument | Type | Notes |
 |---|---|---|
 | `project` [required] | `str` | Project name ("#intake") or ID. |
-| `run_id` [required] | `str` | The run's ID, as list_flow_runs or run_flow gives it. |
+| `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
+| `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to read that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
 
 **Example** — “Why did this morning's digest in #intake fail?”
 
 ```text
-→ get_flow_run(project="#intake", run_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
+→ get_flow_run(project="#intake", workflow_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
 
 Project: #intake (c7d2…5b)
-Run: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z  flow: daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z
+Run: workflow_id channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z  flow: daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z
+Temporal run_id 0199…13: this execution of the workflow. The flow-run tools take the workflow_id; pass run_id beside it only to pin this execution.
 Inputs: {"window_hours": 24}
 Failed with: IntegrationAuthError: gmail: the connected account's token was revoked
 Steps, newest first:
@@ -773,15 +777,16 @@ The run stops at its next step, so a step already under way finishes, and what e
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). |
-| `run_id` [required] | `str` | The run's ID, as list_flow_runs gives it. |
+| `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
+| `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to stop only that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
 
 **Example** — “Stop the claim tick that's running in #intake.”
 
 ```text
-→ cancel_flow_run(project_id="c7d2…5b", run_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
+→ cancel_flow_run(project_id="c7d2…5b", workflow_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
 
 Project: #intake (c7d2…5b)
-Stopping run acme-int…: it stops at its next step. get_flow_run shows when it has.
+Stopping run workflow_id acme-int… (Temporal run_id 0199…75): it stops at its next step. get_flow_run with the workflow_id shows when it has.
 ```
 
 ## Project settings
@@ -792,7 +797,7 @@ Stopping run acme-int…: it stops at its next step. get_flow_run shows when it 
 
 List the settings of the app a project runs, set or not.
 
-A setting changes how the tracker behaves on this project alone: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one project, can be set back, and is kept through app updates, so check here before forking the app. (Changing one prompt or template also stops app updates from changing the others; update_project_setting's dry run says so.) Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_project_setting shows one in full; update_project_setting changes one.
+A setting changes how the tracker behaves on this project alone: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one project, can be set back, and is kept through app updates, so check here before forking the app. Each prompt or template file is its own setting, so changing one leaves the others following app updates. Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_project_setting shows one in full; update_project_setting changes one.
 
 | Argument | Type | Notes |
 |---|---|---|
