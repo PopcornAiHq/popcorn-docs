@@ -25,6 +25,7 @@ so it is worth reading once in full.
 | `changelog` | documentation only on a fork line; the version's note comes from `app publish -m` |
 | `tables` | additive reconcile — tables and columns added, attributes fixed, never dropped or renamed |
 | `channel_parameters` | upsert; on an update, a value a member edited is kept; types preserved; read as `$channel.<name>` |
+| `channel_parameter_fields` | nothing written: the project settings tools read each parameter's `label` and `description` from the version the project runs |
 | `scalars` | upsert — `scalar-tiers` says when an update keeps the channel's value |
 | `default_scalars` | **write once**, on first install only |
 | `schedules` | replace the schedules the bundle manages |

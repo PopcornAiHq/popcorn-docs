@@ -337,6 +337,7 @@ wrong is how you wipe a live channel's state.
 | `tables` | **additive reconcile** | columns are added and attributes fixed, never dropped or renamed |
 | `states` | a state machine over one table | requires `tables:`; see below |
 | `channel_parameters`, `status_kinds` | **upsert per key**; drift-preserving on update | parameters keep their types and read as `$channel.<name>` |
+| `channel_parameter_fields` | display only | `{<parameter>: {label, description}}` for a parameter declared under `channel_parameters:`; see below |
 | `scalars` | **upsert per key**; drift-preserving on update | never put flow-written runtime state here |
 | `default_scalars` | **write once, first install only** | safe place for an operator-owned switch |
 | `schedules` | **reconcile by (flow, slug)** | omitted = leave alone; `[]` = delete every manifest-managed one |
@@ -366,6 +367,32 @@ one end to end, with every publish error it can raise, is
 > real app. A fork publish does not refuse one: it reaches every channel on
 > the line and clears `app_type` and `channel_agent` on each. `app validate`
 > warns you (`clears-app-type`); treat that warning as an error on a fork.
+
+### Saying what a parameter means
+
+A switch gets its label and description from `strings.yaml`. A channel
+parameter gets them from `channel_parameter_fields:`, which maps a top-level
+parameter to an optional `label` (up to 60 characters) and `description` (up
+to 400). The project settings tools print them beside the value, so whoever
+changes a setting knows what it holds without reading the flows:
+
+```yaml
+channel_parameters:
+  reminder_days: [3, 7]
+
+channel_parameter_fields:
+  reminder_days:
+    label: Reminder schedule (days)
+    description: >-
+      Days to wait before each reminder, one entry per reminder, each
+      counted from the previous email.
+```
+
+Install writes nothing for it, and adding it does not make an installed channel
+read as drifted. Publish refuses an entry for a name not declared under
+`channel_parameters:`, an entry for `prompts` or `templates` (each file there
+is a setting of its own), a key other than `label` or `description`, and a
+present key with no mapping under it.
 
 ### Runtime state must not appear under `scalars:`
 
