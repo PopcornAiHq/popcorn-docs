@@ -210,6 +210,21 @@
   pass: no — publish treats it as the line's app, and every install of that version clears app_type and channel_agent on each channel on the line; keep both keys
   trap: says publish refuses a manifest whose app_type differs from its line, so it is safe
 
+- q: What is a Routine, and is it the same as a project or a channel?
+  concept: product-glossary, glossary
+  pass: yes — a Routine is the product's name for one piece of ongoing work Popcorn runs; the MCP tools and web app call it a project, and the API and CLI a channel
+  trap: describes a Routine as a flow, a schedule, or a separate object from the project
+
+- q: If I change a setting on one Routine, will it lose the template's future updates?
+  concept: product-glossary
+  pass: no — a setting reaches only that Routine, can be set back and survives the template's improvements; only a change to what the Routine is built from, such as its Tables or the steps it runs, gives it a copy of its own, which stops receiving them
+  trap: says every change stops updates, or that a setting reaches every Routine made from the template
+
+- q: A person asks what triggers their Routine. What counts as a Trigger?
+  concept: product-glossary, glossary
+  pass: how work arrives — a schedule, a message in the Routine, a document added to it, a booking through its calendar link, or another system posting to it (in the platform, schedules, webhooks, message triggers and documents)
+  trap: counts a person's Action, such as an approval, as a Trigger, or says Trigger always needs a qualifier
+
 - q: Is a channel template something different from an app bundle?
   concept: glossary, app-bundle
   pass: no — channel template is the older name for an app and its bundle; it survives in channel templates and channel create --template, which both mean the app

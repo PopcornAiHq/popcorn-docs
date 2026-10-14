@@ -1,29 +1,37 @@
 ---
 id: glossary
-title: Glossary
-order: 11
+title: Platform glossary
+order: 2
 layout: lookup
 summary: >
-  The platform's nouns, each with its current synonyms and the collisions
-  worth knowing. An app is the thing, such as a claim coordinator; its app
-  bundle is its files. "Channel template" is the older name for both, still in
-  `channel templates` and `channel create --template`. A channel (in the
-  product, a project) is what an app installs into, identified by its UUID
-  because a name can change.
-concepts: [app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
+  The platform's nouns, each with its synonyms, its collisions and the product
+  term it belongs to. An app is the thing (in the product, a Routine Template);
+  its app bundle is its files. A channel (in the product, a Routine) is what an
+  app installs into, identified by its UUID because a name can change.
+concepts: [product-glossary, app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
 applies_to: [cli, mcp, human]
 ---
 
-One vocabulary for authors, agents and tools. Each entry gives the preferred
+The vocabulary of authors, tools and the API. Each entry gives the preferred
 term first, then the other names it goes by today, then what it is most often
 confused with, then the page that explains it. Where the CLI or the API still
 uses an older name, the entry says so; the older name keeps working.
+
+The product uses fewer, plainer words, defined in the
+[product glossary](https://docs.popcorn.ai/concepts/product-glossary.md).
+Each section here names the product term its entries belong to, and an entry
+whose term differs from its section's says so. A platform term with no product
+term is one the product never shows: talking to a person, describe its effect
+instead.
 
 Two words need a qualifier every time they are used: **trigger** and
 **integration**. Each has several meanings, listed under its entry. **Version**
 is close behind: see *bundle version*.
 
 ## Apps and bundles
+
+Product term: **Routine Template**. The product shows the app; its bundle,
+manifest, versions and lines stay behind it.
 
 - **app** — One application, named by a slug such as `claimcoordinator`, and
   everything published under that name. The manifest's `app_type:` and the
@@ -84,6 +92,10 @@ is close behind: see *bundle version*.
 
 ## Moving a version
 
+No product term. The product describes the effect instead: a Routine keeps
+receiving its template's improvements, and *customizing a Routine* says when a
+change gives it a copy of its own, which is what a fork does.
+
 - **publish** — Minting the next version on a fork line with
   `popcorn app publish`. It needs workspace-admin rights, starts an install on
   the channel you published from, and reaches every other channel on the line
@@ -122,6 +134,8 @@ is close behind: see *bundle version*.
 
 ## Channels and workspaces
 
+Product term: **Routine**, except where an entry says otherwise.
+
 - **channel** — What an app installs into. The product calls it a
   *project* (see its entry); the API, the CLI and these pages say *channel*. A
   channel is identified by its UUID; its `#name` can change, so a script or
@@ -129,19 +143,22 @@ is close behind: see *bundle version*.
   the UUID. On the wire the id is `conversation_id`, because the API's older
   noun, *conversation* (see its entry), covers direct messages too. See
   [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
-- **project** — The product's name for a channel: the space a tracker lives
-  in, with its members, its messages and the app it runs. The web app creates
-  one with "New project", and an app can give its projects a noun of its own.
-  The API and the CLI call a project a *channel*, and the API's wider noun is
-  *conversation*, so a project's id is `conversation_id` on the wire and
-  `#name` still names one. *Not to be confused with* `feature.state.project`,
+  Product term: Routine.
+- **project** — The MCP tools' and the web app's name for a channel: the
+  space a tracker lives in, with its members, its messages and the app it
+  runs. The web app creates one with "New project", and an app can give its
+  projects a noun of its own. The API and the CLI call a project a *channel*,
+  and the API's wider noun is *conversation*, so a project's id is
+  `conversation_id` on the wire and `#name` still names one. Product term:
+  Routine. *Not to be confused with* `feature.state.project`,
   which recomposes a row's Status (see *Status*).
-- **tracker** — The product's word for a channel that runs an app, as in
-  "each channel is a tracker". Many apps also name their main table
+- **tracker** — The MCP server's word for a channel that runs an app, as in
+  "each channel is a tracker". Product term: Routine. Many apps also name their main table
   `tracker`, and the state-machine page's "tracker row" means a row of it.
 - **workspace** — The tenant: it owns channels, users and fork lines. Its
   users are its members, each with a workspace role (see *member*).
-  `popcorn workspace switch` changes which one the CLI acts on.
+  `popcorn workspace switch` changes which one the CLI acts on. Product term:
+  workspace.
 - **conversation** — The API's noun for anything messages are posted in,
   named by its `type`: a channel (`workspace_channel`, `public_channel`,
   `private_channel`, `shared_channel` or `shared_private_channel`), a direct
@@ -149,6 +166,7 @@ is close behind: see *bundle version*.
   (`self_dm`), the conversation every user has with themselves. Its id is
   `conversation_id` on the wire. Prefer *channel* when you mean a channel.
   *Not to be confused with* a thread, which is replies inside a conversation.
+  No product term.
 - **shared channel** — A public or private channel with a member from
   another workspace. It becomes `shared_channel` or `shared_private_channel`
   when the first such person joins; a `workspace_channel` cannot be shared.
@@ -156,7 +174,8 @@ is close behind: see *bundle version*.
   workspace reaches it only through their channel membership, and app
   operations there treat them as a workspace guest, whatever their role at
   home. In the home workspace, a `shared_channel` can be read without joining,
-  like a public channel; a `shared_private_channel` needs membership.
+  like a public channel; a `shared_private_channel` needs membership. No
+  product term.
 - **channel config** — A per-channel document holding the channel
   parameters and the channel integrations, among other sections; the prompts
   and templates a bundle seeds are folded into the parameters, as
@@ -166,12 +185,18 @@ is close behind: see *bundle version*.
   confused with* scalars, which live in the agent store and are not in
   `$channel.*`. See
   [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
+  Product term: Routine Settings, for the parameters; its integrations are
+  Connections.
 - **channel parameters** — Typed values in the channel config, read as
   `$channel.<name>`. The manifest's `channel_parameters:` seeds them per key
   and leaves a value the channel changed alone on update. The CLI calls them
-  `params`: `popcorn channel-config params set` and `unset`.
+  `params`: `popcorn channel-config params set` and `unset`. Product term:
+  Routine Settings.
 
 ## People and messages
+
+Product term: messages, threads and reactions are part of a Routine's
+**History**. Users, members and roles have no product term.
 
 - **user** — A person's account in one workspace. There is one user per
   workspace, so one email address in two workspaces is two users, with two
@@ -221,6 +246,10 @@ is close behind: see *bundle version*.
 
 ## Flows and runs
 
+No product term for a flow or what it is made of: they are how a Routine does
+its work, and stay behind it. What starts a run is a **Trigger**, and the
+runs themselves are part of a Routine's **History**; the entries say which.
+
 - **flow** — A YAML file at the bundle root declaring inputs, steps and
   outputs. Its identity is the `name:` inside the file, not the filename, so
   changing `name:` deletes one flow and creates another. Several fields and
@@ -252,10 +281,11 @@ is close behind: see *bundle version*.
 - **run** — One execution of a flow, identified by its `workflow_id`
   (`popcorn flow runs get <workflow-id>`). A run is started by `flow run`, a
   schedule, a webhook, a message trigger, a document, a state machine, an
-  agent or another flow.
+  agent or another flow. Product term: History.
 - **outcome** — What a caller branches on when a run ends: `succeeded`,
   `failed` or `still_running`. *Not to be confused with* the run's status,
-  which uses a finer vocabulary, or with a row's Status column.
+  which uses a finer vocabulary, or with a row's Status column. Product term:
+  History.
 - **trigger** — Always qualify it. A **message trigger** is a manifest
   `triggers:` entry that runs a flow for each message in the channel, and its
   `enabled` is written once, by the install that first brings the trigger to
@@ -264,7 +294,9 @@ is close behind: see *bundle version*.
   asked for the run (`thread_id`, `message_id`, `user_id`, …). The **trigger
   report** that `popcorn flow get` prints is what starts a flow: schedules,
   webhooks, message triggers, documents, states and other flows. **`trigger_workflow`**
-  is a webhook mode.
+  is a webhook mode. Product term: Trigger, for a message trigger and for what
+  the trigger report lists. The product's Trigger needs no qualifier: it means
+  only how work arrives.
 - **schedule** — A manifest `schedules:` entry that runs a flow on an
   `interval:` or a `cron:`, keyed by flow name and `slug`. Its cadence exists
   three ways: **declared** in the manifest, **armed** on the channel (what
@@ -274,19 +306,24 @@ is close behind: see *bundle version*.
   `popcorn app status` compares armed with declared, and uses intended to tell
   a deliberate difference from drift. See
   [Manifest keys](https://docs.popcorn.ai/concepts/manifest-keys.md).
+  Product term: Trigger.
 - **webhook** — A per-channel ingest URL (`popcorn webhook list --show-url`)
   whose `action_mode` is `silent`, `as_is`, `ai_enhanced` or
   `trigger_workflow`. In `trigger_workflow` mode each delivery starts the
   flow named by `trigger_flow_name`; responses spell that field
   `trigger_flow_id`, and it holds the name. A **delivery** is one received
-  payload (`popcorn webhook deliveries`).
+  payload (`popcorn webhook deliveries`). Product term: Trigger.
 
 ## Data
+
+Product term: **Table**, **Row**, **Column** and **Cell**, except where an
+entry says otherwise.
 
 - **agent store** — A channel's tables, scalars and files, scoped to that one
   channel. The CLI reaches it through `popcorn table`, and flows through the
   `foundation.store.*` activities. Some API paths and older pages call it the
-  data store.
+  data store. Product term: Table, for its tables; its scalars are Routine
+  Settings.
 - **table** — A named collection of rows with a schema: its columns, their
   merge policies and an optional merge key. The manifest's `tables:`
   reconciles additively — columns are added, never dropped or renamed — while
@@ -303,11 +340,14 @@ is close behind: see *bundle version*.
   the wire (`popcorn table scalar get` and `set`). A manifest declares
   scalars in one of two tiers, and a value a flow writes at runtime belongs
   in neither. See [The three scalar tiers](https://docs.popcorn.ai/concepts/scalar-tiers.md).
+  Product term: Routine Settings, for a scalar a person sets, such as a
+  switch; a value a flow writes at runtime has none.
 - **merge policy**, **merge key** — A column's merge policy decides what an
   upsert does to its existing value. A table's merge key decides which
   existing row an insert matches. `merge_on` names the match per call, for a
   table without a merge key; on a table with one, `merge_on` is ignored. See
   [Column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md).
+  No product term.
 - **rev**, **`If-Match`** — A revision token for a conditional write. A row
   carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
   `foundation.store.patch_row`); the channel config carries a string `rev`,
@@ -315,9 +355,12 @@ is close behind: see *bundle version*.
   is refused with status 412, `error: stale_rev` and the current `rev`, for a
   row and for the channel config alike, and the CLI reports it as a
   `conflict`. `popcorn channel-config params set` sends no `If-Match`, so it
-  never meets this refusal. *Not to be confused with* a `version_id`.
+  never meets this refusal. *Not to be confused with* a `version_id`. No
+  product term.
 
 ## Integrations and agents
+
+Product terms: **Connection** and **Agent**; the entries say which.
 
 - **integration** — Always qualify it. A **connected account** is one
   person's account with a provider, with an `integration_id`
@@ -331,25 +374,28 @@ is close behind: see *bundle version*.
   started by a schedule, webhook, message trigger or another flow it ends
   without error; a person's or agent's `flow run` is refused with 409
   `missing_integrations`. `connections:` declares what to connect and stops
-  nothing. The product also calls these
-  *connections*.
+  nothing. Product term: Connection, for all three.
 - **channel agent** — The agent members talk to in a channel. The manifest's
   `channel_agent:` proposes it and is written or cleared on every install; a
   channel-level override set by an operator wins over it, and the workspace
   default applies when neither names an allowed agent. `AGENT.md` holds notes
-  it reads on demand.
+  it reads on demand. Product term: Agent.
 - **app agent** — An agent a bundle defines for itself under
   `agents/<name>/` (`agent.yaml`, `prompt.md`, `schemas/*.json`), which a
   flow runs with `foundation.agent.invoke`. With `chat: true` in `agent.yaml`
   it can also serve as a channel agent. See
-  [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md).
+  [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md). Product
+  term: Agent.
 - **agent mode** — The CLI setting `POPCORN_AGENT=1`, which defaults
   `--json`, `--quiet` and `--no-color` and suppresses upgrade prompts. It does
   not imply `--yes`, and `app publish` requires `--yes` (or
   `POPCORN_ASSUME_YES=1`) in agent mode. It has
-  nothing to do with the agents above.
+  nothing to do with the agents above. No product term.
 
 ## State machines
+
+Product terms: **Status** and **Action**. The machines, states, events and
+transitions behind them stay out of the product.
 
 - **state machine** — A manifest `states:` section over one table: a set of
   small machines. At least one is not an overlay; the first of those is the
@@ -365,10 +411,10 @@ is close behind: see *bundle version*.
   leave a terminal state.
 - **CTA** — The button a user sees, declared on the transition it fires
   (`cta:`), so the graph and the interface cannot disagree. Only a
-  staff-family transition may carry one.
+  staff-family transition may carry one. Product term: Action.
 - **Status** — A row's status column, a projection of its machines. Change
   it by firing an event. A state transition or projected patch that writes
   it is refused; a plain store write is not, and lasts only until the
   engine next projects the row. *Not to be
   confused with* a run's status or outcome, or a user's presence, which the
-  API also calls `status`.
+  API also calls `status`. Product term: Status.
