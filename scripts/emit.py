@@ -143,7 +143,8 @@ SECTIONS = [
      "Walkthroughs, in reading order. The first is the whole authoring loop; "
      "each later one builds on it."),
     ("glossary", "Glossary",
-     "Every term, with its synonyms and the collisions worth knowing."),
+     "The product's terms, then the platform's, each with its synonyms and "
+     "the collisions worth knowing."),
     ("reference", "Reference",
      "Generated from the platform itself, never written by hand."),
 ]
@@ -158,7 +159,7 @@ _KNOWN = [name for name, *_ in SECTIONS]
 # Only the navigation moves: the URL is still `<directory>/<id>`, because
 # that path is in llms.txt and in other pages' links, and an id is permanent
 # by contract, which is what makes naming one here safe.
-NAV_SECTION = {"glossary": "glossary"}
+NAV_SECTION = {"product-glossary": "glossary", "glossary": "glossary"}
 
 
 def nav_section(page: dict) -> str:

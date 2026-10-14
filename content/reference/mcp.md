@@ -3,7 +3,6 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-10-08
 summary: >
   The tools the hosted Popcorn MCP server exposes — people, projects,
   messages and a project's app — with their arguments, generated from the
@@ -15,7 +14,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 37 tools. They cover people, projects,
+The hosted MCP server exposes 38 tools. They cover people, projects,
 messages and a project's app: find people and projects, list the apps a
 new project can run, create a project (optionally running an app), read
 and search a project's messages, send messages and reactions, read the
@@ -171,6 +170,7 @@ Show one project: its details, your membership, and the app it runs, with the ve
 | Argument | Type | Notes |
 |---|---|---|
 | `project` [required] | `str` | The project's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one project has it, the call lists them with their IDs; pass an ID instead. |
+| `wait_seconds` | `int` | Wait up to this many seconds for an install in progress to land (installed, or failed for good), then answer; the answer says whether it landed or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 
 **Example** — “Is #intake on the latest version of its app?”
 
@@ -261,6 +261,7 @@ Without `app` the project is created at once. With `app` the first call is a dry
 | `private` | `bool` | true for a private project, joined only by you and `members`. A project that isn't private adds everyone in the workspace. Default `False`. |
 | `members` | `list[str]` | People to add to a private project: "@username", email or user ID, all members of this workspace. You're always a member. |
 | `confirm` | `bool` | true to create a project that runs an app. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Set up a private #claims-west project running the claims app, with Jordan in it.”
 
@@ -293,7 +294,7 @@ Before the app runs, someone sets up in the project: Gmail, Google Calendar, Goo
 
 A project's messages, newest first, or one thread's replies.
 
-Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the project's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a project the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A project set to reply outside threads posts top-level instead, so if the thread stays empty, list the project with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly.
+Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the project's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a project the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A project set to reply outside threads posts top-level instead, so if the thread stays empty, list the project with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -302,6 +303,7 @@ Each row is a timestamp (UTC), the message ID, the author, the text (long text i
 | `after` | `str` | Only messages after this ISO timestamp or message ID. |
 | `before` | `str` | Only messages before this ISO timestamp or message ID. |
 | `cursor` | `str` | next_cursor from the previous page. |
+| `wait_seconds` | `int` | Wait up to this many seconds for a message newer than `after` (or, without it, than the newest one listed now) in the same project or thread, then answer; the answer says whether one arrived or the wait ran out. Not with cursor or before. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 
 **Example** — “What's happened in #intake today?”
 
@@ -518,6 +520,7 @@ The line starts as a byte-identical copy of the product version the project runs
 | `project_id` [required] | `str` | The project's ID (not its name). |
 | `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app(line=...). |
 | `confirm` | `bool` | true to fork. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 
@@ -550,6 +553,7 @@ It installs the app the project already runs, never another one: a project runs 
 | `project_id` [required] | `str` | The project's ID (not its name). |
 | `line` | `str` | A fork line of this project's app to move onto. |
 | `confirm` | `bool` | true to make an adoption. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id an adoption's dry run gave, with confirm=true and the same line. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 
@@ -573,15 +577,17 @@ Call again with `confirm=true` to move #intake onto line "acme-west".
 
 Publish changes to a project's app as the next version of its line.
 
-A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. To change how a tracker behaves on one project, check list_project_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it.
+A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. To change how a tracker behaves on one project, check list_project_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach, and a plan_id. To publish, call again with project_id, confirm=true and that plan_id alone: the changes needn't be sent again, and every check runs again. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} {"path": "code/x/lib.js", "from_url": "https://unpkg.com/…", "sha256": "…"} {"path": "code/x/app.js", "from_upload": "<upload_id>"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it. from_url has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per publish. Pin a version in the URL. To replace an existing file, add its expected_sha256. The dry run shows each file's sha256, and the publish takes exactly that content: a confirm by plan_id holds it, and a confirm that resends the changes must give each from_url change that sha256. Content that changed since the dry run is refused. from_upload takes a file you uploaded with create_app_upload, for this project and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as from_url, and is published once.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). It installs the new version first. |
-| `base_version_id` [required] | `int` | The version_id the files were read from, as list_app_files' header shows it: the line's head. |
-| `changes` [required] | `list[Change]` | The changes, one per file, applied in order. |
-| `changelog` [required] | `str` | What changed and why, in a sentence or two. |
+| `base_version_id` | `int` | The version_id the files were read from, as list_app_files' header shows it: the line's head. |
+| `changes` | `list[Change]` | The changes, one per file, applied in order. |
+| `changelog` | `str` | What changed and why, in a sentence or two. |
 | `confirm` | `bool` | true to publish. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of base_version_id, changes and changelog. |
+| `diff` | `DiffLevel` | How much of each file's diff the dry run shows: "full" (the default), "summary" (line counts) or "none". A deleted file is always one line. |
 
 **Example** — “On #intake, chase estimates at 8 instead of 9, and publish it.”
 
@@ -611,8 +617,56 @@ Files:
   +    cron: 0 8 * * 1-5
   ```
 Reach: #intake would install it now. 2 other projects on this line will update at their daily check.
+plan_id: pL4nC0nf1rmByRef9xQ2a7 (lasts 30 minutes)
 
-Call again with `confirm=true` to publish 0.16.1 to line "acme-intake".
+Call again with `confirm=true` to publish 0.16.1 to line "acme-intake": pass project_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version_id, changes and changelog.
+
+→ publish_app(project_id="c7d2…5b", confirm=true, plan_id="pL4nC0nf1rmByRef9xQ2a7")
+
+Project: #intake (c7d2…5b)
+Published claimcoordinator 0.16.1 (version_id: 44) to fork line "acme-intake". It is now the line's head.
+#intake is installing it now.
+Reach: 2 other projects on this line will update at their daily check.
+Published is not installed: get_project's Install: field shows when #intake has it.
+Files now (the base for a next edit is version_id 44; use these sha256s as expected_sha256):
+- manifest.yaml  sha256: d00a8443…
+```
+
+### `create_app_upload`
+
+[writes]
+
+Get a URL to upload one file you made, for publish_app to take.
+
+For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then publish with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this project and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can be published for most of a day. Workspace admins only, like publish_app.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `project_id` [required] | `str` | The project's ID (not its name), as for publish_app. |
+| `path` [required] | `str` | The bundle path the file will be published at, e.g. code/engine/lib.js. |
+| `size` [required] | `int` | The file's size in bytes. |
+| `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |
+
+**Example** — “I bundled the chess engine into engine.js; publish it to #intake's app without pasting it.”
+
+```text
+→ create_app_upload(project_id="c7d2…5b", path="code/engine/engine.js", size=48213, sha256="9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c")
+
+Project: #intake (c7d2…5b)
+Upload for code/engine/engine.js: 48,213 bytes, sha256 9f2c9f2c….
+upload_id: 3f6a…93
+method: PUT
+url: https://uploads.popcorn.ai/staging/8c1f…e2/3f6a…93?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=5e1d…
+headers:
+  x-amz-checksum-sha256: nyyfLJ8s…
+URL expires: 2026-10-13T18:15:00Z. Publishable until 2026-10-14T17:00:00Z.
+
+Run this with FILE replaced by the file's path; it prints nothing when the upload succeeds:
+curl -fsS -T FILE -H 'x-amz-checksum-sha256: nyyfLJ8s…' 'https://uploads.popcorn.ai/staging/8c1f…e2/3f6a…93?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=5e1d…'
+
+Then publish it with this change (add expected_sha256 to replace a file that exists):
+{"path": "code/engine/engine.js", "from_upload": "3f6a…93"}
+If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
 ```
 
 ## Flows
@@ -683,9 +737,10 @@ A run does what the flow does, for real: it can post messages, send email and ch
 |---|---|---|
 | `project_id` [required] | `str` | The project's ID (not its name). |
 | `flow` [required] | `str` | The flow's name, as list_flows shows it. |
-| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. |
+| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. conversation_id is filled in with the project's ID; leave it out. |
 | `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
 | `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same inputs; it stands in for the run_key. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Send the claimant on C-1042 in #intake a reminder now.”
 
@@ -742,13 +797,16 @@ Project: #intake (c7d2…5b)
 
 One flow run: how it ended (or what it's doing now), its inputs, its outputs, the error it failed with, and its newest steps.
 
-A run still going shows the step it's on; call again to follow it.
+A run still going shows the step it's on; call again to follow it, or pass wait_seconds to have this call wait for the run to end. Outputs too long to show together are listed by name, with short values whole. output=<name> reads one output whole and exactly (a string as is, anything else as JSON), to pass back to another call; a long one comes in ranges, and next_cursor reads the next.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `project` [required] | `str` | Project name ("#intake") or ID. |
 | `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
 | `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to read that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
+| `output` | `str` | Optional. One output's name, to read just that output whole. |
+| `cursor` | `str` | next_cursor from the previous range of that output. |
+| `wait_seconds` | `int` | Wait up to this many seconds for a running run to end, then answer; the answer says whether it ended or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. With output, the wait comes first. |
 
 **Example** — “Why did this morning's digest in #intake fail?”
 
@@ -853,7 +911,7 @@ Changed by: update_project_setting, by a workspace admin who's also a member of 
 
 Change one of a project's settings, on this project only.
 
-Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. Setting the app's default value resets the setting. A switch takes one of its options; any other setting keeps the shape of the app's default (a list stays a list, a number a number). Secrets and the recipe aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
+Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the app's default value resets the setting. A switch takes one of its options; any other setting keeps the shape of the app's default (a list stays a list, a number a number). Secrets and the recipe aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -862,6 +920,7 @@ Without confirm=true this is a dry run that changes nothing: it shows the old an
 | `value` | `Any` | The whole new value: text, a number, a list, a mapping, or null. Omit it to pass changes instead. Default `OMITTED`. |
 | `changes` | `list[Op]` | Text ops on the current text, instead of value. |
 | `confirm` | `bool` | true to change it. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of value and changes. |
 
 **Example** — “Stop chasing after five follow-ups on #chase-renewals.”
 
@@ -1146,6 +1205,7 @@ Without confirm=true this is a dry run that deletes nothing: it lists the rows i
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `row_ids` [required] | `list[int]` | The rows' IDs ("row 88" is 88). At most 50. |
 | `confirm` | `bool` | true to delete. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same table and row_ids. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Delete the duplicate row 91 from #intake's claims.”
 
@@ -1168,3 +1228,279 @@ Project: #intake (c7d2…5b) · table: claims
 Deleted 1 of 1 rows: row 91.
 ```
 
+## Proposed tools
+
+**None of these tools exist yet, and nothing depends on them arriving.** They
+are a design for the tools a person's assistant uses to run Routines, named
+in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'s
+terms rather than the platform's. They are listed so an author can see what is
+being considered; names and arguments may change before any ships.
+
+When they ship, they replace the project-named tools above, and the message,
+member, flow, run and scalar tools leave this surface: a Routine's
+conversation and runs are read as its History, a flow is started by its
+Trigger or an Action, and a switch is a Routine Setting. The table tools keep
+their names and take `routine` and `routine_id` in place of `project` and
+`project_id`. Changing a Routine Template itself is not part of this design.
+
+Three rules run through it:
+
+1. **Ask for the outcome; Popcorn picks the mechanism.** A tool takes what
+   the person wants changed, in product terms, and Popcorn decides which
+   setting, document or step has to change to get it.
+2. **Every write is a dry run until `confirm=true`**, and the dry run says
+   whether the change stays with this Routine or gives it a copy of its own,
+   which stops receiving its template's improvements.
+3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
+   since a write is the worst place to resolve a name to the wrong Routine.
+
+### `list_routines`
+
+Read-only. The Routines the caller can see in this workspace, each with its
+template, its Status counts and whether it is missing a Connection.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `template` | | Only Routines made from this Routine Template |
+| `query` | | Matches a Routine's name |
+| `cursor` | | From the previous page |
+
+### `get_routine`
+
+Read-only. One Routine: its template, whether it still receives the
+template's improvements, its Triggers, its Connections and which are missing,
+and a count of items per Status.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `wait_seconds` | `0` | Wait up to this long for a Routine that is still being set up |
+
+### `list_routine_templates`
+
+Read-only. The Routine Templates this workspace can start a Routine from,
+each with what it is for and the Connections it needs.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `query` | | Matches a template's name or description |
+
+### `create_routine`
+
+Starts a new Routine from a Routine Template. Without `confirm`, says what
+the Routine will be set up with and which Connections a person will need to
+make.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `name` | | The new Routine's name |
+| `template` | | The Routine Template to start from |
+| `confirm` | `false` | Create the previewed Routine |
+
+### `duplicate_routine`
+
+Makes a new Routine that starts as a copy of an existing one: its template,
+Routine Settings, Instructions and References, but none of its items or
+History. Connections are not copied, because they sign in as a person.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | The Routine to copy |
+| `name` | | The new Routine's name |
+| `confirm` | `false` | Create the previewed copy |
+
+### `change_routine`
+
+Changes how a Routine works, from a plain-language request such as "remind
+the client every three days instead of weekly" or "add an approval before
+anything is sent". Without `confirm`, returns the plan: what will change, in
+product terms, and whether the change stays with this Routine or gives it a
+copy of its own. The confirming call carries the plan's ID, so only the
+previewed plan is applied.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `request` | | What should change, in the person's words |
+| `plan_id` | | From the dry run; required with `confirm` |
+| `confirm` | `false` | Apply the previewed plan |
+
+### `list_triggers`
+
+Read-only. How work arrives in a Routine: each schedule with its cadence,
+each address another system posts to (never the address itself, which is a
+credential), each message or document that starts work, and a booking link.
+A Trigger that is paused says so.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+
+### `run_trigger`
+
+Runs a scheduled Trigger now, with the inputs it runs with on schedule, and
+leaves its schedule unchanged. Without `confirm`, says what the run will do.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `trigger` | | A scheduled Trigger, as `list_triggers` names it |
+| `confirm` | `false` | Start the run |
+
+### `list_connections`
+
+Read-only. The Connections a Routine needs, each with whether it is made,
+whose account it uses, and what stops while it is missing. Making one is a
+person's job, in the browser; the result says where.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+
+### `list_references`
+
+Read-only. The documents a Routine works from, each with what it is used for,
+when it was added and by whom, and the ones the Routine is still waiting for.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+
+### `read_reference`
+
+Read-only. One Reference's text, or a download link for a file that is not
+text.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `reference` | | As `list_references` names it |
+
+### `add_reference`
+
+Adds a document to a Routine, or replaces one, from text or a file the
+caller uploaded. Without `confirm`, says what the Routine will do with it.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `reference` | | Which document this is, as `list_references` names it |
+| `text` | | The document as text |
+| `upload_id` | | A file uploaded for this Routine, in place of `text` |
+| `confirm` | `false` | Add the previewed document |
+
+### `get_instructions`
+
+Read-only. A Routine's Instructions in plain language: how it words its
+messages, what it asks a person about first, its deadlines and reminders.
+Each part says whether it is the template's or was changed for this Routine.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+
+### `update_instructions`
+
+Changes a Routine's Instructions. Takes the change in plain language or as
+an edit to the text `get_instructions` returned. Without `confirm`, shows the
+Instructions as they would read after the change.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `request` | | The change, in the person's words |
+| `edits` | | Or exact edits to the text, in place of `request` |
+| `confirm` | `false` | Apply the previewed change |
+| `reset` | `false` | Return a changed part to the template's |
+
+### `list_routine_settings`
+
+Read-only. A Routine's settings: each one's value, what it does, whether it
+was changed for this Routine, and who may change it. Secrets are never shown.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+
+### `get_routine_setting`
+
+Read-only. One setting in full, including long text values.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `setting` | | As `list_routine_settings` names it |
+
+### `update_routine_setting`
+
+Changes one setting on one Routine, or sets it back to the template's value.
+The change reaches only that Routine and survives the template's
+improvements.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `setting` | | As `list_routine_settings` names it |
+| `value` | | The new value |
+| `reset` | `false` | Return to the template's value |
+| `confirm` | `false` | Apply the previewed change |
+
+### `get_status`
+
+Read-only. Where a Routine's items stand: a count per Status, the items
+waiting on a person, and the stages an item moves through. One item's Status
+is on its Row.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `table` | | The Table to count; the Routine's main one by default |
+
+### `list_actions`
+
+Read-only. The Actions a person can take on one item now, given where it
+stands, with what each will do.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `table` | | The item's Table |
+| `row_id` | | The item |
+
+### `take_action`
+
+Takes an Action on one or more items, as a person pressing its button would.
+Refused for an item where the Action does not apply. Without `confirm`, says
+what will happen to each item.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine_id` | | Routine ID |
+| `table` | | The items' Table |
+| `row_ids` | | The items |
+| `action` | | As `list_actions` names it |
+| `confirm` | `false` | Take the previewed Action |
+
+### `list_history`
+
+Read-only. What has happened in a Routine, newest first: work it ran and how
+each ended, its conversation, and changes to its items, each with who or what
+made it.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `kind` | all | `work`, `conversation` or `changes` |
+| `row_id` | | Only what happened to this item |
+| `since` | | ISO-8601 time |
+| `cursor` | | From the previous page |
+
+### `read_history_entry`
+
+Read-only. One entry from `list_history` in full: a run's steps and result, a
+message and its replies, or a change's before and after.
+
+| Argument | Default | Notes |
+|---|---|---|
+| `routine` | | Routine ID or `#name` |
+| `entry_id` | | From `list_history` |
