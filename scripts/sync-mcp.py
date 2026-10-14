@@ -74,14 +74,14 @@ _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 # the sync, so a new area gets a heading rather than going unlisted.
 GROUPS = {
     "context": "Workspace and people",
-    "details": "Projects",
-    "new_project": "Projects",
+    "details": "Routines",
+    "new_project": "Routines",
     "messages": "Messages",
     "search_messages": "Messages",
     "app_bundle": "Apps",
     "flows": "Flows",
-    "settings": "Project settings",
-    "agent_store": "Agent store",
+    "settings": "Routine settings",
+    "agent_store": "Tables",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
@@ -101,12 +101,10 @@ in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
-When they ship, they replace the project-named tools above, and the message,
-member, flow, run and scalar tools leave this surface: a Routine's
-conversation and runs are read as its History, a flow is started by its
-Trigger or an Action, and a switch is a Routine Setting. The table tools keep
-their names and take `routine` and `routine_id` in place of `project` and
-`project_id`. Changing a Routine Template itself is not part of this design.
+When they ship, the message, member, flow, run and scalar tools leave this
+surface: a Routine's conversation and runs are read as its History, a flow is
+started by its Trigger or an Action, and a switch is a Routine Setting.
+Changing a Routine Template itself is not part of this design.
 
 Three rules run through it:
 
