@@ -1,7 +1,7 @@
 ---
 id: publish-and-apply
 title: Publish and apply
-order: 10
+order: 17
 group: How a version ships
 summary: >
   Publish mints the next version on a fork line and reaches every channel on

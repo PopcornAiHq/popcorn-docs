@@ -1,7 +1,7 @@
 ---
 id: channel-binding
 title: How a channel runs a version
-order: 8
+order: 15
 group: How a version ships
 summary: >
   A channel points at exactly one bundle version. A run reads it once at start

@@ -1,7 +1,7 @@
 ---
 id: bundle-version
 title: Bundle versions
-order: 7
+order: 14
 group: How a version ships
 summary: >
   Publishing mints an immutable, content-addressed version on a line;

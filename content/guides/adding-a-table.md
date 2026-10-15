@@ -18,7 +18,7 @@ This guide adds one table to an app a channel already runs, and ends with
 the table on the channel and a flow writing rows to it. The loop around it
 (fork, edit, check, publish) is the one in
 [authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md),
-and that guide's §5 is the column reference. This one is the order to do
+and [table columns](https://docs.popcorn.ai/concepts/table-columns.md) is the column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
 A channel is what the product calls a **Routine**, and an app a **Routine
@@ -68,16 +68,9 @@ tables:
       on_conflict: merge
 ```
 
-A column needs a `name` and a `type`. The authoring guide's §5 lists the
-rest: `display`, the governance flags, `index` and `unique`. Two things it
-does not say:
-
-- **Each `format` belongs to one `type`.** `string` takes `uuid`, `email`,
-  `url`, `phone`, `ipv4`, `ipv6`, `hex_color` or `slug`. `number` takes
-  `integer`, and `datetime` takes `date`. `boolean` and `json` take none.
-  Every write is checked against the format.
-- **`label` is the heading clients show in place of `name`.** It is the one
-  way to change what a column is called on screen.
+A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/concepts/table-columns.md) lists the
+rest: `format`, which belongs to one type and is checked on every write,
+`display`, `label`, the governance flags, `index` and `unique`.
 
 Choose the names now, because install never renames a column. The `name`
 is the key every row is stored under, so a changed `name` adds a new column
@@ -85,8 +78,7 @@ next to the old one. A change of case alone adds nothing. The installed
 spelling stays, and a flow that writes the new spelling is refused with a
 "did you mean". A column that any `$` reference reads, such
 as `$row.TicketId` in a `foreach`, needs a name made only of letters, digits
-and underscores that does not start with a digit. The authoring guide's §5
-has the rule. `First Seen` is only ever written or filtered on, so its space
+and underscores that does not start with a digit. `First Seen` is only ever written or filtered on, so its space
 does no harm.
 
 A table declared with no columns is skipped. Install does not create it.

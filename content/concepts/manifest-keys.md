@@ -23,12 +23,12 @@ so it is worth reading once in full.
 | `version` | required to publish; must be a semver such as `1.2.0` — `1.0` parses as a number and is refused |
 | `display_name`, `description` | catalog copy for the template picker |
 | `changelog` | documentation only on a fork line; the version's note comes from `app publish -m` |
-| `tables` | additive reconcile — tables and columns added, attributes fixed, never dropped or renamed |
+| `tables` | additive reconcile — tables and columns added, attributes fixed, never dropped or renamed; see `table-columns` |
 | `channel_parameters` | upsert; on an update, a value a member edited is kept; types preserved; read as `$channel.<name>` |
 | `channel_parameter_fields` | nothing written: the Routine Settings tools read each parameter's `label` and `description` from the version the channel runs |
 | `scalars` | upsert — `scalar-tiers` says when an update keeps the channel's value |
 | `default_scalars` | **write once**, on first install only |
-| `schedules` | replace the schedules the bundle manages |
+| `schedules` | replace the schedules the bundle manages, by (flow, slug) — see `schedules` |
 | `webhooks` | create if missing; never updated, never deleted |
 | `triggers` | the set is replaced; a trigger's `enabled` is written the first time only, so a member's toggle survives upgrades |
 | `connections`, `documents`, `required_connections` | replaced on first install; on an update, kept where the channel's copy was edited (see `scalar-tiers`). `required_connections` is the legacy flat list |
@@ -62,6 +62,32 @@ manifest creates. A schedule created some other way is left alone. On an
 automatic update the rule narrows again: only schedules the previous version
 declared and this one does not are deleted, and a declaration that did not
 change is not touched at all, so a member's pause survives.
+
+## Labelling a parameter
+
+A switch gets its label and description from `strings.yaml`. A channel
+parameter gets them from `channel_parameter_fields:`, which maps a top-level
+parameter to an optional `label` (up to 60 characters) and `description` (up
+to 400). The Routine Settings tools print them beside the value, so whoever
+changes a setting knows what it holds without reading the flows:
+
+```yaml
+channel_parameters:
+  reminder_days: [3, 7]
+
+channel_parameter_fields:
+  reminder_days:
+    label: Reminder schedule (days)
+    description: >-
+      Days to wait before each reminder, one entry per reminder, each
+      counted from the previous email.
+```
+
+Install writes nothing for it, and adding it does not make an installed
+channel read as drifted. Publish refuses an entry for a name not declared
+under `channel_parameters:`, an entry for `prompts` or `templates` (each file
+there is a setting of its own), a key other than `label` or `description`,
+and a present key with no mapping under it.
 
 ## Two specific traps
 
