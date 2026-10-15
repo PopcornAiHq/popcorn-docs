@@ -316,3 +316,38 @@
   concept: activities
   pass: not necessarily — the reference lists only foundation and feature activities at release or beta; alpha, deprecated and app-specific ones appear only in popcorn flow activities, and --name <wire.name> prints one's arguments
   trap: says the reference is stale and needs regenerating, or that the activity was removed
+
+- q: Why did my schedule disappear after I published a new version of the bundle?
+  concept: schedules, flow-identity
+  pass: install reconciles schedules by (flow, slug); a schedule whose flow is not in the bundle — a typo or a renamed flow — is skipped and then deleted as undeclared
+  trap: says schedules are never deleted by install, or blames the daily update
+
+- q: Which string formats can a table column declare, and is display checked?
+  concept: table-columns
+  pass: string takes uuid, email, url, phone, ipv4, ipv6, hex_color or slug, checked on every write; display is checked only for its kind, so a misspelled argument silently does not render
+  trap: says any format works on any type, or that display arguments are validated
+
+- q: Can a block's outer step read the steps nested inside it?
+  concept: flow-grammar
+  pass: no — a block's inner steps are private; outside it only the block's declared outputs are readable, as $steps.<block>.output.<name>
+  trap: says $steps.<inner>.output is readable from outside the block
+
+- q: How do I subtract a number of minutes from a reference?
+  concept: references
+  pass: nothing in a reference computes — -$x is a literal string; use foundation.math.calculate, or foundation.math.offset with direction subtract for timestamps
+  trap: writes $a - $b or -$channel.minutes inline
+
+- q: Adding && to my when expression changed how the first comparison behaves.
+  concept: conditions
+  pass: a lone == is lenient legacy equality, but with && the string routes to the strict, typed expression rail, so the comparison becomes typed
+  trap: says && and == always compare the same way
+
+- q: How many times does a step run when it has no on_error?
+  concept: on-error
+  pass: up to 4 attempts; a non-idempotent step must set retry 0
+  trap: says once, or that retries are off by default
+
+- q: My webhook payload has no severity field; should I use fields.extract or agent.transform?
+  concept: extract-or-derive
+  pass: extract what the payload states; a field it does not state has to be derived with agent.transform, guarded by a recognized flag because the model invents an object given junk
+  trap: uses fields.extract with a default for severity, or trusts the output schema to reject junk

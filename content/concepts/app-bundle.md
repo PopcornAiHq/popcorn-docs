@@ -51,10 +51,20 @@ reads it when it needs it rather than carrying it in every prompt. An explicit
 ## The tree has a fixed shape
 
 `prompts/` and `templates/` are descended one level and seeded into channel
-config. `code/` holds one directory per block, each with exactly one
-entrypoint — `main.py` or `index.js`, never both — and is not seeded anywhere:
-a flow reads a block by name at run time. Block files must be UTF-8 text, and
-a block has a file-count and a size cap, which the refusal names.
+config, as `$channel.prompts.<stem>` and `$channel.templates.<stem>`. `code/`
+holds one directory per block, each with exactly one entrypoint — `main.py` or
+`index.js`, never both — and is not seeded anywhere: `foundation.code.execute`
+reads a block by name at run time. A block is descended to any depth, so it
+may be a small package. Block files must be UTF-8 text, may carry any
+extension (a `.yaml` there is block source, not a flow), and a block has a
+file-count and a size cap, which the refusal names.
+
+The block name is a slug, because it rides inside flow YAML as `code_name:`,
+and every segment below it must be visible: the server refuses a hidden entry
+there, while `app publish` drops dotfiles under `code/` before upload, so from
+the CLI a hidden file is silently left behind. `app validate` reports
+`code-file-outside-block` for a loose file directly under `code/` and
+`code-block-name-invalid` for a name that is not a slug.
 
 `agents/<name>/` holds an app agent's definition: `agent.yaml` and
 `prompt.md` directly inside it, and JSON schemas under `schemas/`. It
@@ -66,7 +76,8 @@ agent at publish and refuses one it could not run.
 Anything outside that shape is not part of the bundle. The server refuses a
 publish containing an unrecognised path; the CLI leaves such paths behind
 before uploading and lists what it left. `app validate` reports them as
-`path-not-published`, which fails `--strict`.
+`path-not-published`, which fails `--strict`. Only dotfiles and `__pycache__`
+are dropped without comment.
 
 So sample payloads live **outside** the bundle directory. A `fixtures/`
 folder inside it is an unrecognised path whatever its files are called.

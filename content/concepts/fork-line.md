@@ -1,7 +1,7 @@
 ---
 id: fork-line
 title: Fork lines
-order: 9
+order: 16
 group: How a version ships
 summary: >
   A fork line is a workspace's own version series of an app, forked from the

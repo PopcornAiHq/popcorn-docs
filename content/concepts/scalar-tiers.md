@@ -14,7 +14,8 @@ applies_to: [cli, mcp, human]
 source: [PLATFORM_SETTINGS, candidate_settings, filter_update_scalar_pairs, parse_send_mode, parse_app_mode]
 ---
 
-A scalar is a named string on a channel. Two manifest tiers write them, a
+A scalar is a named string on a channel — always a string on the wire,
+unlike a channel parameter, which keeps its declared type. Two manifest tiers write them, a
 third family of keys is reserved by the platform, and choosing the wrong one is
 how a setting resets.
 

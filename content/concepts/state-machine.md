@@ -1,7 +1,7 @@
 ---
 id: state-machine
 title: State machines in a bundle
-order: 6
+order: 8
 group: What a bundle holds
 summary: >
   A bundle declares its own state machines — states, transitions, and the
