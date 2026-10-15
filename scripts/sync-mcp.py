@@ -74,14 +74,14 @@ _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 # the sync, so a new area gets a heading rather than going unlisted.
 GROUPS = {
     "context": "Workspace and people",
-    "details": "Projects",
-    "new_project": "Projects",
+    "details": "Routines",
+    "new_project": "Routines",
     "messages": "Messages",
     "search_messages": "Messages",
     "app_bundle": "Apps",
     "flows": "Flows",
-    "settings": "Project settings",
-    "agent_store": "Agent store",
+    "settings": "Routine settings",
+    "agent_store": "Tables",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
@@ -101,12 +101,10 @@ in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
-When they ship, they replace the project-named tools above, and the message,
-member, flow, run and scalar tools leave this surface: a Routine's
-conversation and runs are read as its History, a flow is started by its
-Trigger or an Action, and a switch is a Routine Setting. The table tools keep
-their names and take `routine` and `routine_id` in place of `project` and
-`project_id`. Changing a Routine Template itself is not part of this design.
+When they ship, the message, member, flow, run and scalar tools leave this
+surface: a Routine's conversation and runs are read as its History, a flow is
+started by its Trigger or an Action, and a switch is a Routine Setting.
+Changing a Routine Template itself is not part of this design.
 
 Three rules run through it:
 
@@ -563,42 +561,43 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "order: 3",
         "layout: lookup",
         "summary: >",
-        "  The tools the hosted Popcorn MCP server exposes — people, projects,",
-        "  messages and a project's app — with their arguments, generated from the",
-        "  server's own definitions. They list apps and create a project, read an",
-        "  app's files, fork it, publish changes to a fork line and install a version,",
-        "  and start, follow and stop a project's flows, and read its settings and",
-        "  tables.",
+        "  The tools the hosted Popcorn MCP server exposes — people, Routines,",
+        "  messages and a Routine's app — with their arguments, generated from the",
+        "  server's own definitions. They list Routine Templates and create a",
+        "  Routine, read an app's files, fork it, publish changes to a fork line and",
+        "  install a version, and start, follow and stop a Routine's flows, and read",
+        "  its settings and tables.",
         "concepts: [app-bundle, publish-and-apply, fork-line]",
         "applies_to: [cli, mcp, human]",
         "---",
         "",
-        f"The hosted MCP server exposes {len(found)} tools. They cover people, projects,",
-        "messages and a project's app: find people and projects, list the apps a",
-        "new project can run, create a project (optionally running an app), read",
-        "and search a project's messages, send messages and reactions, read the",
-        "files of the app a project runs, fork it onto the workspace's own line,",
-        "publish changes to a fork line, bring a project on a fork line to its",
-        "line's head, or move it onto another line, list a project's flows, run",
-        "one, and follow or stop its runs, read and change a project's settings,",
-        "and read a project's agent store (its tables, rows and stored values)",
-        "and add, change or delete its rows. They work on projects only;",
-        "direct messages are out of reach.",
+        f"The hosted MCP server exposes {len(found)} tools. They cover people, Routines,",
+        "messages and a Routine's app: find people and Routines, list the Routine",
+        "Templates a new Routine can be made from, create a Routine (optionally from",
+        "a template), read and search a Routine's messages, send messages and",
+        "reactions, read the files of the app a Routine runs, fork it onto the",
+        "workspace's own line, publish changes to a fork line, bring a Routine on a",
+        "fork line to its line's head, or move it onto another line, list a",
+        "Routine's flows, run one, and follow or stop its runs, read and change a",
+        "Routine's settings, and read a Routine's tables, rows and stored values",
+        "and add, change or delete its rows. They work on Routines only; direct",
+        "messages are out of reach.",
         "",
-        "A project is what the CLI and the API call a channel, and an app is what",
-        "they call an app bundle; the `#name` and the IDs are the same.",
+        "A Routine is what the CLI and the API call a channel, and its Routine",
+        "Template's code is what they call an app (an app bundle); the `#name` and",
+        "the IDs are the same.",
         "",
         "Every call runs as the person who connected the server, with that person's",
         "permissions, in the one workspace the connection is bound to; every",
         "response starts with that workspace's name. To use another workspace,",
-        "reconnect. Read tools accept a project's `#name` or its ID; tools that",
-        "write into a project take `project_id`, the ID only. A listing returns one",
-        "page and a `next_cursor` to pass back with the same arguments. A fork, a",
-        "publish, an install that moves a project onto another line, creating a",
-        "project that runs an app, running a flow, changing a setting and",
+        "reconnect. Read tools accept a Routine's `#name` or its ID as `routine`;",
+        "tools that write into a Routine take `routine_id`, the ID only. A listing",
+        "returns one page and a `next_cursor` to pass back with the same arguments.",
+        "A fork, a publish, an install that moves a Routine onto another line,",
+        "creating a Routine from a template, running a flow, changing a setting and",
         "deleting rows are a dry run until called again with `confirm=true`. An",
-        "install that brings a project to its own line's head starts at once, and",
-        "so does creating a project with no app.",
+        "install that brings a Routine to its own line's head starts at once, and",
+        "so does creating a Routine with no template.",
         "",
         "This page is generated from the server's tool definitions by",
         "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
