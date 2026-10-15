@@ -82,6 +82,8 @@ GROUPS = {
     "flows": "Flows",
     "settings": "Routine settings",
     "agent_store": "Tables",
+    "triggers": "Triggers",
+    "actions": "Actions",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
