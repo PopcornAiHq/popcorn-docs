@@ -21,6 +21,9 @@ the table on the channel and a flow writing rows to it. The loop around it
 and that guide's §5 is the column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
+A channel is what the product calls a **Routine**, and an app a **Routine
+Template** (see the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)); this guide uses the CLI's names.
+
 The running example adds a `handoffs` table to an app on `#example-intake`:
 one row per ticket handed to someone, where a repeat hand-off updates the
 row instead of adding another one.
@@ -35,7 +38,9 @@ cd <app>
 ```
 
 If the channel is already on a fork, `app checkout --channel '#example-intake'`
-is enough. Forking is permanent, and a publish reaches every channel on the
+is enough. A table is a change to what the app is built from, so no setting can
+stand in for it. In the product's terms, it gives the Routine a copy of its
+own, which no longer receives the template's improvements. Forking is permanent, and a publish reaches every channel on the
 line, not only this one. See
 [fork lines](https://docs.popcorn.ai/concepts/fork-line.md) before forking a
 production channel.

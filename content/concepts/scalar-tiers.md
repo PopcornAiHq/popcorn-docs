@@ -86,6 +86,8 @@ owner of a switch that belongs to the operator. Where a bundle wants to ship
 an opinion about one, `default_scalars:` is the sanctioned way — it cannot move
 a channel that already has a value.
 
-What an app *shows* in its settings panel is a separate, deliberately smaller
+The product calls a channel's scalars that a person sets, and its channel
+parameters, **Routine Settings**; over MCP, `list_routine_settings` lists
+them. What an app *shows* in its settings panel is a separate, deliberately smaller
 choice: the bundle promotes candidates into the panel through `strings.yaml`,
 and anything unpromoted stays readable in the developer view.

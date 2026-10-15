@@ -17,15 +17,19 @@ source: [StatesSpec, parse_states, render_hints_into_tables, project_row, compos
 This guide takes one `states:` section from design to a published, wired
 graph. What a state machine *is* — the tuple, the projection, why a button is
 an edge — is [the state machine](https://docs.popcorn.ai/concepts/state-machine.md),
-and where the two overlap that page is authoritative.
+and where the two overlap that page is authoritative. In the product, the
+projected status is an item's **Status**, and each staff edge's button is an
+**Action** (see the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)).
 
 The loop is the ordinary one from
 [authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md):
-edit `manifest.yaml`, `popcorn app publish`, read the error, repeat. One thing
-is different. `popcorn app validate` does not look inside `states:`; the
-graph is checked only when the server parses the manifest at publish. The
-check stops at the first problem, so a new graph usually takes several
-publishes to pass, one error at a time.
+edit `manifest.yaml`, check it, read the error, repeat. One thing is
+different. The CLI's own checks do not look inside `states:`; the graph is
+checked only when the server parses the manifest. `popcorn app validate`
+sends it there when run logged in from a fork checkout with edits, and
+`app publish` (or `publish_app`'s dry run) always does. The check stops at the
+first problem, so a new graph usually takes several rounds to pass, one error
+at a time. Run those rounds with `app validate`, which mints no version.
 
 ## The worked example
 
@@ -334,6 +338,13 @@ the button, and one kind belongs to one event. `route` defaults to
 `deterministic`: a click runs your `cta_apply` flow directly (§5) and posts
 nothing. `message` is the chat line, templated on columns as
 `{Title}` or `{Title|this request}`.
+
+**Choose `ui` and `route` knowing who presses the button.** The Popcorn client
+draws every one. An assistant over MCP can take only an Action that the press
+completes: `route: deterministic` with `ui: button`. `list_actions` shows the
+others marked "in the Popcorn app", and `take_action` refuses them. Both the
+client and `take_action` start the flow by the literal name `cta_apply`, so a
+bundle with buttons must ship a flow by that name.
 
 A button's `when` can offer *less* than the edge allows. Approve is legal
 while a row is on hold, but a held card should not invite it:
