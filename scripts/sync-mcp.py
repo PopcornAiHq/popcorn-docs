@@ -62,6 +62,7 @@ PAGE = ROOT / "content" / "reference" / "mcp.md"
 DEFAULT_BACKEND = pathlib.Path.home() / "popcorn" / "backend"
 TOOLS_DIR = ("services", "mcp", "tools")
 EXAMPLES_DIR = ("services", "mcp", "examples")
+INTERNAL_TOOLS = ("services", "mcp", "internal_tools.py")
 
 _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
 # The end of a description's first sentence: a stop followed by a capital, so
@@ -103,10 +104,11 @@ in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
-When they ship, the message, member, flow, run and scalar tools leave this
-surface: a Routine's conversation and runs are read as its History, a flow is
-started by its Trigger or an Action, and a switch is a Routine Setting.
-Changing a Routine Template itself is not part of this design.
+The message, flow, run and stored-value tools have already left this
+surface: a Routine's work starts from its Triggers and Actions, a switch is a
+Routine Setting, and its conversation and runs are read in Popcorn until
+History arrives here. Changing a Routine Template itself is not part of this
+design.
 
 Three rules run through it:
 
@@ -449,10 +451,29 @@ def hints(decorator: ast.Call) -> dict[str, bool]:
     return {}
 
 
+def hidden(root: pathlib.Path) -> set[str]:
+    """The tools the server keeps from a person's assistant: the keys of
+    `EXTERNAL_EXCLUDED_TOOLS` in the server's dispatch module. They stay
+    defined for the server's own use, so the page leaves them out by name.
+    None when the checkout predates the set."""
+    path = root.joinpath(*INTERNAL_TOOLS)
+    if not path.exists():
+        return set()
+    for node in ast.walk(ast.parse(path.read_text())):
+        target = getattr(node, "target", None) or next(iter(getattr(node, "targets", [])), None)
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and isinstance(target, ast.Name) \
+                and target.id == "EXTERNAL_EXCLUDED_TOOLS" and isinstance(node.value, ast.Dict):
+            return {k.value for k in node.value.keys if isinstance(k, ast.Constant)}
+    return set()
+
+
 def tools(root: pathlib.Path) -> list[dict]:
-    """Every tool, in page order: by module as `GROUPS` orders them, then in
-    the order its module defines them, which keeps a listing beside the reads
-    it leads to. Two modules under one heading follow one another."""
+    """Every tool a person's assistant gets, in page order: by module as
+    `GROUPS` orders them, then in the order its module defines them, which
+    keeps a listing beside the reads it leads to. Two modules under one
+    heading follow one another. A module whose tools are all hidden gets no
+    section."""
+    skip = hidden(root)
     found = []
     for path in sorted(root.joinpath(*TOOLS_DIR).glob("*.py")):
         source = path.read_text()
@@ -466,7 +487,7 @@ def tools(root: pathlib.Path) -> list[dict]:
                  if isinstance(d, ast.Call) and ast.unparse(d.func) == "mcp.tool"),
                 None,
             )
-            if decorator is None:
+            if decorator is None or node.name in skip:
                 continue
             summary, described = docstring(ast.get_docstring(node) or "")
             params = node.args.args
@@ -491,12 +512,16 @@ def tools(root: pathlib.Path) -> list[dict]:
 def examples(root: pathlib.Path, names: set[str]) -> dict[str, dict]:
     """The worked examples by the tool each documents.
 
-    Every call in an example must name a tool the server defines: a stale
-    example would show a call nobody can make, so it stops the sync instead.
+    A hidden tool's example is skipped with its tool. Every call in the rest
+    must name a tool on the page: a stale example would show a call nobody
+    can make, so it stops the sync instead.
     """
+    skip = hidden(root)
     found = {}
     for path in sorted(root.joinpath(*EXAMPLES_DIR).glob("*.json")):
         example = json.loads(path.read_text())
+        if example["tool"] in skip:
+            continue
         unknown = {c["tool"] for c in example["calls"]} - names
         if example["tool"] not in names or unknown:
             sys.exit(f"✖  example {path.name} calls a tool the server doesn't define: "
@@ -563,27 +588,24 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "order: 3",
         "layout: lookup",
         "summary: >",
-        "  The tools the hosted Popcorn MCP server exposes — people, Routines,",
-        "  messages and a Routine's app — with their arguments, generated from the",
-        "  server's own definitions. They list Routine Templates and create a",
-        "  Routine, read an app's files, fork it, publish changes to a fork line and",
-        "  install a version, and start, follow and stop a Routine's flows, and read",
-        "  its settings and tables.",
+        "  The tools the hosted Popcorn MCP server gives a person's assistant —",
+        "  people, Routines, their Triggers, Actions, settings and tables, and a",
+        "  Routine's app — with their arguments, generated from the server's own",
+        "  definitions.",
         "concepts: [app-bundle, publish-and-apply, fork-line]",
         "applies_to: [cli, mcp, human]",
         "---",
         "",
-        f"The hosted MCP server exposes {len(found)} tools. They cover people, Routines,",
-        "messages and a Routine's app: find people and Routines, list the Routine",
-        "Templates a new Routine can be made from, create a Routine (optionally from",
-        "a template), read and search a Routine's messages, send messages and",
-        "reactions, read the files of the app a Routine runs, fork it onto the",
-        "workspace's own line, publish changes to a fork line, bring a Routine on a",
-        "fork line to its line's head, or move it onto another line, list a",
-        "Routine's flows, run one, and follow or stop its runs, read and change a",
-        "Routine's settings, and read a Routine's tables, rows and stored values",
-        "and add, change or delete its rows. They work on Routines only; direct",
-        "messages are out of reach.",
+        f"The hosted MCP server gives a person's assistant {len(found)} tools. With them it",
+        "can find people and Routines, list the Routine Templates a new Routine can",
+        "be made from, create a Routine (optionally from a template), see whether a",
+        "Routine's Connections are made, see what starts its work and run a",
+        "schedule now, list and take the Actions on its items, read and change its",
+        "settings, read its tables and rows and add, change or delete rows, and read",
+        "the files of the app a Routine runs, fork it onto the workspace's own line,",
+        "publish changes to a fork line, and bring a Routine on a fork line to its",
+        "line's head or move it onto another line. They work on Routines only; a",
+        "Routine's messages and runs are read in Popcorn.",
         "",
         "A Routine is what the CLI and the API call a channel, and its Routine",
         "Template's code is what they call an app (an app bundle); the `#name` and",
@@ -596,8 +618,9 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "tools that write into a Routine take `routine_id`, the ID only. A listing",
         "returns one page and a `next_cursor` to pass back with the same arguments.",
         "A fork, a publish, an install that moves a Routine onto another line,",
-        "creating a Routine from a template, running a flow, changing a setting and",
-        "deleting rows are a dry run until called again with `confirm=true`. An",
+        "creating a Routine from a template, running a Trigger, taking an Action,",
+        "changing a setting and deleting rows are a dry run until called again with",
+        "`confirm=true`. An",
         "install that brings a Routine to its own line's head starts at once, and",
         "so does creating a Routine with no template.",
         "",
