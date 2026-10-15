@@ -5,27 +5,24 @@ order: 3
 layout: lookup
 platform: 2026-10-15
 summary: >
-  The tools the hosted Popcorn MCP server exposes — people, Routines,
-  messages and a Routine's app — with their arguments, generated from the
-  server's own definitions. They list Routine Templates and create a
-  Routine, read an app's files, fork it, publish changes to a fork line and
-  install a version, and start, follow and stop a Routine's flows, and read
-  its settings and tables.
+  The tools the hosted Popcorn MCP server gives a person's assistant —
+  people, Routines, their Triggers, Actions, settings and tables, and a
+  Routine's app — with their arguments, generated from the server's own
+  definitions.
 concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 41 tools. They cover people, Routines,
-messages and a Routine's app: find people and Routines, list the Routine
-Templates a new Routine can be made from, create a Routine (optionally from
-a template), read and search a Routine's messages, send messages and
-reactions, read the files of the app a Routine runs, fork it onto the
-workspace's own line, publish changes to a fork line, bring a Routine on a
-fork line to its line's head, or move it onto another line, list a
-Routine's flows, run one, and follow or stop its runs, read and change a
-Routine's settings, and read a Routine's tables, rows and stored values
-and add, change or delete its rows. They work on Routines only; direct
-messages are out of reach.
+The hosted MCP server gives a person's assistant 27 tools. With them it
+can find people and Routines, list the Routine Templates a new Routine can
+be made from, create a Routine (optionally from a template), see whether a
+Routine's Connections are made, see what starts its work and run a
+schedule now, list and take the Actions on its items, read and change its
+settings, read its tables and rows and add, change or delete rows, and read
+the files of the app a Routine runs, fork it onto the workspace's own line,
+publish changes to a fork line, and bring a Routine on a fork line to its
+line's head or move it onto another line. They work on Routines only; a
+Routine's messages and runs are read in Popcorn.
 
 A Routine is what the CLI and the API call a channel, and its Routine
 Template's code is what they call an app (an app bundle); the `#name` and
@@ -38,8 +35,9 @@ reconnect. Read tools accept a Routine's `#name` or its ID as `routine`;
 tools that write into a Routine take `routine_id`, the ID only. A listing
 returns one page and a `next_cursor` to pass back with the same arguments.
 A fork, a publish, an install that moves a Routine onto another line,
-creating a Routine from a template, running a flow, changing a setting and
-deleting rows are a dry run until called again with `confirm=true`. An
+creating a Routine from a template, running a Trigger, taking an Action,
+changing a setting and deleting rows are a dry run until called again with
+`confirm=true`. An
 install that brings a Routine to its own line's head starts at once, and
 so does creating a Routine with no template.
 
@@ -140,7 +138,7 @@ This workspace's members only: someone from another workspace who is in a shared
 
 List the Routines you can see in this workspace: the ones you're in (including Routines shared in from another workspace) and the ones you can view without joining (marked [not joined]).
 
-Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID. get_routine shows one Routine's version and install state.
+Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID; [missing a connection] marks one whose app needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -157,7 +155,7 @@ Direct messages are not listed. Each row shows the Routine's name, its Routine T
 
 50 of 137 Routines running claimcoordinator:
 - #claims-central  claimcoordinator  (id: 2af4…0c)
-- #claims-east  claimcoordinator  4 unread, 1 mention  (id: be23…ef)  [pinned]
+- #claims-east  claimcoordinator  4 unread, 1 mention  (id: be23…ef)  [pinned]  [missing a connection]
 - #claims-north  claimcoordinator  (id: bd7d…b9)  [not joined]
 - … 47 more rows
 next_cursor: eyJ2Ijox…
@@ -167,7 +165,7 @@ next_cursor: eyJ2Ijox…
 
 [read-only]
 
-Show one Routine: its details, your membership, and the app it runs, with the version it's on, the head of its line, and whether the latest install landed.
+Show one Routine: its details, your membership, and the app it runs, with the version it's on, the head of its line, whether the latest install landed, and its Connections: each account or webhook the app needs, and whether it's connected.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -195,6 +193,11 @@ Line: product
 Version: 0.15.1 (the line's head)
 Version ID: 812
 Install: installed
+Connections:
+- Claims inbox (email): connected: claims@acme.example (google)
+- Adjuster calendar (calendar): NOT CONNECTED; work that uses it can't run
+- Carrier portal (webhook): connected: carrier-portal
+Whether a connected account still has the access it needs isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
 ```
 
 ### `list_routine_templates`
@@ -260,166 +263,6 @@ Created #claims-west (id: 0141…b3), a private Routine in Acme.
 Members: you, @jlee.
 Claim Coordinator (claimcoordinator) is installing in the background. Watch get_routine("0141…b3")'s Install: field until it says installed.
 Before the app runs, someone sets up in the Routine: Gmail, Google Calendar, Google Drive.
-```
-
-## Messages
-
-### `list_messages`
-
-[read-only]
-
-A Routine's messages, newest first, or one thread's replies.
-
-Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the Routine's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a Routine the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A Routine set to reply outside threads posts top-level instead, so if the thread stays empty, list the Routine with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine ID or "#name". |
-| `thread_id` | `str` | List this thread's replies instead. A thread's ID is its first message's ID; a reply's ID finds its thread too. |
-| `after` | `str` | Only messages after this ISO timestamp or message ID. |
-| `before` | `str` | Only messages before this ISO timestamp or message ID. |
-| `cursor` | `str` | next_cursor from the previous page. |
-| `wait_seconds` | `int` | Wait up to this many seconds for a message newer than `after` (or, without it, than the newest one listed now) in the same Routine or thread, then answer; the answer says whether one arrived or the wait ran out. Not with cursor or before. At most 20 (more is read as 20); 0, the default, doesn't wait. |
-
-**Example** — “What's happened in #intake today?”
-
-```text
-→ list_messages(routine="#intake", after="2026-09-29T00:00:00Z")
-
-Routine: #intake (c7d2…5b)
-3 of 3 messages, newest first:
-[2026-09-29 16:40] (id: 9400…a5) Intake agent: New claim 4480 from the web form: water damage, Riverside Ave. Assigned to Jordan.
-[2026-09-29 14:01] (id: 7e1a…47) Dana Smith: What's still open on claim 4471?
-  ↳ 1 reply (thread_id: 7e1a…47)
-[2026-09-29 09:00] (id: e769…47) Intake agent: Morning summary: 3 new claims overnight, 2 waiting on a repair estimate.
-```
-
-### `read_message`
-
-[read-only]
-
-One message in a Routine, in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours).
-
-| Argument | Type | Notes |
-|---|---|---|
-| `message_id` [required] | `str` | The message's ID. |
-| `include_parts` | `bool` | Also list every part's kind and fields, including tool calls with their arguments and integration payloads: what an agent actually did. Large; leave off unless needed. The parts are paged: a response ends with next_cursor when more follow. Default `False`. |
-| `cursor` | `str` | next_cursor from the previous page of parts. A later page holds only the parts, not the message text again. |
-
-**Example** — “Show me Dana's question about claim 4471 in full.”
-
-```text
-→ read_message(message_id="7e1a…47")
-
-Routine: #intake (c7d2…5b)
-Message: 7e1a…47
-Author: Dana Smith
-Sent: 2026-09-29 14:01 UTC
-Replies: ↳ 1 reply (thread_id: 7e1a…47)
-Reactions: 👀 1
-
-What's still open on claim 4471?
-```
-
-### `send_message`
-
-[writes]
-
-Post a message in a Routine, as you, visible to its members.
-
-Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; the agent of a Routine that runs an app answers most messages, other Routines' agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace, and while the agent is already running a task in the Routine, your message joins that task instead of getting its own reply. Replies arrive asynchronously, in a thread under a top-level message (unless the Routine is set to reply outside threads). The response gives the new message's ID and the list_messages call that reads the answer.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine_id` [required] | `str` | The Routine's ID (get_routine returns it). |
-| `text` | `str` | Message text (markdown). Optional with an attachment. |
-| `thread_id` | `str` | Reply in this thread (its first message's ID). |
-| `mentions` | `list[str]` | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
-| `attachment` | `Attachment` | A text file to attach. |
-
-**Example** — “Ask the agent in #intake what's still open on claim 4471, and tell me what it says.”
-
-```text
-→ send_message(routine_id="c7d2…5b", text="What's still open on claim 4471?")
-
-Message sent to #intake (id: 7e1a…47).
-Replies arrive asynchronously: the Routine's agent typically answers within seconds to a few minutes. To read them: list_messages(routine="c7d2…5b", thread_id="7e1a…47"). A Routine set to reply outside threads posts its answer top-level instead; if the thread stays empty, check list_messages(routine="c7d2…5b", after="7e1a…47").
-
-→ list_messages(routine="c7d2…5b", thread_id="7e1a…47")
-
-Routine: #intake (c7d2…5b) · thread: 7e1a…47
-1 of 1 replies, newest first:
-[2026-09-29 14:03] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
-```
-
-### `add_reaction`
-
-[writes] [idempotent]
-
-Add your emoji reaction to a Routine message.
-
-Adding one that's already there succeeds and changes nothing.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `message_id` [required] | `str` | The message's ID. |
-| `emoji` [required] | `str` | A Unicode emoji, e.g. "👍". |
-
-**Example** — “Give the agent's answer on claim 4471 a thumbs up.”
-
-```text
-→ add_reaction(message_id="9a3c…19", emoji="👍")
-
-Reacted 👍 to message 9a3c…19.
-```
-
-### `remove_reaction`
-
-[writes] [idempotent]
-
-Remove your emoji reaction from a Routine message.
-
-Removing one that isn't there succeeds and changes nothing.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `message_id` [required] | `str` | The message's ID. |
-| `emoji` [required] | `str` | The emoji to remove, e.g. "👍". |
-
-**Example** — “Take my 👀 off the 4471 question.”
-
-```text
-→ remove_reaction(message_id="7e1a…47", emoji="👀")
-
-Removed your 👀 from message 7e1a…47.
-```
-
-### `search_messages`
-
-[read-only]
-
-Search message text across the Routines you can see, ranked by relevance (or newest first with sort="recent").
-
-Direct messages are never searched. Each result names its Routine; read_message returns a result in full, and list_messages(Routine, after=<id>) shows what followed it. To page through one Routine in time order, use list_messages.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `query` [required] | `str` | Words to search for. |
-| `routine` | `str` | Only this Routine (ID or "#name"). |
-| `author` | `str` | Only messages from this person: "@username", email, user ID, or "me". |
-| `after` | `str` | Only messages from this ISO timestamp on (inclusive), or from this message's time on, the message itself left out. |
-| `before` | `str` | Only messages up to this ISO timestamp (inclusive), or up to this message's time, the message itself left out. |
-| `sort` | one of `relevance`, `recent` | "relevance" (default) or "recent". |
-| `cursor` | `str` | next_cursor from the previous page. |
-
-**Example** — “Find where anyone mentioned Northside Auto this month.”
-
-```text
-→ search_messages(query="Northside Auto", after="2026-09-01T00:00:00Z")
-
-2 messages matching "Northside Auto", most relevant first:
-[2026-09-29 14:03] (id: 9a3c…19) #intake · Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension.
-[2026-09-12 10:15] (id: e11b…9d) #claims-east · Dana Smith: Northside Auto says the parts arrive Monday.
 ```
 
 ## Apps
@@ -645,184 +488,6 @@ Then publish it with this change (add expected_sha256 to replace a file that exi
 If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
 ```
 
-## Flows
-
-### `list_flows`
-
-[read-only]
-
-List the flows of the app a Routine runs: the updating it does for itself.
-
-Each row shows the flow's name, what it does, its inputs (a ? marks an optional one) and the schedules that run it. get_flow gives one flow's inputs in full and everything that starts it; run_flow runs one; list_flow_runs shows what ran.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `cursor` | `str` | next_cursor from the previous page. |
-
-**Example** — “What does #intake do on its own?”
-
-```text
-→ list_flows(routine="#intake")
-
-Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-3 of 3 flows:
-- claim_tick  Move every open claim one step along, chasing what's overdue.  schedules: every 180s
-- daily_digest  Post the morning summary of new, stuck and closed claims.  inputs: window_hours?  schedules: cron '0 8 * * 1-5' (America/Los_Angeles)
-- send_reminder  Email a claimant a reminder of what their claim still needs.  inputs: claim_id, tone?
-```
-
-### `get_flow`
-
-[read-only]
-
-One flow of the app a Routine runs: what it does, the inputs run_flow takes, the integrations it needs, and everything that starts it (schedules, webhooks, messages, documents, row states, other flows).
-
-Each schedule is shown with the inputs it runs with: to run a scheduled flow now, pass those to run_flow. The flow's steps are its file, read with read_app_file(path="flows/<flow>.yaml").
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `flow` [required] | `str` | The flow's name, as list_flows shows it. |
-
-**Example** — “What starts #intake's daily digest, and what does it take?”
-
-```text
-→ get_flow(routine="#intake", flow="daily_digest")
-
-Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-Flow: daily_digest  (file: flows/daily_digest.yaml)
-Description: Post the morning summary of new, stuck and closed claims.
-Inputs:
-- window_hours  integer  optional  default 24 — How far back the summary looks.
-Required integrations: gmail
-What starts it:
-- schedule: schedule 'morning' — cron '0 8 * * 1-5' (America/Los_Angeles), next 2026-10-07T15:00:00Z
-  schedule 'morning' runs with inputs: {"window_hours": 24}
-```
-
-### `run_flow`
-
-[writes] [destructive]
-
-Run one of a Routine's flows now, with the given inputs.
-
-A run does what the flow does, for real: it can post messages, send email and change the Routine's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the Routine, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its workflow_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `flow` [required] | `str` | The flow's name, as list_flows shows it. |
-| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. conversation_id is filled in with the Routine's ID; leave it out. |
-| `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
-| `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same inputs; it stands in for the run_key. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
-
-**Example** — “Send the claimant on C-1042 in #intake a reminder now.”
-
-```text
-→ run_flow(routine_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"})
-
-Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-**Dry run.** Nothing was changed.
-
-Run: send_reminder on #intake, now.
-- Inputs: {"claim_id": "C-1042"}
-- Defaults that apply: {"tone": "friendly"}
-- It runs as the workspace's agent, for you, in the background, and does what the flow does: posts, emails and row changes are real.
-- run_key: Qm7xT2vL…
-
-Call again with `confirm=true` to run send_reminder, with run_key="Qm7xT2vL…" and the same inputs.
-
-→ run_flow(routine_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true, run_key="Qm7xT2vLp9aRk4Ne3d121b61c6573b4a")
-
-Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
-Started send_reminder. workflow_id: 8c1f3a52…
-It runs in the background: get_flow_run with this workflow_id shows its steps and how it ended.
-```
-
-### `list_flow_runs`
-
-[read-only]
-
-List a Routine's flow runs, newest first: which flow, how each ended (succeeded, failed, still_running), when, and what started it. get_flow_run shows one run's steps, inputs and failure.
-
-Each row ends with the run's workflow_id, the ID get_flow_run and cancel_flow_run take.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `flow` | `str` | Only this flow's runs, by its name. |
-| `status` | `str` | "all", "running", "failed" or "closed". Default `all`. |
-| `cursor` | `str` | next_cursor from the previous page. |
-
-**Example** — “Has #intake's daily digest failed lately?”
-
-```text
-→ list_flow_runs(routine="#intake", flow="daily_digest", status="failed")
-
-Routine: #intake (c7d2…5b)
-2 runs of "daily_digest", failed, newest first:
-- daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z  (workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z)
-- daily_digest  failed  started 2026-10-02T15:00:00Z  ended 2026-10-02T15:00:38Z  started by a person  (workflow_id: acme-int…)
-```
-
-### `get_flow_run`
-
-[read-only]
-
-One flow run: how it ended (or what it's doing now), its inputs, its outputs, the error it failed with, and its newest steps.
-
-A run still going shows the step it's on; call again to follow it, or pass wait_seconds to have this call wait for the run to end. Outputs too long to show together are listed by name, with short values whole. output=<name> reads one output whole and exactly (a string as is, anything else as JSON), to pass back to another call; a long one comes in ranges, and next_cursor reads the next.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
-| `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to read that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
-| `output` | `str` | Optional. One output's name, to read just that output whole. |
-| `cursor` | `str` | next_cursor from the previous range of that output. |
-| `wait_seconds` | `int` | Wait up to this many seconds for a running run to end, then answer; the answer says whether it ended or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. With output, the wait comes first. |
-
-**Example** — “Why did this morning's digest in #intake fail?”
-
-```text
-→ get_flow_run(routine="#intake", workflow_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
-
-Routine: #intake (c7d2…5b)
-Run: workflow_id channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z  flow: daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z
-Temporal run_id 0199…13: this execution of the workflow. The flow-run tools take the workflow_id; pass run_id beside it only to pin this execution.
-Inputs: {"window_hours": 24}
-Failed with: IntegrationAuthError: gmail: the connected account's token was revoked
-Steps, newest first:
-- email_digest  integrations.gmail.send  failed  2.1s  attempt 3  gmail: the connected account's token was revoked
-- post_summary  foundation.channel.post  completed  0.6s
-- collect  foundation.table.query  completed  0.3s
-```
-
-### `cancel_flow_run`
-
-[writes] [destructive] [idempotent]
-
-Stop one flow run that's still going.
-
-The run stops at its next step, so a step already under way finishes, and what earlier steps did (messages posted, rows changed) stays done. A run that already ended is left as it was. One run per call.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
-| `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to stop only that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
-
-**Example** — “Stop the claim tick that's running in #intake.”
-
-```text
-→ cancel_flow_run(routine_id="c7d2…5b", workflow_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
-
-Routine: #intake (c7d2…5b)
-Stopping run workflow_id acme-int… (Temporal run_id 0199…75): it stops at its next step. get_flow_run with the workflow_id shows when it has.
-```
-
 ## Routine settings
 
 ### `list_routine_settings`
@@ -1046,60 +711,6 @@ State: Status = open · Stage = open
 - summary: Ortiz called about the roof
 ```
 
-### `list_scalars`
-
-[read-only]
-
-List the single values a Routine's agent store keeps (scalars), by key: the app's runtime state, values people or agents keep, and the values behind its settings.
-
-This is the raw storage; long values are cut and marked, and get_scalar shows one whole. Credentials are never shown. Stored values that are settings read better through list_routine_settings, which says what each one does and what changing it would do. These values are read-only here.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `query` | `str` | Text to find in the key, case-insensitively. |
-| `cursor` | `str` | next_cursor from the previous page, with the same query. |
-
-**Example** — “What values does #intake keep?”
-
-```text
-→ list_scalars(routine="#intake")
-
-Routine: #intake (c7d2…5b)
-4 of 4 stored values:
-- copy:claims.settings.fields  = [{"key": "popcorn.portal_pin", "label": "Portal PIN", "input": "secret"}]  (updated 2026-09-01 10:00)
-- popcorn.crm_api_key  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
-- popcorn.portal_pin  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
-- Routine status  = On track  (updated 2026-09-02 10:00)
-Stored values that are settings read better through list_routine_settings, which says what each one does.
-```
-
-### `get_scalar`
-
-[read-only]
-
-One value a Routine's agent store keeps (a scalar), whole, as stored.
-
-A credential is never shown. If the key is a setting, get_routine_setting reads it better: it says what the setting does and what its options are. Stored values are read-only here.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `key` [required] | `str` | The value's key, as list_scalars shows it. |
-
-**Example** — “What's the Routine status note on #intake?”
-
-```text
-→ get_scalar(routine="#intake", key="Routine status")
-
-Routine: #intake (c7d2…5b)
-Key: Routine status
-Updated: 2026-09-02 10:00
-Value:
-On track
-Stored values that are settings read better through list_routine_settings, which says what each one does.
-```
-
 ### `create_rows`
 
 [writes]
@@ -1241,7 +852,7 @@ Documents:
 
 Run one of a Routine's schedules now, with the inputs it runs with on schedule.
 
-Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run; don't repeat one that timed out without checking list_flow_runs first.
+Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1267,7 +878,7 @@ Call again with `confirm=true` to run it now.
 
 Routine: #intake (c7d2…5b)
 Started morning (daily_digest). workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z
-It runs in the background: get_flow_run with this workflow_id shows how it ended.
+It runs in the background; the Routine's runs in Popcorn show how it ended.
 ```
 
 ## Actions
@@ -1332,7 +943,7 @@ Call again with `confirm=true` to take it, with run_key="Hc4pW8sN…" and the sa
 
 Routine: #intake (c7d2…5b) · table: claims
 Taking close on 1 item(s). workflow_id: 8c1f3a52…
-It applies in the background; get_row shows each item's new Status, and get_flow_run how the run ended.
+It applies in the background; get_row shows each item's new Status once it has.
 ```
 
 ## Proposed tools
@@ -1343,10 +954,11 @@ in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
-When they ship, the message, member, flow, run and scalar tools leave this
-surface: a Routine's conversation and runs are read as its History, a flow is
-started by its Trigger or an Action, and a switch is a Routine Setting.
-Changing a Routine Template itself is not part of this design.
+The message, flow, run and stored-value tools have already left this
+surface: a Routine's work starts from its Triggers and Actions, a switch is a
+Routine Setting, and its conversation and runs are read in Popcorn until
+History arrives here. Changing a Routine Template itself is not part of this
+design.
 
 Three rules run through it:
 
