@@ -13,6 +13,10 @@ into an app: tables to hold state, flows to do work, schedules and webhooks to
 invoke them. The CLI's `channel templates` command and `--template` flag name
 the same thing.
 
+In the product, an app is a **Routine Template** and a channel is a
+**Routine**. This guide uses the CLI's names, because the commands do; the
+[product glossary](https://docs.popcorn.ai/concepts/product-glossary.md) maps each one.
+
 > **Which path you are on decides how fast you can iterate.** A *new* app type
 > is not self-serve: the set of installable templates is fixed on the server,
 > and adding to it takes an internal change plus a deploy that no CLI command
@@ -90,8 +94,8 @@ name is left behind at publish and reported by `app validate` (§2).
 ## 2. How a bundle gets installed
 
 **Two paths, and which one you are on depends on whether the app already
-exists.** Creating a new app type still costs a server deploy. *Changing* one
-is now entirely a CLI loop.
+exists.** Creating a new app type costs a server deploy. *Changing* one is a
+loop you run yourself, from the CLI or from an assistant over MCP.
 
 ### 2a. A new app type — not self-serve
 
@@ -108,6 +112,7 @@ your bundle dir                                    (author here)
       │                                              (internal)
       │
       └─▶ popcorn channel create '#chan' --template <name>
+          (over MCP: create_routine(template=…))
 ```
 
 **Publish after the deploy** — that ordering is the part worth carrying even
@@ -162,7 +167,16 @@ publish says so. Nor is there any command that reads a published version's
 message back: no endpoint serves it. The line `app publish` prints is the one
 chance to see what landed.
 
-The fork comes first and is not optional: a publish lands on a fork line **this
+**Check the settings before you fork.** A change to how one channel behaves —
+a sending mode, a schedule's cadence, a limit, a prompt or email template — is
+often a setting: `list_routine_settings` and `update_routine_setting` over
+MCP, or in the CLI `popcorn channel-config params set` for a parameter and
+`popcorn table scalar set` for a switch. A setting
+reaches that channel alone, can be set back, and survives app updates. A fork
+is permanent and reaches every channel on its line, so fork only for what a
+setting cannot express: a table, a flow, a state machine.
+
+Publishing needs a fork: a publish lands on a fork line **this
 workspace owns**, so publishing from a channel still bound to the shared
 product version is refused. `app publish` also starts the install that moves
 your channel onto the new version, and that install converges on its own —
@@ -216,8 +230,7 @@ the channel on — for a failed, skipped or behind fork channel, `app apply
 
 `--fork` takes an optional line name (`--fork=experiment`); bare, it names the
 line it is about to use and asks, because a workspace's single existing line
-can be anywhere — one production line sat 23 minor versions behind product.
-`-y` answers that. `popcorn app fork` on its own is still there and does the
+can be far behind product. `-y` answers that. `popcorn app fork` on its own is still there and does the
 same thing without the checkout.
 
 **This is also how you read a real bundle.** `app checkout` returns the whole
@@ -254,6 +267,26 @@ Three things about this loop that are easy to get wrong:
 
 `popcorn app list` shows the product line and any fork line this workspace
 owns; add `--channel '#chan'` to see what that channel currently runs.
+
+### The same loop from an assistant
+
+An assistant connected to Popcorn over MCP runs this loop without a working
+copy. The tools take a Routine where the CLI takes a channel, and each write
+is a dry run until it is called again with `confirm=true`:
+
+| CLI | MCP |
+|---|---|
+| `app checkout` | `list_app_files`, then `read_app_file` per file |
+| `app fork` | `fork_app` |
+| `app validate`, then `app publish` | `publish_app`: its dry run reports every check publish would fail, each file's diff and the reach; the confirm publishes by `plan_id` |
+| `app status` | `get_routine`, whose `Install:` field says whether the install landed |
+| `app apply` | `install_app` |
+
+`publish_app` takes changes, not a tree: each one creates, deletes, renames or
+edits one file with text ops, and an edit carries the `sha256` it was read at.
+A file the assistant generated rather than typed goes up through
+`create_app_upload`. The
+[MCP reference](https://docs.popcorn.ai/reference/mcp.md) has the arguments.
 
 ### The app list is filtered by your release track
 
@@ -373,7 +406,8 @@ one end to end, with every publish error it can raise, is
 A switch gets its label and description from `strings.yaml`. A channel
 parameter gets them from `channel_parameter_fields:`, which maps a top-level
 parameter to an optional `label` (up to 60 characters) and `description` (up
-to 400). The project settings tools print them beside the value, so whoever
+to 400). The Routine Settings tools (`list_routine_settings`,
+`get_routine_setting`) print them beside the value, so whoever
 changes a setting knows what it holds without reading the flows:
 
 ```yaml
@@ -928,7 +962,7 @@ because nothing downstream parses it.
 
 ## 7. The authoring loop
 
-Three loops now, and picking the right one is most of the speed. The **inner**
+Three loops, and picking the right one is most of the speed. The **inner**
 loop publishes nothing and runs as often as you like:
 
 ```bash
@@ -958,7 +992,8 @@ was published — and it is worth a look before forking, because a nameless
 `app fork` adopts whatever single line exists and the server refuses outright
 once there are two. The lines listed are the workspace's, and it needs no
 channel. Two things it cannot tell you, both because the API does not carry
-them: how many channels ride each line, and how to delete one. Lines accumulate until the backend grows those.
+them: how many channels ride each line, and how to delete one. Neither
+exists, so lines accumulate.
 
 `channel-config show` is worth running the first time a bundle installs: it
 diffs every `$channel.*` reference your flows make against what the channel
@@ -993,10 +1028,9 @@ a whole deploy cycle to correct — which is the argument for `app validate`
 and `flow validate` being pedantic, and for exercising boundaries (below) the
 first time you get a real channel rather than the third.
 
-That argument is weaker than it was: once the app exists, a wrong bundle costs
-a `app publish` rather than a deploy. It is not gone, though — the *first*
-version of a new app still has to be right, and a fork publish still moves
-every other channel on the line.
+Once the app exists, a wrong bundle costs an `app publish` rather than a
+deploy. The *first* version of a new app still has to be right, though, and a
+fork publish still moves every other channel on the line.
 
 A `#name` that matches more than one channel — a case variant, or a channel
 shared in from another workspace — is refused with each candidate's id. Pass

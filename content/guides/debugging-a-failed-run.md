@@ -21,7 +21,10 @@ publishing are the loop in
 this page is the reading half of it.
 
 Commands that act on a channel take it as `--channel`, a `#name` or a UUID;
-the examples write `<channel>`.
+the examples write `<channel>`. A channel is what the product calls a
+**Routine**, and its runs are part of the Routine's **History** (see the
+[product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)). An assistant connected over MCP is not given the
+flow-run tools, so this loop runs from the CLI.
 
 ## 1. Find the run
 
@@ -145,7 +148,7 @@ The failures you will meet most:
   connected (§4). The parent fails rather than read empty outputs.
 
 `on_error: {policy: skip}` turns a step's failure into a null output and puts
-the error at `$steps.<channel>.error`, as `type` and `message`, so a later step
+the error at `$steps.<id>.error`, as `type` and `message`, so a later step
 can still fail by the original error once cleanup has run. `policy: fallback`
 is accepted but runs as `fail`.
 
@@ -208,7 +211,7 @@ explains, or a declared schedule that was never installed. A schedule whose flow
 
 To re-run a scheduled flow without waiting for its next fire,
 `popcorn schedule trigger <slug> --channel <channel>` runs it once now, with
-the inputs the schedule stores. It takes the same slug, flow id or
+the inputs the schedule stores (over MCP, `run_trigger`). It takes the same slug, flow id or
 `schedule_id` as `schedule get`, and runs only a schedule the channel's bound
 manifest declares. It prints the run's `workflow_id` and the `flow runs get`
 command to follow it. When a run is already in flight and the schedule's

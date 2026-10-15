@@ -60,6 +60,11 @@ product-bound channel in a workspace that owns exactly one fork line of that
 app moves the channel onto the fork.
 
 Treat forking as a decision about the workspace, not a step in an edit.
+Check the channel's settings first (`list_routine_settings` over MCP;
+`channel-config params` and `table scalar` in the CLI): a setting reaches one channel, can be set
+back, and survives app updates. In the product, forking is what gives a
+Routine a copy of its own, which no longer receives its template's
+improvements.
 
 ## Head versus bound
 

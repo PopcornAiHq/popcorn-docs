@@ -26,7 +26,8 @@ from you — there is no parameter through which one channel's content reaches
 another — and reports `already_current` if there is nothing to do.
 
 Publishing needs workspace-admin rights. Forking and applying need only
-membership of the channel.
+membership of the channel. Over MCP the same two operations are `publish_app`
+and `install_app`.
 
 ## Publish's guards are all about validity
 

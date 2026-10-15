@@ -98,6 +98,9 @@ came from, on its own.
 
 ## Every button is an edge
 
+In the product, the status chip is an item's **Status** and each button is an
+**Action**.
+
 A transition names the event that fires it, the states it is legal from, the
 facts it writes, and the state it lands on. The button a user sees is declared
 on the transition, so the graph and the interface cannot disagree — there is no
