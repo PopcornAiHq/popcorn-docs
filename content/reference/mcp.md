@@ -15,7 +15,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 37 tools. They cover people, Routines,
+The hosted MCP server exposes 41 tools. They cover people, Routines,
 messages and a Routine's app: find people and Routines, list the Routine
 Templates a new Routine can be made from, create a Routine (optionally from
 a template), read and search a Routine's messages, send messages and
@@ -1204,6 +1204,137 @@ Routine: #intake (c7d2…5b) · table: claims
 Deleted 1 of 1 rows: row 91.
 ```
 
+## Triggers
+
+### `list_triggers`
+
+[read-only]
+
+List how work arrives in a Routine: each schedule with its cadence, each webhook another system posts to, each message or document that starts work.
+
+A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential. run_trigger runs a schedule now.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “What sets #intake working?”
+
+```text
+→ list_triggers(routine="#intake")
+
+Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Schedules:
+- morning  cron '0 8 * * 1-5' (America/Los_Angeles)  runs daily_digest
+- tick  every 180s  runs claim_tick
+Webhooks:
+- carrier-portal  runs claim_intake
+Messages:
+- a message posted in #intake  runs claim_intake
+Documents:
+- uploading the 'policy' document  runs policy_upsert
+```
+
+### `run_trigger`
+
+[writes] [destructive]
+
+Run one of a Routine's schedules now, with the inputs it runs with on schedule.
+
+Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run; don't repeat one that timed out without checking list_flow_runs first.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `trigger` [required] | `str` | The schedule's name, as list_triggers shows it. |
+| `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
+
+**Example** — “Send #intake's morning digest now; don't wait.”
+
+```text
+→ run_trigger(routine_id="c7d2…5b", trigger="morning")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+Run: the morning schedule's work (daily_digest) on #intake, now.
+- Schedule: cron '0 8 * * 1-5' (America/Los_Angeles); unchanged by this run.
+- It runs as it would on schedule, in the background: posts, emails and row changes are real.
+
+Call again with `confirm=true` to run it now.
+
+→ run_trigger(routine_id="c7d2…5b", trigger="morning", confirm=true)
+
+Routine: #intake (c7d2…5b)
+Started morning (daily_digest). workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z
+It runs in the background: get_flow_run with this workflow_id shows how it ended.
+```
+
+## Actions
+
+### `list_actions`
+
+[read-only]
+
+List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to. take_action takes one.
+
+Some Actions need the Popcorn app (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `row_id` [required] | `int` | The item's row ID in the Routine's main table, as list_rows shows it ("row 88" is 88). |
+
+**Example** — “What can I do with claim 4471 in #intake?”
+
+```text
+→ list_actions(routine="#intake", row_id=88)
+
+Routine: #intake (c7d2…5b) · table: claims
+Row 88 · Status: open
+Actions offered now:
+- Close claim  action: close  moves it to: Closed
+- Ask for documents  action: ask_docs  [in the Popcorn app]
+```
+
+### `take_action`
+
+[writes] [destructive]
+
+Take one Action on one or more of a Routine's items, as a person pressing its button in Popcorn would.
+
+Refused for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `row_ids` [required] | `list[int]` | The items' row IDs in the Routine's main table. |
+| `action` [required] | `str` | The Action, as list_actions names it (its "action"). |
+| `confirm` | `bool` | true to act. Show the user the dry run first. Default `False`. |
+| `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
+
+**Example** — “Close claim 4471 in #intake.”
+
+```text
+→ take_action(routine_id="c7d2…5b", row_ids=[88], action="close")
+
+Routine: #intake (c7d2…5b) · table: claims
+**Dry run.** Nothing was changed.
+
+Take: close on 1 item(s), now.
+- row 88: open → Closed (Close claim)
+- It runs as the workspace's agent, for you, as the button would: what the Action sends or records is real.
+- run_key: Hc4pW8sN…
+
+Call again with `confirm=true` to take it, with run_key="Hc4pW8sN…" and the same items.
+
+→ take_action(routine_id="c7d2…5b", row_ids=[88], action="close", confirm=true, run_key="Hc4pW8sNz1bVq6Tj20d155d5c65bdaaa")
+
+Routine: #intake (c7d2…5b) · table: claims
+Taking close on 1 item(s). workflow_id: 8c1f3a52…
+It applies in the background; get_row shows each item's new Status, and get_flow_run how the run ended.
+```
+
 ## Proposed tools
 
 **None of these tools exist yet, and nothing depends on them arriving.** They
@@ -1255,28 +1386,6 @@ previewed plan is applied.
 | `request` | | What should change, in the person's words |
 | `plan_id` | | From the dry run; required with `confirm` |
 | `confirm` | `false` | Apply the previewed plan |
-
-### `list_triggers`
-
-Read-only. How work arrives in a Routine: each schedule with its cadence,
-each address another system posts to (never the address itself, which is a
-credential), each message or document that starts work, and a booking link.
-A Trigger that is paused says so.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `run_trigger`
-
-Runs a scheduled Trigger now, with the inputs it runs with on schedule, and
-leaves its schedule unchanged. Without `confirm`, says what the run will do.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `trigger` | | A scheduled Trigger, as `list_triggers` names it |
-| `confirm` | `false` | Start the run |
 
 ### `list_connections`
 
@@ -1354,31 +1463,6 @@ is on its Row.
 |---|---|---|
 | `routine` | | Routine ID or `#name` |
 | `table` | | The Table to count; the Routine's main one by default |
-
-### `list_actions`
-
-Read-only. The Actions a person can take on one item now, given where it
-stands, with what each will do.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `table` | | The item's Table |
-| `row_id` | | The item |
-
-### `take_action`
-
-Takes an Action on one or more items, as a person pressing its button would.
-Refused for an item where the Action does not apply. Without `confirm`, says
-what will happen to each item.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `table` | | The items' Table |
-| `row_ids` | | The items |
-| `action` | | As `list_actions` names it |
-| `confirm` | `false` | Take the previewed Action |
 
 ### `list_history`
 
