@@ -3,43 +3,45 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
+platform: 2026-10-15
 summary: >
-  The tools the hosted Popcorn MCP server exposes — people, projects,
-  messages and a project's app — with their arguments, generated from the
-  server's own definitions. They list apps and create a project, read an
-  app's files, fork it, publish changes to a fork line and install a version,
-  and start, follow and stop a project's flows, and read its settings and
-  tables.
+  The tools the hosted Popcorn MCP server exposes — people, Routines,
+  messages and a Routine's app — with their arguments, generated from the
+  server's own definitions. They list Routine Templates and create a
+  Routine, read an app's files, fork it, publish changes to a fork line and
+  install a version, and start, follow and stop a Routine's flows, and read
+  its settings and tables.
 concepts: [app-bundle, publish-and-apply, fork-line]
 applies_to: [cli, mcp, human]
 ---
 
-The hosted MCP server exposes 38 tools. They cover people, projects,
-messages and a project's app: find people and projects, list the apps a
-new project can run, create a project (optionally running an app), read
-and search a project's messages, send messages and reactions, read the
-files of the app a project runs, fork it onto the workspace's own line,
-publish changes to a fork line, bring a project on a fork line to its
-line's head, or move it onto another line, list a project's flows, run
-one, and follow or stop its runs, read and change a project's settings,
-and read a project's agent store (its tables, rows and stored values)
-and add, change or delete its rows. They work on projects only;
-direct messages are out of reach.
+The hosted MCP server exposes 37 tools. They cover people, Routines,
+messages and a Routine's app: find people and Routines, list the Routine
+Templates a new Routine can be made from, create a Routine (optionally from
+a template), read and search a Routine's messages, send messages and
+reactions, read the files of the app a Routine runs, fork it onto the
+workspace's own line, publish changes to a fork line, bring a Routine on a
+fork line to its line's head, or move it onto another line, list a
+Routine's flows, run one, and follow or stop its runs, read and change a
+Routine's settings, and read a Routine's tables, rows and stored values
+and add, change or delete its rows. They work on Routines only; direct
+messages are out of reach.
 
-A project is what the CLI and the API call a channel, and an app is what
-they call an app bundle; the `#name` and the IDs are the same.
+A Routine is what the CLI and the API call a channel, and its Routine
+Template's code is what they call an app (an app bundle); the `#name` and
+the IDs are the same.
 
 Every call runs as the person who connected the server, with that person's
 permissions, in the one workspace the connection is bound to; every
 response starts with that workspace's name. To use another workspace,
-reconnect. Read tools accept a project's `#name` or its ID; tools that
-write into a project take `project_id`, the ID only. A listing returns one
-page and a `next_cursor` to pass back with the same arguments. A fork, a
-publish, an install that moves a project onto another line, creating a
-project that runs an app, running a flow, changing a setting and
+reconnect. Read tools accept a Routine's `#name` or its ID as `routine`;
+tools that write into a Routine take `routine_id`, the ID only. A listing
+returns one page and a `next_cursor` to pass back with the same arguments.
+A fork, a publish, an install that moves a Routine onto another line,
+creating a Routine from a template, running a flow, changing a setting and
 deleting rows are a dry run until called again with `confirm=true`. An
-install that brings a project to its own line's head starts at once, and
-so does creating a project with no app.
+install that brings a Routine to its own line's head starts at once, and
+so does creating a Routine with no template.
 
 This page is generated from the server's tool definitions by
 `scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
@@ -84,9 +86,9 @@ This connection is bound to this workspace. To use a different one, the user rec
 
 [read-only]
 
-Look up a person by handle: yourself, a member of this workspace, or someone from another workspace you share a project or DM with.
+Look up a person by handle: yourself, a member of this workspace, or someone from another workspace you share a Routine or DM with.
 
-For a member: ID, username, display name, email, workspace role, whether they're active (no once deactivated or removed) and whether they're a bot. For someone from another workspace: display name, username and bot only. To find someone by name, use list_workspace_members. Someone from another workspace is found by user ID only, and so is a deactivated member: usernames and emails are looked up among this workspace's active members, since a username is unique only within one workspace. list_project_members shows the IDs.
+For a member: ID, username, display name, email, workspace role, whether they're active (no once deactivated or removed) and whether they're a bot. For someone from another workspace: display name, username and bot only. To find someone by name, use list_workspace_members. Someone from another workspace is found by user ID only, and so is a deactivated member: usernames and emails are looked up among this workspace's active members, since a username is unique only within one workspace.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -112,7 +114,7 @@ Bot: no
 
 List the members of this workspace, alphabetically by name.
 
-This workspace's members only: someone from another workspace who is in a shared project isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use get_user.
+This workspace's members only: someone from another workspace who is in a shared Routine isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use get_user.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -130,30 +132,30 @@ This workspace's members only: someone from another workspace who is in a shared
 - Sam Lee  @slee  sam@acme.example  admin  (id: 7a41…d2)
 ```
 
-## Projects
+## Routines
 
-### `list_projects`
+### `list_routines`
 
 [read-only]
 
-List the projects you can see in this workspace: the ones you're in (including projects shared in from another workspace) and the ones you can view without joining (marked [not joined]).
+List the Routines you can see in this workspace: the ones you're in (including Routines shared in from another workspace) and the ones you can view without joining (marked [not joined]).
 
-Direct messages are not listed. Each row shows the project's name, the app it runs, your unread count and mentions, and its ID. get_project shows one project's version and install state.
+Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID. get_routine shows one Routine's version and install state.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `query` | `str` | Case-insensitive substring of the project name. |
-| `app` | `str` | Only projects running this app, by its slug (e.g. "claimcoordinator"). |
-| `include_archived` | `bool` | Also list archived projects (marked [archived]). Default `False`. |
+| `query` | `str` | Case-insensitive substring of the Routine name. |
+| `template` | `str` | Only Routines made from this Routine Template, by its slug (e.g. "claimcoordinator"). |
+| `include_archived` | `bool` | Also list archived Routines (marked [archived]). Default `False`. |
 | `sort` | one of `name`, `recent` | "name" (default), or "recent": pinned first, then by last message. |
 | `cursor` | `str` | The next_cursor from the previous page, with the same other arguments. |
 
-**Example** — “Which of our projects run the claims coordinator app?”
+**Example** — “Which of our Routines run the claims coordinator app?”
 
 ```text
-→ list_projects(app="claimcoordinator")
+→ list_routines(template="claimcoordinator")
 
-50 of 137 projects running claimcoordinator:
+50 of 137 Routines running claimcoordinator:
 - #claims-central  claimcoordinator  (id: 2af4…0c)
 - #claims-east  claimcoordinator  4 unread, 1 mention  (id: be23…ef)  [pinned]
 - #claims-north  claimcoordinator  (id: bd7d…b9)  [not joined]
@@ -161,25 +163,25 @@ Direct messages are not listed. Each row shows the project's name, the app it ru
 next_cursor: eyJ2Ijox…
 ```
 
-### `get_project`
+### `get_routine`
 
 [read-only]
 
-Show one project: its details, your membership, and the app it runs, with the version it's on, the head of its line, and whether the latest install landed. list_project_members lists who's in it.
+Show one Routine: its details, your membership, and the app it runs, with the version it's on, the head of its line, and whether the latest install landed.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | The project's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one project has it, the call lists them with their IDs; pass an ID instead. |
+| `routine` [required] | `str` | The Routine's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one Routine has it, the call lists them with their IDs; pass an ID instead. |
 | `wait_seconds` | `int` | Wait up to this many seconds for an install in progress to land (installed, or failed for good), then answer; the answer says whether it landed or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 
 **Example** — “Is #intake on the latest version of its app?”
 
 ```text
-→ get_project(project="#intake")
+→ get_routine(routine="#intake")
 
 ID: c7d2…5b
 Name: #intake
-Kind: project
+Kind: Routine
 Description: New claims, triaged and assigned
 Archived: no
 Members (incl. bots): 9
@@ -195,95 +197,69 @@ Version ID: 812
 Install: installed
 ```
 
-### `list_project_members`
+### `list_routine_templates`
 
 [read-only]
 
-List the people in a project, with each one's role in it.
+List the Routine Templates a new Routine in this workspace can start from.
 
-Includes people from other workspaces in a shared project (marked [other workspace], shown without email), whom list_workspace_members doesn't list.
-
-| Argument | Type | Notes |
-|---|---|---|
-| `project` [required] | `str` | The project's ID, or its name ("#intake" or "intake"). |
-| `include_bots` | `bool` | Also list bots (marked [bot]). Default `False`. |
-| `cursor` | `str` | The next_cursor from the previous page, with the same other arguments. |
-
-**Example** — “Who's in #partners-acme?”
-
-```text
-→ list_project_members(project="#partners-acme")
-
-Project: #partners-acme (dddb…f2)
-3 of 3 members:
-- Dana Smith  @dsmith  dana@acme.example  admin  (id: 2b7e…a1)
-- Jordan Lee  @jlee  jordan@acme.example  member  (id: 5d33…0c)
-- Priya Nair  @pnair  member  (id: e019…3b)  [other workspace]
-```
-
-### `list_apps`
-
-[read-only]
-
-List the apps a new project in this workspace can run.
-
-Each row shows the app's name, its slug (what create_project's `app` takes), what it does, and the connections someone sets up before it runs. An app this workspace can't run isn't listed.
+Each row shows the template's name, its slug (what create_routine's `template` takes), what it does, and the connections someone sets up before it runs. A template this workspace can't run isn't listed.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `query` | `str` | Case-insensitive substring of the app's name or slug. |
+| `query` | `str` | Case-insensitive substring of the template's name or slug. |
 | `cursor` | `str` | The next_cursor from the previous page, with the same query. |
 
-**Example** — “What apps could a new project here run?”
+**Example** — “What apps could a new Routine here run?”
 
 ```text
-→ list_apps()
+→ list_routine_templates()
 
-5 of 5 apps:
+5 of 5 Routine Templates:
 - Alert Tracker  alerttracker  Ingests Alertmanager alerts from a webhook and keeps one row per alert.  needs no connections
-- Chat  chat  A project with a calendar. Ask when everyone's free and it checks every connected calendar.  needs Google Calendar
+- Chat  chat  A Routine with a calendar. Ask when everyone's free and it checks every connected calendar.  needs Google Calendar
 - Claim Coordinator  claimcoordinator  Imports arbitration leads, emails each one its questions, and tracks every answer until the claim is complete.  needs Gmail, Google Calendar, Google Drive
 - … 2 more rows
 ```
 
-### `create_project`
+### `create_routine`
 
 [writes]
 
-Create a project in this workspace, optionally running an app.
+Create a Routine in this workspace, optionally from a Routine Template.
 
-Without `app` the project is created at once. With `app` the first call is a dry run that changes nothing: it shows the version that will install and the connections someone sets up before the app runs. Call again with confirm=true to create it. The app installs in the background after the project exists; get_project's Install: field shows when it lands. A name already used in this workspace is refused, with the ID of the project that has it.
+Without `template` the Routine is created at once. With `template` the first call is a dry run that changes nothing: it shows the version that will install and the connections someone sets up before it runs. Call again with confirm=true to create it. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands. A name already used in this workspace is refused, with the ID of the Routine that has it.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `name` [required] | `str` | The project's name, e.g. "claims-west". Spaces become hyphens; the response shows the name it got. |
-| `app` | `str` | An app's slug from list_apps, e.g. "claimcoordinator". |
-| `private` | `bool` | true for a private project, joined only by you and `members`. A project that isn't private adds everyone in the workspace. Default `False`. |
-| `members` | `list[str]` | People to add to a private project: "@username", email or user ID, all members of this workspace. You're always a member. |
-| `confirm` | `bool` | true to create a project that runs an app. Show the user the dry run first. Default `False`. |
+| `name` [required] | `str` | The Routine's name, e.g. "claims-west". Spaces become hyphens; the response shows the name it got. |
+| `template` | `str` | A Routine Template's slug from list_routine_templates, e.g. "claimcoordinator". |
+| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. Default `False`. |
+| `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
+| `confirm` | `bool` | true to create a Routine from a template. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
-**Example** — “Set up a private #claims-west project running the claims app, with Jordan in it.”
+**Example** — “Set up a private #claims-west Routine from the claims template, with Jordan in it.”
 
 ```text
-→ create_project(name="claims-west", app="claimcoordinator", private=true, members=["@jlee"])
+→ create_routine(name="claims-west", template="claimcoordinator", private=true, members=["@jlee"])
 
 **Dry run.** Nothing was changed.
 
-Create: #claims-west, a private project in Acme, running Claim Coordinator (claimcoordinator).
+Create: #claims-west, a private Routine in Acme, running Claim Coordinator (claimcoordinator).
 - Installs: claimcoordinator 0.15.1 (version_id: 812), the head of the product line.
 - Members: you, @jlee.
-- Connections to set up in the project before the app runs: Gmail, Google Calendar, Google Drive.
-- The install runs in the background once the project exists, typically in seconds; get_project's Install: field shows when it lands.
+- Connections to set up in the Routine before the app runs: Gmail, Google Calendar, Google Drive.
+- The install runs in the background once the Routine exists, typically in seconds; get_routine's Install: field shows when it lands.
 
 Call again with `confirm=true` to create #claims-west running claimcoordinator.
 
-→ create_project(name="claims-west", app="claimcoordinator", private=true, members=["@jlee"], confirm=true)
+→ create_routine(name="claims-west", template="claimcoordinator", private=true, members=["@jlee"], confirm=true)
 
-Created #claims-west (id: 0141…b3), a private project in Acme.
+Created #claims-west (id: 0141…b3), a private Routine in Acme.
 Members: you, @jlee.
-Claim Coordinator (claimcoordinator) is installing in the background. Watch get_project("0141…b3")'s Install: field until it says installed.
-Before the app runs, someone sets up in the project: Gmail, Google Calendar, Google Drive.
+Claim Coordinator (claimcoordinator) is installing in the background. Watch get_routine("0141…b3")'s Install: field until it says installed.
+Before the app runs, someone sets up in the Routine: Gmail, Google Calendar, Google Drive.
 ```
 
 ## Messages
@@ -292,25 +268,25 @@ Before the app runs, someone sets up in the project: Gmail, Google Calendar, Goo
 
 [read-only]
 
-A project's messages, newest first, or one thread's replies.
+A Routine's messages, newest first, or one thread's replies.
 
-Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the project's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a project the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A project set to reply outside threads posts top-level instead, so if the thread stays empty, list the project with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
+Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the Routine's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a Routine the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A Routine set to reply outside threads posts top-level instead, so if the thread stays empty, list the Routine with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project ID or "#name". |
+| `routine` [required] | `str` | Routine ID or "#name". |
 | `thread_id` | `str` | List this thread's replies instead. A thread's ID is its first message's ID; a reply's ID finds its thread too. |
 | `after` | `str` | Only messages after this ISO timestamp or message ID. |
 | `before` | `str` | Only messages before this ISO timestamp or message ID. |
 | `cursor` | `str` | next_cursor from the previous page. |
-| `wait_seconds` | `int` | Wait up to this many seconds for a message newer than `after` (or, without it, than the newest one listed now) in the same project or thread, then answer; the answer says whether one arrived or the wait ran out. Not with cursor or before. At most 20 (more is read as 20); 0, the default, doesn't wait. |
+| `wait_seconds` | `int` | Wait up to this many seconds for a message newer than `after` (or, without it, than the newest one listed now) in the same Routine or thread, then answer; the answer says whether one arrived or the wait ran out. Not with cursor or before. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 
 **Example** — “What's happened in #intake today?”
 
 ```text
-→ list_messages(project="#intake", after="2026-09-29T00:00:00Z")
+→ list_messages(routine="#intake", after="2026-09-29T00:00:00Z")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 3 of 3 messages, newest first:
 [2026-09-29 16:40] (id: 9400…a5) Intake agent: New claim 4480 from the web form: water damage, Riverside Ave. Assigned to Jordan.
 [2026-09-29 14:01] (id: 7e1a…47) Dana Smith: What's still open on claim 4471?
@@ -322,7 +298,7 @@ Project: #intake (c7d2…5b)
 
 [read-only]
 
-One message in a project, in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours).
+One message in a Routine, in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours).
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -335,7 +311,7 @@ One message in a project, in full: its whole text, a line per attachment or othe
 ```text
 → read_message(message_id="7e1a…47")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 Message: 7e1a…47
 Author: Dana Smith
 Sent: 2026-09-29 14:01 UTC
@@ -349,13 +325,13 @@ What's still open on claim 4471?
 
 [writes]
 
-Post a message in a project, as you, visible to its members.
+Post a message in a Routine, as you, visible to its members.
 
-Whether the project's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; a tracker or app project's agent answers most messages, other project agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the project's member list) in `mentions`. There is no answer in a project homed in another workspace, and while the agent is already running a task in the project, your message joins that task instead of getting its own reply. Replies arrive asynchronously, in a thread under a top-level message (unless the project is set to reply outside threads). The response gives the new message's ID and the list_messages call that reads the answer.
+Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; the agent of a Routine that runs an app answers most messages, other Routines' agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace, and while the agent is already running a task in the Routine, your message joins that task instead of getting its own reply. Replies arrive asynchronously, in a thread under a top-level message (unless the Routine is set to reply outside threads). The response gives the new message's ID and the list_messages call that reads the answer.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (get_project returns it). |
+| `routine_id` [required] | `str` | The Routine's ID (get_routine returns it). |
 | `text` | `str` | Message text (markdown). Optional with an attachment. |
 | `thread_id` | `str` | Reply in this thread (its first message's ID). |
 | `mentions` | `list[str]` | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
@@ -364,14 +340,14 @@ Whether the project's agent answers: an @mention of the agent gets an answer. A 
 **Example** — “Ask the agent in #intake what's still open on claim 4471, and tell me what it says.”
 
 ```text
-→ send_message(project_id="c7d2…5b", text="What's still open on claim 4471?")
+→ send_message(routine_id="c7d2…5b", text="What's still open on claim 4471?")
 
 Message sent to #intake (id: 7e1a…47).
-Replies arrive asynchronously: the project's agent typically answers within seconds to a few minutes. To read them: list_messages(project="c7d2…5b", thread_id="7e1a…47"). A project set to reply outside threads posts its answer top-level instead; if the thread stays empty, check list_messages(project="c7d2…5b", after="7e1a…47").
+Replies arrive asynchronously: the Routine's agent typically answers within seconds to a few minutes. To read them: list_messages(routine="c7d2…5b", thread_id="7e1a…47"). A Routine set to reply outside threads posts its answer top-level instead; if the thread stays empty, check list_messages(routine="c7d2…5b", after="7e1a…47").
 
-→ list_messages(project="c7d2…5b", thread_id="7e1a…47")
+→ list_messages(routine="c7d2…5b", thread_id="7e1a…47")
 
-Project: #intake (c7d2…5b) · thread: 7e1a…47
+Routine: #intake (c7d2…5b) · thread: 7e1a…47
 1 of 1 replies, newest first:
 [2026-09-29 14:03] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
 ```
@@ -380,7 +356,7 @@ Project: #intake (c7d2…5b) · thread: 7e1a…47
 
 [writes] [idempotent]
 
-Add your emoji reaction to a project message.
+Add your emoji reaction to a Routine message.
 
 Adding one that's already there succeeds and changes nothing.
 
@@ -401,7 +377,7 @@ Reacted 👍 to message 9a3c…19.
 
 [writes] [idempotent]
 
-Remove your emoji reaction from a project message.
+Remove your emoji reaction from a Routine message.
 
 Removing one that isn't there succeeds and changes nothing.
 
@@ -422,14 +398,14 @@ Removed your 👀 from message 7e1a…47.
 
 [read-only]
 
-Search message text across the projects you can see, ranked by relevance (or newest first with sort="recent").
+Search message text across the Routines you can see, ranked by relevance (or newest first with sort="recent").
 
-Direct messages are never searched. Each result names its project; read_message returns a result in full, and list_messages(project, after=<id>) shows what followed it. To page through one project in time order, use list_messages.
+Direct messages are never searched. Each result names its Routine; read_message returns a result in full, and list_messages(Routine, after=<id>) shows what followed it. To page through one Routine in time order, use list_messages.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `query` [required] | `str` | Words to search for. |
-| `project` | `str` | Only this project (ID or "#name"). |
+| `routine` | `str` | Only this Routine (ID or "#name"). |
 | `author` | `str` | Only messages from this person: "@username", email, user ID, or "me". |
 | `after` | `str` | Only messages from this ISO timestamp on (inclusive), or from this message's time on, the message itself left out. |
 | `before` | `str` | Only messages up to this ISO timestamp (inclusive), or up to this message's time, the message itself left out. |
@@ -452,23 +428,23 @@ Direct messages are never searched. Each result names its project; read_message 
 
 [read-only]
 
-List the files of the app a project runs, with sizes and sha256.
+List the files of the app a Routine runs, with sizes and sha256.
 
-The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the project runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how a tracker behaves on one project, check list_project_settings first: a fork is one-way, and a publish reaches every project on the line.
+The header names the app, its line and the version listed. By default that's the version edits are based on, and its version_id is the publish base: on a fork line, the line's head; on the product line, the version the Routine runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_app_file. To change how one Routine behaves, check list_routine_settings first: a fork is one-way, and a publish reaches every Routine on the line.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
-| `version_id` | `int` | Another version of the project's own line, to read history. Omit for the publish base. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `version_id` | `int` | Another version of the Routine's own line, to read history. Omit for the publish base. |
 | `paths` | `list[str]` | Only files matching any of these: an exact path or a glob ("flows/*", "code/**"). |
 | `cursor` | `str` | next_cursor from the previous page. |
 
 **Example** — “What files make up the app #intake runs?”
 
 ```text
-→ list_app_files(project="#intake")
+→ list_app_files(routine="#intake")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
 6 of 6 files:
 - AGENT.md  53 B  sha256: f7834927…
@@ -481,23 +457,23 @@ App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · he
 
 [read-only]
 
-Read one file of the app a project runs, exactly as stored.
+Read one file of the app a Routine runs, exactly as stored.
 
 The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and next_cursor reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `path` [required] | `str` | The file's path, as list_app_files shows it. |
-| `version_id` | `int` | Another version of the project's own line. Omit for the publish base. |
+| `version_id` | `int` | Another version of the Routine's own line. Omit for the publish base. |
 | `cursor` | `str` | next_cursor from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
 
 ```text
-→ read_app_file(project="#intake", path="manifest.yaml")
+→ read_app_file(routine="#intake", path="manifest.yaml")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 App: claimcoordinator · line: product · version 0.15.1 (version_id: 812) · head: yes
 File: manifest.yaml  75 B  sha256: 4331d221…
 Whole file.
@@ -511,30 +487,30 @@ version: 0.15.1
 
 [writes] [destructive]
 
-Fork the app a project runs into a new, named fork line.
+Fork the app a Routine runs into a new, named fork line.
 
-The line starts as a byte-identical copy of the product version the project runs, and the project moves onto it. That's one-way: the project never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how a tracker behaves on one project, check list_project_settings first: a setting reaches one project and can be set back. Fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The line starts as a byte-identical copy of the product version the Routine runs, and the Routine moves onto it. That's one-way: the Routine never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with publish_app. To change how one Routine behaves, check list_routine_settings first: a setting reaches one Routine and can be set back. Fork only for what settings can't express. Validate an edit before forking with publish_app's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
-| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a project onto a line that exists, use install_app(line=...). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a Routine onto a line that exists, use install_app(line=...). |
 | `confirm` | `bool` | true to fork. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 
 ```text
-→ fork_app(project_id="c7d2…5b", name="acme-intake")
+→ fork_app(routine_id="c7d2…5b", name="acme-intake")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
 Fork: claimcoordinator 0.15.1 (product line, version_id: 812) → new fork line "acme-intake".
-- The line starts as a byte-identical copy of 0.15.1. Nothing the project runs changes now.
+- The line starts as a byte-identical copy of 0.15.1. Nothing the Routine runs changes now.
 - #intake moves onto the line. Product updates stop reaching it.
-- One-way: a project on a fork line never returns to the product line. From then on it follows "acme-intake", and versions published there reach it within a day.
-- Reach: this project only. Other projects running claimcoordinator stay where they are.
+- One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme-intake", and versions published there reach it within a day.
+- Reach: this Routine only. Other Routines running claimcoordinator stay where they are.
 - Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_app(line=…)).
 
 Call again with `confirm=true` to fork the app into line "acme-intake".
@@ -544,29 +520,29 @@ Call again with `confirm=true` to fork the app into line "acme-intake".
 
 [writes] [destructive]
 
-Install the newest version of a project's line on the project.
+Install the newest version of a Routine's line on the Routine.
 
-It installs the app the project already runs, never another one: a project runs another app only by creating a new project with create_project(app=…). Without line, this is a catch-up (as `popcorn app apply`): a project on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_project shows the project behind its line. With line, or when a product-line project would join the workspace's only fork line, it's an adoption: the project moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a project that has none, and product versions reach product-line projects through the daily update, not through this tool. To change how a tracker behaves on one project, check list_project_settings first; a move between lines is one-way.
+It installs the app the Routine already runs, never another one: a Routine runs another app only by creating a new Routine with create_routine(template=…). Without line, this is a catch-up (as `popcorn app apply`): a Routine on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_routine shows the Routine behind its line. With line, or when a product-line Routine would join the workspace's only fork line, it's an adoption: the Routine moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a Routine that has none, and product versions reach product-line Routines through the daily update, not through this tool. To change how one Routine behaves, check list_routine_settings first; a move between lines is one-way.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
-| `line` | `str` | A fork line of this project's app to move onto. |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `line` | `str` | A fork line of this Routine's app to move onto. |
 | `confirm` | `bool` | true to make an adoption. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id an adoption's dry run gave, with confirm=true and the same line. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 
 ```text
-→ install_app(project_id="c7d2…5b", line="acme-west")
+→ install_app(routine_id="c7d2…5b", line="acme-west")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
 Install: #intake moves from claimcoordinator 0.15.1 (product line) onto fork line "acme-west", at its head 0.16.0 (version_id: 913).
-- This changes which line the project is on. It installs 0.16.0, which isn't what the project runs now.
-- One-way: a project on a fork line never returns to the product line. From then on it follows "acme-west", and versions published there reach it within a day.
-- Reach: this project only.
+- This changes which line the Routine is on. It installs 0.16.0, which isn't what the Routine runs now.
+- One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme-west", and versions published there reach it within a day.
+- Reach: this Routine only.
 
 Call again with `confirm=true` to move #intake onto line "acme-west".
 ```
@@ -575,13 +551,13 @@ Call again with `confirm=true` to move #intake onto line "acme-west".
 
 [writes] [destructive]
 
-Publish changes to a project's app as the next version of its line.
+Publish changes to a Routine's app as the next version of its line.
 
-A publish reaches every project on the project's fork line: this project installs the new version now, and every other project on the line updates at its daily check. Workspace admins only. To change how a tracker behaves on one project, check list_project_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach, and a plan_id. To publish, call again with project_id, confirm=true and that plan_id alone: the changes needn't be sent again, and every check runs again. A project on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} {"path": "code/x/lib.js", "from_url": "https://unpkg.com/…", "sha256": "…"} {"path": "code/x/app.js", "from_upload": "<upload_id>"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it. from_url has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per publish. Pin a version in the URL. To replace an existing file, add its expected_sha256. The dry run shows each file's sha256, and the publish takes exactly that content: a confirm by plan_id holds it, and a confirm that resends the changes must give each from_url change that sha256. Content that changed since the dry run is refused. from_upload takes a file you uploaded with create_app_upload, for this project and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as from_url, and is published once.
+A publish reaches every Routine on the Routine's fork line: this Routine installs the new version now, and every other Routine on the line updates at its daily check. Workspace admins only. To change how one Routine behaves, check list_routine_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach, and a plan_id. To publish, call again with routine_id, confirm=true and that plan_id alone: the changes needn't be sent again, and every check runs again. A Routine on the product line can dry-run changes, but must fork_app before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_app_files or read_app_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} {"path": "code/x/lib.js", "from_url": "https://unpkg.com/…", "sha256": "…"} {"path": "code/x/app.js", "from_upload": "<upload_id>"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it. from_url has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per publish. Pin a version in the URL. To replace an existing file, add its expected_sha256. The dry run shows each file's sha256, and the publish takes exactly that content: a confirm by plan_id holds it, and a confirm that resends the changes must give each from_url change that sha256. Content that changed since the dry run is refused. from_upload takes a file you uploaded with create_app_upload, for this Routine and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as from_url, and is published once.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). It installs the new version first. |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). It installs the new version first. |
 | `base_version_id` | `int` | The version_id the files were read from, as list_app_files' header shows it: the line's head. |
 | `changes` | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` | `str` | What changed and why, in a sentence or two. |
@@ -592,9 +568,9 @@ A publish reaches every project on the project's fork line: this project install
 **Example** — “On #intake, chase estimates at 8 instead of 9, and publish it.”
 
 ```text
-→ publish_app(project_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
+→ publish_app(routine_id="c7d2…5b", base_version_id=913, changes=[{"path": "manifest.yaml", "expected_sha256": "0454e71d37086e35e6b9e5e41daf6f5a7bf3f27835a897efcfb664edbe7b3d87", "ops": [{"op": "replace", "old_string": "version: 0.16.0", "new_string": "version: 0.16.1"}, {"op": "replace", "old_string": "cron: 0 9 * * 1-5", "new_string": "cron: 0 8 * * 1-5"}, {"op": "replace", "old_string": "# Chase open estimates before the adjusters' stand-up.", "new_string": "# Chase open estimates an hour before stand-up."}]}], changelog="Chase open estimates at 8, an hour before stand-up.")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
 Publish: claimcoordinator 0.16.0 (version_id: 913) → 0.16.1 on fork line "acme-intake".
@@ -616,18 +592,18 @@ Files:
   -    cron: 0 9 * * 1-5
   +    cron: 0 8 * * 1-5
   ```
-Reach: #intake would install it now. 2 other projects on this line will update at their daily check.
+Reach: #intake would install it now. 2 other Routines on this line will update at their daily check.
 plan_id: pL4nC0nf1rmByRef9xQ2a7 (lasts 30 minutes)
 
-Call again with `confirm=true` to publish 0.16.1 to line "acme-intake": pass project_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version_id, changes and changelog.
+Call again with `confirm=true` to publish 0.16.1 to line "acme-intake": pass routine_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version_id, changes and changelog.
 
-→ publish_app(project_id="c7d2…5b", confirm=true, plan_id="pL4nC0nf1rmByRef9xQ2a7")
+→ publish_app(routine_id="c7d2…5b", confirm=true, plan_id="pL4nC0nf1rmByRef9xQ2a7")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 Published claimcoordinator 0.16.1 (version_id: 44) to fork line "acme-intake". It is now the line's head.
 #intake is installing it now.
-Reach: 2 other projects on this line will update at their daily check.
-Published is not installed: get_project's Install: field shows when #intake has it.
+Reach: 2 other Routines on this line will update at their daily check.
+Published is not installed: get_routine's Install: field shows when #intake has it.
 Files now (the base for a next edit is version_id 44; use these sha256s as expected_sha256):
 - manifest.yaml  sha256: d00a8443…
 ```
@@ -638,11 +614,11 @@ Files now (the base for a next edit is version_id 44; use these sha256s as expec
 
 Get a URL to upload one file you made, for publish_app to take.
 
-For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then publish with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this project and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can be published for most of a day. Workspace admins only, like publish_app.
+For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then publish with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can be published for most of a day. Workspace admins only, like publish_app.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name), as for publish_app. |
+| `routine_id` [required] | `str` | The Routine's ID (not its name), as for publish_app. |
 | `path` [required] | `str` | The bundle path the file will be published at, e.g. code/engine/lib.js. |
 | `size` [required] | `int` | The file's size in bytes. |
 | `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |
@@ -650,9 +626,9 @@ For a file too large to send in a change, such as a bundled script or a generate
 **Example** — “I bundled the chess engine into engine.js; publish it to #intake's app without pasting it.”
 
 ```text
-→ create_app_upload(project_id="c7d2…5b", path="code/engine/engine.js", size=48213, sha256="9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c")
+→ create_app_upload(routine_id="c7d2…5b", path="code/engine/engine.js", size=48213, sha256="9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c9f2c")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 Upload for code/engine/engine.js: 48,213 bytes, sha256 9f2c9f2c….
 upload_id: 3f6a…93
 method: PUT
@@ -675,21 +651,21 @@ If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it:
 
 [read-only]
 
-List the flows of the app a project runs: the updating it does for itself.
+List the flows of the app a Routine runs: the updating it does for itself.
 
 Each row shows the flow's name, what it does, its inputs (a ? marks an optional one) and the schedules that run it. get_flow gives one flow's inputs in full and everything that starts it; run_flow runs one; list_flow_runs shows what ran.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `cursor` | `str` | next_cursor from the previous page. |
 
 **Example** — “What does #intake do on its own?”
 
 ```text
-→ list_flows(project="#intake")
+→ list_flows(routine="#intake")
 
-Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
 3 of 3 flows:
 - claim_tick  Move every open claim one step along, chasing what's overdue.  schedules: every 180s
 - daily_digest  Post the morning summary of new, stuck and closed claims.  inputs: window_hours?  schedules: cron '0 8 * * 1-5' (America/Los_Angeles)
@@ -700,21 +676,21 @@ Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
 
 [read-only]
 
-One flow of the app a project runs: what it does, the inputs run_flow takes, the integrations it needs, and everything that starts it (schedules, webhooks, messages, documents, row states, other flows).
+One flow of the app a Routine runs: what it does, the inputs run_flow takes, the integrations it needs, and everything that starts it (schedules, webhooks, messages, documents, row states, other flows).
 
 Each schedule is shown with the inputs it runs with: to run a scheduled flow now, pass those to run_flow. The flow's steps are its file, read with read_app_file(path="flows/<flow>.yaml").
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `flow` [required] | `str` | The flow's name, as list_flows shows it. |
 
 **Example** — “What starts #intake's daily digest, and what does it take?”
 
 ```text
-→ get_flow(project="#intake", flow="daily_digest")
+→ get_flow(routine="#intake", flow="daily_digest")
 
-Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
 Flow: daily_digest  (file: flows/daily_digest.yaml)
 Description: Post the morning summary of new, stuck and closed claims.
 Inputs:
@@ -729,15 +705,15 @@ What starts it:
 
 [writes] [destructive]
 
-Run one of a project's flows now, with the given inputs.
+Run one of a Routine's flows now, with the given inputs.
 
-A run does what the flow does, for real: it can post messages, send email and change the project's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the project, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its workflow_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
+A run does what the flow does, for real: it can post messages, send email and change the Routine's rows. Without confirm=true this is a dry run that starts nothing: it checks the inputs against the flow's declared inputs and its required integrations against the Routine, and gives a run_key. To run, call again with the same flow and inputs, confirm=true and that run_key. A run starts in the background and returns its workflow_id; get_flow_run follows it. A run_key starts one run. Calling again with it (after a timeout, say) finds the run it started rather than starting another. get_flow shows the inputs a flow takes. To run a scheduled flow now, pass the inputs its schedule runs with.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `flow` [required] | `str` | The flow's name, as list_flows shows it. |
-| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. conversation_id is filled in with the project's ID; leave it out. |
+| `inputs` | `dict[str, Any]` | The flow's inputs by name. Omit an optional input to use its default. conversation_id is filled in with the Routine's ID; leave it out. |
 | `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
 | `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same inputs; it stands in for the run_key. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
@@ -745,9 +721,9 @@ A run does what the flow does, for real: it can post messages, send email and ch
 **Example** — “Send the claimant on C-1042 in #intake a reminder now.”
 
 ```text
-→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"})
+→ run_flow(routine_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"})
 
-Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
 **Dry run.** Nothing was changed.
 
 Run: send_reminder on #intake, now.
@@ -758,9 +734,9 @@ Run: send_reminder on #intake, now.
 
 Call again with `confirm=true` to run send_reminder, with run_key="Qm7xT2vL…" and the same inputs.
 
-→ run_flow(project_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true, run_key="Qm7xT2vLp9aRk4Ne3d121b61c6573b4a")
+→ run_flow(routine_id="c7d2…5b", flow="send_reminder", inputs={"claim_id": "C-1042"}, confirm=true, run_key="Qm7xT2vLp9aRk4Ne3d121b61c6573b4a")
 
-Project: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
 Started send_reminder. workflow_id: 8c1f3a52…
 It runs in the background: get_flow_run with this workflow_id shows its steps and how it ended.
 ```
@@ -769,13 +745,13 @@ It runs in the background: get_flow_run with this workflow_id shows its steps an
 
 [read-only]
 
-List a project's flow runs, newest first: which flow, how each ended (succeeded, failed, still_running), when, and what started it. get_flow_run shows one run's steps, inputs and failure.
+List a Routine's flow runs, newest first: which flow, how each ended (succeeded, failed, still_running), when, and what started it. get_flow_run shows one run's steps, inputs and failure.
 
 Each row ends with the run's workflow_id, the ID get_flow_run and cancel_flow_run take.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `flow` | `str` | Only this flow's runs, by its name. |
 | `status` | `str` | "all", "running", "failed" or "closed". Default `all`. |
 | `cursor` | `str` | next_cursor from the previous page. |
@@ -783,9 +759,9 @@ Each row ends with the run's workflow_id, the ID get_flow_run and cancel_flow_ru
 **Example** — “Has #intake's daily digest failed lately?”
 
 ```text
-→ list_flow_runs(project="#intake", flow="daily_digest", status="failed")
+→ list_flow_runs(routine="#intake", flow="daily_digest", status="failed")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 2 runs of "daily_digest", failed, newest first:
 - daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z  (workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z)
 - daily_digest  failed  started 2026-10-02T15:00:00Z  ended 2026-10-02T15:00:38Z  started by a person  (workflow_id: acme-int…)
@@ -801,7 +777,7 @@ A run still going shows the step it's on; call again to follow it, or pass wait_
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
 | `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to read that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
 | `output` | `str` | Optional. One output's name, to read just that output whole. |
@@ -811,9 +787,9 @@ A run still going shows the step it's on; call again to follow it, or pass wait_
 **Example** — “Why did this morning's digest in #intake fail?”
 
 ```text
-→ get_flow_run(project="#intake", workflow_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
+→ get_flow_run(routine="#intake", workflow_id="channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 Run: workflow_id channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z  flow: daily_digest  failed  started 2026-10-05T15:00:00Z  ended 2026-10-05T15:00:41Z
 Temporal run_id 0199…13: this execution of the workflow. The flow-run tools take the workflow_id; pass run_id beside it only to pin this execution.
 Inputs: {"window_hours": 24}
@@ -834,66 +810,66 @@ The run stops at its next step, so a step already under way finishes, and what e
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `workflow_id` | `str` | Required. The run's workflow ID, as run_flow returns it and list_flow_runs shows it. Not the Temporal run ID (a UUID). |
 | `run_id` | `str` | Optional. The Temporal run ID (a UUID) of one execution of the workflow, to stop only that execution rather than the newest. Sent without workflow_id it is read as the workflow ID, a deprecated alias. |
 
 **Example** — “Stop the claim tick that's running in #intake.”
 
 ```text
-→ cancel_flow_run(project_id="c7d2…5b", workflow_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
+→ cancel_flow_run(routine_id="c7d2…5b", workflow_id="acme-intake-claim_tick-2026-10-06T091200Z-c3d4")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 Stopping run workflow_id acme-int… (Temporal run_id 0199…75): it stops at its next step. get_flow_run with the workflow_id shows when it has.
 ```
 
-## Project settings
+## Routine settings
 
-### `list_project_settings`
+### `list_routine_settings`
 
 [read-only]
 
-List the settings of the app a project runs, set or not.
+List the settings of the app a Routine runs, set or not.
 
-A setting changes how the tracker behaves on this project alone: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one project, can be set back, and is kept through app updates, so check here before forking the app. Each prompt or template file is its own setting, so changing one leaves the others following app updates. Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_project_setting shows one in full; update_project_setting changes one.
+A setting changes how this Routine alone behaves: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one Routine, can be set back, and is kept through app updates, so check here before forking the app. Each prompt or template file is its own setting, so changing one leaves the others following app updates. Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_routine_setting shows one in full; update_routine_setting changes one.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `query` | `str` | Only settings whose key or label contains this. |
 | `cursor` | `str` | next_cursor from the previous page. |
 
 **Example** — “What can I change about how #chase-renewals chases people, without forking its app?”
 
 ```text
-→ list_project_settings(project="#chase-renewals", query="chase")
+→ list_routine_settings(routine="#chase-renewals", query="chase")
 
-Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
 4 of 4 settings matching "chase":
 - chase_days  [1, 3, 7]
 - chase_max_followups  5  (changed; app default 10)
 - chase_window_timezone  America/Los_Angeles
-- prompts.chase_email  Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and pl… [truncated; get_project_setting(key="prompts.chase_email") for the full text]
-2 values set on this project are read by nothing and not shown.
+- prompts.chase_email  Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and pl… [truncated; get_routine_setting(key="prompts.chase_email") for the full text]
+2 values set on this Routine are read by nothing and not shown.
 ```
 
-### `get_project_setting`
+### `get_routine_setting`
 
 [read-only]
 
-One of a project's settings in full: the whole value (a prompt or template's whole text), the app's default, what it accepts, its description, its options with the warning each one carries, and who may change it.
+One of a Routine's settings in full: the whole value (a prompt or template's whole text), the app's default, what it accepts, its description, its options with the warning each one carries, and who may change it.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
-| `key` [required] | `str` | The setting's key, as list_project_settings shows it. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `key` [required] | `str` | The setting's key, as list_routine_settings shows it. |
 
 **Example** — “Show me the email #chase-renewals sends when it chases someone.”
 
 ```text
-→ get_project_setting(project="#chase-renewals", key="prompts.chase_email")
+→ get_routine_setting(routine="#chase-renewals", key="prompts.chase_email")
 
-Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
 Setting: prompts.chase_email
 Value:
 Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and please ignore this note.
@@ -902,21 +878,21 @@ The {{ firm }} team
 
 App default: the same as the value
 Accepts: text, the shape of the app's default
-Changed by: update_project_setting, by a workspace admin who's also a member of the project.
+Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
 ```
 
-### `update_project_setting`
+### `update_routine_setting`
 
 [writes] [destructive]
 
-Change one of a project's settings, on this project only.
+Change one of a Routine's settings, on this Routine only.
 
 Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the app's default value resets the setting. A switch takes one of its options; any other setting keeps the shape of the app's default (a list stays a list, a number a number). Secrets and the recipe aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
-| `key` [required] | `str` | The setting's key, as list_project_settings shows it. |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `key` [required] | `str` | The setting's key, as list_routine_settings shows it. |
 | `value` | `Any` | The whole new value: text, a number, a list, a mapping, or null. Omit it to pass changes instead. Default `OMITTED`. |
 | `changes` | `list[Op]` | Text ops on the current text, instead of value. |
 | `confirm` | `bool` | true to change it. Show the user the dry run first. Default `False`. |
@@ -925,45 +901,45 @@ Without confirm=true this is a dry run that changes nothing: it shows the old an
 **Example** — “Stop chasing after five follow-ups on #chase-renewals.”
 
 ```text
-→ update_project_setting(project_id="4b0e…12", key="chase_max_followups", value=5)
+→ update_routine_setting(routine_id="4b0e…12", key="chase_max_followups", value=5)
 
-Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
 **Dry run.** Nothing was changed.
 
 Change: chase_max_followups on #chase-renewals.
 - 10 → 5
-- Reach: this project only. It can be set back with update_project_setting. App updates won't change the new value.
+- Reach: this Routine only. It can be set back with update_routine_setting. App updates won't change the new value.
 
 Call again with `confirm=true` to change chase_max_followups.
 
-→ update_project_setting(project_id="4b0e…12", key="chase_max_followups", value=5, confirm=true)
+→ update_routine_setting(routine_id="4b0e…12", key="chase_max_followups", value=5, confirm=true)
 
-Project: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
 Changed chase_max_followups on #chase-renewals: 10 → 5.
 Runs already under way keep the value they started with.
 ```
 
-## Agent store
+## Tables
 
 ### `list_tables`
 
 [read-only]
 
-List the tables in a project's agent store, with each one's row count.
+List the tables in a Routine's agent store, with each one's row count.
 
-The agent store is the project's storage: tables of rows the app, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
+The agent store is the Routine's storage: tables of rows the app, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `cursor` | `str` | next_cursor from the previous page. |
 
 **Example** — “What does #intake keep track of?”
 
 ```text
-→ list_tables(project="#intake")
+→ list_tables(routine="#intake")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 2 of 2 tables:
 - claims  212 rows
 - Contacts  3 rows
@@ -973,21 +949,21 @@ Project: #intake (c7d2…5b)
 
 [read-only]
 
-A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the project's app runs one on it.
+A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the Routine's app runs one on it.
 
 A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or increment_on_change (a counter the store keeps). Columns marked as state change only when one of the app's transitions fires, so create_rows and update_row refuse them.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 
 **Example** — “What columns does #intake's claims table have?”
 
 ```text
-→ get_table(project="#intake", table="claims")
+→ get_table(routine="#intake", table="claims")
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Table: claims  (schema version 3)
 Merge key: none; create_rows merges only on the columns its merge_on names.
 Columns (11), in order:
@@ -1017,7 +993,7 @@ Each row shows its ID, a few columns (long values are cut and marked; get_row sh
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `query` | `str` | Text to find in any column, case-insensitively: "4471" finds the row whatever column holds it. Only rows where it appears in a value you can see are listed, so with query (or filter["*"]) a page can come back short, there's no total, and next_cursor goes on to the rest. |
 | `filter` | `dict[str, Any]` | Conditions on columns, all of which must hold: {"Status": "open"} or {"Status": {"$eq": "open"}}, {"amount": {"$gt": 1000}}, {"claimant": {"$contains": "ortiz"}}, {"Status": {"$in": ["open", "waiting"]}}, {"closed_at": {"$exists": false}}. Operators: $eq, $ne, $gt, $gte, $lt, $lte, $in, $exists, $contains. There's no $or. Text compares case-insensitively. |
@@ -1028,9 +1004,9 @@ Each row shows its ID, a few columns (long values are cut and marked; get_row sh
 **Example** — “Find claim 4471 in #intake.”
 
 ```text
-→ list_rows(project="#intake", table="claims", query="4471")
+→ list_rows(routine="#intake", table="claims", query="4471")
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] picks others). Empty values are left out.
 2 rows matching "4471", newest first, shown on this page:
 - row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
@@ -1045,16 +1021,16 @@ One row in full: every column, its rev (update_row needs it as expected_rev), wh
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `row_id` [required] | `int` | The row's ID, as list_rows shows it ("row 88" is 88). |
 
 **Example** — “Show me everything on row 88 of #intake's claims.”
 
 ```text
-→ get_row(project="#intake", table="claims", row_id=88)
+→ get_row(routine="#intake", table="claims", row_id=88)
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Row: 88  rev: 4  created 2026-09-01 10:00  updated 2026-09-29 14:05
 State: Status = open · Stage = open
 - claim_no: 4471
@@ -1074,67 +1050,67 @@ State: Status = open · Stage = open
 
 [read-only]
 
-List the single values a project's agent store keeps (scalars), by key: the app's runtime state, values people or agents keep, and the values behind its settings.
+List the single values a Routine's agent store keeps (scalars), by key: the app's runtime state, values people or agents keep, and the values behind its settings.
 
-This is the raw storage; long values are cut and marked, and get_scalar shows one whole. Credentials are never shown. Stored values that are settings read better through list_project_settings, which says what each one does and what changing it would do. These values are read-only here.
+This is the raw storage; long values are cut and marked, and get_scalar shows one whole. Credentials are never shown. Stored values that are settings read better through list_routine_settings, which says what each one does and what changing it would do. These values are read-only here.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `query` | `str` | Text to find in the key, case-insensitively. |
 | `cursor` | `str` | next_cursor from the previous page, with the same query. |
 
 **Example** — “What values does #intake keep?”
 
 ```text
-→ list_scalars(project="#intake")
+→ list_scalars(routine="#intake")
 
-Project: #intake (c7d2…5b)
+Routine: #intake (c7d2…5b)
 4 of 4 stored values:
 - copy:claims.settings.fields  = [{"key": "popcorn.portal_pin", "label": "Portal PIN", "input": "secret"}]  (updated 2026-09-01 10:00)
 - popcorn.crm_api_key  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
 - popcorn.portal_pin  = [hidden: holds a credential]  (updated 2026-09-01 10:00)
-- project status  = On track  (updated 2026-09-02 10:00)
-Stored values that are settings read better through list_project_settings, which says what each one does.
+- Routine status  = On track  (updated 2026-09-02 10:00)
+Stored values that are settings read better through list_routine_settings, which says what each one does.
 ```
 
 ### `get_scalar`
 
 [read-only]
 
-One value a project's agent store keeps (a scalar), whole, as stored.
+One value a Routine's agent store keeps (a scalar), whole, as stored.
 
-A credential is never shown. If the key is a setting, get_project_setting reads it better: it says what the setting does and what its options are. Stored values are read-only here.
+A credential is never shown. If the key is a setting, get_routine_setting reads it better: it says what the setting does and what its options are. Stored values are read-only here.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project` [required] | `str` | Project name ("#intake") or ID. |
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `key` [required] | `str` | The value's key, as list_scalars shows it. |
 
-**Example** — “What's the project status note on #intake?”
+**Example** — “What's the Routine status note on #intake?”
 
 ```text
-→ get_scalar(project="#intake", key="project status")
+→ get_scalar(routine="#intake", key="Routine status")
 
-Project: #intake (c7d2…5b)
-Key: project status
+Routine: #intake (c7d2…5b)
+Key: Routine status
 Updated: 2026-09-02 10:00
 Value:
 On track
-Stored values that are settings read better through list_project_settings, which says what each one does.
+Stored values that are settings read better through list_routine_settings, which says what each one does.
 ```
 
 ### `create_rows`
 
 [writes]
 
-Add rows to one of a project's tables.
+Add rows to one of a Routine's tables.
 
 A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the app's state or a credential). The response says which rows were added and which merged. Adding rows starts no flow. Columns the app's state machine owns are refused (they change only by a transition), and so are credential columns. Each call adds its rows: if a call timed out, check with list_rows before sending it again.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `rows` [required] | `list[dict[str, Any]]` | The rows, each an object of column: value. At most 50. |
 | `merge_on` | `list[str]` | Columns that identify an existing row to merge into, for a table with no merge key of its own. |
@@ -1142,9 +1118,9 @@ A row whose merge key matches an existing row merges into it instead of adding a
 **Example** — “Add claim 5002 for Kim, $900, to #intake, and update 4471's amount to 13,000 while you're at it.”
 
 ```text
-→ create_rows(project_id="c7d2…5b", table="claims", rows=[{"claim_no": "5002", "claimant": "Kim", "amount": 900}, {"claim_no": "4471", "amount": 13000}], merge_on=["claim_no"])
+→ create_rows(routine_id="c7d2…5b", table="claims", rows=[{"claim_no": "5002", "claimant": "Kim", "amount": 900}, {"claim_no": "4471", "amount": 13000}], merge_on=["claim_no"])
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Added 1 row and merged 1 into existing rows:
 - row 301  added
 - row 88  merged into the existing row
@@ -1161,7 +1137,7 @@ Only the columns in data change; the rest stay as they are. Each changes by its 
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `row_id` [required] | `int` | The row's ID ("row 88" is 88). |
 | `data` [required] | `dict[str, Any]` | The columns to change, as column: value. |
@@ -1170,9 +1146,9 @@ Only the columns in data change; the rest stay as they are. Each changes by its 
 **Example** — “Add a note to claim 4471 in #intake that the adjuster called back.”
 
 ```text
-→ update_row(project_id="c7d2…5b", table="claims", row_id=88, data={"Notes": "Adjuster called back 10/6."}, expected_rev=4)
+→ update_row(routine_id="c7d2…5b", table="claims", row_id=88, data={"Notes": "Adjuster called back 10/6."}, expected_rev=4)
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Changed row 88: rev 4 → 5.
 Where the table's merge policy decided what's stored:
 - Notes: the value sent was appended to the stored text (merge: concat).
@@ -1195,13 +1171,13 @@ The row as stored:
 
 [writes] [destructive] [idempotent]
 
-Delete rows from one of a project's tables, by ID.
+Delete rows from one of a Routine's tables, by ID.
 
 Without confirm=true this is a dry run that deletes nothing: it lists the rows it would delete. Show the person the dry run, and confirm only once they agree. A deleted row can't be restored with these tools. Rows are deleted one at a time, and the response says which were deleted, which were already gone and which failed.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `project_id` [required] | `str` | The project's ID (not its name). |
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `row_ids` [required] | `list[int]` | The rows' IDs ("row 88" is 88). At most 50. |
 | `confirm` | `bool` | true to delete. Show the user the dry run first. Default `False`. |
@@ -1210,9 +1186,9 @@ Without confirm=true this is a dry run that deletes nothing: it lists the rows i
 **Example** — “Delete the duplicate row 91 from #intake's claims.”
 
 ```text
-→ delete_rows(project_id="c7d2…5b", table="claims", row_ids=[91])
+→ delete_rows(routine_id="c7d2…5b", table="claims", row_ids=[91])
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 **Dry run.** Nothing was changed.
 
 Delete 1 row from claims:
@@ -1222,9 +1198,9 @@ Delete 1 row from claims:
 
 Call again with `confirm=true` to delete this row.
 
-→ delete_rows(project_id="c7d2…5b", table="claims", row_ids=[91], confirm=true)
+→ delete_rows(routine_id="c7d2…5b", table="claims", row_ids=[91], confirm=true)
 
-Project: #intake (c7d2…5b) · table: claims
+Routine: #intake (c7d2…5b) · table: claims
 Deleted 1 of 1 rows: row 91.
 ```
 
@@ -1236,12 +1212,10 @@ in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
-When they ship, they replace the project-named tools above, and the message,
-member, flow, run and scalar tools leave this surface: a Routine's
-conversation and runs are read as its History, a flow is started by its
-Trigger or an Action, and a switch is a Routine Setting. The table tools keep
-their names and take `routine` and `routine_id` in place of `project` and
-`project_id`. Changing a Routine Template itself is not part of this design.
+When they ship, the message, member, flow, run and scalar tools leave this
+surface: a Routine's conversation and runs are read as its History, a flow is
+started by its Trigger or an Action, and a switch is a Routine Setting.
+Changing a Routine Template itself is not part of this design.
 
 Three rules run through it:
 
@@ -1253,49 +1227,6 @@ Three rules run through it:
    which stops receiving its template's improvements.
 3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
    since a write is the worst place to resolve a name to the wrong Routine.
-
-### `list_routines`
-
-Read-only. The Routines the caller can see in this workspace, each with its
-template, its Status counts and whether it is missing a Connection.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `template` | | Only Routines made from this Routine Template |
-| `query` | | Matches a Routine's name |
-| `cursor` | | From the previous page |
-
-### `get_routine`
-
-Read-only. One Routine: its template, whether it still receives the
-template's improvements, its Triggers, its Connections and which are missing,
-and a count of items per Status.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `wait_seconds` | `0` | Wait up to this long for a Routine that is still being set up |
-
-### `list_routine_templates`
-
-Read-only. The Routine Templates this workspace can start a Routine from,
-each with what it is for and the Connections it needs.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `query` | | Matches a template's name or description |
-
-### `create_routine`
-
-Starts a new Routine from a Routine Template. Without `confirm`, says what
-the Routine will be set up with and which Connections a person will need to
-make.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `name` | | The new Routine's name |
-| `template` | | The Routine Template to start from |
-| `confirm` | `false` | Create the previewed Routine |
 
 ### `duplicate_routine`
 
@@ -1412,38 +1343,6 @@ Instructions as they would read after the change.
 | `edits` | | Or exact edits to the text, in place of `request` |
 | `confirm` | `false` | Apply the previewed change |
 | `reset` | `false` | Return a changed part to the template's |
-
-### `list_routine_settings`
-
-Read-only. A Routine's settings: each one's value, what it does, whether it
-was changed for this Routine, and who may change it. Secrets are never shown.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `get_routine_setting`
-
-Read-only. One setting in full, including long text values.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `setting` | | As `list_routine_settings` names it |
-
-### `update_routine_setting`
-
-Changes one setting on one Routine, or sets it back to the template's value.
-The change reaches only that Routine and survives the template's
-improvements.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `setting` | | As `list_routine_settings` names it |
-| `value` | | The new value |
-| `reset` | `false` | Return to the template's value |
-| `confirm` | `false` | Apply the previewed change |
 
 ### `get_status`
 
