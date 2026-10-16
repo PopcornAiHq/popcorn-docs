@@ -9,7 +9,7 @@ summary: >
   `name:` is a delete plus a create — and a schedule still naming the old
   flow is dropped at install, with no error.
 concepts: [app-bundle, manifest-keys]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A flow is identified by the `name:` inside the YAML. The filename is not part

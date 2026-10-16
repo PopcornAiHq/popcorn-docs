@@ -10,7 +10,7 @@ summary: >
   lacks is a hard ReferenceError that on_error cannot catch. Index arrays with
   dots, and keep spaces out of any column a flow dereferences.
 concepts: [flow-grammar, on-error, table-columns]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A step's `args`, `when:` and `foreach:`, and a flow's `outputs:`, read values

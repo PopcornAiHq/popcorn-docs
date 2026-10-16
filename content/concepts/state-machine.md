@@ -10,7 +10,7 @@ summary: >
   written to the column lasts until the next projection. Publish proves the graph's structure; its intent is the
   author's to check — states no event fires, terminals reached too early.
 concepts: [manifest-keys, channel-binding, states-authoring]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A tracker row is not one flat status. It is a **tuple of small machines**, and

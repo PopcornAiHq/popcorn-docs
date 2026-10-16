@@ -200,7 +200,7 @@ def page(acts: list[dict]) -> str:
         "  foundation.store.upsert_rows; `popcorn flow activities` lists alpha and",
         "  deprecated ones too.",
         "concepts: [app-bundle, template-authoring]",
-        "applies_to: [cli, mcp, human]",
+        "layer: platform",
         "---",
         "",
         "A flow step names one of these by its wire name in `activity:` and passes",

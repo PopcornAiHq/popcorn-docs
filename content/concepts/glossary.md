@@ -9,7 +9,7 @@ summary: >
   its app bundle is its files. A channel (in the product, a Routine) is what an
   app installs into, identified by its UUID because a name can change.
 concepts: [product-glossary, app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 The vocabulary of authors, tools and the API. Each entry gives the preferred

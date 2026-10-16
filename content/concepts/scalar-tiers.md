@@ -10,7 +10,7 @@ summary: >
   such as the outbound send mode. Never declare a value a flow writes at
   runtime: declaring it hands it to install, which can reset it.
 concepts: [manifest-keys]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A scalar is a named string on a channel — always a string on the wire,

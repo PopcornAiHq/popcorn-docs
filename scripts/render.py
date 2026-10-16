@@ -47,6 +47,7 @@ import highlight
 _FENCE = re.compile(r"^```")
 _RULE = re.compile(r"^-{3,}\s*$")
 _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
+_PLATFORM_NOTE = re.compile(r"^\*\*Platform note\*\*\s*(?:[—–-]\s*)?(?P<rest>.*)$")
 # A list item may be indented up to three spaces, as Markdown allows; four is
 # where an indented code block begins.
 _ORDERED = re.compile(r"^ {0,3}\d+\.\s+(?P<text>.+)$")
@@ -472,6 +473,18 @@ def body(md: str, *, terms: bool = False) -> str:
             while i < len(lines) and _QUOTE.match(lines[i]):
                 inner.append(_QUOTE.match(lines[i]).group("text"))
                 i += 1
+            note = _PLATFORM_NOTE.match(inner[0])
+            if note:
+                # A Platform note is where a product page names the mechanism
+                # under its words. It is set apart, and labelled, so a reader
+                # who only wants the product can see what to skip. The .md
+                # output keeps it as a plain blockquote.
+                inner[0] = note.group("rest")
+                out.append(
+                    '<aside class="platform-note"><p class="platform-note-label">'
+                    f"Platform note</p>{body(chr(10).join(inner))}</aside>"
+                )
+                continue
             out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
             continue
 
@@ -862,6 +875,9 @@ h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1
 li:target { background: var(--wash); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--wash); }
 blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--brand); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
+.platform-note { margin: 0 0 1.4rem; padding: .75rem 1rem; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--card); }
+.platform-note p:last-child { margin-bottom: 0; }
+.platform-note-label { margin: 0 0 .3rem; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
    follow the page instead. */

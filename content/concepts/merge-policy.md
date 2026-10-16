@@ -11,7 +11,7 @@ summary: >
   write. An install sets the declared policy; stored values change on their
   next write.
 concepts: [manifest-keys]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A table column carries a merge policy that decides what happens when a write

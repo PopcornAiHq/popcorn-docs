@@ -10,7 +10,7 @@ summary: >
   never leaves it, so isolating a change means forking a second named line from
   a channel still on the product version. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 An app ships as a **product version** that every workspace can install. To

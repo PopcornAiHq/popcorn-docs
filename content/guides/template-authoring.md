@@ -5,7 +5,7 @@ order: 1
 summary: >
   The loop for changing what an app does: check its settings first, fork, check out, edit, `app validate`, `app publish`, then confirm the install landed with `app status` — from the CLI or an assistant over MCP. A new app type is not self-serve. `flow validate` is the authority on a flow; the grammar, manifest keys and table rules are concept pages this guide links.
 concepts: [app-bundle, manifest-keys, flow-grammar, publish-and-apply, fork-line]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 An **app bundle** is a directory of YAML that turns an empty Popcorn channel

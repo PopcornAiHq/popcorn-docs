@@ -11,7 +11,7 @@ summary: >
   forward. An old version can be read back by id, but nothing rolls a channel
   back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A version is minted by a publish and never changes afterwards. Installing it

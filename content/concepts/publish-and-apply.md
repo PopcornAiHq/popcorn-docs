@@ -10,7 +10,7 @@ summary: >
   the app on every channel. Apply brings a fork-line channel up to its head,
   takes no version, and is the durable retry when an install was blocked.
 concepts: [fork-line, bundle-version]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 Two operations people conflate, doing different jobs.

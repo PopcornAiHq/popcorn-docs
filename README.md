@@ -55,6 +55,7 @@ python3 scripts/emit.py              # rebuild build/ from empty
 python3 scripts/check-links.py       # every advertised URL and page link resolves
 python3 scripts/check-retrieval.py   # every eval question surfaces its concept
 python3 scripts/check-highlight.py   # YAML highlighting never changes a block's text
+python3 scripts/check-layer.py       # product pages use no platform term outside a Platform note
 ./scripts/check-public-repo.sh       # no internal references — reads the STAGED tree
 ```
 

@@ -10,7 +10,7 @@ summary: >
   left there installs as one; keep payloads outside the bundle. A manifest with
   a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 An app bundle is a directory. Installing it into an empty channel gives that
