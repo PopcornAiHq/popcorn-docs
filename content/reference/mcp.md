@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-10-15
+platform: 2026-10-16
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -138,7 +138,7 @@ This workspace's members only: someone from another workspace who is in a shared
 
 List the Routines you can see in this workspace: the ones you're in (including Routines shared in from another workspace) and the ones you can view without joining (marked [not joined]).
 
-Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID; [missing a connection] marks one whose app needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
+Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -148,7 +148,7 @@ Direct messages are not listed. Each row shows the Routine's name, its Routine T
 | `sort` | one of `name`, `recent` | "name" (default), or "recent": pinned first, then by last message. |
 | `cursor` | `str` | The next_cursor from the previous page, with the same other arguments. |
 
-**Example** — “Which of our Routines run the claims coordinator app?”
+**Example** — “Which of our Routines use the Claim Coordinator template?”
 
 ```text
 → list_routines(template="claimcoordinator")
@@ -165,14 +165,14 @@ next_cursor: eyJ2Ijox…
 
 [read-only]
 
-Show one Routine: its details, your membership, and the app it runs, with the version it's on, the head of its line, whether the latest install landed, and its Connections: each account or webhook the app needs, and whether it's connected.
+Show one Routine: its details, your membership, and its Routine Template, with the version it's on, the latest version, where its updates come from (Popcorn, or this workspace's own copy of the template), whether the latest install landed, and its Connections: each account or webhook the template needs, and whether it's connected.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | The Routine's ID, or its name ("#intake" or "intake"). Names aren't unique: if more than one Routine has it, the call lists them with their IDs; pass an ID instead. |
 | `wait_seconds` | `int` | Wait up to this many seconds for an install in progress to land (installed, or failed for good), then answer; the answer says whether it landed or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 
-**Example** — “Is #intake on the latest version of its app?”
+**Example** — “Is #intake on the latest version of its template?”
 
 ```text
 → get_routine(routine="#intake")
@@ -188,10 +188,9 @@ Your role: admin
 Unread: 4
 Mentions: 1
 Muted: no
-App: claimcoordinator
-Line: product
-Version: 0.15.1 (the line's head)
-Version ID: 812
+Template: claimcoordinator
+Updates from: Popcorn
+Version: 0.15.1 (the latest)
 Install: installed
 Connections:
 - Claims inbox (email): connected: claims@acme.example (google)
@@ -213,7 +212,7 @@ Each row shows the template's name, its slug (what create_routine's `template` t
 | `query` | `str` | Case-insensitive substring of the template's name or slug. |
 | `cursor` | `str` | The next_cursor from the previous page, with the same query. |
 
-**Example** — “What apps could a new Routine here run?”
+**Example** — “What templates could a new Routine here start from?”
 
 ```text
 → list_routine_templates()
@@ -250,9 +249,9 @@ Without `template` the Routine is created at once. With `template` the first cal
 **Dry run.** Nothing was changed.
 
 Create: #claims-west, a private Routine in Acme, running Claim Coordinator (claimcoordinator).
-- Installs: claimcoordinator 0.15.1 (version_id: 812), the head of the product line.
+- Installs: claimcoordinator 0.15.1, the latest version.
 - Members: you, @jlee.
-- Connections to set up in the Routine before the app runs: Gmail, Google Calendar, Google Drive.
+- Connections to set up in the Routine before it runs: Gmail, Google Calendar, Google Drive.
 - The install runs in the background once the Routine exists, typically in seconds; get_routine's Install: field shows when it lands.
 
 Call again with `confirm=true` to create #claims-west running claimcoordinator.
@@ -262,7 +261,7 @@ Call again with `confirm=true` to create #claims-west running claimcoordinator.
 Created #claims-west (id: 0141…b3), a private Routine in Acme.
 Members: you, @jlee.
 Claim Coordinator (claimcoordinator) is installing in the background. Watch get_routine("0141…b3")'s Install: field until it says installed.
-Before the app runs, someone sets up in the Routine: Gmail, Google Calendar, Google Drive.
+Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
 ```
 
 ## Apps
@@ -494,9 +493,9 @@ If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it:
 
 [read-only]
 
-List the settings of the app a Routine runs, set or not.
+List the settings of a Routine's Routine Template, set or not.
 
-A setting changes how this Routine alone behaves: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one Routine, can be set back, and is kept through app updates, so check here before forking the app. Each prompt or template file is its own setting, so changing one leaves the others following app updates. Each row shows the value; an unset one says what unset means, and one changed from the app's default says so. Secrets show only whether they're set. get_routine_setting shows one in full; update_routine_setting changes one.
+A setting changes how this Routine alone behaves: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one Routine, can be set back, and is kept through template updates, so check here before giving the Routine its own copy of its template (fork_app). Each prompt or email template file is its own setting, so changing one leaves the others following template updates. Each row shows the value; an unset one says what unset means, and one changed from the template default says so. Secrets show only whether they're set. get_routine_setting shows one in full; update_routine_setting changes one.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -504,15 +503,15 @@ A setting changes how this Routine alone behaves: sending modes, schedules, limi
 | `query` | `str` | Only settings whose key or label contains this. |
 | `cursor` | `str` | next_cursor from the previous page. |
 
-**Example** — “What can I change about how #chase-renewals chases people, without forking its app?”
+**Example** — “What can I change about how #chase-renewals chases people, without giving it its own copy of its template?”
 
 ```text
 → list_routine_settings(routine="#chase-renewals", query="chase")
 
-Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 4 of 4 settings matching "chase":
 - chase_days  [1, 3, 7]
-- chase_max_followups  5  (changed; app default 10)
+- chase_max_followups  5  (changed; template default 10)
 - chase_window_timezone  America/Los_Angeles
 - prompts.chase_email  Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and pl… [truncated; get_routine_setting(key="prompts.chase_email") for the full text]
 2 values set on this Routine are read by nothing and not shown.
@@ -522,7 +521,7 @@ Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
 
 [read-only]
 
-One of a Routine's settings in full: the whole value (a prompt or template's whole text), the app's default, what it accepts, its description, its options with the warning each one carries, and who may change it.
+One of a Routine's settings in full: the whole value (a prompt or email template's whole text), the template default, what it accepts, its description, its options with the warning each one carries, and who may change it.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -534,15 +533,15 @@ One of a Routine's settings in full: the whole value (a prompt or template's who
 ```text
 → get_routine_setting(routine="#chase-renewals", key="prompts.chase_email")
 
-Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 Setting: prompts.chase_email
 Value:
 Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and please ignore this note.
 
 The {{ firm }} team
 
-App default: the same as the value
-Accepts: text, the shape of the app's default
+Template default: the same as the value
+Accepts: text, the shape of the template default
 Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
 ```
 
@@ -552,7 +551,7 @@ Changed by: update_routine_setting, by a workspace admin who's also a member of 
 
 Change one of a Routine's settings, on this Routine only.
 
-Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the app's default value resets the setting. A switch takes one of its options; any other setting keeps the shape of the app's default (a list stays a list, a number a number). Secrets and the recipe aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
+Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Instructions aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -568,18 +567,18 @@ Without confirm=true this is a dry run that changes nothing: it shows the old an
 ```text
 → update_routine_setting(routine_id="4b0e…12", key="chase_max_followups", value=5)
 
-Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 **Dry run.** Nothing was changed.
 
 Change: chase_max_followups on #chase-renewals.
 - 10 → 5
-- Reach: this Routine only. It can be set back with update_routine_setting. App updates won't change the new value.
+- Reach: this Routine only. It can be set back with update_routine_setting. Template updates won't change the new value.
 
 Call again with `confirm=true` to change chase_max_followups.
 
 → update_routine_setting(routine_id="4b0e…12", key="chase_max_followups", value=5, confirm=true)
 
-Routine: #chase-renewals (4b0e…12) · app: chase 0.3.1
+Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 Changed chase_max_followups on #chase-renewals: 10 → 5.
 Runs already under way keep the value they started with.
 ```
@@ -590,9 +589,9 @@ Runs already under way keep the value they started with.
 
 [read-only]
 
-List the tables in a Routine's agent store, with each one's row count.
+List the tables in a Routine, with each one's row count.
 
-The agent store is the Routine's storage: tables of rows the app, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
+A Routine's tables hold the rows its template, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -614,9 +613,9 @@ Routine: #intake (c7d2…5b)
 
 [read-only]
 
-A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the Routine's app runs one on it.
+A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the Routine runs one on it.
 
-A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or increment_on_change (a counter the store keeps). Columns marked as state change only when one of the app's transitions fires, so create_rows and update_row refuse them.
+A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or increment_on_change (a counter the store keeps). Columns marked as state change only when one of the state machine's transitions fires, so create_rows and update_row refuse them.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -644,7 +643,7 @@ Columns (11), in order:
 - home_address  string  [personal data]
 - summary  string  [personal data]
 State machine:
-- Status column: Status · CTAs: CTAs · sub: Stage
+- Status column: Status · Actions: CTAs · sub: Stage
 - funnel (column Stage): open, closed
 ```
 
@@ -682,7 +681,7 @@ Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] p
 
 [read-only]
 
-One row in full: every column, its rev (update_row needs it as expected_rev), when it was created and last changed, and its state if the app's state machine runs on the table.
+One row in full: every column, its rev (update_row needs it as expected_rev), when it was created and last changed, and its state if the Routine's state machine runs on the table.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -717,7 +716,7 @@ State: Status = open · Stage = open
 
 Add rows to one of a Routine's tables.
 
-A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the app's state or a credential). The response says which rows were added and which merged. Adding rows starts no flow. Columns the app's state machine owns are refused (they change only by a transition), and so are credential columns. Each call adds its rows: if a call timed out, check with list_rows before sending it again.
+A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the row's state or a credential). The response says which rows were added and which merged. Adding rows starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns. Each call adds its rows: if a call timed out, check with list_rows before sending it again.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -744,7 +743,7 @@ get_row shows one in full.
 
 Change some columns of one row.
 
-Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored. expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again. Changing a row starts no flow. Columns the app's state machine owns are refused (they change only by a transition), and so are credential columns.
+Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored. expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again. Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -804,8 +803,8 @@ Routine: #intake (c7d2…5b) · table: claims
 
 Delete 1 row from claims:
 - row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
-- Warning: the app's state machine runs on this table; a deleted row leaves the app's tracker and its open items.
-- A deleted row can't be restored with these tools. Deleting starts no flow.
+- Warning: the Routine's state machine runs on this table; a deleted row leaves the Routine's tracker and its open items.
+- A deleted row can't be restored with these tools. Deleting starts no work.
 
 Call again with `confirm=true` to delete this row.
 
@@ -834,16 +833,16 @@ A Trigger that is paused or turned off says so. A webhook's address is never sho
 ```text
 → list_triggers(routine="#intake")
 
-Routine: #intake (c7d2…5b) · app: claimcoordinator 0.15.1
+Routine: #intake (c7d2…5b) · template: claimcoordinator 0.15.1
 Schedules:
-- morning  cron '0 8 * * 1-5' (America/Los_Angeles)  runs daily_digest
-- tick  every 180s  runs claim_tick
+- morning  cron '0 8 * * 1-5' (America/Los_Angeles)  starts daily digest
+- tick  every 180s  starts claim tick
 Webhooks:
-- carrier-portal  runs claim_intake
+- carrier-portal  starts claim intake
 Messages:
-- a message posted in #intake  runs claim_intake
+- a message posted in #intake  starts claim intake
 Documents:
-- uploading the 'policy' document  runs policy_upsert
+- uploading the 'policy' document  starts policy upsert
 ```
 
 ### `run_trigger`
@@ -868,7 +867,7 @@ Its schedule is unchanged: the next scheduled run still happens. The run does wh
 Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
-Run: the morning schedule's work (daily_digest) on #intake, now.
+Run: the morning schedule's work (daily digest) on #intake, now.
 - Schedule: cron '0 8 * * 1-5' (America/Los_Angeles); unchanged by this run.
 - It runs as it would on schedule, in the background: posts, emails and row changes are real.
 
@@ -877,7 +876,7 @@ Call again with `confirm=true` to run it now.
 → run_trigger(routine_id="c7d2…5b", trigger="morning", confirm=true)
 
 Routine: #intake (c7d2…5b)
-Started morning (daily_digest). workflow_id: channel:c7d2…5b:flow:daily_digest:morning-2026-10-05T15:00:00Z
+Started morning (daily digest).
 It runs in the background; the Routine's runs in Popcorn show how it ended.
 ```
 
@@ -942,7 +941,7 @@ Call again with `confirm=true` to take it, with run_key="Hc4pW8sN…" and the sa
 → take_action(routine_id="c7d2…5b", row_ids=[88], action="close", confirm=true, run_key="Hc4pW8sNz1bVq6Tj20d155d5c65bdaaa")
 
 Routine: #intake (c7d2…5b) · table: claims
-Taking close on 1 item(s). workflow_id: 8c1f3a52…
+Taking close on 1 item(s).
 It applies in the background; get_row shows each item's new Status once it has.
 ```
 
