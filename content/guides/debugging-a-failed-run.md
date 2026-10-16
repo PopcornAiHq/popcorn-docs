@@ -16,13 +16,13 @@ layer: platform
 This guide starts from a flow run that did the wrong thing, or from one you
 expected and cannot find, and ends with a fixed version running. Editing and
 publishing are the loop in
-[authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md);
+[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md);
 this page is the reading half of it.
 
 Commands that act on a channel take it as `--channel`, a `#name` or a UUID;
 the examples write `<channel>`. A channel is what the product calls a
 **Routine**, and its runs are part of the Routine's **History** (see the
-[product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)). An assistant connected over MCP is not given the
+[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)). An assistant connected over MCP is not given the
 flow-run tools, so this loop runs from the CLI.
 
 ## 1. Find the run
@@ -206,7 +206,7 @@ the channel's armed schedules with the manifest's. It prints a difference the
 platform explains — a `set_app_mode` retune, a spread offset — as a `note`,
 and exits non-zero only on one it cannot: a cadence or a pause nothing
 explains, or a declared schedule that was never installed. A schedule whose flow was renamed is dropped at install, with no error
-— see [a flow's identity is its name](https://docs.popcorn.ai/concepts/flow-identity.md).
+— see [a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
 
 To re-run a scheduled flow without waiting for its next fire,
 `popcorn schedule trigger <slug> --channel <channel>` runs it once now, with
@@ -254,7 +254,7 @@ run`, or an agent running it — starts this flow.
 A run reads the channel's bound version once, when it starts, and keeps it to
 the end. Its `call_flow` children share that version; a run started with
 `start_flow` reads the binding afresh — see
-[how a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+[how a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
 A fix published while a run is going does not reach that run, and a run that
 started before the install landed ran the old version.
 
@@ -289,7 +289,7 @@ answer comes from the database alone, and a running install does not show.
 A failed or retrying install whose error the server classified also prints a
 `Code:` line under `Error:`; for `internal`, a further line says the failure is
 inside the platform, not in the bundle, and names the install workflow.
-See [publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+See [publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
 
 In `--json`, branch on `install.state`, one of the lowercase names above; the
 `install` block carries the error, `error_code`, attempt counts, reason and

@@ -16,12 +16,12 @@ layer: platform
 This guide adds one table to an app a channel already runs, and ends with
 the table on the channel and a flow writing rows to it. The loop around it
 (fork, edit, check, publish) is the one in
-[authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md),
-and [table columns](https://docs.popcorn.ai/concepts/table-columns.md) is the column reference. This one is the order to do
+[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md),
+and [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) is the column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
 A channel is what the product calls a **Routine**, and an app a **Routine
-Template** (see the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)); this guide uses the CLI's names.
+Template** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)); this guide uses the CLI's names.
 It runs from the CLI throughout. An assistant over MCP can publish the same
 change with `publish_app`, but it is not given the flow-run tools that step 7
 uses to check the result.
@@ -44,7 +44,7 @@ is enough. A table is a change to what the app is built from, so no setting can
 stand in for it. In the product's terms, it gives the Routine a copy of its
 own, which no longer receives the template's improvements. Forking is permanent, and a publish reaches every channel on the
 line, not only this one. See
-[fork lines](https://docs.popcorn.ai/concepts/fork-line.md) before forking a
+[fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md) before forking a
 production channel.
 
 ## 2. Declare the table
@@ -70,7 +70,7 @@ tables:
       on_conflict: merge
 ```
 
-A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/concepts/table-columns.md) lists the
+A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) lists the
 rest: `format`, which belongs to one type and is checked on every write,
 `display`, `label`, the governance flags, `index` and `unique`.
 
@@ -92,7 +92,7 @@ around it and a later change does not rewrite what is already stored.
 
 The merge key decides which row a write lands on, and each column's merge
 policy decides what happens to that column on that row. Both are explained
-in [column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md).
+in [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
 Keep `on_conflict: merge`: `replace` swaps the whole row for the incoming one
 and applies no column policy at all. The example uses three policies:
 
@@ -144,7 +144,7 @@ steps:
 The write sends every column on every call. The first write inserts the
 row exactly as sent, so `Reopened` starts at `0`. After that, the
 accumulating policies act only on columns a write carries (see
-[column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md)).
+[column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md)).
 
 The other activities you will usually need are:
 
@@ -158,7 +158,7 @@ The other activities you will usually need are:
 - `foundation.store.get_record`: reads one row by id.
 
 Their arguments are in the
-[activity reference](https://docs.popcorn.ai/reference/activities.md).
+[activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
 
 The store checks each value against its column's `type`, `format` and
 `required`. On a merging write, including `patch_row`, it checks the whole
@@ -202,7 +202,7 @@ the `handoffs` table before it binds the channel to the new version, so no
 run on the new version can reach a channel without the table. The other
 channels on the line get the table at their own daily update, apart from the
 ones that take no updates (see
-[publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md)).
+[publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md)).
 The publish prints how many channels will update, but only after the version
 exists.
 

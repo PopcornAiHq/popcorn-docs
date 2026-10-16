@@ -17,9 +17,13 @@ Outputs, under `build/`:
                      title, summary and URL but not its body: those pages are
                      looked up one entry at a time, and inlined they would
                      outweigh everything written by hand
-    <section>/<id>.md  the plain-Markdown twin of each page, at the path
-                     its llms.txt entry advertises
-    <section>/<id>.html  the same page for a person with a browser
+    <layer>/<kind>/<id>.md  the plain-Markdown twin of each page, at the
+                     path its llms.txt entry advertises: the page's `layer`,
+                     then concepts, guides, glossary or reference
+    <layer>/<kind>/<id>.html  the same page for a person with a browser
+    <dir>/<id>.md, .html, moved.json  each page's address from before the
+                     site had layers, answering with a pointer to where it
+                     is now, and the list of them
     index.html       the landing page, every concept with its summary
     404.html         what a missing path is answered with, in the site's own
                      chrome, so a stale link still leaves the reader somewhere
@@ -125,28 +129,34 @@ def parse(path: pathlib.Path) -> dict:
     if "order" in meta:
         meta["order"] = int(meta["order"])
     meta["body"] = doc.group("body").strip()
-    meta["section"] = path.parent.name
+    # The content directory the page lives in. Its URL is no longer that
+    # directory: see `page_dir`.
+    meta["source_dir"] = path.parent.name
     return meta
 
 
-# The sections in the order a reader meets them: (directory, label, what the
-# section is for). The label heads the section in the sidebar and on its
-# Overview card; the blurb is the card's text. The concepts come first: they
-# are what every guide and every agent answer points into, so they lead the
-# sidebar and the index. A section not listed here still publishes, after
-# these, under its directory name.
+# The two layers, product first: (frontmatter value, label, who it is for).
+# A page's layer is the first part of its URL and the top level of the
+# sidebar. Popcorn is used headless, so a user's assistant is the first
+# reader, and the product layer leads.
+LAYERS = [
+    ("product", "Using Popcorn",
+     "For anyone working with Routines, directly or through an assistant "
+     "connected over MCP: what a Routine does, and what you can ask of it."),
+    ("platform", "Building Routine Templates",
+     "For building or customizing the templates Routines are made from: the "
+     "files, flows and tools underneath, with no access to Popcorn's backend."),
+]
+
+# The kinds of page within a layer, in the order a reader meets them:
+# (kind, label, what it is for). The label heads the kind in the sidebar and
+# on its Overview card; the blurb is the card's text. A kind not listed here
+# still publishes, after these, under its own name.
 SECTIONS = [
-    ("concepts", "Concepts",
-     "One idea each, in reading order: what a bundle holds, then how it ships "
-     "and what a publish changes."),
-    ("guides", "Guides",
-     "Walkthroughs, in reading order. The first is the whole authoring loop; "
-     "each later one builds on it."),
-    ("glossary", "Glossary",
-     "The product's terms, then the platform's, each with its synonyms and "
-     "the collisions worth knowing."),
-    ("reference", "Reference",
-     "Generated from the platform itself, never written by hand."),
+    ("concepts", "Concepts", "One idea each, in reading order."),
+    ("guides", "Guides", "Walkthroughs, start to finish, each building on the last."),
+    ("glossary", "Glossary", "Every term, with its synonyms and the collisions worth knowing."),
+    ("reference", "Reference", "Generated from Popcorn itself, never written by hand."),
 ]
 
 # The sections whose pages a generator writes. llms-full.txt names them
@@ -154,20 +164,30 @@ SECTIONS = [
 GENERATED = {"reference"}
 
 _KNOWN = [name for name, *_ in SECTIONS]
+_LAYERS = [name for name, *_ in LAYERS]
 
-# Pages the navigation lists under a section other than their directory's.
-# Only the navigation moves: the URL is still `<directory>/<id>`, because
-# that path is in llms.txt and in other pages' links, and an id is permanent
-# by contract, which is what makes naming one here safe.
+# Pages listed under a kind other than their directory's. The two glossaries
+# live in content/concepts/ but are looked up rather than read through. An id
+# is permanent by contract, which is what makes naming one here safe.
 NAV_SECTION = {"product-glossary": "glossary", "glossary": "glossary"}
 
 
 def nav_section(page: dict) -> str:
-    return NAV_SECTION.get(page["id"], page["section"])
+    return NAV_SECTION.get(page["id"], page["source_dir"])
+
+
+def page_dir(page: dict) -> str:
+    """The page's directory on the site: its layer, then its kind."""
+    return f"{page['layer']}/{nav_section(page)}"
 
 
 def href(page: dict, suffix: str = ".html") -> str:
-    return f"/{page['section']}/{page['id']}{suffix}"
+    return f"/{page_dir(page)}/{page['id']}{suffix}"
+
+
+def old_href(page: dict, suffix: str) -> str:
+    """Where the page was served before the site was split into layers."""
+    return f"/{page['source_dir']}/{page['id']}{suffix}"
 
 
 def url(page: dict | None) -> str:
@@ -182,6 +202,13 @@ def section_info(section: str) -> tuple[str, str]:
     return section.title(), ""
 
 
+def layer_info(layer: str) -> tuple[str, str]:
+    for name, label, blurb in LAYERS:
+        if name == layer:
+            return label, blurb
+    return layer.title(), ""
+
+
 def reading_order(page: dict) -> tuple:
     """Section first, then the page's `order:`, then its title.
 
@@ -189,10 +216,12 @@ def reading_order(page: dict) -> tuple:
     which put an advanced guide ahead of the one it builds on. A page with
     no `order:` goes after the ordered ones in its section.
     """
+    layer = page["layer"]
+    layer_rank = _LAYERS.index(layer) if layer in _LAYERS else len(_LAYERS)
     section = nav_section(page)
     rank = _KNOWN.index(section) if section in _KNOWN else len(_KNOWN)
     order = page.get("order")
-    return (rank, section, order is None, order or 0, page["title"].lower())
+    return (layer_rank, rank, section, order is None, order or 0, page["title"].lower())
 
 
 def sidebar(pages: list[dict], current: str | None) -> str:
@@ -202,19 +231,23 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     order rather than needing an order of their own; pages without a group
     sit directly under their section.
     """
-    sections: dict[str, dict[str, list]] = {}
+    layers: dict[str, dict[str, dict[str, list]]] = {}
     for page in pages:
-        groups = sections.setdefault(nav_section(page), {})
+        groups = layers.setdefault(page["layer"], {}).setdefault(nav_section(page), {})
         groups.setdefault(page.get("group", ""), []).append(
             (render.inline(page["title"]), href(page), page["id"] == current)
         )
     # The home page leads the sidebar, current when no page is — `current`
     # is None only when the landing page is the one being built.
-    home = (None, [("", [("Overview", "/", current is None)])])
-    return render.site_nav([home] + [
-        (section_info(section)[0], list(groups.items()))
-        for section, groups in sections.items()
-    ])
+    out: list = [(None, [("", [("Overview", "/", current is None)])])]
+    for layer, sections in layers.items():
+        # A layer is a heading with no links of its own; its kinds follow.
+        out.append((layer_info(layer)[0], None))
+        out += [
+            (section_info(section)[0], list(groups.items()))
+            for section, groups in sections.items()
+        ]
+    return render.site_nav(out)
 
 
 def landing(pages: list[dict]) -> str:
@@ -224,41 +257,47 @@ def landing(pages: list[dict]) -> str:
     section gets a card that opens its first page in reading order, so the
     way in follows `order:` rather than being chosen again here.
     """
-    first: dict[str, dict] = {}
+    first: dict[str, dict[str, dict]] = {}
     for page in pages:
-        first.setdefault(nav_section(page), page)
-    cards = []
-    for section, page in first.items():
-        label, blurb = section_info(section)
-        cards.append(
-            f'<a class="card" id="{section}" href="{href(page)}">'
-            f'<span class="card-label">{label}</span>'
-            f"<p>{blurb}</p>"
-            f'<span class="card-start">{render.inline(page["title"])} \u2192</span></a>'
+        first.setdefault(page["layer"], {}).setdefault(nav_section(page), page)
+    layers = []
+    for layer, sections in first.items():
+        label, blurb = layer_info(layer)
+        cards = []
+        for section, page in sections.items():
+            kind, kind_blurb = section_info(section)
+            cards.append(
+                f'<a class="card" id="{layer}-{section}" href="{href(page)}">'
+                f'<span class="card-label">{kind}</span>'
+                f"<p>{kind_blurb}</p>"
+                f'<span class="card-start">{render.inline(page["title"])} \u2192</span></a>'
+            )
+        layers.append(
+            f'<h2 id="{layer}">{label}</h2>\n<p>{blurb}</p>\n'
+            '<div class="cards">' + "".join(cards) + "</div>\n"
         )
     return render.document(
         "Overview — Popcorn docs",
         "<h1>Overview</h1>\n"
-        '<p class="summary">Popcorn is an AI tracker. Each channel (a project, in '
-        "the app) is a tracker that updates itself, reading across email, "
-        "messages and files, and an "
-        "<strong>app bundle</strong> defines what it tracks: its tables, the flows "
-        "that update them, and the schedules and webhooks that bring an update in "
-        "without anyone typing.</p>\n"
-        "<p>These pages are for whoever authors, publishes or operates a bundle — "
-        "a person or an agent. The first guide walks the whole loop once; the "
-        "concepts are where to go when something behaves in a way you did not "
-        "expect.</p>\n"
-        '<div class="cards">' + "".join(cards) + "</div>\n"
-        "<h2>For agents</h2>\n"
+        '<p class="summary">Popcorn runs Routines. Each one is a piece of ongoing '
+        "work, such as claims intake or order follow-up, that reads across email, "
+        "messages and files, catches every update and decision, and keeps itself "
+        "current. People talk to its agent like a member of the team.</p>\n"
+        "<p>These pages come in two layers. <strong>Using Popcorn</strong> is "
+        "written in the words you see in Popcorn. <strong>Building Routine "
+        "Templates</strong> goes underneath, to what a template is made of; a "
+        "Platform note on a Using Popcorn page is the way down when you want "
+        "it.</p>\n"
+        + "".join(layers)
+        + "<h2>For agents</h2>\n"
         "<p>Every page has a Markdown twin at the same path, ending "
         "<code>.md</code> instead of <code>.html</code>. "
         '<a href="/llms.txt">/llms.txt</a> lists every page with its summary, '
         '<a href="/llms-full.txt">/llms-full.txt</a> holds every written page in '
         "full and names the generated reference pages, and "
         '<a href="/chunks.json">/chunks.json</a> has one record per page.</p>',
-        description="How Popcorn app bundles work: tables, flows, schedules and "
-        "webhooks, and what happens when you publish.",
+        description="How Popcorn Routines work, and how to build the Routine "
+        "Templates they are made from.",
         sidebar=sidebar(pages, None),
         url=url(None),
     )
@@ -338,15 +377,12 @@ def version_badge(page: dict) -> str:
 
 
 def eyebrow(page: dict) -> str:
-    """Where the page sits: its section, and its group when it has one.
-
-    Omitted when the section is the page itself — "Glossary" over "Glossary".
-    """
-    section = nav_section(page)
-    label = section_info(section)[0]
-    if label == page["title"]:
-        return ""
-    trail = f'<a href="/#{section}">{label}</a>'
+    """Where the page sits: its layer, its kind, and its group when it has one."""
+    layer, section = page["layer"], nav_section(page)
+    trail = (
+        f'<a href="/#{layer}">{layer_info(layer)[0]}</a> \u203a '
+        f'<a href="/#{layer}-{section}">{section_info(section)[0]}</a>'
+    )
     if page.get("group"):
         trail += f" \u203a {render.inline(page['group'])}"
     return f'<p class="eyebrow">{trail}</p>\n'
@@ -369,8 +405,15 @@ def main() -> int:
         shutil.rmtree(BUILD)
     BUILD.mkdir(parents=True)
 
+    # `section` in chunks.json is the page's directory on the site, so a
+    # reader that builds `<section>/<id>.md` from it lands on the page —
+    # which is how the channel agents' docs tool finds one.
+    chunks = [
+        {k: v for k, v in {**page, "section": page_dir(page)}.items() if k != "source_dir"}
+        for page in pages
+    ]
     (BUILD / "chunks.json").write_text(
-        json.dumps({"site": SITE, "pages": pages}, indent=2) + "\n"
+        json.dumps({"site": SITE, "pages": chunks}, indent=2) + "\n"
     )
 
     search = []
@@ -384,9 +427,9 @@ def main() -> int:
     ]
     by_id = {page["id"]: page for page in pages}
     for page in pages:
-        path = f"{page['section']}/{page['id']}.md"
+        path = href(page, ".md").lstrip("/")
         index += [f"## {page['title']}", f"{SITE}/{path}", "", page["summary"], ""]
-        if page["section"] in GENERATED:
+        if page["source_dir"] in GENERATED:
             full += [f"# {page['title']}", "", page["summary"], "", f"Full reference: {SITE}/{path}", ""]
         else:
             full += [f"# {page['title']}", "", page["summary"], "", page["body"], ""]
@@ -426,12 +469,31 @@ def main() -> int:
         search.append({
             "title": render.plain(page["title"]),
             "url": href(page),
-            "section": section_info(nav_section(page))[0],
+            "section": f"{layer_info(page['layer'])[0]} \u203a {section_info(nav_section(page))[0]}",
             "summary": render.plain(page["summary"]),
             "headings": render.search_entries(rendered),
         })
 
     (BUILD / "llms.txt").write_text("\n".join(index))
+
+    # The addresses pages had before the site was split into layers keep
+    # answering, with a pointer to where the page is now, so a link already
+    # copied into a tool or a prompt still leads somewhere. check-links fails
+    # any page of ours that links one: the pointers are for the outside.
+    moved = {}
+    for page in pages:
+        for suffix in (".md", ".html"):
+            old, new = old_href(page, suffix).lstrip("/"), href(page, suffix)
+            moved[old] = new.lstrip("/")
+            target = BUILD / old
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if suffix == ".md":
+                target.write_text(
+                    f"# {page['title']}\n\nThis page moved to {SITE}{new}.\n"
+                )
+            else:
+                target.write_text(render.moved_page(page["title"], f"{SITE}{new}"))
+    (BUILD / "moved.json").write_text(json.dumps({"moved": moved}, indent=2) + "\n")
     (BUILD / "search.json").write_text(
         json.dumps({"pages": search}, ensure_ascii=False, separators=(",", ":")) + "\n"
     )
@@ -459,7 +521,7 @@ def main() -> int:
     )
 
     size = (BUILD / "llms.txt").stat().st_size
-    sections = ", ".join(sorted({f"{p['section']}/" for p in pages}))
+    sections = ", ".join(sorted({f"{page_dir(p)}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
           f"llms-full.txt, search.json ({(BUILD / 'search.json').stat().st_size:,}B), "
           f"index.html, 404.html, robots.txt, sitemap.xml, fonts/, {sections}(.md + .html)")

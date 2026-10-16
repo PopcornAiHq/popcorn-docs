@@ -20,7 +20,7 @@ Popcorn decides what has to change underneath.
 
 Today's tools, the API and the CLI still use older and more technical names
 for several of these. The
-[platform glossary](https://docs.popcorn.ai/concepts/glossary.md) gives each of
+[platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md) gives each of
 its terms the product term it belongs to.
 
 ## Routines

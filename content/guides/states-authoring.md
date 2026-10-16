@@ -15,13 +15,13 @@ layer: platform
 
 This guide takes one `states:` section from design to a published, wired
 graph. What a state machine *is* — the tuple, the projection, why a button is
-an edge — is [the state machine](https://docs.popcorn.ai/concepts/state-machine.md),
+an edge — is [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md),
 and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
-**Action** (see the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)).
+**Action** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
 
 The loop is the ordinary one from
-[authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md):
+[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md):
 edit `manifest.yaml`, check it, read the error, repeat. One thing is
 different. The CLI's own checks do not look inside `states:`; the graph is
 checked only when the server parses the manifest. `popcorn app validate`
