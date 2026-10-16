@@ -11,7 +11,6 @@ summary: >
   a channel still on the product version. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 applies_to: [cli, mcp, human]
-source: [fork_for_channel, publish_fork_version, ChannelForkRegressionError, AmbiguousForkLineError]
 ---
 
 An app ships as a **product version** that every workspace can install. To

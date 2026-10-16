@@ -40,15 +40,18 @@ name is caught without appearing anywhere.
 
 ## Cite symbols, never paths
 
-A concept's `source:` field names bare symbols — the names a reader would
-search the backend for, nothing about where they live. This is why a path is
-both a leak and unnecessary. `scripts/drift.py sources` checks each name
-still has a definition in a local backend checkout; CI cannot, since the
-backend is private, so run it before any content PR. It checks existence, not
-behaviour — see "Checking the pages against the backend" in `README.md`.
+When prose has to name backend code, it names the bare symbol a reader would
+search for, nothing about where it lives. A path is both a leak and
+unnecessary: a symbol that moves file keeps its name, and a path does not
+survive a refactor.
 
-A symbol that moves file keeps its name; a path does not survive a refactor.
-That is the same reason this rule holds in prose.
+Pages do not list the symbols behind them. That list lives in a mapping kept
+in the private backend repository, keyed by page `id`, and the backend's CI
+fails when a listed symbol loses its definition. A `source:` field in a page
+fails `check-content.py`. A new or rewritten page that describes specific
+backend behaviour gets its entry in that mapping through a backend PR, and
+`scripts/drift.py` reads it from a local backend checkout — see "Checking the
+pages against the backend" in `README.md`.
 
 ## Describe the present
 

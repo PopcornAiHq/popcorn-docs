@@ -24,6 +24,10 @@ Checks, in the order a writer meets them:
 * `platform`, when present, is a real `YYYY-MM-DD` date — it is shown to
   readers as the day the page was last regenerated, so a malformed one would
   be published as a claim about freshness nobody can read
+* no `source:` field. The backend symbols behind a page are private names,
+  kept in a mapping in the private backend repository; this repository is
+  public, so a page that lists them leaks them, and this is the guard that
+  stops one page at a time bringing the field back
 """
 
 from __future__ import annotations
@@ -45,6 +49,7 @@ _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
 _PLATFORM = re.compile(r"^platform:\s*(?P<value>.*)$", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
+_SOURCE = re.compile(r"^source\s*:", re.M)
 
 
 def check(path: pathlib.Path, ids: set[str]) -> list[str]:
@@ -97,6 +102,12 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
             datetime.date.fromisoformat(value)
         except ValueError:
             problems.append(f"platform '{value}' is not a YYYY-MM-DD date")
+
+    if _SOURCE.search(front):
+        problems.append(
+            "source: is refused — a page's backend symbols are private and live "
+            "in the backend's mapping, not here (see content/_frontmatter.md)"
+        )
 
     words = len(body.split())
     if words < BODY_MIN_WORDS:

@@ -11,7 +11,6 @@ summary: >
   with no app_type clears the channel's.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
 applies_to: [cli, mcp, human]
-source: [ParsedTemplateConfig, ChannelTemplateInstaller]
 ---
 
 Every manifest key but `version:` is optional, and each one has its own

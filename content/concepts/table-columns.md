@@ -11,7 +11,6 @@ summary: >
   column declares unless it differs from one only by case.
 concepts: [merge-policy, manifest-keys, adding-a-table]
 applies_to: [cli, mcp, human]
-source: [ColumnDef, SchemaDef, validate_record]
 ---
 
 A bundle declares its tables under `tables:` in the manifest. Each install

@@ -11,7 +11,6 @@ summary: >
   reference fails before the activity runs, so no policy catches it.
 concepts: [flow-grammar, references, debugging-a-failed-run]
 applies_to: [cli, mcp, human]
-source: [OnError, ReferenceError]
 ---
 
 A step's `on_error:` decides what its failure does to the run and how often

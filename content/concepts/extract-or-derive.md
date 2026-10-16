@@ -11,7 +11,6 @@ summary: >
   Extract whatever the input states; derive only the rest.
 concepts: [references, on-error]
 applies_to: [cli, mcp, human]
-source: [ExtractInput, extract]
 ---
 
 The DSL cannot reach sub-fields of an `object` input — `$inputs.payload.name`

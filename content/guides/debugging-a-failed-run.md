@@ -11,7 +11,6 @@ summary: >
   integration, a skipped step) and the ones that never start.
 concepts: [channel-binding, publish-and-apply, flow-identity, template-authoring]
 applies_to: [cli, human]
-source: [run_outcome, get_workflow_execution_detail, get_workflow_execution_timeline, missing_required_integrations, InterpreterOutput, OnError, derive_delivery_status, reconcile_inflight_trigger_workflows, check_exact_dedup]
 ---
 
 This guide starts from a flow run that did the wrong thing, or from one you

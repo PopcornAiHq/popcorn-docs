@@ -11,7 +11,6 @@ summary: >
   in the query instead of gating a step.
 concepts: [flow-grammar, references]
 applies_to: [cli, mcp, human]
-source: [parse_when, routes_to_expression, parse_when_expression, evaluate_predicate, PredicateError]
 ---
 
 `when:` gates a step, a block, or — on a `foreach` step — each item. Routing

@@ -11,7 +11,6 @@ summary: >
   on the version the channel runs is refused.
 concepts: [bundle-version, fork-line]
 applies_to: [cli, mcp, human]
-source: [bind_version_internal, get_flow_bytes_pinned]
 ---
 
 A channel points at exactly one bundle version. The channel stores no copy of

@@ -71,11 +71,15 @@ checks are required to merge.
 
 ## Checking the pages against the backend
 
-A page's `source:` names the backend symbols it describes, and the backend
-keeps moving after the page is written. `scripts/drift.py` compares the two.
-The backend repository is private, so this runs **locally only**, against a
-checkout named by `$POPCORN_BACKEND` (default `$HOME/popcorn/backend`); with
-none there it prints a notice and exits 0, which is also why CI does not run it.
+Each page's backend symbols are listed, by page `id`, in a mapping kept in the
+private backend repository — not in the page, since the names are private.
+The backend's own CI fails when a listed symbol loses its definition, so a
+rename cannot orphan a page silently. The backend keeps moving after a page
+is written, though, and `scripts/drift.py` compares the two. It reads the
+mapping and the code from a local checkout named by `$POPCORN_BACKEND`
+(default `$HOME/popcorn/backend`), so it runs **locally only**; with no
+checkout there it prints a notice and exits 0, which is also why CI does not
+run it.
 
 ```bash
 python3 scripts/drift.py sources               # every cited symbol still has a definition
@@ -84,16 +88,20 @@ python3 scripts/drift.py packet merge-policy > ~/packet.md   # page + cited sour
 python3 scripts/drift.py packet --all > ~/packets.md
 ```
 
-- **`sources`** — before any content PR. It fails on a cited name the backend
-  no longer defines; it cannot tell you the page is right.
+- **`sources`** — the same existence check the backend's CI runs, plus a
+  check that every page the mapping names exists here. Run it after renaming
+  or deleting a page, whose entry in the mapping must follow. It fails on a
+  cited name the backend no longer defines; it cannot tell you the page is
+  right.
 - **`changes`** — periodically. A review list, not a verdict: the pages whose
   cited files have moved since the page did.
 - **`packet`** — for each page `changes` flags, and for every new page. Hand
   the output to a model; it carries its own instructions to list what the code
   contradicts and what the page omits.
 
-`changes` and `packet` print private source paths, and `packet` reproduces
-private source. Keep their output outside this repository.
+All three print private symbol names, `changes` and `packet` print private
+source paths, and `packet` reproduces private source. Keep their output
+outside this repository.
 
 ## Publishing
 

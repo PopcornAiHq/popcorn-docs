@@ -11,7 +11,6 @@ summary: >
   dots, and keep spaces out of any column a flow dereferences.
 concepts: [flow-grammar, on-error, table-columns]
 applies_to: [cli, mcp, human]
-source: [Ref, parse_ref, REFERENCE_PATTERN, Scope, resolve_value, ReferenceError, math_calculate]
 ---
 
 A step's `args`, `when:` and `foreach:`, and a flow's `outputs:`, read values
