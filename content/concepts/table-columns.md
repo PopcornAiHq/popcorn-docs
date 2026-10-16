@@ -4,18 +4,18 @@ title: Table columns
 order: 6
 group: What a bundle holds
 summary: >
-  A column has a name and one of five types; `format` is checked on every
-  write, while `display` is checked only for its kind. Install adds columns and
-  fixes attributes but never drops or renames one. A flow can dereference only
-  a column whose name has no spaces, and the store silently accepts a key no
-  column declares unless it differs from one only by case.
+  A Routine's Tables and Columns are declared in its template: a column has a
+  name and one of five types; `format` is checked on every write, while
+  `display` is checked only for its kind. Install adds columns and fixes
+  attributes but never drops or renames one. A flow can dereference only a
+  column whose name has no spaces.
 concepts: [merge-policy, manifest-keys, adding-a-table]
 layer: platform
+product_terms: [Table, Column]
 ---
 
-A bundle declares its tables under `tables:` in the manifest. Each install
-reconciles them additively. In the product a table is a Routine's **Table**,
-and each column a **Column**.
+A Routine's Tables, and each Table's Columns, are declared in its template's
+manifest, under `tables:`. Each install reconciles them additively.
 
 ```yaml
 tables:

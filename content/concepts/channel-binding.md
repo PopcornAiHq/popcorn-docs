@@ -4,16 +4,19 @@ title: How a channel runs a version
 order: 15
 group: How a version ships
 summary: >
-  A channel points at exactly one bundle version. A run reads it once at start
-  and is pinned for its whole life, including the flows it calls, so an upgrade
-  mid-run never mixes versions; table data stays live. Base edits on the
-  line's newest version (head): when a channel lags behind it, a publish based
-  on the version the channel runs is refused.
+  A Routine runs one version of its template at a time: its channel points at
+  exactly one bundle version. A run reads it once at start and is pinned for
+  its whole life, including the flows it calls, so an upgrade mid-run never
+  mixes versions; table data stays live. Base edits on the line's head: a
+  publish based on a lagging channel's version is refused.
 concepts: [bundle-version, fork-line]
 layer: platform
+product_terms: [Routine]
 ---
 
-A channel points at exactly one bundle version. The channel stores no copy of
+A Routine runs exactly one version of its template, and a run that has
+started finishes on the version it started with. Underneath, the Routine's
+channel points at exactly one bundle version. The channel stores no copy of
 the flows or the code: they are read from that version when they are needed.
 The binding itself is a single write, but an upgrade is more than the bind —
 the install reconciles tables, schedules and webhooks first, and binds last.

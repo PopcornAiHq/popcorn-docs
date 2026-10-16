@@ -11,6 +11,7 @@ summary: >
   dots, and keep spaces out of any column a flow dereferences.
 concepts: [flow-grammar, on-error, table-columns]
 layer: platform
+product_terms: []
 ---
 
 A step's `args`, `when:` and `foreach:`, and a flow's `outputs:`, read values

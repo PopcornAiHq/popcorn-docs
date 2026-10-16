@@ -351,3 +351,18 @@
   concept: extract-or-derive
   pass: extract what the payload states; a field it does not state has to be derived with agent.transform, guarded by a recognized flag because the model invents an object given junk
   trap: uses fields.extract with a default for severity, or trusts the output schema to reject junk
+
+- q: Why does my customized Routine no longer get the template's improvements?
+  concept: product-glossary, fork-line
+  pass: a change to what the Routine is built from gave it a copy of its own (a fork line), and a fork line no longer receives product releases; forking cannot be undone
+  trap: says the improvements are paused and can be resumed, or to re-install the product template
+
+- q: Where do a Routine's settings like its send mode come from?
+  concept: scalar-tiers
+  pass: many Routine Settings are scalars; popcorn.* switches such as popcorn.email_send_mode belong in default_scalars so a member's change survives updates
+  trap: declares the send mode under scalars:, which install then owns
+
+- q: How does a Routine decide which Actions an item offers?
+  concept: product-glossary, state-machine, states-authoring
+  pass: the template declares state machines; each Action is the button on a staff edge, offered when the edge is legal from where the item stands
+  trap: says Actions are configured separately from Status

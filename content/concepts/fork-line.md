@@ -4,20 +4,23 @@ title: Fork lines
 order: 16
 group: How a version ships
 summary: >
-  A fork line is a workspace's own version series of an app, forked from the
-  shared product version. Publishing to it moves every channel on that line —
-  the others converge on their daily update. Once on a fork line a channel
-  never leaves it, so isolating a change means forking a second named line from
-  a channel still on the product version. A fork cannot be undone.
+  Customizing a Routine beyond its settings gives it a copy of its own: a fork
+  line, the workspace's own version series of the app. Publishing to it moves
+  every channel on that line — the others converge on their daily update. Once
+  on a fork line a channel never leaves it, so isolating a change means a
+  second named line. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 layer: platform
+product_terms: [customizing a Routine]
 ---
 
-An app ships as a **product version** that every workspace can install. To
-change it for your workspace, you fork: the platform mints a version series
-your workspace owns, starting from byte-identical content to what your channel
-already runs, and binds the channel to it. From then on your channel follows
-your line and product releases no longer reach it.
+In the product, a change to what a Routine is built from gives it a copy of
+its own, which no longer receives the template's improvements. That copy is
+a fork line. An app ships as a **product version** that every workspace can
+install. To change it for your workspace, you fork: the platform mints a
+version series your workspace owns, starting from byte-identical content to
+what your channel already runs, and binds the channel to it. From then on
+your channel follows your line and product releases no longer reach it.
 
 Forking is required before publishing. A publish lands on a line the workspace
 owns, so a publish whose base is the shared product version is refused with

@@ -6,10 +6,12 @@ layout: lookup
 summary: >
   The platform's nouns, each with its synonyms, its collisions and the product
   term it belongs to. An app is the thing (in the product, a Routine Template);
-  its app bundle is its files. A channel (in the product, a Routine) is what an
-  app installs into, identified by its UUID because a name can change.
+  its app bundle is its files. A channel (in the product, a Routine; once a
+  project) is what an app installs into, identified by its UUID because a
+  name can change.
 concepts: [product-glossary, app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
 layer: platform
+product_terms: [Routine, Routine Template]
 ---
 
 The vocabulary of authors, tools and the API. Each entry gives the preferred
@@ -137,23 +139,24 @@ change gives it a copy of its own, which is what a fork does.
 Product term: **Routine**, except where an entry says otherwise.
 
 - **channel** — What an app installs into. The product calls it a
-  *project* (see its entry); the API, the CLI and these pages say *channel*. A
+  *Routine*, and older surfaces called it a *project* (see its entry); the API,
+  the CLI and these platform pages say *channel*. A
   channel is identified by its UUID; its `#name` can change, so a script or
   a note should hold the UUID. The CLI accepts either and resolves a name to
   the UUID. On the wire the id is `conversation_id`, because the API's older
   noun, *conversation* (see its entry), covers direct messages too. See
   [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
   Product term: Routine.
-- **project** — The MCP tools' and the web app's name for a channel: the
-  space a tracker lives in, with its members, its messages and the app it
-  runs. The web app creates one with "New project", and an app can give its
-  projects a noun of its own. The API and the CLI call a project a *channel*,
-  and the API's wider noun is *conversation*, so a project's id is
+- **project** — The older name for a channel in the MCP tools and the web
+  app, before both said *Routine*: the space a Routine's work lives in, with
+  its members, its messages and the app it runs. The API and the CLI call it a
+  *channel*, and the API's wider noun is *conversation*, so its id is
   `conversation_id` on the wire and `#name` still names one. Product term:
   Routine. *Not to be confused with* `feature.state.project`,
   which recomposes a row's Status (see *Status*).
-- **tracker** — The MCP server's word for a channel that runs an app, as in
-  "each channel is a tracker". Product term: Routine. Many apps also name their main table
+- **tracker** — An older word for a channel that runs an app, from earlier
+  product copy and MCP descriptions ("each channel is a tracker"). Product
+  term: Routine. Many apps also name their main table
   `tracker`, and the state-machine page's "tracker row" means a row of it.
 - **workspace** — The tenant: it owns channels, users and fork lines. Its
   users are its members, each with a workspace role (see *member*).

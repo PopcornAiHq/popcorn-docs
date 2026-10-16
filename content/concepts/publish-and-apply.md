@@ -4,16 +4,20 @@ title: Publish and apply
 order: 17
 group: How a version ships
 summary: >
-  Publish mints the next version on a fork line and reaches every channel on
-  it; its guards check permission and validity, never whether you meant to
-  reach everyone, and a manifest missing `app_type` is not refused — it clears
-  the app on every channel. Apply brings a fork-line channel up to its head,
-  takes no version, and is the durable retry when an install was blocked.
+  Publish mints the next version of a Routine Template on a fork line and
+  reaches every channel on it; its guards check permission and validity, never
+  whether you meant to reach everyone, and a manifest missing `app_type` is
+  not refused — it clears the app on every channel. Apply brings a fork-line
+  channel up to its head, takes no version, and is the durable retry when an
+  install was blocked.
 concepts: [fork-line, bundle-version]
 layer: platform
+product_terms: [Routine Template]
 ---
 
-Two operations people conflate, doing different jobs.
+A customized Routine Template changes when someone publishes it and lands on
+a Routine when it is applied. Two operations people conflate, doing
+different jobs.
 
 **Publish** mints the next version on a line and starts an install on the
 channel it names. It is a line operation: every other channel on the line

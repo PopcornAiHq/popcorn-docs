@@ -4,22 +4,24 @@ title: Bundle versions
 order: 14
 group: How a version ships
 summary: >
-  Publishing mints an immutable, content-addressed version on a line;
-  installing it is a separate step that can be blocked. The same semver with
-  different content is refused, and so is a new semver whose content matches an
-  earlier version — change something, such as the changelog, and publish
-  forward. An old version can be read back by id, but nothing rolls a channel
-  back.
+  Each improvement to a Routine Template is a bundle version: publishing mints
+  an immutable, content-addressed version on a line, and installing it is a
+  separate step that can be blocked. The same semver with different content is
+  refused, and so is a new semver whose content matches an earlier version. An
+  old version can be read back by id, but nothing rolls a channel back.
 concepts: [app-bundle, channel-binding, publish-and-apply]
 layer: platform
+product_terms: [Routine Template]
 ---
 
-A version is minted by a publish and never changes afterwards. Installing it
-onto a channel is a separate operation: the CLI starts one for the channel you
-published from, and other channels on the line follow on their own schedule
-(see `fork-line`). An install can be blocked or can skip, and then the version
-exists while no channel runs it. The gap between the two is where most
-confusion about "did my change go out" lives.
+When a Routine receives its template's improvements, what arrives is a new
+bundle version. A version is minted by a publish and never changes
+afterwards. Installing it onto a channel is a separate operation: the CLI
+starts one for the channel you published from, and other channels on the
+line follow on their own schedule (see `fork-line`). An install can be
+blocked or can skip, and then the version exists while no channel runs it.
+The gap between the two is where most confusion about "did my change go out"
+lives.
 
 ## The version is identified two ways
 
