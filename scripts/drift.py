@@ -76,7 +76,15 @@ COMMITS_SHOWN = 5
 
 # Where a symbol may be defined. Tests are excluded for the reason in the
 # module docstring: a test's stand-in is not the implementation.
-PATHSPEC = ["*.py", ":(exclude)**/tests/**", ":(exclude)**/test_*.py", ":(exclude)**/conftest.py"]
+# `glob` magic lets `**/` match zero directories, so a repo-root conftest.py
+# is excluded too.
+PATHSPEC = [
+    "*.py",
+    ":(exclude,glob)**/tests/**",
+    ":(exclude,glob)**/test_*.py",
+    ":(exclude,glob)**/conftest.py",
+    ":(exclude,glob)integration_tests/**",
+]
 
 # The mapping's table, which is also how it is found — see the docstring.
 TABLE = "docs_sources"
