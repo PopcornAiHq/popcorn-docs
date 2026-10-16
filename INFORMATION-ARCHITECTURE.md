@@ -7,6 +7,23 @@ nobody can say which one a new file belongs in.
 Each section below states its audience, what belongs in it, and the one test
 that decides a borderline case.
 
+## Two layers, across every section
+
+Every page also declares a `layer`, which cuts across concepts, guides and
+reference.
+
+- **`product`** — for a Popcorn user and their assistant, in the product
+  glossary's words. Popcorn is used headless, so this is what an assistant
+  connected over MCP reads first.
+- **`platform`** — for someone building or customizing a Routine Template
+  without access to the backend, in the platform glossary's words.
+
+**The test:** *would a Popcorn user who never builds a template need this?*
+Then it is product, and it names a platform term only inside a Platform note.
+
+Nothing internal has a layer here. Backend symbols, services and why the
+platform is built the way it is stay out of this public repository.
+
 ## `content/concepts/`
 
 **Audience:** an agent answering a question mid-task, and a person who has hit

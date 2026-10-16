@@ -10,7 +10,7 @@ summary: >
   line's newest version (head): when a channel lags behind it, a publish based
   on the version the channel runs is refused.
 concepts: [bundle-version, fork-line]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A channel points at exactly one bundle version. The channel stores no copy of

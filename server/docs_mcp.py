@@ -44,18 +44,23 @@ _READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False)
 
 
 @mcp.tool(annotations=_READ_ONLY)
-def search_docs(query: str, limit: int = 5) -> str:
+def search_docs(query: str, limit: int = 5, layer: str | None = None) -> str:
     """Find Popcorn concepts matching a question or phrase.
 
     Returns each match's summary, never its full text — read one with get_doc.
     A query that matches nothing returns the nearest entries rather than an
     empty result.
 
+    Pages are in one of two layers. "product" pages describe Routines in the
+    words a Popcorn user sees; "platform" pages describe what a Routine
+    Template is made of, for someone building one. Omit layer to search both.
+
     Args:
         query: a question, error message, or phrase
         limit: maximum results (default 5)
+        layer: "product" or "platform" to search one layer only
     """
-    return retrieval.search(_pages, query, limit=limit)
+    return retrieval.search(_pages, query, limit=limit, layer=layer)
 
 
 @mcp.tool(annotations=_READ_ONLY)

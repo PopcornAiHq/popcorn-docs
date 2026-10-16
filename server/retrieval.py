@@ -121,9 +121,23 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
     )
 
 
-def search(pages: list[dict], query: str, limit: int = 5) -> str:
+LAYERS = ("product", "platform")
+
+
+def search(pages: list[dict], query: str, limit: int = 5, layer: str | None = None) -> str:
+    if layer is not None and layer not in LAYERS:
+        return f"layer must be one of {', '.join(LAYERS)}, or omitted to search both."
+    if layer is not None:
+        pages = [p for p in pages if p.get("layer") == layer]
     terms = _terms(query)
-    ranked = sorted(pages, key=lambda p: _score(p, terms), reverse=True)
+    # A user's assistant is the first reader, so on an equal score the page in
+    # the product's words comes first. Only a tie: a platform page that answers
+    # the question better still outranks one that merely uses the right nouns.
+    ranked = sorted(
+        pages,
+        key=lambda p: (_score(p, terms), p.get("layer") == "product"),
+        reverse=True,
+    )
     hits = [p for p in ranked if _score(p, terms)][:limit]
 
     if hits:

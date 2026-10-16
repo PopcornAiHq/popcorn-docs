@@ -10,7 +10,7 @@ summary: >
   such as the typo `schedule:`, is ignored without a warning, and a manifest
   with no app_type clears the channel's.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 Every manifest key but `version:` is optional, and each one has its own

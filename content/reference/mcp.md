@@ -10,7 +10,7 @@ summary: >
   Routine's app — with their arguments, generated from the server's own
   definitions.
 concepts: [app-bundle, publish-and-apply, fork-line]
-applies_to: [cli, mcp, human]
+layer: product
 ---
 
 The hosted MCP server gives a person's assistant 27 tools. With them it

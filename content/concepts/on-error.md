@@ -10,7 +10,7 @@ summary: >
   `$steps.<id>.error`; `fallback` is accepted but runs as `fail`. A missing
   reference fails before the activity runs, so no policy catches it.
 concepts: [flow-grammar, references, debugging-a-failed-run]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A step's `on_error:` decides what its failure does to the run and how often

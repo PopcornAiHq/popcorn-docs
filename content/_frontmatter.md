@@ -16,7 +16,7 @@ summary: >                     # THE PRODUCT — under 400 characters
   A fork line is a workspace's own version series of an app. Publishing to it
   moves every channel on that line, not just the one you edited.
 concepts: [publish, channel-binding]   # other ids, for "see also" and search
-applies_to: [cli, mcp, human]          # which renderings include it
+layer: platform                        # product | platform — which layer the page speaks
 ---
 ```
 
@@ -81,8 +81,19 @@ that changes nothing leaves the page untouched; a hand run that changes the
 page drops the line, since it does not know which deploy it read. A page has
 `version` or `platform`, never both, and a hand-written page has neither.
 
-**`applies_to`** records which readers a page is written for — `cli`, `mcp`,
-`human`. Nothing reads it: the build and the MCP server serve every page to
-every reader. It is still worth setting honestly: a page marked
-`[cli, human]` — editing files on disk, say — tells a reviewer it asks for
-something an MCP host with no filesystem cannot do.
+**`layer`** says whose words the page is written in, and it is required.
+
+- `product` — for a Popcorn user and their assistant: Routines, Routine
+  Templates, Triggers, Actions, Status, Routine Settings, in the
+  [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'s
+  terms. Such a page names a platform term only inside a **Platform note** —
+  a blockquote that opens `> **Platform note** —` and links the platform page
+  that explains the term. `scripts/check-layer.py` fails a product page that
+  uses one anywhere else, taking the terms from the platform glossary.
+- `platform` — for someone building a Routine Template: the bundle format,
+  the CLI, flows, fork lines, in the
+  [platform glossary](https://docs.popcorn.ai/concepts/glossary.md)'s terms.
+
+The field describes the page, not its reader: someone building a template
+reads both layers. A page that needs the CLI says so in its first paragraph;
+the retired `applies_to:` field is refused.

@@ -28,6 +28,12 @@ Checks, in the order a writer meets them:
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
   stops one page at a time bringing the field back
+* `layer` is `product` or `platform`. It is what the site's two sections, the
+  lens check (`check-layer.py`) and search all read, so a page without one
+  would belong to neither
+* no `applies_to:` field. It recorded which readers a page was for and
+  nothing read it; `layer` replaced it, and a page that needs the CLI says so
+  in its prose
 """
 
 from __future__ import annotations
@@ -50,6 +56,9 @@ LAYOUTS = {"lookup"}
 _PLATFORM = re.compile(r"^platform:\s*(?P<value>.*)$", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
+_LAYER = re.compile(r"^layer:\s*(?P<value>.*)$", re.M)
+LAYERS = {"product", "platform"}
+_APPLIES_TO = re.compile(r"^applies_to\s*:", re.M)
 
 
 def check(path: pathlib.Path, ids: set[str]) -> list[str]:
@@ -102,6 +111,15 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
             datetime.date.fromisoformat(value)
         except ValueError:
             problems.append(f"platform '{value}' is not a YYYY-MM-DD date")
+
+    layer = _LAYER.search(front)
+    if not layer:
+        problems.append(f"no layer — every page is one of {sorted(LAYERS)}")
+    elif layer.group("value").strip() not in LAYERS:
+        problems.append(f"layer '{layer.group('value').strip()}' is not one of {sorted(LAYERS)}")
+
+    if _APPLIES_TO.search(front):
+        problems.append("applies_to: is retired — say in the page's prose when it needs the CLI")
 
     if _SOURCE.search(front):
         problems.append(

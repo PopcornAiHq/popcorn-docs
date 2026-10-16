@@ -10,7 +10,7 @@ summary: >
   the runs that end `succeeded` having done nothing (a missing required
   integration, a skipped step) and the ones that never start.
 concepts: [channel-binding, publish-and-apply, flow-identity, template-authoring]
-applies_to: [cli, human]
+layer: platform
 ---
 
 This guide starts from a flow run that did the wrong thing, or from one you

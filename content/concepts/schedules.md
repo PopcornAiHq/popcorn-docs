@@ -10,7 +10,7 @@ summary: >
   `flow:` is not in the bundle (a typo in it, say) disappears: skipped,
   then deleted as undeclared. `app status` explains live schedules that differ.
 concepts: [manifest-keys, flow-identity]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A schedule is how a bundle runs a flow on a clock. It names the flow, a

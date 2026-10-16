@@ -10,7 +10,7 @@ summary: >
   expected edge enters`, `lacks columns … the states tier writes`, a terminal
   left by staff — and its fix.
 concepts: [state-machine, manifest-keys, app-bundle]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 This guide takes one `states:` section from design to a published, wired

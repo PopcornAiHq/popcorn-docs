@@ -10,7 +10,7 @@ summary: >
   the payload does not state, and given junk it invents a plausible object.
   Extract whatever the input states; derive only the rest.
 concepts: [references, on-error]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 The DSL cannot reach sub-fields of an `object` input — `$inputs.payload.name`

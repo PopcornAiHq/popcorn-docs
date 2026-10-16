@@ -10,7 +10,7 @@ summary: >
   a column whose name has no spaces, and the store silently accepts a key no
   column declares unless it differs from one only by case.
 concepts: [merge-policy, manifest-keys, adding-a-table]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A bundle declares its tables under `tables:` in the manifest. Each install

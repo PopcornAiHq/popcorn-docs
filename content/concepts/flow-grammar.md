@@ -10,7 +10,7 @@ summary: >
   steps private and exposes only its declared outputs, and `foreach` repeats a
   step per item, at most five in parallel.
 concepts: [flow-identity, references, conditions, on-error]
-applies_to: [cli, mcp, human]
+layer: platform
 ---
 
 A flow is how a bundle does work. Nothing in the product names it: a flow

@@ -10,7 +10,7 @@ summary: >
   a Routine stays behind these names. The platform glossary maps each one to
   the platform's terms.
 concepts: [glossary]
-applies_to: [mcp, human]
+layer: product
 ---
 
 The words a person sees, and the words an assistant should use when it talks

@@ -33,3 +33,5 @@ jobs:
         run: scripts/check-retrieval.py
       - name: Highlighting never changes a code block's text
         run: scripts/check-highlight.py
+      - name: Product pages speak the product's words
+        run: scripts/check-layer.py
