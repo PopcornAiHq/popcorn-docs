@@ -14,6 +14,12 @@ Checks:
 * a product page uses no platform term outside a Platform note
 * every Platform note links at least one `layer: platform` page, because a
   note that names the mechanism and leads nowhere strands the reader
+* a platform page declares `product_terms:` — the product glossary terms it
+  explains the mechanism behind — and its summary names one of them. A reader
+  arriving from a Platform note, or a search in the product's words, lands on
+  a page that says the term they came with. `product_terms: []` declares a
+  page with no product term, such as the flow grammar, on purpose; leaving the
+  field out is the omission this catches
 
 The terms come from the platform glossary's entries, less the ones the
 product glossary also defines (`workspace`, `table`, …), so a term is guarded
@@ -53,6 +59,8 @@ _ENTRY = re.compile(
     r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?", re.M
 )
 _LAYER = re.compile(r"^layer:\s*(?P<value>\S+)", re.M)
+_TERMS = re.compile(r"^product_terms:\s*\[(?P<terms>[^\]]*)\]", re.M)
+_SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
 _GENERATED = re.compile(r"^(platform|version):", re.M)
 _NOTE = re.compile(r"^> \*\*Platform note\*\*")
 _LINK = re.compile(r"\]\((?P<url>[^)\s]+)\)")
@@ -122,7 +130,25 @@ def main() -> int:
 
     problems: list[str] = []
     checked = 0
+    product_terms = _entries(PRODUCT_GLOSSARY)
     for page_id, (layer, front, body) in pages.items():
+        if layer == "platform" and not _GENERATED.search(front):
+            declared = _TERMS.search(front)
+            if not declared:
+                problems.append(
+                    f"{page_id}: no product_terms: — list the product terms this page "
+                    "explains, or [] when it has none"
+                )
+                continue
+            terms_here = [t.strip() for t in declared.group("terms").split(",") if t.strip()]
+            unknown = [t for t in terms_here if t.lower() not in product_terms]
+            if unknown:
+                problems.append(f"{page_id}: product_terms {unknown} are not product glossary entries")
+            block = _SUMMARY.search(front + "\n")
+            summary = " ".join(block.group("block").split()) if block else ""
+            if terms_here and not any(_pattern(t.lower(), False).search(summary) for t in terms_here):
+                problems.append(f"{page_id}: the summary names none of its product_terms {terms_here}")
+            continue
         if layer != "product":
             continue
         rest, notes = split_notes(body)

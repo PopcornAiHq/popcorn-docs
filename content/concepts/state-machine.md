@@ -4,17 +4,20 @@ title: State machines in a bundle
 order: 8
 group: What a bundle holds
 summary: >
-  A bundle declares its own state machines — states, transitions, and the
-  button on each edge — and the platform runs them. A row's status is a
-  projection of those machines, so it changes by firing an event; a value
-  written to the column lasts until the next projection. Publish proves the graph's structure; its intent is the
-  author's to check — states no event fires, terminals reached too early.
+  A Routine's Status and Actions come from state machines its template
+  declares — states, transitions, and the button on each edge — which the
+  platform runs. A row's Status is a projection of those machines, so it
+  changes by firing an event; a value written to the column lasts until the
+  next projection. Publish proves the graph's structure; its intent is the
+  author's to check.
 concepts: [manifest-keys, channel-binding, states-authoring]
 layer: platform
+product_terms: [Status, Action]
 ---
 
-A tracker row is not one flat status. It is a **tuple of small machines**, and
-the single chip a user sees is a projection of that tuple.
+An item's Status, and the Actions it offers, are not one flat field.
+Underneath, a tracker row is a **tuple of small machines**, and the single
+chip a user sees is a projection of that tuple.
 
 A bundle declares the machines, their states, and the transitions between them
 in its manifest. The platform ships the engine and runs the graph; the bundle

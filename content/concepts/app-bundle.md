@@ -4,18 +4,20 @@ title: App bundles
 order: 1
 group: What a bundle holds
 summary: >
-  An app bundle is a directory of YAML plus optional code that turns an empty
-  channel into an application — tables, flows, schedules and webhooks. Every
-  non-reserved YAML file at the bundle's root is a flow, so a sample payload
-  left there installs as one; keep payloads outside the bundle. A manifest with
-  a version is what makes it publishable.
+  A Routine Template is an app bundle: a directory of YAML plus optional code
+  that turns an empty channel into a Routine — tables, flows, schedules and
+  webhooks. Every non-reserved YAML file at the bundle's root is a flow, so a
+  sample payload left there installs as one; keep payloads outside the bundle.
+  A manifest with a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
 layer: platform
+product_terms: [Routine Template]
 ---
 
-An app bundle is a directory. Installing it into an empty channel gives that
-channel tables to hold state, flows to do work, and schedules and webhooks to
-start them.
+A Routine Template is, underneath, an app bundle: a directory. Installing it
+into an empty channel — the platform's word for a Routine — gives that
+channel tables to hold state, flows to do work, and schedules and webhooks
+to start them.
 
 ```
 myapp/

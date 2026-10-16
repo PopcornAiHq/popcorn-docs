@@ -4,18 +4,21 @@ title: Manifest keys and what install does to them
 order: 3
 group: What a bundle holds
 summary: >
-  Each manifest key has its own install semantics, and an absent key is not
-  the same as an empty one — omitting schedules leaves them alone, while
-  `schedules: []` deletes every schedule the bundle manages. An unknown key,
-  such as the typo `schedule:`, is ignored without a warning, and a manifest
-  with no app_type clears the channel's.
+  A Routine Template's manifest decides what install does to a Routine, key by
+  key, and an absent key is not the same as an empty one — omitting schedules
+  leaves them alone, while `schedules: []` deletes every schedule the bundle
+  manages. An unknown key, such as the typo `schedule:`, is ignored without a
+  warning, and a manifest with no app_type clears the channel's.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
 layer: platform
+product_terms: [Routine Template]
 ---
 
-Every manifest key but `version:` is optional, and each one has its own
-install semantics. Getting this wrong is how a live channel's state gets wiped,
-so it is worth reading once in full.
+A Routine Template's `manifest.yaml` is what decides what a Routine holds
+and how its Triggers are set up, every time the template installs. Every
+manifest key but `version:` is optional, and each one has its own install
+semantics. Getting this wrong is how a live channel's state gets wiped, so
+it is worth reading once in full.
 
 | Key | What install does |
 |---|---|

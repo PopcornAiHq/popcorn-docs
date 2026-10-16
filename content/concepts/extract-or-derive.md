@@ -11,6 +11,7 @@ summary: >
   Extract whatever the input states; derive only the rest.
 concepts: [references, on-error]
 layer: platform
+product_terms: []
 ---
 
 The DSL cannot reach sub-fields of an `object` input — `$inputs.payload.name`

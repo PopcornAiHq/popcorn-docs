@@ -3,14 +3,14 @@ id: states-authoring
 title: Authoring a states tier
 order: 2
 summary: >
-  Writing a bundle's `states:` section end to end: stored, derived and
-  mirrored machines; states, events, transitions and buttons; guards; and the
-  flows that fire an edge, which must start its `flow` and `then` launches
-  themselves. Every publish check is listed with its exact error — `no
-  expected edge enters`, `lacks columns … the states tier writes`, a terminal
-  left by staff — and its fix.
+  Writing the `states:` section behind a Routine's Status and Actions: stored,
+  derived and mirrored machines; states, events, transitions and buttons;
+  guards; and the flows that fire an edge, which must start its `flow` and
+  `then` launches themselves. Every publish check is listed with its exact
+  error — `no expected edge enters`, a terminal left by staff — and its fix.
 concepts: [state-machine, manifest-keys, app-bundle]
 layer: platform
+product_terms: [Status, Action]
 ---
 
 This guide takes one `states:` section from design to a published, wired

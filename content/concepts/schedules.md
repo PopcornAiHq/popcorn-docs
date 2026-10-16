@@ -4,18 +4,19 @@ title: Schedules in a manifest
 order: 5
 group: What a bundle holds
 summary: >
-  A manifest schedule names a single flow and either `interval:` or
-  `cron:`, never both; its `class:` picks the queue and how a fire is spread. Each install
-  of a new version reconciles schedules by (flow, slug), and a schedule whose
-  `flow:` is not in the bundle (a typo in it, say) disappears: skipped,
-  then deleted as undeclared. `app status` explains live schedules that differ.
+  A Routine's scheduled Triggers are manifest schedules: each names a single
+  flow and either `interval:` or `cron:`, never both, and its `class:` picks
+  the queue and how a fire is spread. Each install of a new version reconciles
+  schedules by (flow, slug), and a schedule whose `flow:` is not in the bundle
+  (a typo in it, say) disappears: skipped, then deleted as undeclared.
 concepts: [manifest-keys, flow-identity]
 layer: platform
+product_terms: [Trigger]
 ---
 
-A schedule is how a bundle runs a flow on a clock. It names the flow, a
-cadence, and the inputs each fire passes. In the product it is one of a
-Routine's **Triggers**.
+A Routine's scheduled Triggers — the ones that run on a clock — are
+schedules in its template's manifest. Each names the flow it runs, a
+cadence, and the inputs each fire passes.
 
 ```yaml
 schedules:

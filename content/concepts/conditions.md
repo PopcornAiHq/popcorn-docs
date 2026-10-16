@@ -11,6 +11,7 @@ summary: >
   in the query instead of gating a step.
 concepts: [flow-grammar, references]
 layer: platform
+product_terms: []
 ---
 
 `when:` gates a step, a block, or — on a `foreach` step — each item. Routing
