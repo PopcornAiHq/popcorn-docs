@@ -11,7 +11,6 @@ summary: >
   step per item, at most five in parallel.
 concepts: [flow-identity, references, conditions, on-error]
 applies_to: [cli, mcp, human]
-source: [Flow, Step, CallFlowSpec, AwaitApprovalSpec, FailureStatus, RequiredIntegrationDecl, FOREACH_MAX_PARALLEL, MAX_CALL_DEPTH, MAX_BLOCK_DEPTH]
 ---
 
 A flow is how a bundle does work. Nothing in the product names it: a flow

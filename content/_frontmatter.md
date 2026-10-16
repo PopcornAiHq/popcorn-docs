@@ -17,7 +17,6 @@ summary: >                     # THE PRODUCT — under 400 characters
   moves every channel on that line, not just the one you edited.
 concepts: [publish, channel-binding]   # other ids, for "see also" and search
 applies_to: [cli, mcp, human]          # which renderings include it
-source: [fork_for_channel, publish_fork_version]   # BARE SYMBOLS, never paths
 ---
 ```
 
@@ -35,18 +34,17 @@ The 400-character cap is not a style preference. Search returns many summaries
 in one response, and the whole response lands in the model's context, so an
 uncapped summary is a cost every caller pays.
 
-**`source`** lists bare symbols — the backend names a reader would search for
-to check the page. Paths are both a leak in a public repo and less durable than
-the name: a symbol that moves file keeps its name.
+**`source` is refused.** Listing the backend symbols a page describes in its
+own frontmatter would publish private names in a public repository. The list
+for each page lives in a mapping kept in the private backend repository,
+keyed by the page's `id`, where the backend's own CI fails when a listed
+symbol loses its definition. `check-content.py` fails a page that carries the
+field, so the names cannot drift back in one page at a time.
 
-`scripts/drift.py sources` verifies that each one still has a definition in
-the backend. It runs locally only, against a backend checkout, because the
-backend is private and CI cannot read it — so run it before a content PR.
-Nothing verifies behaviour: a symbol can exist and do the opposite of what the
-page says. Treat a page's `source` as a pointer, not a proof.
-
-Omit `source` when a concept describes a behaviour no single symbol owns; do
-not invent one to satisfy the field.
+Writing a page that describes specific backend behaviour means adding its
+entry to that mapping, in a backend PR; `scripts/drift.py` reads it from a
+local backend checkout. Omit a page from it when no single symbol owns what
+it describes; do not invent one.
 
 **`order`** is the page's place in its section's reading path, starting at 1:
 the landing page, the previous/next links on every page, and `llms.txt` all

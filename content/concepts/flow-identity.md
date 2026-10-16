@@ -10,7 +10,6 @@ summary: >
   flow is dropped at install, with no error.
 concepts: [app-bundle, manifest-keys]
 applies_to: [cli, mcp, human]
-source: [FLOW_NAME_RE, build_flow_index, analyze_flow_triggers]
 ---
 
 A flow is identified by the `name:` inside the YAML. The filename is not part

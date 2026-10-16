@@ -11,7 +11,6 @@ summary: >
   author's to check — states no event fires, terminals reached too early.
 concepts: [manifest-keys, channel-binding, states-authoring]
 applies_to: [cli, mcp, human]
-source: [StatesSpec, parse_states, project_row]
 ---
 
 A tracker row is not one flat status. It is a **tuple of small machines**, and

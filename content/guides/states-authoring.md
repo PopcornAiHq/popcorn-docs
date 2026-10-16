@@ -11,7 +11,6 @@ summary: >
   left by staff — and its fix.
 concepts: [state-machine, manifest-keys, app-bundle]
 applies_to: [cli, mcp, human]
-source: [StatesSpec, parse_states, render_hints_into_tables, project_row, compose_shown, projection_columns, state_transition, state_project]
 ---
 
 This guide takes one `states:` section from design to a published, wired

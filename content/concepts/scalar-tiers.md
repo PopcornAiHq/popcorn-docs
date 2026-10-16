@@ -11,7 +11,6 @@ summary: >
   runtime: declaring it hands it to install, which can reset it.
 concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
-source: [PLATFORM_SETTINGS, candidate_settings, filter_update_scalar_pairs, parse_send_mode, parse_app_mode]
 ---
 
 A scalar is a named string on a channel — always a string on the wire,

@@ -11,7 +11,6 @@ summary: >
   takes no version, and is the durable retry when an install was blocked.
 concepts: [fork-line, bundle-version]
 applies_to: [cli, mcp, human]
-source: [publish_fork_version, apply_app, manifest_table_errors]
 ---
 
 Two operations people conflate, doing different jobs.

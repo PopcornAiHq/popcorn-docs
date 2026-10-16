@@ -12,7 +12,6 @@ summary: >
   next write.
 concepts: [manifest-keys]
 applies_to: [cli, mcp, human]
-source: [ColumnDef, MergeWhenDef, apply_column_merge, reconcile_columns, carry_merge_forward]
 ---
 
 A table column carries a merge policy that decides what happens when a write

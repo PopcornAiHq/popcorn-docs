@@ -11,7 +11,6 @@ summary: >
   values until their next write.
 concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
 applies_to: [cli, human]
-source: [ColumnDef, SchemaDef, MergeKeyDef, manifest_table_errors, apply_tables, reconcile_columns, carry_merge_forward, apply_column_merge, validate_record, upsert_rows]
 ---
 
 This guide adds one table to an app a channel already runs, and ends with

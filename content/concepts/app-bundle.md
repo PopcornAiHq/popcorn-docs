@@ -11,7 +11,6 @@ summary: >
   a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
 applies_to: [cli, mcp, human]
-source: [ParsedTemplateConfig, bundle_file_tree, unrecognized_tree_paths, validate_code_blocks, is_agent_tree_path]
 ---
 
 An app bundle is a directory. Installing it into an empty channel gives that
