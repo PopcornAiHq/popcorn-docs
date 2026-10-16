@@ -185,9 +185,27 @@ def href(page: dict, suffix: str = ".html") -> str:
     return f"/{page_dir(page)}/{page['id']}{suffix}"
 
 
-def old_href(page: dict, suffix: str) -> str:
-    """Where the page was served before the site was split into layers."""
-    return f"/{page['source_dir']}/{page['id']}{suffix}"
+# The pages the site served before it was split into layers, at
+# `/<directory>/<id>`. Only these have an old address to point onward from: a
+# page written since never lived there, and a pointer for it would advertise
+# an address nobody ever linked. Frozen; never add to it.
+PRE_LAYER_PAGES = frozenset({
+    "concepts/app-bundle", "concepts/bundle-version", "concepts/channel-binding",
+    "concepts/conditions", "concepts/extract-or-derive", "concepts/flow-grammar",
+    "concepts/flow-identity", "concepts/fork-line", "concepts/glossary",
+    "concepts/manifest-keys", "concepts/merge-policy", "concepts/on-error",
+    "concepts/product-glossary", "concepts/publish-and-apply", "concepts/references",
+    "concepts/scalar-tiers", "concepts/schedules", "concepts/state-machine",
+    "concepts/table-columns", "guides/adding-a-table", "guides/debugging-a-failed-run",
+    "guides/states-authoring", "guides/template-authoring", "reference/activities",
+    "reference/cli", "reference/mcp",
+})
+
+
+def old_href(page: dict, suffix: str) -> str | None:
+    """Where the page was served before the site was split into layers, if it was."""
+    old = f"{page['source_dir']}/{page['id']}"
+    return f"/{old}{suffix}" if old in PRE_LAYER_PAGES else None
 
 
 def url(page: dict | None) -> str:
@@ -483,6 +501,8 @@ def main() -> int:
     moved = {}
     for page in pages:
         for suffix in (".md", ".html"):
+            if old_href(page, suffix) is None:
+                continue
             old, new = old_href(page, suffix).lstrip("/"), href(page, suffix)
             moved[old] = new.lstrip("/")
             target = BUILD / old

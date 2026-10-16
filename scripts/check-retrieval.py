@@ -42,11 +42,8 @@ def main() -> int:
     misses = []
 
     for question, expected in questions():
-        ranked = sorted(
-            pages,
-            key=lambda p: retrieval._score(p, retrieval._terms(question)),
-            reverse=True,
-        )
+        terms = retrieval.query_terms(pages, question)
+        ranked = sorted(pages, key=lambda p: retrieval._score(p, terms), reverse=True)
         top = [p["id"] for p in ranked[:TOP_N]]
         if not any(e in top for e in expected):
             misses.append((question, expected, top))
