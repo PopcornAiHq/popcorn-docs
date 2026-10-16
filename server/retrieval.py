@@ -124,12 +124,35 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
 LAYERS = ("product", "platform")
 
 
+def query_terms(pages: list[dict], query: str) -> set[str]:
+    """The query's terms, less the ones most pages are about.
+
+    A term in the id, title or summary of more than half the pages tells them
+    apart no better than a stop word, and the 8× an id or title hit is worth
+    lets it decide the ranking anyway. "Routine" is the case that forced this:
+    once the product layer existed, nearly every page named one, and a guide
+    with "Routine" in its title outranked the concept a question was asking
+    about. Measured on the corpus, so the list follows the pages. A query made
+    only of such terms keeps them, since an empty one would match nothing.
+    """
+    terms = _terms(query)
+    shared = {
+        t
+        for t in terms
+        if sum(
+            t in (_terms(p["id"]) | _terms(p["title"]) | _terms(p["summary"]))
+            for p in pages
+        ) > len(pages) / 2
+    }
+    return (terms - shared) or terms
+
+
 def search(pages: list[dict], query: str, limit: int = 5, layer: str | None = None) -> str:
     if layer is not None and layer not in LAYERS:
         return f"layer must be one of {', '.join(LAYERS)}, or omitted to search both."
     if layer is not None:
         pages = [p for p in pages if p.get("layer") == layer]
-    terms = _terms(query)
+    terms = query_terms(pages, query)
     # A user's assistant is the first reader, so on an equal score the page in
     # the product's words comes first. Only a tie: a platform page that answers
     # the question better still outranks one that merely uses the right nouns.

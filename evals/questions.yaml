@@ -156,7 +156,7 @@
   trap: says to declare it under scalars, or that it cannot be defaulted at all
 
 - q: Can I set a row's status directly to retained?
-  concept: state-machine
+  concept: state-machine, actions-and-status
   pass: no — status is a projection of the machine tuple, so a direct write is overwritten; fire the event instead
   trap: says to update the status column, or to patch the record
 
@@ -216,7 +216,7 @@
   trap: describes a Routine as a flow, a schedule, or a separate object from the project
 
 - q: If I change a setting on one Routine, will it lose the template's future updates?
-  concept: product-glossary
+  concept: product-glossary, routine-settings, change-how-a-routine-behaves
   pass: no — a setting reaches only that Routine, can be set back and survives the template's improvements; only a change to what the Routine is built from, such as its Tables or the steps it runs, gives it a copy of its own, which stops receiving them
   trap: says every change stops updates, or that a setting reaches every Routine made from the template
 
@@ -353,7 +353,7 @@
   trap: uses fields.extract with a default for severity, or trusts the output schema to reject junk
 
 - q: Why does my customized Routine no longer get the template's improvements?
-  concept: product-glossary, fork-line
+  concept: product-glossary, fork-line, customizing-a-routine
   pass: a change to what the Routine is built from gave it a copy of its own (a fork line), and a fork line no longer receives product releases; forking cannot be undone
   trap: says the improvements are paused and can be resumed, or to re-install the product template
 
@@ -366,3 +366,63 @@
   concept: product-glossary, state-machine, states-authoring
   pass: the template declares state machines; each Action is the button on a staff edge, offered when the edge is legal from where the item stands
   trap: says Actions are configured separately from Status
+
+- q: Is #claims-west on the latest version of its template, and is it finished installing?
+  concept: routines
+  pass: get_routine shows Version (and whether it is the latest), Install (whether the latest install landed) and Updates from; wait_seconds waits up to 20 for an install in progress
+  trap: says there is no way to tell, or reads the template list instead of the Routine
+
+- q: Which changes to a Routine stay with it, and which give it a copy of its own?
+  concept: customizing-a-routine
+  pass: Routine Settings, Connections, Instructions and References stay with the Routine and survive template improvements; a change to what it is built from (a Table, a step) gives it a copy of its own, which stops receiving improvements and cannot be undone
+  trap: says every change stops the template's improvements, or that a copy can be reverted
+
+- q: Can my assistant run our Routine's morning schedule right now without waiting?
+  concept: triggers
+  pass: run_trigger runs a schedule now with its usual inputs after a dry run and confirm=true; the next scheduled run still happens; only schedules can be run this way
+  trap: says to change the schedule's time, or that a message or webhook Trigger can be run the same way
+
+- q: The Routine says an account is missing. Can my assistant connect our Gmail for it?
+  concept: connections
+  pass: no — a Connection signs in as a person, so that person connects it in the Routine's settings in Popcorn; get_routine shows which are NOT CONNECTED
+  trap: tries to connect the account through a tool, or asks for the password
+
+- q: Where does a Routine get the policy document it checks claims against?
+  concept: reference-documents
+  pass: it is a Reference, added by a person in Popcorn; some documents start work when added, which list_triggers shows; no assistant tool adds or reads one yet
+  trap: puts the policy in a Table as a row, or claims a tool can upload it
+
+- q: How do I make one Routine wait three days between reminders instead of seven?
+  concept: routine-settings, change-how-a-routine-behaves
+  pass: find the reminder interval with list_routine_settings, then update_routine_setting after a dry run; it reaches that Routine only and survives template improvements
+  trap: proposes giving the Routine a copy of its own, or changing every Routine made from the template
+
+- q: I want the Routine's agent to always ask me before emailing the carrier. Where does that go?
+  concept: instructions
+  pass: that is the Routine's Instructions; a person tells the Routine's agent in Popcorn; wording that is a Routine Setting can be edited by an assistant, the rest cannot yet
+  trap: says to change a Routine Setting that does not exist, or to edit the template
+
+- q: How do I find every claim in #intake that is still open?
+  concept: tables, work-a-routines-items
+  pass: list_rows with filter {"Status": "open"} on the claims Table; query finds text in any column; there is no per-Status count yet
+  trap: reads every row and filters by hand, or uses a count tool that does not exist
+
+- q: Can my assistant mark an item approved by writing its Status?
+  concept: actions-and-status
+  pass: no — Status is worked out from what happened and create_rows/update_row refuse it; take the Approve Action with take_action after a dry run and confirm with its run_key
+  trap: writes the Status column directly
+
+- q: Did the Routine's reminder emails go out yesterday? Can my assistant check?
+  concept: history
+  pass: that is the Routine's History; people read runs and the conversation in Popcorn; an assistant sees only when items were created and last changed
+  trap: claims an assistant tool reads the Routine's runs or messages
+
+- q: Walk me through starting a new Routine from the claims template.
+  concept: set-up-a-routine
+  pass: list_routine_templates, create_routine dry run then confirm, wait for Install with get_routine, have the account owner make each Connection in Popcorn, then list_triggers
+  trap: skips the Connections step, or creates the Routine without showing the dry run
+
+- q: My assistant should close a claim the way pressing its Close button would. How does it do that?
+  concept: work-a-routines-items, actions-and-status
+  pass: list_actions on the row, take_action close as a dry run, then confirm=true with its run_key; get_row shows the new Status
+  trap: sets the Status column with update_row

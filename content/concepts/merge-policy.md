@@ -4,12 +4,12 @@ title: Column merge policy
 order: 7
 group: What a bundle holds
 summary: >
-  A Column's merge policy decides what an upsert does to an existing row:
+  A column's merge policy decides what an upsert does to an existing row:
   replace (the default, last-write-wins), concat (append to a string), keep
-  (first-write-wins) or increment_on_change (a counter that rises when another
-  column makes a declared transition). Policies apply only on a merging write.
-  An install sets the declared policy; stored values change on their next
-  write.
+  (first-write-wins, as for the first time a row was seen) or
+  increment_on_change (a counter that rises when another column makes a
+  declared transition). Policies apply only on a merging write; stored values
+  change on their next write.
 concepts: [manifest-keys]
 layer: platform
 product_terms: [Column]
