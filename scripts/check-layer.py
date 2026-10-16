@@ -7,7 +7,7 @@ to name a platform term — the mechanism under a product idea — and the one
 place it may do so is a Platform note:
 
     > **Platform note** — A copy of its own is a *fork line* … See
-    > [Fork lines](https://docs.popcorn.ai/concepts/fork-line.md).
+    > [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
 
 Checks:
 

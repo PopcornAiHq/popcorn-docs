@@ -34,7 +34,7 @@ tables:
 ```
 
 What a repeat write does to each column, and how a merge key picks the row,
-is [column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md).
+is [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
 
 ## Type, format, display
 

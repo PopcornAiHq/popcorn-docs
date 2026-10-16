@@ -18,7 +18,7 @@ confused with, then the page that explains it. Where the CLI or the API still
 uses an older name, the entry says so; the older name keeps working.
 
 The product uses fewer, plainer words, defined in the
-[product glossary](https://docs.popcorn.ai/concepts/product-glossary.md).
+[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md).
 Each section here names the product term its entries belong to, and an entry
 whose term differs from its section's says so. A platform term with no product
 term is one the product never shows: talking to a person, describe its effect
@@ -38,24 +38,24 @@ manifest, versions and lines stay behind it.
   `app` field on app responses both carry the slug. The set of apps is fixed
   on the server: editing an existing app is self-serve, and adding a new one
   is not. *Not to be confused with* a channel: one app runs in many channels.
-  See [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md).
+  See [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
 - **app bundle** (short: **bundle**) — The files of one version of an app:
   `manifest.yaml`, the flow YAML files at the root, `AGENT.md`, `README.md`,
   `strings.yaml`, and the `prompts/`, `templates/`, `code/` and `agents/`
   directories. *Not to be confused with* the bundle's own `templates/`
   directory, which holds email text. See
-  [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md).
+  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
 - **channel template** — The older name for an app and its bundle. It
   survives in `popcorn channel templates` and
   `popcorn channel create --template <app>`, which both mean the app. Prefer
   *app* or *app bundle* in prose. See
-  [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
+  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 - **manifest** — `manifest.yaml` at the bundle root; `config.yaml` is still
   read under its legacy name. Each key has its own install semantics, and an
   absent key is not the same as an empty one. An unknown top-level key is
   ignored; an unknown key inside `connections:`, `documents:` or `triggers:`
   is refused.
-  See [Manifest keys](https://docs.popcorn.ai/concepts/manifest-keys.md).
+  See [Manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).
 - **bundle version** — One immutable published version of a bundle,
   identified two ways: `version_id`, an integer the platform assigns (what
   `app checkout --version` takes), and `semver`, the manifest's `version:`,
@@ -63,32 +63,32 @@ manifest, versions and lines stay behind it.
   a flow's own `version:`, an integer inside the flow file that a `call_flow`
   step reports as `flow_version`; `flow_version` on a flow-run response, which
   is the bundle's `version_id`; or a table's schema version. See
-  [Bundle versions](https://docs.popcorn.ai/concepts/bundle-version.md).
+  [Bundle versions](https://docs.popcorn.ai/platform/concepts/bundle-version.md).
 - **line** — A series of bundle versions with one head. The **product line**
   is the shared series Popcorn publishes (`kind: product`); a **fork line** is
   one workspace's own series, with a name (`kind: fork`, `fork_name`). Two
   lines can each hold a `1.0.1`. `popcorn app lines` lists a workspace's fork
-  lines. See [Fork lines](https://docs.popcorn.ai/concepts/fork-line.md).
+  lines. See [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
 - **fork** — Minting a fork line from the product version a channel runs,
   with byte-identical content, and binding the channel to it. It is required
   before a publish, and it is one-way: a channel on a fork line never returns
   to the product line. `popcorn app fork --name <line>` names the line; a
   workspace may own several per app. See
-  [Fork lines](https://docs.popcorn.ai/concepts/fork-line.md).
+  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
 - **head** — The newest version on a line; on the product line, the version
   the workspace's release track points at. `popcorn app checkout` checks out
   a fork line's head, and a publish must be based on it. A channel still on
   the product line checks out its bound version. *Not to be confused with* the
   bound version, which lags the head while an install has not landed. See
-  [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+  [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
 - **binding**, **bound version** — The one version a channel runs. A run
   reads it once at start and stays pinned to it; table data is not pinned.
-  See [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+  See [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
 - **release track** — `alpha`, `beta` or `stable`: which product versions a
   workspace is offered, set per workspace and defaulting to stable. It filters
   `popcorn app list` and `popcorn channel templates`, and the API never says
   which track a workspace is on. *Not to be confused with* a tracker. See
-  [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
+  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 
 ## Moving a version
 
@@ -100,12 +100,12 @@ change gives it a copy of its own, which is what a fork does.
   `popcorn app publish`. It needs workspace-admin rights, starts an install on
   the channel you published from, and reaches every other channel on the line
   through their daily updates. It publishes to a *line*, not to a channel. See
-  [Publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+  [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
 - **install** — Bringing one channel to one version: reconciling its tables,
   scalars, channel config, schedules and webhooks, then binding it last.
   Installs follow `channel create --template`, a publish, an apply and a daily
   update. An install can be blocked or can skip, and the version exists
-  either way. See [Publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+  either way. See [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
 - **apply** — `popcorn app apply`: bring one channel on a fork line up to
   that line's head, from server state alone. It takes no version, reports
   `already_current` when there is nothing to do, and is the retry for an
@@ -113,24 +113,24 @@ change gives it a copy of its own, which is what a fork does.
   not upgraded by an apply: it adopts the workspace's fork line if there is
   exactly one, and otherwise reports `already_current` even when behind. An
   apply is refused on a channel locked against app updates. See
-  [Publish and apply](https://docs.popcorn.ai/concepts/publish-and-apply.md).
+  [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
 - **adoption** — A channel still on the product version moving onto a fork
   line the workspace already owns. A fork, or an apply in a workspace with
   exactly one fork line of the app, does it. See
-  [Fork lines](https://docs.popcorn.ai/concepts/fork-line.md).
+  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
 - **daily update** — Each channel's scheduled daily install of its line's
   head, which is how a publish reaches the channels you did not publish from,
   and how a channel on the product line reaches its release track's head. It
   never adopts a fork line. It skips archived channels, channels locked
   against app updates, and
   channels with no update schedule. See
-  [Fork lines](https://docs.popcorn.ai/concepts/fork-line.md).
+  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
 - **checkout** — A CLI operation, not a server one. `popcorn app checkout`
   writes a version's files to disk with a `.popcorn-app.json` baseline that
   records the app, the version it came from and the channel's UUID. It checks
   out the head (see *head*); `--version <id>` checks out a past version,
   which `app publish` refuses. See
-  [Bundle versions](https://docs.popcorn.ai/concepts/bundle-version.md).
+  [Bundle versions](https://docs.popcorn.ai/platform/concepts/bundle-version.md).
 
 ## Channels and workspaces
 
@@ -142,7 +142,7 @@ Product term: **Routine**, except where an entry says otherwise.
   a note should hold the UUID. The CLI accepts either and resolves a name to
   the UUID. On the wire the id is `conversation_id`, because the API's older
   noun, *conversation* (see its entry), covers direct messages too. See
-  [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+  [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
   Product term: Routine.
 - **project** — The MCP tools' and the web app's name for a channel: the
   space a tracker lives in, with its members, its messages and the app it
@@ -184,7 +184,7 @@ Product term: **Routine**, except where an entry says otherwise.
   `popcorn channel-config show` prints it. *Not to be
   confused with* scalars, which live in the agent store and are not in
   `$channel.*`. See
-  [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
+  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
   Product term: Routine Settings, for the parameters; its integrations are
   Connections.
 - **channel parameters** — Typed values in the channel config, read as
@@ -256,28 +256,28 @@ runs themselves are part of a Routine's **History**; the entries say which.
   arguments spelled `flow_id`, such as the one `popcorn flow get` takes, hold
   that name. *Not to be confused with* a workflow: the webhook mode
   `trigger_workflow` starts a flow. See
-  [A flow's identity is its name](https://docs.popcorn.ai/concepts/flow-identity.md).
+  [A flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
 - **step** — One entry in a flow's `steps:`: exactly one of an `activity`, a
   `call_flow`, an `await_approval`, a `sleep_seconds` or a nested `steps:`
   block, optionally with `when:`, `foreach:` and `on_error:`. Not every kind
   takes every modifier: `foreach:` is refused on `sleep_seconds`,
   `await_approval` and a nested block, and `on_error.retry` on `call_flow` and
   a nested block. See
-  [Authoring an app bundle](https://docs.popcorn.ai/guides/template-authoring.md).
+  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 - **activity** — A platform operation a step calls, named
   `<tier>.<domain>.<verb>`, such as `foundation.store.list_rows`, sometimes
   with more segments before the verb (`app.delivery.briefing.collect`); the
   tiers
   are `foundation`, `feature`, `app` and `system`. The **activity catalog**
   (`popcorn flow activities`) decides what a flow can do. See the
-  [activity reference](https://docs.popcorn.ai/reference/activities.md).
+  [activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
 - **`call_flow`** — A step that runs another flow of the same bundle as a
   child, pinned to the parent's version. By default (`mode: wait`) it waits
   for the child's outputs; `mode: detach` returns once the child has started.
   Its key is `flow:`. *Not to be confused with* the activity
   `foundation.workflow.start_flow`, which starts a separate run that reads the
   channel's binding afresh and cannot be waited on; its key is `flow_name:`.
-  See [How a channel runs a version](https://docs.popcorn.ai/concepts/channel-binding.md).
+  See [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
 - **run** — One execution of a flow, identified by its `workflow_id`
   (`popcorn flow runs get <workflow-id>`). A run is started by `flow run`, a
   schedule, a webhook, a message trigger, a document, a state machine, an
@@ -305,7 +305,7 @@ runs themselves are part of a Routine's **History**; the entries say which.
   spread offset can move a daily cron off the declared minute.
   `popcorn app status` compares armed with declared, and uses intended to tell
   a deliberate difference from drift. See
-  [Manifest keys](https://docs.popcorn.ai/concepts/manifest-keys.md).
+  [Manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).
   Product term: Trigger.
 - **webhook** — A per-channel ingest URL (`popcorn webhook list --show-url`)
   whose `action_mode` is `silent`, `as_is`, `ai_enhanced` or
@@ -339,14 +339,14 @@ entry says otherwise.
 - **scalar** — A flat `key → text` value on a channel, always a string on
   the wire (`popcorn table scalar get` and `set`). A manifest declares
   scalars in one of two tiers, and a value a flow writes at runtime belongs
-  in neither. See [The three scalar tiers](https://docs.popcorn.ai/concepts/scalar-tiers.md).
+  in neither. See [The three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
   Product term: Routine Settings, for a scalar a person sets, such as a
   switch; a value a flow writes at runtime has none.
 - **merge policy**, **merge key** — A column's merge policy decides what an
   upsert does to its existing value. A table's merge key decides which
   existing row an insert matches. `merge_on` names the match per call, for a
   table without a merge key; on a table with one, `merge_on` is ignored. See
-  [Column merge policy](https://docs.popcorn.ai/concepts/merge-policy.md).
+  [Column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
   No product term.
 - **rev**, **`If-Match`** — A revision token for a conditional write. A row
   carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
@@ -384,7 +384,7 @@ Product terms: **Connection** and **Agent**; the entries say which.
   `agents/<name>/` (`agent.yaml`, `prompt.md`, `schemas/*.json`), which a
   flow runs with `foundation.agent.invoke`. With `chat: true` in `agent.yaml`
   it can also serve as a channel agent. See
-  [App bundles](https://docs.popcorn.ai/concepts/app-bundle.md). Product
+  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md). Product
   term: Agent.
 - **agent mode** — The CLI setting `POPCORN_AGENT=1`, which defaults
   `--json`, `--quiet` and `--no-color` and suppresses upgrade prompts. It does
@@ -401,7 +401,7 @@ transitions behind them stay out of the product.
   small machines. At least one is not an overlay; the first of those is the
   primary, usually a **funnel** (the milestone that moves forward). An
   **overlay** (`overlay: true`) holds what is true alongside it. See
-  [State machines in a bundle](https://docs.popcorn.ai/concepts/state-machine.md).
+  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
 - **state**, **event**, **transition** — A machine's values; the named
   things that happen, grouped in families the bundle names (`staff.*`,
   `world.*`, `system.*`, …); and the edge an event fires, from one set of

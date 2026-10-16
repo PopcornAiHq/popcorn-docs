@@ -48,7 +48,7 @@ A publish is refused when:
 - a `tables:` entry would be refused by the store at install — an unknown
   `type` or `display` kind, a `format` that does not suit its type, a merge
   setting without the policy it belongs to, and the other column rules in
-  [adding a table](https://docs.popcorn.ai/guides/adding-a-table.md). The
+  [adding a table](https://docs.popcorn.ai/platform/guides/adding-a-table.md). The
   refusal names each table and column
 - the version or its content already exists (see `bundle-version`)
 

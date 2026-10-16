@@ -51,8 +51,8 @@ the step's arguments are resolved, before the activity is invoked, so
 `on_error` never sees it and a retry cannot fix it. Guarantee the key
 upstream: in an `output_schema`'s `required`, or with `$exists: true` in the
 query that produced the rows. See
-[references in a flow](https://docs.popcorn.ai/concepts/references.md).
+[references in a flow](https://docs.popcorn.ai/platform/concepts/references.md).
 
 A `when:` that cannot be evaluated (`PredicateError`) is likewise an
 authoring bug that fails the run at once. Reading a failure end to end is
-[debugging a failed run](https://docs.popcorn.ai/guides/debugging-a-failed-run.md).
+[debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).

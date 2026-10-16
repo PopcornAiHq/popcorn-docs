@@ -85,14 +85,14 @@ page drops the line, since it does not know which deploy it read. A page has
 
 - `product` — for a Popcorn user and their assistant: Routines, Routine
   Templates, Triggers, Actions, Status, Routine Settings, in the
-  [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'s
+  [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)'s
   terms. Such a page names a platform term only inside a **Platform note** —
   a blockquote that opens `> **Platform note** —` and links the platform page
   that explains the term. `scripts/check-layer.py` fails a product page that
   uses one anywhere else, taking the terms from the platform glossary.
 - `platform` — for someone building a Routine Template: the bundle format,
   the CLI, flows, fork lines, in the
-  [platform glossary](https://docs.popcorn.ai/concepts/glossary.md)'s terms.
+  [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)'s terms.
 
 The field describes the page, not its reader: someone building a template
 reads both layers. A page that needs the CLI says so in its first paragraph;

@@ -100,7 +100,7 @@ PROPOSED = """\
 
 **None of these tools exist yet, and nothing depends on them arriving.** They
 are a design for the tools a person's assistant uses to run Routines, named
-in the [product glossary](https://docs.popcorn.ai/concepts/product-glossary.md)'s
+in the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)'s
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 

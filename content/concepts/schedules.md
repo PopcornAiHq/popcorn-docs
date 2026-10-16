@@ -61,7 +61,7 @@ state and note.
 **A schedule whose `flow:` is not in the bundle is skipped — and is then
 deleted as undeclared**, so a typo in `flow:` removes the schedule it meant to
 keep. A renamed flow does the same; see
-[a flow's identity is its name](https://docs.popcorn.ai/concepts/flow-identity.md).
+[a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
 
 ## Live schedules can differ from the manifest
 
