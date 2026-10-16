@@ -21,9 +21,10 @@ Checks, in the order a writer meets them:
   a value it cannot read would crash the build rather than fail here by name
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
-* `platform`, when present, is a real `YYYY-MM-DD` date — it is shown to
+* `deployed`, when present, is a real `YYYY-MM-DD` date — it is shown to
   readers as the day the page was last regenerated, so a malformed one would
-  be published as a claim about freshness nobody can read
+  be published as a claim about freshness nobody can read. Its old name,
+  `platform:`, is refused: `layer: platform` uses the word for something else
 * no `source:` field. The backend symbols behind a page are private names,
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
@@ -53,7 +54,8 @@ _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
-_PLATFORM = re.compile(r"^platform:\s*(?P<value>.*)$", re.M)
+_DEPLOYED = re.compile(r"^deployed:\s*(?P<value>.*)$", re.M)
+_OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
 _LAYER = re.compile(r"^layer:\s*(?P<value>.*)$", re.M)
@@ -102,15 +104,20 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     if layout and layout.group("value").strip() not in LAYOUTS:
         problems.append(f"layout '{layout.group('value').strip()}' is not one of {sorted(LAYOUTS)}")
 
-    platform = _PLATFORM.search(front)
-    if platform:
-        value = platform.group("value").strip()
+    deployed = _DEPLOYED.search(front)
+    if deployed:
+        value = deployed.group("value").strip()
         try:
             if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
                 raise ValueError
             datetime.date.fromisoformat(value)
         except ValueError:
-            problems.append(f"platform '{value}' is not a YYYY-MM-DD date")
+            problems.append(f"deployed '{value}' is not a YYYY-MM-DD date")
+    if _OLD_PLATFORM.search(front):
+        problems.append(
+            "platform: is the old name of the deploy-date field; write deployed: "
+            "(platform now names a layer)"
+        )
 
     layer = _LAYER.search(front)
     if not layer:

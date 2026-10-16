@@ -22,7 +22,7 @@ before running: the page describes whatever that checkout defines.
 After each prod deploy the backend's deploy pipeline runs the last form
 against the deployed checkout with the deploy's version, then opens a pull
 request here as the docs bot when the page changed. `--platform-version` sets
-the page's `platform:` date; `platform_version.py` says when that line moves.
+the page's `deployed:` date; `platform_version.py` says when that line moves.
 
 The page also carries a "Proposed tools" section, which is the one part of
 the reference no source generates: tools that are designed but not built.

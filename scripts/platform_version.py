@@ -1,4 +1,4 @@
-"""The `platform:` date a generated reference page carries, and when it changes.
+"""The `deployed:` date a generated reference page carries, and when it changes.
 
 `sync-activities.py` and `sync-mcp.py` describe the deployed platform, and
 the backend's deploy pipeline runs them after every prod deploy with that
@@ -6,7 +6,7 @@ deploy's version:
 
     --platform-version vYYYYMMDD-HHMMSS-<7 hex>
 
-Only the date is recorded, as `platform: YYYY-MM-DD` in the frontmatter. The
+Only the date is recorded, as `deployed: YYYY-MM-DD` in the frontmatter. The
 deploy version ends in a commit hash from a private repository, which this
 public one must not carry; the date is what tells a reader how fresh the page
 is, and that is all the page needs to say.
@@ -33,7 +33,7 @@ import datetime
 import re
 
 _VERSION = re.compile(r"^v(?P<date>\d{8})-\d{6}-[0-9a-f]{7}$")
-_LINE = re.compile(r"^platform: .*\n", re.M)
+_LINE = re.compile(r"^deployed: .*\n", re.M)
 _FRONT = re.compile(r"^---\n.*?\n---\n", re.S)
 
 
@@ -59,7 +59,7 @@ def add_argument(ap: argparse.ArgumentParser) -> None:
 
 
 def _without(text: str) -> str:
-    """The page with its `platform:` line removed from the frontmatter only."""
+    """The page with its `deployed:` line removed from the frontmatter only."""
     front = _FRONT.match(text)
     if not front:
         return text
@@ -75,4 +75,4 @@ def stamp(generated: str, current: str, date: str | None) -> str:
         return current
     if date is None:
         return generated
-    return generated.replace("\nsummary:", f"\nplatform: {date}\nsummary:", 1)
+    return generated.replace("\nsummary:", f"\ndeployed: {date}\nsummary:", 1)
