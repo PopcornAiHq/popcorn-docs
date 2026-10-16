@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-platform: 2026-10-16
+deployed: 2026-10-16
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a

@@ -11,7 +11,7 @@ order: 9                       # reading position within its section
 group: How a version ships     # optional: sidebar group within the section
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
-platform: 2026-09-25           # optional, generated pages only: the deploy's date
+deployed: 2026-09-25           # optional, generated pages only: the deploy's date
 summary: >                     # THE PRODUCT — under 400 characters
   A fork line is a workspace's own version series of an app. Publishing to it
   moves every channel on that line, not just the one you edited.
@@ -71,7 +71,7 @@ list. It is the only value; omit the field for every other page.
 something — `sync-cli.py` records the `popcorn` version it read — and is shown
 beside the title. A hand-written page never sets it.
 
-**`platform`** is `version`'s counterpart for pages that describe the
+**`deployed`** is `version`'s counterpart for pages that describe the
 deployed platform rather than a release — `sync-activities.py` and
 `sync-mcp.py` write it from `--platform-version`, and it too is shown beside
 the title. It holds only the date of the prod deploy the page was regenerated
@@ -80,7 +80,9 @@ which cannot appear here, and the date is what tells a reader how fresh the
 page is. It changes only when something else on the page does, so a deploy
 that changes nothing leaves the page untouched; a hand run that changes the
 page drops the line, since it does not know which deploy it read. A page has
-`version` or `platform`, never both, and a hand-written page has neither.
+`version` or `deployed`, never both, and a hand-written page has neither. The
+field was once called `platform:`, which `check-content.py` now refuses:
+`layer: platform` uses that word for the page's layer.
 
 **`layer`** says whose words the page is written in, and it is required.
 

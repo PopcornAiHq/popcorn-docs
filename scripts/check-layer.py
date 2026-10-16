@@ -28,7 +28,7 @@ well — a person *runs* something, *publishes* a post — and those are matched
 only in code form (`` `run` ``), where they can only mean the platform's
 word. Every other entry is matched in prose too.
 
-Generated pages (those carrying `platform:` or `version:`) are exempt: they
+Generated pages (those carrying `deployed:` or `version:`) are exempt: they
 describe a surface entry by entry, and the MCP reference documents the
 template-building tools in their own section on purpose.
 """
@@ -61,7 +61,7 @@ _ENTRY = re.compile(
 _LAYER = re.compile(r"^layer:\s*(?P<value>\S+)", re.M)
 _TERMS = re.compile(r"^product_terms:\s*\[(?P<terms>[^\]]*)\]", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
-_GENERATED = re.compile(r"^(platform|version):", re.M)
+_GENERATED = re.compile(r"^(deployed|version):", re.M)
 _NOTE = re.compile(r"^> \*\*Platform note\*\*")
 _LINK = re.compile(r"\]\((?P<url>[^)\s]+)\)")
 _DOCS_URL = re.compile(r"^https://docs\.popcorn\.ai/(?:[a-z]+/)*(?P<id>[a-z0-9-]+)\.(?:md|html)")
