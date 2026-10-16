@@ -181,8 +181,45 @@ def _line_definitions(symbol: str, lines: list[str]) -> list[tuple[int, int]]:
                 break
             if lines[j].strip():
                 end = j
-        found.append((i + 1, end + 1))
+        found.append((_decorated_from(lines, i, indent) + 1, end + 1))
     return found
+
+
+def _decorated_from(lines: list[str], i: int, indent: int) -> int:
+    """The first line of the decorators above line `i`, or `i` itself.
+
+    The AST path counts decorators as part of a definition, and the `mcp:`
+    check depends on it. This fallback is the common path, not a rare one: the
+    backend is written for a newer Python than this repo runs, so many of its
+    files do not parse here. Walk up through lines that are a decorator, a
+    decorator's continuation (indented deeper) or its closing bracket, and keep
+    the block only if its top line is a decorator.
+    """
+    top = i
+    for k in range(i - 1, -1, -1):
+        text = lines[k]
+        if not text.strip():
+            break
+        depth = len(text) - len(text.lstrip())
+        stripped = text.strip()
+        if depth == indent and stripped.startswith("@"):
+            top = k
+        elif depth > indent or (depth == indent and stripped[:1] in ")]}"):
+            continue
+        else:
+            break
+    return top
+
+
+# A citation written `mcp:<name>` means the hosted MCP server's tool of that
+# name: a function registered with an `@<server>.tool` decorator. The product
+# pages describe tools by name, and several tool names are also ordinary
+# functions elsewhere in the backend, so a bare name would go on resolving
+# after the tool was renamed. The backend's own check also confines tools to
+# the server's directory; this one goes by the decorator alone, so the public
+# repo names no backend path.
+MCP_PREFIX = "mcp:"
+_TOOL_DECORATOR = re.compile(r"^\s*@\w+\.tool\b", re.M)
 
 
 def locate(repo: pathlib.Path, symbol: str, cache: dict) -> list[Definition]:
@@ -193,6 +230,13 @@ def locate(repo: pathlib.Path, symbol: str, cache: dict) -> list[Definition]:
     """
     if symbol in cache:
         return cache[symbol]
+    if symbol.startswith(MCP_PREFIX):
+        found = [
+            d for d in locate(repo, symbol[len(MCP_PREFIX):], cache)
+            if _TOOL_DECORATOR.search(d.text)
+        ]
+        cache[symbol] = found
+        return found
     listed = git(repo, "grep", "-lwI", "-e", symbol, "--", *PATHSPEC) or ""
     found = []
     for rel in listed.split():
@@ -254,7 +298,8 @@ def cmd_sources(repo: pathlib.Path, _args) -> int:
             print(f"     {page} → {symbol}")
         print(
             "\n   Search the backend for what the page means and cite that name in the "
-            "mapping,\n   or drop it — see `source` in content/_frontmatter.md.\n"
+            "mapping\n   (in the backend repo), or drop it — see \"Checking the pages "
+            "against the backend\"\n   in README.md.\n"
         )
     if orphans or missing:
         return 1
