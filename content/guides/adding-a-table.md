@@ -3,14 +3,14 @@ id: adding-a-table
 title: Adding a table
 order: 4
 summary: >
-  Adding a table to an app that already exists: declare it under `tables:`,
-  write it from a flow with `foundation.store.*`, run `app validate`, then
-  `app publish` from a fork line. Install creates the table, and each later
-  install adds to it and never removes. Publish refuses a column the store
-  would reject. A later publish can change a merge policy; stored rows keep
-  values until their next write.
+  Adding a Table to a Routine Template that already exists: declare it under
+  `tables:`, write it from a flow with `foundation.store.*`, run `app
+  validate`, then `app publish` from a fork line. Install creates the table,
+  and each later install adds to it and never removes. Publish refuses a
+  column the store would reject; a later publish can change a merge policy.
 concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
 layer: platform
+product_terms: [Table]
 ---
 
 This guide adds one table to an app a channel already runs, and ends with

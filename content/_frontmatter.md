@@ -17,6 +17,7 @@ summary: >                     # THE PRODUCT — under 400 characters
   moves every channel on that line, not just the one you edited.
 concepts: [publish, channel-binding]   # other ids, for "see also" and search
 layer: platform                        # product | platform — which layer the page speaks
+product_terms: [customizing a Routine] # platform pages: the product terms it explains; [] for none
 ---
 ```
 
@@ -93,6 +94,13 @@ page drops the line, since it does not know which deploy it read. A page has
 - `platform` — for someone building a Routine Template: the bundle format,
   the CLI, flows, fork lines, in the
   [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)'s terms.
+  It opens with the product idea before the mechanism ("A Routine's
+  scheduled Triggers are schedules in its template's manifest"), and declares
+  **`product_terms:`**, the product glossary terms it explains. Its summary
+  names one of them, so a reader arriving in the product's words finds the
+  word they came with. `product_terms: []` declares a page with no product
+  term, such as the flow grammar; leaving the field out fails
+  `check-layer.py`. Generated reference pages are exempt.
 
 The field describes the page, not its reader: someone building a template
 reads both layers. A page that needs the CLI says so in its first paragraph;

@@ -10,6 +10,7 @@ summary: >
   flow is dropped at install, with no error.
 concepts: [app-bundle, manifest-keys]
 layer: platform
+product_terms: []
 ---
 
 A flow is identified by the `name:` inside the YAML. The filename is not part

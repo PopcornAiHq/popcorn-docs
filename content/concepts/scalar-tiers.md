@@ -4,19 +4,21 @@ title: The three scalar tiers
 order: 4
 group: What a bundle holds
 summary: >
-  `scalars:` are written on first install and fast-forwarded on update unless
-  the channel changed them. `default_scalars:` write once, only if absent — the
-  manifest tier for an operator-owned switch and for platform `popcorn.*` keys
-  such as the outbound send mode. Never declare a value a flow writes at
-  runtime: declaring it hands it to install, which can reset it.
+  Many Routine Settings are scalars, and a manifest writes them in one of two
+  tiers. `scalars:` are written on first install and fast-forwarded on update
+  unless the channel changed them. `default_scalars:` write once, only if
+  absent — the tier for an operator-owned switch and for `popcorn.*` keys such
+  as the send mode. Never declare a value a flow writes at runtime.
 concepts: [manifest-keys]
 layer: platform
+product_terms: [Routine Settings]
 ---
 
-A scalar is a named string on a channel — always a string on the wire,
-unlike a channel parameter, which keeps its declared type. Two manifest tiers write them, a
-third family of keys is reserved by the platform, and choosing the wrong one is
-how a setting resets.
+Many of a Routine's Settings — its switches and its send modes — are scalars
+underneath. A scalar is a named string on a channel — always a string on the
+wire, unlike a channel parameter, which keeps its declared type. Two
+manifest tiers write them, a third family of keys is reserved by the
+platform, and choosing the wrong one is how a setting resets.
 
 | Tier | Written | Use it for |
 |---|---|---|

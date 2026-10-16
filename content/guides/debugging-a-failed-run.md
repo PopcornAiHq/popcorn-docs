@@ -3,14 +3,14 @@ id: debugging-a-failed-run
 title: Debugging a failed run
 order: 3
 summary: >
-  The loop after a flow run goes wrong: find the run, read its `outcome`
-  rather than its status, read the failure with `flow runs get
+  When a Routine's History shows work that went wrong: find the flow run, read
+  its `outcome` rather than its status, read the failure with `flow runs get
   --include-errors` and the steps with `flow runs timeline`, fix, publish, and
-  run again with the same inputs once the install lands. Also
-  the runs that end `succeeded` having done nothing (a missing required
-  integration, a skipped step) and the ones that never start.
+  run again once the install lands. Also runs that succeed having done
+  nothing, and ones that never start.
 concepts: [channel-binding, publish-and-apply, flow-identity, template-authoring]
 layer: platform
+product_terms: [History]
 ---
 
 This guide starts from a flow run that did the wrong thing, or from one you

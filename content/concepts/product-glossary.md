@@ -4,8 +4,8 @@ title: Product glossary
 order: 1
 layout: lookup
 summary: >
-  The product's nouns. A person manages one thing, a Routine, made from a
-  Routine Template; its Triggers bring work in, its Tables hold it, its Status
+  The product's nouns. A person manages one thing, a Routine (once called a
+  project), made from a Routine Template; its Triggers bring work in, its Tables hold it, its Status
   says where each item stands, and its Actions move it on. How Popcorn builds
   a Routine stays behind these names. The platform glossary maps each one to
   the platform's terms.
