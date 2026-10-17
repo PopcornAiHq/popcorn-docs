@@ -374,8 +374,13 @@
 
 - q: Which changes to a Routine stay with it, and which give it a copy of its own?
   concept: customizing-a-routine
-  pass: Routine Settings, Connections, Instructions and References stay with the Routine and survive template improvements; a change to what it is built from (a Table, a step) gives it a copy of its own, which stops receiving improvements and cannot be undone
+  pass: Routine Settings, Connections, Instructions, References and, where the template allows, its steps stay with the Routine and survive template improvements; a change to what it is built from (a new Table, a kind of step the template does not offer) gives it a copy of its own, which stops receiving improvements and cannot be undone
   trap: says every change stops the template's improvements, or that a copy can be reverted
+
+- q: If I add a review before the agreement goes out, does my Routine stop getting the template's improvements?
+  concept: customizing-a-routine
+  pass: no, where the template keeps its steps with the Routine; changing, adding or reordering steps stays with that Routine, an earlier version or the template's own can be put back, and only a kind of step the template does not offer needs a copy of its own
+  trap: says any change to the steps gives the Routine a copy of its own, or that it cannot be undone
 
 - q: Can my assistant run our Routine's morning schedule right now without waiting?
   concept: triggers

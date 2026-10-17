@@ -40,9 +40,10 @@ its terms the product term it belongs to.
 - **customizing a Routine** — Changing one Routine without changing the
   others made from the same template. Most changes stay with that one Routine
   and survive the template's improvements: its Routine Settings, its
-  Connections, its Instructions and, where its template allows, its stages and
-  Actions. A change to what the Routine is built from (the Tables it keeps,
-  the steps it runs) gives it a copy of its own instead. That copy no longer
+  Connections, its Instructions and, where its template keeps them with the
+  Routine, its steps and the Actions between them. A change to what the
+  Routine is built from (a new Table, a kind of step its template does not
+  offer) gives it a copy of its own instead. That copy no longer
   receives the template's improvements, which cannot be undone. Popcorn says
   which kind a change is before it makes it.
 
