@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-16
+deployed: 2026-10-17
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -154,9 +154,9 @@ Direct messages are not listed. Each row shows the Routine's name, its Routine T
 → list_routines(template="claimcoordinator")
 
 50 of 137 Routines running claimcoordinator:
-- #claims-central  claimcoordinator  (id: 2af4…0c)
-- #claims-east  claimcoordinator  4 unread, 1 mention  (id: be23…ef)  [pinned]  [missing a connection]
-- #claims-north  claimcoordinator  (id: bd7d…b9)  [not joined]
+- #claims-central  Claim Coordinator (claimcoordinator)  (id: 2af4…0c)
+- #claims-east  Claim Coordinator (claimcoordinator)  4 unread, 1 mention  (id: be23…ef)  [pinned]  [missing a connection]
+- #claims-north  Claim Coordinator (claimcoordinator)  (id: bd7d…b9)  [not joined]
 - … 47 more rows
 next_cursor: eyJ2Ijox…
 ```
@@ -188,7 +188,7 @@ Your role: admin
 Unread: 4
 Mentions: 1
 Muted: no
-Template: claimcoordinator
+Template: Claim Coordinator (claimcoordinator)
 Updates from: Popcorn
 Version: 0.15.1 (the latest)
 Install: installed
@@ -888,7 +888,7 @@ It runs in the background; the Routine's runs in Popcorn show how it ended.
 
 List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to. take_action takes one.
 
-Some Actions need the Popcorn app (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
+Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -904,7 +904,7 @@ Routine: #intake (c7d2…5b) · table: claims
 Row 88 · Status: open
 Actions offered now:
 - Close claim  action: close  moves it to: Closed
-- Ask for documents  action: ask_docs  [in the Popcorn app]
+- Ask for documents  action: ask_docs  [in Popcorn]
 ```
 
 ### `take_action`
