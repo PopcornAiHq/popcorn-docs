@@ -456,3 +456,13 @@
   concept: work-a-routines-items, reviews
   pass: list_rows on the Routine's Table filtered on the Status value of that Review, such as retainer_review (shown in Popcorn as Needs retainer review); list_actions then shows Send retainer, Already signed and Do not send retainer
   trap: says to filter on the label text, or that take_action can send the retainer itself
+
+- q: How many items in #intake are waiting for a person, and why?
+  concept: reviews, work-a-routines-items
+  pass: get_status counts the items at each Status, marks the ones that need a person, and lists what is waiting with its reason and the items it is about
+  trap: says to page through list_rows and count by hand, or that no tool can tell
+
+- q: Can my assistant see what a Routine's Steps are?
+  concept: steps
+  pass: yes, get_routine lists the Steps in order with each Review's choices and where they lead, and which choices are made only in Popcorn; changing the Steps is still done by telling the Routine's agent in Popcorn
+  trap: says no tool reads the Steps, or that an assistant can change them

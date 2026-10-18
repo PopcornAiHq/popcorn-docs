@@ -7,8 +7,8 @@ summary: >
   A Routine's Steps are its work on each item, in order: what each one asks
   for by email, what finishes it, and how it follows up when no reply comes. A
   Review is the kind of Step where a person decides. Where a template has
-  Steps, they stay with the Routine and are changed in Popcorn; an assistant
-  sees which version is installed, not the Steps themselves.
+  Steps, they stay with the Routine and are changed in Popcorn; get_routine
+  lists them for an assistant.
 concepts: [reviews, customizing-a-routine, routine-settings]
 layer: product
 ---
@@ -66,10 +66,13 @@ improvements (see
 earlier version, or the template's own, can be put back, and a change that
 would remove a Step items are still at is refused.
 
-An assistant sees which version of the Steps is installed, with its name and
-when it was installed, through `list_routine_settings`, and where each item
-stands from its Status, through `list_rows`. No assistant tool reads or
-changes the Steps themselves yet.
+An assistant reads the Steps with `get_routine`, which lists them in order as
+the **Routine steps** tab does: each Step's kind and name, the ways an item
+leaves it on its own, and each Review's reason and choices, with where each
+leads and which are made only in Popcorn. Each Step also shows its Status
+value, the one `list_rows` filters on. The list names the version of the
+Steps installed, and `get_status` shows how many items are at each Step. No
+assistant tool changes the Steps yet.
 
 > **Platform note** — A Routine's Steps are the states of its template's
 > state machine, and a Routine with Steps of its own has them installed as a
