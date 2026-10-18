@@ -1,7 +1,7 @@
 ---
 id: set-up-a-routine
 title: Setting up a Routine
-order: 1
+order: 2
 summary: >
   Setting up a Routine from a Routine Template: pick a template with
   list_routine_templates, create the Routine with create_routine (a dry run

@@ -378,7 +378,7 @@
   trap: says every change stops the template's improvements, or that a copy can be reverted
 
 - q: If I add a review before the agreement goes out, does my Routine stop getting the template's improvements?
-  concept: customizing-a-routine
+  concept: customizing-a-routine, reviews
   pass: no, where the template keeps its steps with the Routine; changing, adding or reordering steps stays with that Routine, an earlier version or the template's own can be put back, and only a kind of step the template does not offer needs a copy of its own
   trap: says any change to the steps gives the Routine a copy of its own, or that it cannot be undone
 
@@ -431,3 +431,18 @@
   concept: work-a-routines-items, actions-and-status
   pass: list_actions on the row, take_action close as a dry run, then confirm=true with its run_key; get_row shows the new Status
   trap: sets the Status column with update_row
+
+- q: What happens if a client doesn't reply to the Routine's emails?
+  concept: steps
+  pass: the Step follows up on the Routine's reminder schedule within its sending hours; when the follow-ups run out the item closes with a reason such as No response, and a later reply reopens the Step
+  trap: says Popcorn keeps emailing indefinitely, or that a closed item cannot come back
+
+- q: How do I make Popcorn wait for me before it sends the retainer?
+  concept: reviews, steps
+  pass: add a Review before the signing Step by telling the Routine's agent in Popcorn; the item then waits, says why, and offers choices such as Send retainer, Already signed or Do not send retainer
+  trap: says to change a Routine Setting with update_routine_setting, or that an assistant can add the Review through MCP
+
+- q: How do I connect Claude to my Popcorn workspace?
+  concept: connect-your-assistant
+  pass: add the MCP server at https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose the workspace on the consent page, then check with get_workspace; the connection is bound to that one workspace
+  trap: says to paste an API key, or that the assistant can switch workspaces without reconnecting

@@ -37,6 +37,8 @@ its terms the product term it belongs to.
   a claims coordinator. One template can start many Routines, and a Routine
   made from one keeps receiving the template's improvements unless it has been
   changed into a copy of its own (see *customizing a Routine*).
+- **Inbox Scan** — The Routine Template that reads a mailbox, suggests
+  Routines from the work it finds there, and shows how the team writes.
 - **customizing a Routine** — Changing one Routine without changing the
   others made from the same template. Most changes stay with that one Routine
   and survive the template's improvements: its Routine Settings, its
@@ -61,6 +63,11 @@ its terms the product term it belongs to.
 - **Reference** — A document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. A Reference informs the Routine; it
   is not one of the items the Routine tracks.
+- **booking page** — The calendar link people book a meeting through. A
+  booking made on it can start an item's work, or complete a booking Step.
+- **signing provider** — The service an agreement is sent through for
+  signature. Its account is set up per Routine, and Popcorn tracks who has
+  signed.
 
 ## How it behaves
 
@@ -76,7 +83,24 @@ its terms the product term it belongs to.
   people talk to. It follows the Routine's Instructions, and it asks before
   the steps the Instructions say need a person.
 
+## What it does
+
+- **Step** — One part of a Routine's work on each item, in order: what it
+  asks for, what finishes it, and how it follows up until then. Not every
+  Routine has Steps. *Not to be confused with* a Trigger, which brings an
+  item in; Steps are what happens to it after.
+- **Review** — The kind of Step where a person decides instead of Popcorn.
+  The item waits, says why, and offers the Actions that decide where it goes
+  next. *Not to be confused with* an Action: a Review is the Step that
+  waits, and an Action is the button that ends it.
+- **Approval** — One kind of Review, "should this go ahead?", and the
+  outcome of a Review that passes.
+
 ## What it holds
+
+- **item** — One thing a Routine works on, such as a potential client in an
+  intake Routine or an order on its way to a customer. Each item is a Row in
+  one of the Routine's Tables. An item is not always a person.
 
 - **Table** — A set of items the Routine keeps, such as claims, orders or
   contacts, shown as rows and columns.
@@ -89,6 +113,8 @@ its terms the product term it belongs to.
   changes when an Action is taken or the Routine moves the item on, not by
   editing the Cell. *Not to be confused with* whether a single run of the
   Routine finished.
+- **outcome** — The Status a finished item ends on, such as *Retained* or
+  *Not retained*.
 
 ## What people do, and what happened
 
