@@ -84,6 +84,7 @@ GROUPS = {
     "settings": "Routine settings",
     "agent_store": "Tables",
     "triggers": "Triggers",
+    "status": "Status",
     "actions": "Actions",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
