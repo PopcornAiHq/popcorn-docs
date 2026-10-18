@@ -1,7 +1,7 @@
 ---
 id: history
 title: History
-order: 10
+order: 12
 group: What people do, and what happened
 summary: >
   A Routine's History is what has happened in it — did the reminders go out,

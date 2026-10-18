@@ -1,7 +1,7 @@
 ---
 id: instructions
 title: Instructions
-order: 7
+order: 9
 group: How it behaves
 summary: >
   A Routine's Instructions say in plain language what it should do and how:

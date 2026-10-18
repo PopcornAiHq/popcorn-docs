@@ -265,7 +265,10 @@ runs themselves are part of a Routine's **History**; the entries say which.
   block, optionally with `when:`, `foreach:` and `on_error:`. Not every kind
   takes every modifier: `foreach:` is refused on `sleep_seconds`,
   `await_approval` and a nested block, and `on_error.retry` on `call_flow` and
-  a nested block. See
+  a nested block. *Not to be confused with* a Routine's Step, which is a
+  state of its state machine, not an entry in a flow. An `await_approval`
+  step pauses one run until a person replies; it is not how a Routine's
+  Reviews or Approvals are built. See
   [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 - **activity** — A platform operation a step calls, named
   `<tier>.<domain>.<verb>`, such as `foundation.store.list_rows`, sometimes
@@ -287,7 +290,8 @@ runs themselves are part of a Routine's **History**; the entries say which.
   agent or another flow. Product term: History.
 - **outcome** — What a caller branches on when a run ends: `succeeded`,
   `failed` or `still_running`. *Not to be confused with* the run's status,
-  which uses a finer vocabulary, or with a row's Status column. Product term:
+  which uses a finer vocabulary, or with a row's Status column, or with the
+  product's outcome, the Status a finished item ends on. Product term:
   History.
 - **trigger** — Always qualify it. A **message trigger** is a manifest
   `triggers:` entry that runs a flow for each message in the channel, and its

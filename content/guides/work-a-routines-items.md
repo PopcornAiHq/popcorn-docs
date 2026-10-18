@@ -1,7 +1,7 @@
 ---
 id: work-a-routines-items
 title: Working a Routine's items
-order: 3
+order: 4
 summary: >
   Working a Routine's items: find them in its Tables with list_rows, filtering
   by Status; read one with get_row; see the Actions it offers with
