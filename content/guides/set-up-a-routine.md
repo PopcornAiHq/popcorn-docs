@@ -17,7 +17,19 @@ something a person can ask their assistant for, and the assistant does it
 through the Popcorn MCP server; one step needs the person themselves.
 
 The example sets up a private Routine for western-region claims, called
-`#claims-west`, from the Claim Coordinator template.
+`#claims-west`, from the Chase template, whose
+[Steps](https://docs.popcorn.ai/product/concepts/steps.md) start as a claims intake: questions, a
+Review, then the retainer.
+
+## Or describe it in Popcorn
+
+A person can also start a Routine in Popcorn without picking a template.
+**New routine** takes a sentence such as "ask new clients a few questions,
+then send them a retainer", or an example to start from, and the new
+Routine's agent drafts its Steps from it for the person to check. Popcorn can
+also suggest Routines from a connected inbox, from the work it finds waiting
+there. Both start from the same template as this guide, so the rest of it
+applies once the Routine exists.
 
 ## 1. Pick a template
 
@@ -26,12 +38,12 @@ The example sets up a private Routine for western-region claims, called
 `list_routine_templates` lists the Routine Templates this workspace can
 start from: each one's name, its slug, what it does, and the Connections it
 needs before it runs. A template the workspace cannot run is not listed. Note
-the slug — `claimcoordinator` here — and the Connections, because someone
-has to make them in step 4.
+the slug — `chase` here — and the Connections (Gmail, Google Drive, Google
+Calendar and an intake address), because someone has to make them in step 4.
 
 ## 2. Create the Routine
 
-> "Set up a private #claims-west Routine from the claims template, with
+> "Set up a private #claims-west Routine from the Chase template, with
 > Jordan in it."
 
 `create_routine` with a `template` is a dry run first. It names the
@@ -74,8 +86,10 @@ connected. See [Connections](https://docs.popcorn.ai/product/concepts/connection
 
 `list_triggers` shows how work arrives: its schedules with their cadence,
 the messages and documents that start work, and any other system that posts to
-it. Some templates expect a document, such as a policy, before they can do
-much; adding one is a person's step in Popcorn.
+it. A Chase Routine needs its sample email before its first Step can ask
+anything, and its agreement before it can send one; adding them is a
+person's step in Popcorn (see
+[References](https://docs.popcorn.ai/product/concepts/reference-documents.md)).
 
 To see the Routine work without waiting, `run_trigger` runs one of its
 schedules now — a dry run first, because the work is real. See

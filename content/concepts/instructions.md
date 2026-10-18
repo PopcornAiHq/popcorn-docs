@@ -33,6 +33,14 @@ Instructions come from more than one place:
 - **What people tell the Routine's agent** in the Routine itself — "always
   copy the adjuster", "ask me before sending anything to the carrier". The
   agent keeps the preferences and decisions it is given.
+- **Each [Step](https://docs.popcorn.ai/product/concepts/steps.md)'s own instructions**, in a
+  Routine that has Steps: the questions a Step asks and what a complete
+  answer to each needs, the wording of its emails, and a note on how to
+  handle it. A Step's first email uses the opening and closing of the sample
+  email it was set up from, word for word, and its later emails keep that
+  voice. These are the instructions people change most, by telling the
+  Routine's agent: "ask when it happened, and accept a month if they don't
+  know the day".
 
 ## What an assistant can do with them
 

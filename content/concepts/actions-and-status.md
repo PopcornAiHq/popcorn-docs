@@ -13,16 +13,22 @@ concepts: [tables, work-a-routines-items, triggers]
 layer: product
 ---
 
-An item's **Status** says where it stands: *Waiting on documents*,
-*Approved*, *Closed*. Popcorn works it out from what has happened to the item,
+An item's **Status** says where it stands: in a claims intake Routine,
+*Collecting info*, *Needs retainer review*, *Getting signatures*, *Retained*. Popcorn works it out from what has happened to the item,
 so it changes when someone takes an Action or the Routine moves the item on —
 never by writing it. `create_rows` and `update_row` refuse a Status Column.
 A Status is about the item, not about whether one piece of the Routine's work
 finished.
 
-An **Action** is something a person does to move an item on: approve, send,
-archive, retry. An item offers only the Actions that make sense for where it
-stands, so the buttons and the Status cannot disagree.
+An **Action** is something a person does to move an item on: *Send
+retainer* or *Already signed* at a [Review](https://docs.popcorn.ai/product/concepts/reviews.md),
+*Stop tracking* and *Resume tracking* on any item, *Try again* after an error.
+An item offers only the Actions that make sense for where it stands, so the
+buttons and the Status cannot disagree.
+
+There is no Action that archives an item. An item closes for a reason the
+Routine records, such as *No response* when the follow-ups run out, or a
+person stops tracking it.
 
 ## Seeing what an item offers
 
