@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-deployed: 2026-10-17
+deployed: 2026-10-18
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -402,8 +402,6 @@ the channel-config endpoints hand out.
 ## foundation.channels
 
 ### `foundation.channels.get`
-
-*Beta.*
 
 Look up channels by id and return their name and type.
 
@@ -2338,7 +2336,7 @@ be supplied explicitly in `inputs`.
 | `flow_name` | string | yes | Name of the flow to launch, as installed in the conversation (e.g. 'email_backfill_gmail'). |
 | `inputs` | object | no | Map of input name → value passed to the launched flow. |
 | `provider` | string, optional | no | DEPRECATED, ignored. Was the connector key of the removed provider-arg override; declared only so flows stored before the `integrations` rename still pass input validation. |
-| `best_effort` | boolean | no | Launch on the batch tier even though the target flow does not declare `best_effort: true` itself. Implied whenever the launching flow already runs on the batch tier, so a best-effort parent's children never climb back onto realtime. Default `false`. |
+| `best_effort` | boolean | no | Launch on the batch tier even though the target flow does not declare `best_effort: true` itself. Implied whenever the launching flow is not on the realtime queue (a scheduled tick on system, the eval driver on batch), so background fan-out never lands on realtime; set it to send a realtime parent's launch to the batch tier too. Default `false`. |
 
 **Returns**
 
@@ -2624,6 +2622,7 @@ before the check (same as email.list).
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `provider` | string | no | Canonical provider ('google' or 'microsoft'); pass $channel.integrations.<name>.provider. A value with no mail reader runtime -> connected=False. Default `"google"`. |
+| `for_send` | boolean | no | Also require the scope a send or reply needs (Google: gmail.send); a grant without it -> connected=False, reason missing_scope. Lets a flow refuse a read-only mailbox before it shows a preview it could never send. Default `false`. |
 
 **Returns**
 
@@ -3082,6 +3081,7 @@ step. Prefix the subject with 'Re: ' so Gmail threads it correctly.
 | `cc` | list of string | no | Cc addresses. |
 | `bcc` | list of string | no | Bcc addresses. |
 | `in_reply_to` | string, optional | no | Original message's RFC822 Message-Id, for In-Reply-To header threading. Optional. |
+| `footer` | boolean | no | False sends `body` without the 'Powered by Popcorn' footer, exactly as given (a member's own reply, previewed byte for byte). True, the default, keeps it. Default `true`. |
 
 **Returns**
 
