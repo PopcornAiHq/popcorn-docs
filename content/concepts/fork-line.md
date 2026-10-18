@@ -4,11 +4,11 @@ title: Fork lines
 order: 16
 group: How a version ships
 summary: >
-  Customizing a Routine beyond its settings gives it a copy of its own: a fork
-  line, the workspace's own version series of the app. Publishing to it moves
-  every channel on that line — the others converge on their daily update. Once
-  on a fork line a channel never leaves it, so isolating a change means a
-  second named line. A fork cannot be undone.
+  Customizing a Routine beyond what stays with it, such as a new Table, gives
+  it a copy of its own: a fork line, the workspace's own version series of the
+  app. Publishing to it moves every channel on that line — the others converge
+  on their daily update. Once on a fork line a channel never leaves it, so
+  isolating a change means a second named line. A fork cannot be undone.
 concepts: [publish-and-apply, bundle-version, channel-binding]
 layer: platform
 product_terms: [customizing a Routine]

@@ -7,7 +7,8 @@ summary: >
   with list_routine_settings, read it in full, change it with
   update_routine_setting after a dry run, and confirm the new value. A setting
   stays with that Routine and can be set back; what no setting covers is
-  either Instructions, changed in Popcorn, or a copy of its own.
+  Instructions or the Routine's steps, both changed in Popcorn, or a copy of
+  its own.
 concepts: [routine-settings, customizing-a-routine, instructions]
 layer: product
 ---
@@ -60,14 +61,18 @@ default.
 
 ## 5. When no setting covers it
 
-Two other kinds of change remain:
+Three other kinds of change remain:
 
 - **How the Routine's agent should act** — "ask me before sending anything
   to the carrier", "always copy the adjuster". That is its
   [Instructions](https://docs.popcorn.ai/product/concepts/instructions.md): a person tells the
   Routine's agent in Popcorn.
+- **Its steps** — another question before the agreement goes out, a review
+  before a meeting is booked. Where the template keeps its steps with the
+  Routine, a person asks the Routine's agent in Popcorn, and the change stays
+  with this Routine.
 - **What the Routine is built from** — a new Table, a new kind of Trigger, a
-  different step in its work. That gives the Routine a copy of its own, which
+  kind of step its template does not offer. That gives the Routine a copy of its own, which
   no longer receives the template's improvements and cannot be undone. See
   [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)
   before agreeing to it.
