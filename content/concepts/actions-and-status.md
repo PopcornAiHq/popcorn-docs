@@ -37,9 +37,9 @@ it moves the item to. Some Actions need the Popcorn app — a form to fill in, a
 document to sign, a request to the Routine's agent — and are listed and marked
 `[in the Popcorn app]`.
 
-To find items by Status, filter Rows on the Status Column with `list_rows`,
-for example `{"Status": "open"}`. There is no tool yet that counts items per
-Status.
+`get_status` counts the items at each Status, with the value each is stored
+as. To list the items at one, filter Rows on the Status Column with
+`list_rows`, for example `{"Status": "open"}`.
 
 ## Taking one
 

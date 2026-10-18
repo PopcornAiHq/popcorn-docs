@@ -6,8 +6,8 @@ group: What it does
 summary: >
   A Review is the kind of Step where a person makes the call instead of
   Popcorn: the item waits, says why, and gives a few choices of where it goes
-  next. Approval is one kind of Review, and its passing outcome. list_rows
-  finds waiting items by Status; take_action takes a choice, except one that
+  next. Approval is one kind of Review, and its passing outcome. get_status
+  lists what is waiting and why; take_action takes a choice, except one that
   opens a form in Popcorn.
 concepts: [steps, actions-and-status, routine-settings]
 layer: product
@@ -39,8 +39,10 @@ fit" or "already done".
 In Popcorn, items at a Review show as needing review. Each one's Status names
 its Review, such as *Needs retainer review*.
 
-An assistant finds them with `list_rows`, filtering on the Status Column. No
-tool yet lists everything waiting across a Routine with its reason.
+An assistant asks `get_status`, which counts the items at each Status, marks
+the Statuses that need a person, and lists what is waiting, newest first, with
+why and which items. `list_rows`, filtering on the Status Column, lists the
+items at one Review in full.
 
 ## Making the choice
 

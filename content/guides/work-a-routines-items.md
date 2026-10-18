@@ -3,11 +3,12 @@ id: work-a-routines-items
 title: Reviewing what needs you
 order: 4
 summary: >
-  Reviewing what needs you: find the claims or other items waiting at a
-  Review, or still open, with list_rows, filtering by Status; read one with get_row; see the choices it
-  offers with list_actions and take one with take_action after a dry run;
-  stop tracking an item; correct Rows with update_row; and run a scheduled
-  Trigger now with run_trigger.
+  Reviewing what needs you: see what is waiting and why with get_status; find
+  the claims or other items at a Review, or still open, with list_rows,
+  filtering by Status; read one with get_row; see the choices it offers with
+  list_actions and take one with take_action after a dry run; stop tracking an
+  item; correct Rows with update_row; and run a scheduled Trigger now with
+  run_trigger.
 concepts: [reviews, actions-and-status, tables]
 layer: product
 ---
@@ -21,8 +22,13 @@ Routine whose main Table holds one Row per potential client.
 
 > "Who in #intake is waiting for us to review them?"
 
-`list_tables` names the Routine's Tables. `list_rows` lists a Table's
-Rows, newest first, and narrows them:
+`get_status` answers in one call: how many items are at each Status, with the
+ones that need a person marked, then what is waiting, newest first, each with
+its reason and the items it is about. Each Status comes with its stored value,
+which is what the next call filters on.
+
+To see the items at one Review in full, `list_tables` names the Routine's
+Tables, and `list_rows` lists a Table's Rows, newest first, and narrows them:
 
 - `filter` on the Status Column. Popcorn shows a Status by its label, and
   the Row holds its value: *Needs retainer review* is `retainer_review`. So
@@ -33,9 +39,6 @@ Rows, newest first, and narrows them:
 - `query` for a text anywhere in a Row: "Dana Reyes" finds that item
   whatever Column holds the name.
 - `sort` and `columns` to order the Rows and choose what each line shows.
-
-No tool yet lists everything waiting across a Routine with its reason, or
-counts items per Status; a filtered list is the way to see them.
 
 ## 2. Read one
 
