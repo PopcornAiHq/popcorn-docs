@@ -13,9 +13,9 @@ concepts: [triggers, customizing-a-routine]
 layer: product
 ---
 
-A **Reference** is a document a Routine works from: the policy it checks
-claims against, the price list it quotes from, the form it fills in, an
-example of a good reply. A Reference informs the Routine. It is not one of the
+A **Reference** is a document a Routine works from: the agreement it sends
+for signature, the sample email a Step's questions and wording come from,
+the policy it checks claims against, an example of a good reply. A Reference informs the Routine. It is not one of the
 items the Routine tracks, which live in its
 [Tables](https://docs.popcorn.ai/product/concepts/tables.md).
 
@@ -27,10 +27,12 @@ the template's improvements.
 ## Where they live today
 
 People add and replace References in the Routine, in Popcorn. Adding some
-documents also starts work — a new policy is read and its terms recorded —
-and `list_triggers` shows those under **Documents**, for example "uploading
-the 'policy' document starts policy upsert" (see
-[Triggers](https://docs.popcorn.ai/product/concepts/triggers.md)).
+documents also starts work, and `list_triggers` shows those under
+**Documents** (see [Triggers](https://docs.popcorn.ai/product/concepts/triggers.md)). In a
+claims intake Routine, adding the sample email sets up the first Step's
+questions and its first email, and adding the agreement, a Google Doc or a
+Word file, makes it the one sent for signature. The sample email is the one Reference
+that Routine requires.
 
 ## What an assistant can do with them
 

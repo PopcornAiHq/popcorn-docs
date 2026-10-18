@@ -4,12 +4,11 @@ title: Routine Settings
 order: 8
 group: How it behaves
 summary: >
-  Routine Settings tune one Routine without changing what it does: switches
-  such as a sending mode, values such as how many days it waits between
-  reminders or a schedule's cadence, and the wording of its emails and
-  prompts. A setting reaches only its own Routine, can be set back, and
-  survives the template's improvements. list_routine_settings finds one;
-  update_routine_setting changes it.
+  Routine Settings tune one Routine without changing what it does: whether
+  Popcorn sends its emails or writes them as drafts to check, the days between
+  reminders, the wording of its emails and prompts. A setting reaches only its
+  own Routine, can be set back, and survives the template's improvements.
+  list_routine_settings finds one; update_routine_setting changes it.
 concepts: [customizing-a-routine, change-how-a-routine-behaves, triggers]
 layer: product
 ---
@@ -25,6 +24,21 @@ A setting:
 - reaches this Routine only, never the others made from the same template;
 - can be set back, by setting it to the template's default;
 - is kept through the template's improvements.
+
+A claims intake Routine's settings include:
+
+| Setting | What it decides |
+|---|---|
+| Email sending | *Off*, *Draft* (each email is written for a person to send) or *Send* |
+| Agreement sending | the same three, for sending agreements through the signing provider |
+| Reply matching | whether a reply is matched to its item by the sender's address, or by the email thread (for an inbox several Routines share) |
+| Save signed agreements to Google Drive | whether each signed agreement is filed in a folder for its client |
+| Booking confirmation | whether someone who books a meeting gets a short note confirming it |
+| Step forward | whether people can move an item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/product/concepts/reviews.md)) |
+| Reminder schedule, outreach hours | when follow-ups go out, and the hours emails may be sent in |
+
+The names follow the Routine's own words, so a Routine that sends a retainer
+says "Retainer sending".
 
 ## Reading them
 

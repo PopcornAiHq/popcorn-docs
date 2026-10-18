@@ -20,11 +20,28 @@ its template decides which:
 |---|---|
 | Schedule | its time comes: every few minutes, or each weekday at 8 |
 | Message | someone posts in the Routine |
-| Document | a particular document is added to it, such as a policy |
-| Another system | that system posts to the Routine's address |
+| Document | a particular document is added to it, such as the sample email a Step's questions come from |
+| Another system | that system posts to the Routine's address, such as a website's intake form sending each new client |
+
+A claims intake Routine has one of each but messages: schedules that send the
+follow-ups and watch the calendar for bookings, an intake address its website
+form posts each new client to, and documents (the sample email, the agreement
+to sign) that set up its Steps when they are added. A booking made on its
+booking page reaches it through one of those schedules.
 
 Work that a person starts on one item is an
 [Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md), not a Trigger.
+
+## Adding items by hand
+
+A person can also add items without a Trigger: by asking the Routine's agent
+in Popcorn to add someone, or by giving it a spreadsheet of them. Either way
+the item starts its first [Step](https://docs.popcorn.ai/product/concepts/steps.md). `create_rows`
+writes a Row too, but starts no work, so it is not a way in.
+
+In a claims intake Routine, a second arrival for someone already there, by
+the same email address or phone number, updates their item and never starts
+it over. That is this Routine's rule, not every Routine's.
 
 ## Seeing them
 

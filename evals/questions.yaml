@@ -446,3 +446,13 @@
   concept: connect-your-assistant
   pass: add the MCP server at https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose the workspace on the consent page, then check with get_workspace; the connection is bound to that one workspace
   trap: says to paste an API key, or that the assistant can switch workspaces without reconnecting
+
+- q: Can Popcorn write the emails for me to check instead of sending them?
+  concept: routine-settings
+  pass: yes, set the Email sending setting to Draft with update_routine_setting after a dry run; each email is written for a person to send, and Off sends nothing
+  trap: says this needs a copy of the template, or a change to the Routine's Instructions
+
+- q: Which clients in #intake are waiting at the retainer Review?
+  concept: work-a-routines-items, reviews
+  pass: list_rows on the Routine's Table filtered on the Status value of that Review, such as retainer_review (shown in Popcorn as Needs retainer review); list_actions then shows Send retainer, Already signed and Do not send retainer
+  trap: says to filter on the label text, or that take_action can send the retainer itself
