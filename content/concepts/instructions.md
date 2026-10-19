@@ -5,10 +5,10 @@ order: 9
 group: How it behaves
 summary: >
   A Routine's Instructions say in plain language what it should do and how:
-  how to word a follow-up, when to ask a person first, which deadlines matter.
-  Some of that wording — its email and prompt texts — is Routine Settings an
-  assistant can read and change. The rest is shaped in Popcorn by telling the
-  Routine's agent; no assistant tool reads or changes it yet.
+  how to word a follow-up, when to ask a person first, what each Step asks.
+  get_instructions reads them all at once, each part with where it came from
+  and what changes it: update_routine_setting for wording that is a setting,
+  change_routine for its Steps, Popcorn for the rest.
 concepts: [routine-settings, customizing-a-routine]
 layer: product
 ---
@@ -20,7 +20,7 @@ and asks before the steps they say need a person. Changing them changes how
 the Routine behaves from then on, for that Routine only, and the change
 survives the template's improvements.
 
-## Where they live today
+## Where they live
 
 Instructions come from more than one place:
 
@@ -42,23 +42,37 @@ Instructions come from more than one place:
   Routine's agent: "ask when it happened, and accept a month if they don't
   know the day".
 
-## What an assistant can do with them
+## Reading them
 
-An assistant can read and change the wording that is a Routine Setting. It
-cannot read the Instructions as a whole, or change the guidance that is not a
-setting: `update_routine_setting` says so when asked. A person changes those
-in Popcorn, by telling the Routine's agent.
+> "What instructions is #intake working from?"
 
-## What the assistant tools would need to show
+`get_instructions` reads a Routine's Instructions in one call, grouped by
+where they live, and says for each part whether it is the template's or was
+changed for this Routine, and what changes it:
 
-These pages describe the present, so this section is a design input, not a
-promise: nothing depends on it arriving. A tool for Instructions would need
-to show them as one plain-language text, say which parts are the template's
-and which were changed for this Routine, take a change in the person's words
-and preview the Instructions as they would read after it, and return a changed
-part to the template's. The MCP reference's
-[proposed tools](https://docs.popcorn.ai/product/reference/mcp.md) sketch `get_instructions` and
-`update_instructions` along those lines.
+| Part | Changed by |
+|---|---|
+| Guidance for each of the Routine's agents, kept with its Steps | `change_routine`, or in Popcorn |
+| Prompt and email wording that is a Routine Setting | `update_routine_setting` |
+| Notes for an agent | `update_routine_setting` |
+| The Routine's own guidelines for its agent | in Popcorn |
+| What people told the agent | in Popcorn, by telling the agent |
+| Each Step's note, wording, questions and deadlines | `change_routine`, or in Popcorn |
+| The template's guide | a Routine member, in Popcorn |
+
+Without a `step`, each Step is summarised; `step` (its Status value or name)
+shows one Step's in full. On a workspace that guards personal data, what
+people told the agent shows only its kind and date, not what was said, since
+it can name a client.
+
+## Changing them
+
+There is no single tool that rewrites the Instructions. Wording that is a
+setting is changed with `update_routine_setting`, and a Routine's Steps, with
+their own instructions, are changed with `change_routine`, which shows the
+change before anything is installed (see
+[Steps](https://docs.popcorn.ai/product/concepts/steps.md)). The rest is changed in Popcorn, by
+telling the Routine's agent.
 
 > **Platform note** — The template's guidance is its `AGENT.md` and the
 > prompt files it seeds. See [app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).

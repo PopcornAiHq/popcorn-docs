@@ -5,9 +5,9 @@ order: 3
 summary: >
   Changing how one Routine behaves: find the Routine Setting that covers it
   with list_routine_settings, read it in full, change it with
-  update_routine_setting after a dry run, and confirm the new value. A setting
-  stays with that Routine and can be set back; what no setting covers is
-  Instructions or the Routine's steps, both changed in Popcorn, or a copy of
+  update_routine_setting after a dry run, and confirm it. A setting stays with
+  that Routine and can be set back. Otherwise: its Steps, with change_routine
+  after reading the proposal; its other Instructions, in Popcorn; or a copy of
   its own.
 concepts: [routine-settings, customizing-a-routine, instructions]
 layer: product
@@ -69,8 +69,8 @@ Three other kinds of change remain:
   Routine's agent in Popcorn.
 - **Its steps** — another question before the agreement goes out, a review
   before a meeting is booked. Where the template keeps its steps with the
-  Routine, a person asks the Routine's agent in Popcorn, and the change stays
-  with this Routine.
+  Routine, that is `change_routine` (step 6), or the Routine's agent in
+  Popcorn, and the change stays with this Routine.
 - **What the Routine is built from** — a new Table, a new kind of Trigger, a
   kind of step its template does not offer. That gives the Routine a copy of its own, which
   no longer receives the template's improvements and cannot be undone. See
@@ -80,3 +80,29 @@ Three other kinds of change remain:
 > **Platform note** — Making that second kind of change is building on the
 > template itself: see
 > [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+
+## 6. Change its Steps
+
+> "In #intake, once a claimant signs, ask them to book the interview
+> straight away."
+
+1. **Start the draft.** `change_routine` with `routine_id` and the request,
+   in the person's words. It returns a `change_id` and installs nothing; the
+   Routine's agent takes a few minutes to draft it.
+2. **Read the proposal.** `get_routine_change` with that `change_id`, and
+   `wait_seconds` (up to 20) to wait in the call. While it is drafting it
+   says so. When it is proposed, it shows the Steps before and after, what it
+   sets on each Step, what the agent assumed, any questions it left open, and
+   the checks against the Routine's items. Read it back to the person. If
+   part of it is a Routine Setting, it says which, so that part can be
+   changed with `update_routine_setting` instead.
+3. **Install it.** Once the person agrees, `change_routine` with the
+   `change_id` and `confirm=true`. It checks the proposal once more and
+   refuses if the Steps changed in the meantime. `get_routine_change` shows
+   when it is installed, and the version before it.
+4. **Undo it, if needed.** `change_routine` with `revert_to` set to that
+   version, `"previous"` or `"template"` is a dry run that shows the Steps
+   it would put back; confirm it with the `run_key` it gives.
+
+A new request while one is drafting is refused; open questions in a proposal
+are answered with a new request.

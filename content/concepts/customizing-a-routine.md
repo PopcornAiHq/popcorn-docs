@@ -34,10 +34,10 @@ leave them in place:
   documents it works from.
 - **Its steps**, where its template keeps them with the Routine: what each
   step asks for, their order, their wording, and where the Routine stops for
-  a person's review. A person changes them by telling the Routine's agent in
-  Popcorn, and an earlier version, or the template's own, can be put back.
-  Popcorn refuses a change that would remove a step items are still at. No
-  assistant tool changes steps yet.
+  a person's review. A person changes them by describing the change, to the
+  Routine's agent in Popcorn or to an assistant with `change_routine`, and
+  an earlier version, or the template's own, can be put back. Popcorn
+  refuses a change that would remove a step items are still at.
 
 Check the settings first. Most "can it do X differently" questions are a
 setting, and `list_routine_settings` with a `query` finds it.

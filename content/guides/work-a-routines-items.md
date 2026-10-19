@@ -47,6 +47,12 @@ Tables, and `list_rows` lists a Table's Rows, newest first, and narrows them:
 `get_row` shows the Row in full: every Column, its Status, when it was
 created and last changed, and the revision `update_row` needs in step 5.
 
+> "What has happened with Dana so far?"
+
+`list_history` shows what happened to the item, newest first: each change,
+who or what made it and why, and the work that made it. See
+[History](https://docs.popcorn.ai/product/concepts/history.md).
+
 ## 3. See what it offers
 
 > "What can I do with Dana's intake?"

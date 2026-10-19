@@ -404,7 +404,7 @@
 
 - q: I want the Routine's agent to always ask me before emailing the carrier. Where does that go?
   concept: instructions
-  pass: that is the Routine's Instructions; a person tells the Routine's agent in Popcorn; wording that is a Routine Setting can be edited by an assistant, the rest cannot yet
+  pass: that is the Routine's Instructions; a person tells the Routine's agent in Popcorn, or an assistant changes the Routine's Steps with change_routine after showing the proposal; wording that is a Routine Setting is changed with update_routine_setting; get_instructions shows what is there now
   trap: says to change a Routine Setting that does not exist, or to edit the template
 
 - q: How do I find every claim in #intake that is still open?
@@ -419,8 +419,8 @@
 
 - q: Did the Routine's reminder emails go out yesterday? Can my assistant check?
   concept: history
-  pass: that is the Routine's History; people read runs and the conversation in Popcorn; an assistant sees only when items were created and last changed
-  trap: claims an assistant tool reads the Routine's runs or messages
+  pass: that is the Routine's History; list_history shows an item's email turns and the runs that changed it, one item at a time and back as far as Popcorn keeps it; the conversation and email bodies are read in Popcorn
+  trap: claims an assistant tool reads the Routine's messages, or a timeline of the whole Routine at once
 
 - q: Walk me through starting a new Routine from the claims template.
   concept: set-up-a-routine
@@ -464,5 +464,20 @@
 
 - q: Can my assistant see what a Routine's Steps are?
   concept: steps
-  pass: yes, get_routine lists the Steps in order with each Review's choices and where they lead, and which choices are made only in Popcorn; changing the Steps is still done by telling the Routine's agent in Popcorn
-  trap: says no tool reads the Steps, or that an assistant can change them
+  pass: yes, get_routine lists the Steps in order with each Review's choices and where they lead, and which choices are made only in Popcorn; change_routine changes them from a description, after the person reads the proposal
+  trap: says no tool reads the Steps, or that an assistant changes them without showing the proposal first
+
+- q: What happened with Ben Garrett's intake, and who sent the retainer?
+  concept: history
+  pass: list_history with the item's row ID lists each change newest first, with who or what made it (a member by name, or Popcorn for the work it was doing), the Status moves, and the runs that changed it
+  trap: says to read get_row's last-changed time, or that no tool shows an item's history
+
+- q: How do I add a question to the intake Step from my assistant?
+  concept: steps, change-how-a-routine-behaves
+  pass: change_routine with the request starts a draft; get_routine_change shows the Steps before and after once it is proposed; confirm with the change_id and confirm=true; revert_to puts the version before back
+  trap: says to edit the Routine's settings or the template's files, or that the change installs without a proposal
+
+- q: What instructions is #intake working from?
+  concept: instructions
+  pass: get_instructions lists the Routine's Instructions by part, with where each came from and what changes it
+  trap: says to read the template's AGENT.md only, or that no tool shows them

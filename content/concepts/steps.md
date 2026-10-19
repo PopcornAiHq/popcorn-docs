@@ -7,8 +7,9 @@ summary: >
   A Routine's Steps are its work on each item, in order: what each one asks
   for by email, what finishes it, and how it follows up when no reply comes. A
   Review is the kind of Step where a person decides. Where a template has
-  Steps, they stay with the Routine and are changed in Popcorn; get_routine
-  lists them for an assistant.
+  Steps, they stay with the Routine; get_routine lists them, and
+  change_routine changes them from a description, showing the change before it
+  goes in.
 concepts: [reviews, customizing-a-routine, routine-settings]
 layer: product
 ---
@@ -58,9 +59,9 @@ In Popcorn, the **Routine steps** tab lists a Routine's Steps in order, with
 the ways an item leaves each one on its own, and each Review with its
 choices.
 
-A person changes the Steps by telling the Routine's agent, for example "ask
-for their date of birth too" or "check with me before the agreement goes
-out". The change stays with this Routine and survives the template's
+A person changes the Steps by describing the change, for example "ask for
+their date of birth too" or "check with me before the agreement goes out":
+to the Routine's agent in Popcorn, or to an assistant with `change_routine`. The change stays with this Routine and survives the template's
 improvements (see
 [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)). An
 earlier version, or the template's own, can be put back, and a change that
@@ -71,8 +72,25 @@ the **Routine steps** tab does: each Step's kind and name, the ways an item
 leaves it on its own, and each Review's reason and choices, with where each
 leads and which are made only in Popcorn. Each Step also shows its Status
 value, the one `list_rows` filters on. The list names the version of the
-Steps installed, and `get_status` shows how many items are at each Step. No
-assistant tool changes the Steps yet.
+Steps installed, and `get_status` shows how many items are at each Step.
+
+`change_routine` changes them in three moves, because the Routine's agent
+takes a few minutes to draft a change:
+
+1. **Describe it.** `change_routine` with the request starts the draft and
+   returns a `change_id`. Nothing is installed.
+2. **Read the proposal.** `get_routine_change` shows the Steps before and
+   after, what it would set on each Step, what the agent assumed and any
+   questions it left open, and whether it passed the checks against the
+   Routine's items. Part of a proposal that is really a
+   [Routine Setting](https://docs.popcorn.ai/product/concepts/routine-settings.md) says so.
+3. **Confirm it.** `change_routine` with the `change_id` and `confirm=true`
+   installs it, checking it once more first.
+
+`change_routine` with `revert_to` puts back the version before, or the
+template's own, after a dry run. One change is drafted at a time on a
+Routine, and it works only where the template keeps its Steps with the
+Routine.
 
 > **Platform note** — A Routine's Steps are the states of its template's
 > state machine, and a Routine with Steps of its own has them installed as a

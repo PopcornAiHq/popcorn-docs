@@ -4,47 +4,64 @@ title: History
 order: 12
 group: What people do, and what happened
 summary: >
-  A Routine's History is what has happened in it — did the reminders go out,
-  why was this claim closed: the work it ran and how each run ended, the
-  conversation in it, and the changes to its items, with who or what made each
-  one. People read it in Popcorn. An assistant sees when each item was created
-  and last changed; no assistant tool reads runs or the conversation yet.
+  A Routine's History is what has happened in it — did the reminder emails go
+  out, why was this claim closed: changes to its items with who or what made
+  each and why, the runs that made them and how they ended, and its email
+  turns. list_history shows an assistant one item's, newest first. The
+  Routine's conversation is read in Popcorn.
 concepts: [actions-and-status, triggers, tables]
 layer: product
 ---
 
 A Routine's **History** is what has happened in it:
 
-- **its work** — each run, what started it, and how it ended;
-- **its conversation** — the messages people and its agent posted in it;
-- **changes to its items** — what changed on a Row, and who or what changed
-  it.
+- **changes to its items** — what changed on an item, who or what changed
+  it, and why;
+- **its work** — each run that changed an item, what started it, and how it
+  ended;
+- **its email turns** — in a Routine with Steps, each email it sent or reply
+  it assessed;
+- **its conversation** — the messages people and its agent posted in it.
 
 History answers "did the reminder go out?", "why is this claim closed?" and
-"what did the agent say to the carrier?".
+"who sent the retainer?".
 
-## Where it lives today
+## One item's History
 
-People read a Routine's work and conversation in Popcorn. When an assistant
-runs a schedule or takes an Action, the response says the work runs in the
-background and that Popcorn shows how it ended.
+> "What happened with Ben Garrett's intake?"
 
-## What an assistant can do with it
+`list_history` takes the Routine and the item's row ID and lists what
+happened to it, newest first, as the item's **Activity** tab in Popcorn does.
+Each entry has:
 
-`get_row` shows when an item was created and last changed, and
-`list_rows` lists items newest first. An assistant cannot yet read a
-Routine's runs, its conversation, or the history of one item's changes.
+- **when**, and **who or what**: a member by name; Popcorn, with the work it
+  was doing; or "Popcorn, for a person" when someone's button started the
+  work, since a run doesn't record who pressed it;
+- **what happened**, such as *Send retainer* or *Answered all 5 intake
+  questions*;
+- the item's **Status** move and its new **Why**, then the other fields that
+  changed.
 
-## What the assistant tools would need to show
+After the entries, it lists the runs that changed the item on that page and
+how each ended. A long History comes in pages, with a `next_cursor` for the
+next one.
 
-These pages describe the present, so this section is a design input, not a
-promise: nothing depends on it arriving. A tool for History would need one
-timeline, newest first, that mixes work, conversation and changes, each entry
-with who or what made it; narrowing to one kind, one item or a time; and one
-entry in full: a run's steps and result, a message and its replies, or a
-change's before and after. The MCP reference's
-[proposed tools](https://docs.popcorn.ai/product/reference/mcp.md) sketch `list_history` and
-`read_history_entry`.
+## What it leaves out
 
-> **Platform note** — A run is a *flow run*, and the CLI reads runs today.
-> See [debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).
+- **Runs that only read the item.** Only work that changed it is listed.
+- **History older than Popcorn keeps.** Changes are kept for a limited time
+  (30 days, as of 2026-10-19), and the last page says so.
+- **The Routine's conversation and email bodies.** Both are read in Popcorn.
+- **A timeline for the whole Routine.** History is read one item at a time.
+
+## On a workspace that guards personal data
+
+`list_history` hides what `list_rows` would hide: a changed value in a
+Column marked as personal data shows as a placeholder. It also never prints
+the words a piece of work wrote about itself, which can name the person an
+item is about: each entry is titled by its kind instead, such as *Email sent*,
+*Reply assessed* or *Action taken: Send retainer*.
+
+> **Platform note** — An item's History is the agent store's audit log for
+> its Row, and a run is a *flow run*, which the CLI also reads. See
+> [debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).
