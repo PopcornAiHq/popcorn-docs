@@ -39,7 +39,10 @@ Four consequences worth holding on to:
 - **Data is not pinned.** Table rows and scalars are read live. A run that
   outlives an upgrade sees rows the new version wrote. The channel config
   behind `$channel.*` is pinned with the run, so a parameter edited mid-run
-  is seen only by later runs.
+  is seen only by later runs. So is a channel's installed
+  [recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md): a
+  run already going keeps judging rows by the graph it started with when a
+  new one is installed.
 - **Only `call_flow` inherits the pin.** `foundation.workflow.start_flow`
   starts a separate run, which reads the channel's binding when it starts: if
   the channel upgrades in between, a parent on version *n* can launch a child

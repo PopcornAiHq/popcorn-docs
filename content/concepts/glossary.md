@@ -404,10 +404,16 @@ Product terms: **Connection** and **Agent**; the entries say which.
 Product terms: **Status** and **Action**. The machines, states, events and
 transitions behind them stay out of the product.
 
-- **state machine** — A manifest `states:` section over one table: a set of
+- **state machine** — A manifest `states:` section, or a recipe, over one table: a set of
   small machines. At least one is not an overlay; the first of those is the
   primary, usually a **funnel** (the milestone that moves forward). An
   **overlay** (`overlay: true`) holds what is true alongside it. See
+  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+- **recipe** — A bundle's state graph shipped as a root `recipe.yaml`,
+  declared by the manifest's `recipe:` block instead of `states:`. Each
+  channel can install a revision of its own, which runs pinned per run and
+  survives the bundle's updates. Formerly **process** (`process:`,
+  `process.yaml`). Product term: a Routine's Steps. See
   [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
 - **state**, **event**, **transition** — A machine's values; the named
   things that happen, grouped in families the bundle names (`staff.*`,

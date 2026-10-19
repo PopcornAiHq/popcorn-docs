@@ -6,11 +6,11 @@ group: What a bundle holds
 summary: >
   A Routine's Status and Actions come from state machines its template
   declares — states, transitions, and the button on each edge — which the
-  platform runs. A row's Status is a projection of those machines, so it
-  changes by firing an event; a value written to the column lasts until the
-  next projection. Publish proves the graph's structure; its intent is the
-  author's to check.
-concepts: [manifest-keys, channel-binding, states-authoring]
+  platform runs. Status is a projection, so it changes by firing an event; a
+  value written to the column lasts until the next projection. The graph is
+  a manifest `states:` section or a `recipe.yaml` each Routine can replace.
+  Publish proves structure only.
+concepts: [manifest-keys, channel-binding, states-authoring, app-bundle]
 layer: platform
 product_terms: [Status, Action]
 ---
@@ -20,7 +20,8 @@ Underneath, a tracker row is a **tuple of small machines**, and the single
 chip a user sees is a projection of that tuple.
 
 A bundle declares the machines, their states, and the transitions between them
-in its manifest. The platform ships the engine and runs the graph; the bundle
+in its manifest's `states:` section, or in a recipe the channel can replace
+(the last section below). The platform ships the engine and runs the graph; the bundle
 ships the graph and the vocabulary. The platform knows none of your state
 names — only its own few words: `none`, `same`, and the `system` and `staff`
 event families.
@@ -28,9 +29,9 @@ event families.
 `states:` needs a `tables:` section, and the table it names must declare every
 column the tier reads or writes — here `Status`, `CTAs`, `Stage`,
 `Tracking Mode`, `Decision`, and `Why`, where the reason for the last
-transition is written unless `status.why_column` names another. The graph is
-read at run time from the version the channel is bound to; install writes
-only the display hints it adds to those columns.
+transition is written unless `status.why_column` names another. A `states:`
+graph is read at run time from the version the channel is bound to; install
+writes only the display hints it adds to those columns.
 
 ```yaml
 states:
@@ -131,3 +132,56 @@ exempt from the no-way-out rule, so an overlay can still hold a row. And what
 you can always publish is a graph that is well-formed and wrong — reachable
 states that no event fires in practice, a terminal state reached too early.
 The checks prove structure, not intent.
+
+## The recipe: a graph each channel can replace
+
+A `states:` graph belongs to the bundle version, so every channel on that
+version runs the same one, and changing it means publishing a new version.
+The **recipe** tier ships the same graph as a document of its own,
+`recipe.yaml` at the bundle's root, and lets each channel install a revision
+of its own. A Routine with [Steps](https://docs.popcorn.ai/product/concepts/steps.md)
+of its own is running one.
+
+```yaml
+# manifest.yaml
+recipe:
+  document: recipe   # the channel-config key an installed revision lives under; the default
+  contract: chase    # optional: an engine contract the graph must also satisfy
+```
+
+`recipe.yaml` holds the keys a `states:` section would, and the same engine
+parses and runs it, so everything above applies unchanged, publish checks
+included. What differs is where the graph lives:
+
+- **A bundle declares `states:` or `recipe:`, never both.** `recipe:` needs a
+  `tables:` section, as `states:` does. Publish refuses a `recipe:` with no
+  `recipe.yaml`, and a `recipe.yaml` with no `recipe:`.
+- **The bundle's own recipe is in force until the channel installs one.** An
+  installed revision is stored in the channel's config, and the sha256 of its
+  text is its identity. Earlier revisions stay readable, so a channel can go
+  back to one, or to the bundle's own. An assistant does this with
+  `change_routine`; a flow, with `feature.recipe.install`.
+- **An install refuses a revision the rows cannot follow**: one whose graph
+  does not declare a value a stored machine column holds, or that moves a
+  machine to another column or table. Moving stored state is a migration,
+  not an install.
+- **A run pins the revision in force when it starts**, with the channel
+  config, so it judges every row by one graph whatever is installed
+  meanwhile.
+- **A bundle update keeps the channel's revision**, and first checks it
+  against the new version — the flows its edges launch, the tables, the
+  contract. When it no longer fits, the whole update is refused before
+  anything is written.
+
+Beside the graph, a recipe may carry sections of its own that the engine
+does not read as states. `vocabulary:` sets the nouns for the bundle's
+generic words (`document: contract`), from the terms the bundle's
+`strings.yaml` declares, and they are rendered into its client copy.
+`guidance:` adds the recipe author's instructions per agent. Both are pinned
+with the revision, so changing either is a new revision. A contract may read
+sections of its own, such as `chase`'s `start:` and `rejection:`.
+
+The tier was first called **process**. A manifest's `process:` block and a
+root `process.yaml` still read as `recipe:` and `recipe.yaml` (a `process:`
+block's document key defaults to `process`). A bundle that declares both
+blocks, or ships both files, is refused.
