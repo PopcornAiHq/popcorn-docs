@@ -20,6 +20,12 @@ and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
 **Action** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
 
+A bundle on the recipe tier ships this same graph as `recipe.yaml` rather
+than under `states:`, and everything in this guide applies to it unchanged:
+the keys, the engine and the publish checks are the same. What a recipe adds
+is in [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md)'s
+last section.
+
 The loop is the ordinary one from
 [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md):
 edit `manifest.yaml`, check it, read the error, repeat. One thing is

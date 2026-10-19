@@ -25,6 +25,7 @@ myapp/
 ├── AGENT.md           notes the channel agent reads on demand
 ├── README.md          human documentation, installed as a channel file
 ├── strings.yaml       user-facing copy, locale-sectioned
+├── recipe.yaml        the state graph, when the manifest declares recipe:
 ├── some_flow.yaml     one flow per file, at the root
 ├── prompts/           seeded as channel config
 ├── templates/         seeded as channel config
@@ -40,6 +41,12 @@ else is optional.
 `manifest.yaml`, `AGENT.md`, `README.md` and `strings.yaml` are read for what
 they are. `config.yaml` is the legacy name for the manifest and is reserved
 too — a flow saved under that name becomes the manifest instead.
+
+`recipe.yaml`, and its legacy name `process.yaml`, are reserved for the
+[recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md): a
+state graph each channel can replace. Publish requires one when the manifest
+declares `recipe:` (or `process:`), and refuses one when it does not, rather
+than installing it as a flow. A bundle that ships both names is refused.
 
 **Every other `.yaml` or `.yml` file at the bundle's root is a flow.** A
 scratch copy or a sample payload left at the root installs, quietly. A YAML

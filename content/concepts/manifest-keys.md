@@ -35,7 +35,8 @@ it is worth reading once in full.
 | `triggers` | the set is replaced; a trigger's `enabled` is written the first time only, so a member's toggle survives upgrades |
 | `connections`, `documents`, `required_connections` | replaced on first install; on an update, kept where the channel's copy was edited (see `scalar-tiers`). `required_connections` is the legacy flat list |
 | `status_kinds` | merge per kind — kinds the bundle stops declaring stay; on an update, a value a member edited is kept |
-| `states` | validated as a graph at publish, read at run time from the bound version |
+| `states` | validated as a graph at publish, read at run time from the bound version. A bundle declares `states` or `recipe`, never both |
+| `recipe` | declares that the graph ships as `recipe.yaml`, which publish then requires and validates like `states`; `document` (the config key, default `recipe`) and an optional `contract`. Install never overwrites a revision the channel installed itself: it checks that revision against the new version and refuses the update if it no longer fits. `process` is the legacy name — see [the recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md) |
 | `app_type` | sets the channel's app; **absent clears it** |
 | `channel_agent` | sets which agent answers members; **absent clears it** |
 

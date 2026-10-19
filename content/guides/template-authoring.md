@@ -87,6 +87,7 @@ mytemplate/
 ├── manifest.yaml        tables, schedules, webhooks, config, scalars
 ├── AGENT.md             notes the channel agent reads on demand
 ├── README.md            human docs, installed as a channel file
+├── recipe.yaml          the state graph, only when the manifest declares recipe:
 └── some_flow.yaml       one flow per file, at the root
 ```
 
@@ -327,6 +328,7 @@ table. The keys with pages of their own:
 | `scalars`, `default_scalars` | [the three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md) |
 | `schedules` | [schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md) |
 | `states` | [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); writing one is [authoring a states tier](https://docs.popcorn.ai/platform/guides/states-authoring.md) |
+| `recipe` | the same graph as a root `recipe.yaml` each channel can replace — the recipe section of [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); it is written like a `states:` section |
 
 Three traps are worth carrying into every edit:
 
