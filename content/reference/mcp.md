@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 32 tools. With them it
+The hosted MCP server gives a person's assistant 34 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made, see what starts its work and run a
@@ -198,7 +198,8 @@ Connections:
 - Claims inbox (email): connected: claims@acme.example (google)
 - Adjuster calendar (calendar): NOT CONNECTED; work that uses it can't run
 - Carrier portal (webhook): connected: carrier-portal
-Whether a connected account still has the access it needs isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
+Whether a connected account has since been revoked or its sign-in has expired isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
+list_connections says whose account each one uses and what stops without it.
 ```
 
 ### `list_routine_templates`
@@ -1036,6 +1037,39 @@ Started morning (daily digest).
 It runs in the background; the Routine's runs in Popcorn show how it ended.
 ```
 
+## Connections
+
+### `list_connections`
+
+[read-only]
+
+List the Connections a Routine needs: the accounts and other services its template works through.
+
+For each, whether it is made, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not made. Whether an account has since been revoked isn't checked. Making a Connection is a person's job, done in Popcorn in the browser; the response says where. You can't make one from here. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “Why hasn't #intake booked any inspections?”
+
+```text
+→ list_connections(routine="#intake")
+
+Routine: #intake (c7d2…5b)
+3 Connections, 1 not made:
+- Claims inbox (email): made
+  Uses: claims@acme.example (google), connected by Dana Smith
+  Without it: Popcorn shows the Routine as not ready, and claim intake can't run.
+- Adjuster calendar (calendar): NOT MADE
+  Without it: book inspection can't run; the rest of the Routine keeps working.
+- Carrier portal (webhook): made
+  Uses: webhook carrier-portal
+  Without it: Popcorn shows the Routine as not ready, and nothing from the other system starts claim intake.
+Whether a connected account has since been revoked or its sign-in has expired isn't checked here.
+A person makes a Connection in Popcorn, in the browser, not from here: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
+```
+
 ## Status
 
 ### `get_status`
@@ -1160,23 +1194,23 @@ Newest first, a page at a time. Each change shows when, who made it (a person by
 Routine: #intake (c7d2…5b) · table: clients
 Item: row 88
 8 entries, newest first:
-- 2026-10-18 10:20 · Popcorn (signing webhook): Retainer signed
+- 2026-10-18 10:20 · Popcorn (signing webhook): Retainer signed (entry_id 9)
   Status: Retainer sent → Signed
   1 other field changed: Why: Retainer sent; waiting for the signature. → —
-- 2026-10-17 16:10 · Dana Smith: Matter updated
+- 2026-10-17 16:10 · Dana Smith: Matter updated (entry_id 7)
   1 field changed: Matter: Car accident → Car accident, rear-ended
-- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer
+- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer (entry_id 6)
   Status: Needs review → Retainer sent
   Why: Retainer sent; waiting for the signature.
   1 other field changed: Retainer Sent At: 2026-10-17T15:00:00+00:00
-- 2026-10-16 11:30 · Popcorn (chase turn): Answered all 5 intake questions
+- 2026-10-16 11:30 · Popcorn (chase turn): Answered all 5 intake questions (entry_id 4)
   Status: Waiting on answers → Needs review
   Why: Answers are in; check them before the retainer goes out.
   1 other field changed: Answers: {"injured": "yes", "insurer": "Acme Mutual"}
 - 2026-10-16 11:29 · Popcorn: Email turn at intake: assess reply
   verdict: complete · reason: all_answered
   Summary: Ben Garrett answered all five questions.
-- 2026-10-14 09:05 · Popcorn (chase turn): Sent the questions to Ben
+- 2026-10-14 09:05 · Popcorn (chase turn): Sent the questions to Ben (entry_id 2)
   Status: New → Waiting on answers
   Why: Waiting on answers to 5 intake questions.
   1 other field changed: Questions Sent: 5
@@ -1184,7 +1218,8 @@ Item: row 88
   verdict: approve · reason: first_contact
   Email: subject "Your intake questions, Ben Garrett", sent 2026-10-14 09:05
   Summary: Asked Ben Garrett the 5 intake questions.
-- 2026-10-14 09:00 · Popcorn (intake): Created as New
+- 2026-10-14 09:00 · Popcorn (intake): Created as New (entry_id 1)
+read_history_entry with an entry_id shows that change in full, with what the run that made it did.
 Runs that changed it on this page:
 - signing webhook: succeeded · started 2026-10-18 10:19 by a webhook · ended 2026-10-18 10:20
 - cta apply: succeeded · started 2026-10-17 14:59 by a person's button · ended 2026-10-17 15:00
@@ -1194,6 +1229,42 @@ Runs that changed it on this page:
 A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
 Only runs that wrote to this item are listed; a run that only read it isn't.
 History goes back 30 days; older changes aren't kept.
+```
+
+### `read_history_entry`
+
+[read-only]
+
+One change from an item's History, in full: every field it changed, before and after, who or what made it and why, and, when Popcorn's work made it, what that run did, in order, and how it ended.
+
+Only the fields the change touched are shown, not the whole item. Email content isn't part of History.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `entry_id` [required] | `int` | The entry's ID, as list_history shows it ("entry_id 6" is 6). |
+
+**Example** — “Show me entry 6 of row 88's history in #intake in full: what changed and what the run did.”
+
+```text
+→ read_history_entry(routine="#intake", entry_id=6)
+
+Routine: #intake (c7d2…5b) · table: clients
+Item: row 88
+- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer (entry_id 6)
+  Status: Needs review → Retainer sent
+  Why: Retainer sent; waiting for the signature.
+Each field it changed, before → after:
+- Status: Needs review → Retainer sent
+- Why: Answers are in; check them before the retainer goes out. → Retainer sent; waiting for the signature.
+- Retainer Sent At: 2026-10-17T15:00:00+00:00
+The run that made it:
+- cta apply: succeeded · started 2026-10-17 14:59 by a person's button · ended 2026-10-17 15:00
+  What it did, in order:
+  - load item: completed · 0.4s
+  - send retainer: completed · 0.8s · attempt 2 · the signing provider didn't answer in time
+  - apply: completed · 1.2s
+A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
 ```
 
 ## Proposed tools
@@ -1232,16 +1303,6 @@ History. Connections are not copied, because they sign in as a person.
 | `routine_id` | | The Routine to copy |
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
-
-### `list_connections`
-
-Read-only. The Connections a Routine needs, each with whether it is made,
-whose account it uses, and what stops while it is missing. Making one is a
-person's job, in the browser; the result says where.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
 
 ### `list_references`
 
@@ -1288,13 +1349,3 @@ Instructions as they would read after the change.
 | `edits` | | Or exact edits to the text, in place of `request` |
 | `confirm` | `false` | Apply the previewed change |
 | `reset` | `false` | Return a changed part to the template's |
-
-### `read_history_entry`
-
-Read-only. One entry from `list_history` in full: a run's steps and result, a
-message and its replies, or a change's before and after.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `entry_id` | | From `list_history` |
