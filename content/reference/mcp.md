@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 34 tools. With them it
+The hosted MCP server gives a person's assistant 36 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made, see what starts its work and run a
@@ -309,7 +309,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 3999d0e82324).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version da0f2c32d3f4).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -339,14 +339,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 3999d0e82324).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version da0f2c32d3f4).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 15 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version d453af4e0a64. To go back: change_routine with revert_to="d453af4e…".
+Before it: version a7f32001e8f5. To go back: change_routine with revert_to="a7f32001…".
 ```
 
 ## Apps
@@ -1070,6 +1070,73 @@ Whether a connected account has since been revoked or its sign-in has expired is
 A person makes a Connection in Popcorn, in the browser, not from here: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
 ```
 
+## References
+
+### `list_references`
+
+[read-only]
+
+The documents a Routine works from (its References), each with what it is used for, when it was added and by whom, and the ones it is still waiting for.
+
+A Reference marked required is one the template counts on; the Routine works without it until someone adds it. read_reference returns one's text, or a download link for a file that isn't text. A person adds or replaces a Reference in Popcorn. On a workspace that guards personal data, file names aren't listed.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “What documents does #intake work from?”
+
+```text
+→ list_references(routine="#intake")
+
+Routine: #intake (c7d2…5b)
+3 References: 2 added, 1 still waiting.
+- Questions and first email  reference "questions"  [required]
+  Used for: The questions, validation instructions and email wording for intake.
+  Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+- Standard retainer agreement  reference "standard_retainer"  [required]
+  Used for: The retainer every retained claimant signs.
+  Added 2026-10-09 08:53, picked from Google Drive; who picked it isn't recorded · file Retainer 2026.pdf · pdf
+- Fee schedule  reference "fee_schedule"
+  Used for: The fees quoted when a claimant asks what it costs.
+  Still waiting: nobody has added it yet.
+read_reference(routine="#intake", reference="<name>") returns one's text or a download link.
+A person adds or replaces a Reference in the Routine, in Popcorn; adding one starts work, which list_triggers shows.
+```
+
+### `read_reference`
+
+[read-only]
+
+One of a Routine's References: its text, or a download link for a file that isn't text, such as a PDF.
+
+A long text is cut, and the download link gives the whole file. A link works for a limited time; call again for a fresh one. On a workspace that guards personal data, neither the text nor a link is returned: Popcorn shows the file.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+
+**Example** — “Show me the questions #intake sends.”
+
+```text
+→ read_reference(routine="#intake", reference="questions")
+
+Routine: #intake (c7d2…5b)
+Reference: Questions and first email (questions)
+Used for: The questions, validation instructions and email wording for intake.
+Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+Text:
+Subject: Your claim with Acme
+
+Hi {first_name},
+
+Thanks for reaching out. To get your claim started, please reply with:
+1. The date of the loss
+2. Your policy number
+3. Photos of the damage
+```
+
 ## Status
 
 ### `get_status`
@@ -1303,25 +1370,6 @@ History. Connections are not copied, because they sign in as a person.
 | `routine_id` | | The Routine to copy |
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
-
-### `list_references`
-
-Read-only. The documents a Routine works from, each with what it is used for,
-when it was added and by whom, and the ones the Routine is still waiting for.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `read_reference`
-
-Read-only. One Reference's text, or a download link for a file that is not
-text.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `reference` | | As `list_references` names it |
 
 ### `add_reference`
 
