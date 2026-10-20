@@ -490,9 +490,14 @@
 - q: Which documents is my claims Routine still waiting for, and can my assistant read the questions it sends?
   concept: reference-documents
   pass: list_references lists each Reference as added (when and by whom) or still waiting; read_reference returns a text one's text, or a download link for any other file
-  trap: says no tool lists or reads a Routine's References, or that an assistant can add one
+  trap: says no tool lists or reads a Routine's References
 
 - q: Show me one change to an item in full, with what the run that made it did.
   concept: history
   pass: read_history_entry with an entry_id from list_history shows every field the change touched, before and after, and the run that made it, step by step
   trap: says get_row shows the earlier values, or that only the one-line summary is available
+
+- q: Can my assistant replace the fee schedule document on my Routine?
+  concept: reference-documents
+  pass: add_reference adds or replaces it from text or an uploaded file, as a dry run first and then confirm=true; a Reference picked from Google Drive, or the Routine's Steps, stays in Popcorn or change_routine, and list_references marks which
+  trap: says no tool adds a Reference, or that add_reference can replace the Routine's Steps
