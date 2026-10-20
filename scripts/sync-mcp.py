@@ -77,15 +77,18 @@ GROUPS = {
     "context": "Workspace and people",
     "details": "Routines",
     "new_project": "Routines",
+    "routine_change": "Routines",
     "messages": "Messages",
     "search_messages": "Messages",
     "app_bundle": "Apps",
     "flows": "Flows",
     "settings": "Routine settings",
+    "instructions": "Instructions",
     "agent_store": "Tables",
     "triggers": "Triggers",
     "status": "Status",
     "actions": "Actions",
+    "history": "History",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
@@ -107,9 +110,9 @@ being considered; names and arguments may change before any ships.
 
 The message, flow, run and stored-value tools have already left this
 surface: a Routine's work starts from its Triggers and Actions, a switch is a
-Routine Setting, and its conversation and runs are read in Popcorn until
-History arrives here. Changing a Routine Template itself is not part of this
-design.
+Routine Setting, an item's runs are read with `list_history`, and its
+conversation is read in Popcorn. Changing a Routine Template itself is not
+part of this design.
 
 Three rules run through it:
 
@@ -122,49 +125,6 @@ Three rules run through it:
 3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
    since a write is the worst place to resolve a name to the wrong Routine.
 
-### `list_routines`
-
-Read-only. The Routines the caller can see in this workspace, each with its
-template, its Status counts and whether it is missing a Connection.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `template` | | Only Routines made from this Routine Template |
-| `query` | | Matches a Routine's name |
-| `cursor` | | From the previous page |
-
-### `get_routine`
-
-Read-only. One Routine: its template, whether it still receives the
-template's improvements, its Triggers, its Connections and which are missing,
-and a count of items per Status.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `wait_seconds` | `0` | Wait up to this long for a Routine that is still being set up |
-
-### `list_routine_templates`
-
-Read-only. The Routine Templates this workspace can start a Routine from,
-each with what it is for and the Connections it needs.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `query` | | Matches a template's name or description |
-
-### `create_routine`
-
-Starts a new Routine from a Routine Template. Without `confirm`, says what
-the Routine will be set up with and which Connections a person will need to
-make.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `name` | | The new Routine's name |
-| `template` | | The Routine Template to start from |
-| `confirm` | `false` | Create the previewed Routine |
-
 ### `duplicate_routine`
 
 Makes a new Routine that starts as a copy of an existing one: its template,
@@ -176,44 +136,6 @@ History. Connections are not copied, because they sign in as a person.
 | `routine_id` | | The Routine to copy |
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
-
-### `change_routine`
-
-Changes how a Routine works, from a plain-language request such as "remind
-the client every three days instead of weekly" or "add an approval before
-anything is sent". Without `confirm`, returns the plan: what will change, in
-product terms, and whether the change stays with this Routine or gives it a
-copy of its own. The confirming call carries the plan's ID, so only the
-previewed plan is applied.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `request` | | What should change, in the person's words |
-| `plan_id` | | From the dry run; required with `confirm` |
-| `confirm` | `false` | Apply the previewed plan |
-
-### `list_triggers`
-
-Read-only. How work arrives in a Routine: each schedule with its cadence,
-each address another system posts to (never the address itself, which is a
-credential), each message or document that starts work, and a booking link.
-A Trigger that is paused says so.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `run_trigger`
-
-Runs a scheduled Trigger now, with the inputs it runs with on schedule, and
-leaves its schedule unchanged. Without `confirm`, says what the run will do.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `trigger` | | A scheduled Trigger, as `list_triggers` names it |
-| `confirm` | `false` | Start the run |
 
 ### `list_connections`
 
@@ -257,16 +179,6 @@ caller uploaded. Without `confirm`, says what the Routine will do with it.
 | `upload_id` | | A file uploaded for this Routine, in place of `text` |
 | `confirm` | `false` | Add the previewed document |
 
-### `get_instructions`
-
-Read-only. A Routine's Instructions in plain language: how it words its
-messages, what it asks a person about first, its deadlines and reminders.
-Each part says whether it is the template's or was changed for this Routine.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
 ### `update_instructions`
 
 Changes a Routine's Instructions. Takes the change in plain language or as
@@ -280,88 +192,6 @@ Instructions as they would read after the change.
 | `edits` | | Or exact edits to the text, in place of `request` |
 | `confirm` | `false` | Apply the previewed change |
 | `reset` | `false` | Return a changed part to the template's |
-
-### `list_routine_settings`
-
-Read-only. A Routine's settings: each one's value, what it does, whether it
-was changed for this Routine, and who may change it. Secrets are never shown.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `get_routine_setting`
-
-Read-only. One setting in full, including long text values.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `setting` | | As `list_routine_settings` names it |
-
-### `update_routine_setting`
-
-Changes one setting on one Routine, or sets it back to the template's value.
-The change reaches only that Routine and survives the template's
-improvements.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `setting` | | As `list_routine_settings` names it |
-| `value` | | The new value |
-| `reset` | `false` | Return to the template's value |
-| `confirm` | `false` | Apply the previewed change |
-
-### `get_status`
-
-Read-only. Where a Routine's items stand: a count per Status, the items
-waiting on a person, and the stages an item moves through. One item's Status
-is on its Row.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `table` | | The Table to count; the Routine's main one by default |
-
-### `list_actions`
-
-Read-only. The Actions a person can take on one item now, given where it
-stands, with what each will do.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `table` | | The item's Table |
-| `row_id` | | The item |
-
-### `take_action`
-
-Takes an Action on one or more items, as a person pressing its button would.
-Refused for an item where the Action does not apply. Without `confirm`, says
-what will happen to each item.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `table` | | The items' Table |
-| `row_ids` | | The items |
-| `action` | | As `list_actions` names it |
-| `confirm` | `false` | Take the previewed Action |
-
-### `list_history`
-
-Read-only. What has happened in a Routine, newest first: work it ran and how
-each ended, its conversation, and changes to its items, each with who or what
-made it.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `kind` | all | `work`, `conversation` or `changes` |
-| `row_id` | | Only what happened to this item |
-| `since` | | ISO-8601 time |
-| `cursor` | | From the previous page |
 
 ### `read_history_entry`
 
