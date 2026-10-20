@@ -3663,7 +3663,8 @@ No description in the catalog.
 One row's wait (`feature.chase.stage.wait`): the date its wait
 stage names, read against the row; or, with `ref`, any date rule
 (`notice.demand_date`) read against the row, for a flow that writes
-the date somewhere (`due_date_set`).
+the date somewhere (`due_date_set`); or, with `key`, the rule the
+row's stage keeps under that key (`shipment_turn`'s `deliver_by`).
 
 **Arguments**
 
@@ -3672,6 +3673,7 @@ the date somewhere (`due_date_set`).
 | `conversation_id` | string | no | Default `""`. |
 | `record_id` | integer | no | Default `0`. |
 | `ref` | string | no | Default `""`. |
+| `key` | string | no | Default `""`. |
 | `window_timezone` | string | no | Default `"America/Los_Angeles"`. |
 | `app_mode` | string | no | Default `"prod"`. |
 | `test_day_seconds` | integer | no | Default `60`. |
@@ -6417,7 +6419,15 @@ Render pages first_page..last_page of a stored PDF to scratch PNGs.
 
 ### `feature.recipe.check`
 
-No description in the catalog.
+Check a recipe against an app's head, with no channel to install on.
+
+Holds `document` to the version a new channel of `app` would
+install in this workspace, with no channel and no dry run: the
+graph, contract and section checks an install runs, for a caller with
+no channel to run them on. Writes nothing. The checks that need a
+channel — its live rows, stored columns and uploaded questions — are
+not run, and a channel's install can still refuse a document that
+passes here.
 
 **Arguments**
 
@@ -6445,7 +6455,14 @@ No description in the catalog.
 
 ### `feature.recipe.current`
 
-No description in the catalog.
+Report which recipe is in force on the channel, and its text.
+
+The recipe is the one the channel installed, or else the bundle's
+own. Reads the channel's config live, so
+`sha` is what is installed now and `pinned_sha` is the revision
+this run judges rows by; they differ when a recipe was installed
+after the run started. `include_document: false` leaves the text
+out and reports only the revision, its stages and its sections.
 
 **Arguments**
 
@@ -6477,7 +6494,21 @@ No description in the catalog.
 
 ### `feature.recipe.install`
 
-No description in the catalog.
+Check a recipe and install it on the channel, or roll one back.
+
+Takes exactly one of: a new `document`, the `sha` of a revision
+the channel already holds, or `revert_to_default` for the bundle's
+own. The recipe is held to every check a `states:` section passes
+at publish and to the manifest's `contract`, and is refused when a
+live row holds a state it does not declare or when it moves a stored
+machine to another column. An install then renders the graph's
+display hints onto the live tables, renders the bundle's client copy
+through the recipe's `vocabulary:`, seeds the scalar keys its
+stages read, and writes the revision last: if an earlier write
+fails, the previous revision stays in force. `dry_run` checks and
+writes nothing; `fail_step: false` reports a refusal instead of
+failing the step. Rows are re-projected by a later run, which pins
+the new revision.
 
 **Arguments**
 
