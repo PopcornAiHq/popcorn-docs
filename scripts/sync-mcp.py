@@ -86,6 +86,8 @@ GROUPS = {
     "instructions": "Instructions",
     "agent_store": "Tables",
     "triggers": "Triggers",
+    "connections": "Connections",
+    "references": "References",
     "status": "Status",
     "actions": "Actions",
     "history": "History",
