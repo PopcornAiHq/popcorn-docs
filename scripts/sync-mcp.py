@@ -91,6 +91,7 @@ GROUPS = {
     "status": "Status",
     "actions": "Actions",
     "history": "History",
+    "browser": "Browser",
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
