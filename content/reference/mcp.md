@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-18
+deployed: 2026-10-20
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 28 tools. With them it
+The hosted MCP server gives a person's assistant 32 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made, see what starts its work and run a
@@ -264,6 +264,88 @@ Created #claims-west (id: 0141…b3), a private Routine in Acme.
 Members: you, @jlee.
 Claim Coordinator (claimcoordinator) is installing in the background. Watch get_routine("0141…b3")'s Install: field until it says installed.
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
+```
+
+### `change_routine`
+
+[writes] [destructive]
+
+Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
+
+Only a Routine whose template keeps its Steps with the Routine can be changed this way; any other is refused with what changes it instead (a Routine Setting, or a copy of its template of its own). For a change that is only a Routine Setting, update_routine_setting is quicker. Three calls: - request: starts drafting the change and returns a change_id. Drafting takes minutes; get_routine_change shows the proposal, as the Steps before and after. Nothing is installed. One change drafts at a time per Routine. - change_id with confirm=true: installs that proposal, once the person has read it. Sent again, it finds the install it started. - revert_to: "previous", "template" or a version, as get_routine_change names them. Without confirm it checks the revert against the Routine's items and gives a run_key; with confirm=true and that run_key it installs it.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `request` | `str` | The change, in the person's words ("after the retainer is signed, ask for their insurance card"). |
+| `change_id` | `str` | The change_id change_routine returned, with confirm=true, to install its proposal. |
+| `confirm` | `bool` | true to install. Show the person the proposal (or the revert's check) first. Default `False`. |
+| `revert_to` | `str` | "previous", "template", or a version (sha) to go back to. |
+| `run_key` | `str` | The run_key a revert's check gave, with confirm=true. |
+
+**Example** — “In #intake, once a claimant signs the retainer, have them book the interview straight away.”
+
+```text
+→ change_routine(routine_id="c7d2…5b", request="Once a claimant signs the retainer, ask them to book the interview straight away, and remind them after 2 days, then 5.")
+
+Routine: #intake (c7d2…5b)
+Drafting the change. change_id: 8c1f3a52…
+Nothing is installed: the Routine's agent drafts the new Steps and checks them against this Routine's items, which takes a few minutes. get_routine_change with this change_id shows the proposal, as the Steps before and after, for the person to read before it goes in.
+
+→ get_routine_change(routine="#intake", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", wait_seconds=20)
+
+Routine: #intake (c7d2…5b)
+Waited 2s: the change moved on.
+Change 8c1f3a52…: proposed. Nothing is installed yet.
+Asked for: "Once a claimant signs the retainer, ask them to book the interview straight away, and remind them after 2 days, then 5."
+Steps, before → after (- before, + after):
+  3. Signature — Getting signatures (Status value: signing)
++    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
+On install it also sets, per Step:
+- Scheduling meeting (interview): reminders 2, then 5 days after the last email; its email's wording: subject
+  This part is a Routine Setting: update_routine_setting chase_days changes it for every Step without settings of its own, and leaves the Steps as they are.
+The author assumed:
+- The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
+Questions it left open:
+- Should claimants who already had their interview skip the booking email?
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 46c151ca7106).
+To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
+
+→ change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
+
+Routine: #intake (c7d2…5b)
+Installing change 8c1f3a52…. It checks the proposal once more against the Routine's items and puts it in only if it is unchanged; get_routine_change shows when it's done.
+```
+
+### `get_routine_change`
+
+[read-only]
+
+Where a change to a Routine's Steps stands: still drafting, the proposal as Steps before and after, refused and why, or installed.
+
+A proposal shows the Steps that change, what it would set on each Step (saying which part is a Routine Setting the person could change directly), the author's assumptions and open questions, and the checks it passed. An installed change names the version before it, which change_routine's revert_to puts back.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `change_id` [required] | `str` | The change_id change_routine returned. |
+| `wait_seconds` | `int` | Wait up to this many seconds for a change that is drafting or installing to move on, then answer. At most 20 (more is read as 20); 0, the default, doesn't wait. |
+| `detail` | `str` | "recipe" adds the recipe's own text diff to a proposal, for people who author templates. |
+
+**Example** — “Did the change to #intake's Steps go in?”
+
+```text
+→ get_routine_change(routine="#intake", change_id="wf-draft")
+
+Routine: #intake (c7d2…5b)
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 46c151ca7106).
+Steps, before → after (- before, + after):
+  3. Signature — Getting signatures (Status value: signing)
++    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
+get_routine shows all 12 Steps.
+Set:
+- `interview`: reminders 2, then 5 days after our last email; copy subject
+Before it: version 3f31bb3d5b43. To go back: change_routine with revert_to="3f31bb3d…".
 ```
 
 ## Apps
@@ -553,7 +635,7 @@ Changed by: update_routine_setting, by a workspace admin who's also a member of 
 
 Change one of a Routine's settings, on this Routine only.
 
-Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Instructions aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
+Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as publish_app's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -583,6 +665,78 @@ Call again with `confirm=true` to change chase_max_followups.
 Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 Changed chase_max_followups on #chase-renewals: 10 → 5.
 Runs already under way keep the value they started with.
+```
+
+## Instructions
+
+### `get_instructions`
+
+[read-only]
+
+A Routine's Instructions in one read: the guidance its agents work from, Routine-wide and for each Step, each with where it came from (the template's, or changed for this Routine) and what changes it.
+
+The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. On a workspace that guards personal data, what people told the agent shows each memory's category and date, not its text.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `step` | `str` | One Step, by its label or its Status value, as get_routine lists the Steps. Omit for the whole Routine. |
+
+**Example** — “What instructions is #intake's agent following?”
+
+```text
+→ get_instructions(routine="#intake")
+
+Routine: #intake (c7d2…5b) · template: chase 0.84.0
+The Routine's Instructions, by layer: where each came from, and what changes it.
+
+## Routine guidance per agent (from this Routine's Steps, "Acme intake", installed 2026-10-12, sha256 1a2b3c4d5e6f)
+Changed by: with change_routine (describe the change), or in Popcorn by telling the Routine's agent.
+- chasewriter:
+  Write as a person on the Acme claims team.
+  Never promise when a claim will be paid.
+- chasevalidator:
+  An answer that names a month and a year is a date.
+- chasewriter, at Booking Steps only:
+  Offer the adjuster call link before anything else.
+
+## Prompt files
+Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
+- prompts.validator (the template's):
+  Judge each answer against its question.
+- prompts.writer (changed for this Routine):
+  You write the claims team's emails.
+  Be brief.
+  Use the claimant's first name.
+
+## Agent notes
+Changed by: update_routine_setting, by a member of the Routine.
+- popcorn.agent_notes.chasewriter (set for this Routine):
+  Copy the adjuster on anything about money.
+- None set: popcorn.agent_notes.chasevalidator.
+
+## The Routine's guidelines for its agent
+Changed by: in Popcorn.
+- Claims intake:
+  Answer in plain English; never quote policy clauses.
+
+## What people told the agent (2, newest first)
+Changed by: in Popcorn, by telling the agent.
+- preferences  2026-10-14: Mrs. Ortiz prefers a call after 5pm.
+- decisions  2026-10-09: Water damage under $2,000 skips the adjuster call.
+
+## Each Step's note, copy, questions and deadlines
+Changed by: with change_routine (describe the change), or in Popcorn by telling the Routine's agent.
+1. Answers — Collecting claim details (Status value: intake):
+   note "Ask for the policy number before anything else.", set for this Routine, chase.intake.guidance; 3 questions; subject "A few questions about your claim"; deadlines: the recipe's table is in force: 1 period(s) from item q2.
+2. Review — Needs adjuster review (Status value: review): a Review, decided by a person; no instructions of its own.
+3. Booking — Booking the adjuster call (Status value: interview):
+   note "Keep it to two sentences." (+1 more), in this Routine's Steps; a booking page.
+get_instructions(routine="#intake", step="<Status value>") shows one Step's in full.
+
+## The template's guide
+Changed by: a member of the Routine, in Popcorn. A template update keeps a change made to this Routine's copy.
+- AGENT.md (the template's): 1,475 characters, first heading "Claims intake agent". How the Routine's agent talks and what it knows about the template. Popcorn shows its text.
 ```
 
 ## Tables
@@ -982,6 +1136,66 @@ Taking close on 1 item(s).
 It applies in the background; get_row shows each item's new Status once it has.
 ```
 
+## History
+
+### `list_history`
+
+[read-only]
+
+What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
+
+Newest first, a page at a time. Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `row_id` [required] | `int` | The item's row ID, as list_rows shows it ("row 88" is 88). |
+| `cursor` | `str` | next_cursor from the previous page, with the same other arguments. |
+
+**Example** — “What happened with row 88 in #intake?”
+
+```text
+→ list_history(routine="#intake", row_id=88)
+
+Routine: #intake (c7d2…5b) · table: clients
+Item: row 88
+8 entries, newest first:
+- 2026-10-18 10:20 · Popcorn (signing webhook): Retainer signed
+  Status: Retainer sent → Signed
+  1 other field changed: Why: Retainer sent; waiting for the signature. → —
+- 2026-10-17 16:10 · Dana Smith: Matter updated
+  1 field changed: Matter: Car accident → Car accident, rear-ended
+- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer
+  Status: Needs review → Retainer sent
+  Why: Retainer sent; waiting for the signature.
+  1 other field changed: Retainer Sent At: 2026-10-17T15:00:00+00:00
+- 2026-10-16 11:30 · Popcorn (chase turn): Answered all 5 intake questions
+  Status: Waiting on answers → Needs review
+  Why: Answers are in; check them before the retainer goes out.
+  1 other field changed: Answers: {"injured": "yes", "insurer": "Acme Mutual"}
+- 2026-10-16 11:29 · Popcorn: Email turn at intake: assess reply
+  verdict: complete · reason: all_answered
+  Summary: Ben Garrett answered all five questions.
+- 2026-10-14 09:05 · Popcorn (chase turn): Sent the questions to Ben
+  Status: New → Waiting on answers
+  Why: Waiting on answers to 5 intake questions.
+  1 other field changed: Questions Sent: 5
+- 2026-10-14 09:04 · Popcorn: Email turn at intake: send questions
+  verdict: approve · reason: first_contact
+  Email: subject "Your intake questions, Ben Garrett", sent 2026-10-14 09:05
+  Summary: Asked Ben Garrett the 5 intake questions.
+- 2026-10-14 09:00 · Popcorn (intake): Created as New
+Runs that changed it on this page:
+- signing webhook: succeeded · started 2026-10-18 10:19 by a webhook · ended 2026-10-18 10:20
+- cta apply: succeeded · started 2026-10-17 14:59 by a person's button · ended 2026-10-17 15:00
+- chase turn: succeeded · started 2026-10-16 11:29 by a message · ended 2026-10-16 11:30
+- chase turn: succeeded · started 2026-10-14 09:04 by another run · ended 2026-10-14 09:05
+- intake: succeeded · started 2026-10-14 08:59 by a webhook · ended 2026-10-14 09:00
+A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
+Only runs that wrote to this item are listed; a run that only read it isn't.
+History goes back 30 days; older changes aren't kept.
+```
+
 ## Proposed tools
 
 **None of these tools exist yet, and nothing depends on them arriving.** They
@@ -992,9 +1206,9 @@ being considered; names and arguments may change before any ships.
 
 The message, flow, run and stored-value tools have already left this
 surface: a Routine's work starts from its Triggers and Actions, a switch is a
-Routine Setting, and its conversation and runs are read in Popcorn until
-History arrives here. Changing a Routine Template itself is not part of this
-design.
+Routine Setting, an item's runs are read with `list_history`, and its
+conversation is read in Popcorn. Changing a Routine Template itself is not
+part of this design.
 
 Three rules run through it:
 
@@ -1018,22 +1232,6 @@ History. Connections are not copied, because they sign in as a person.
 | `routine_id` | | The Routine to copy |
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
-
-### `change_routine`
-
-Changes how a Routine works, from a plain-language request such as "remind
-the client every three days instead of weekly" or "add an approval before
-anything is sent". Without `confirm`, returns the plan: what will change, in
-product terms, and whether the change stays with this Routine or gives it a
-copy of its own. The confirming call carries the plan's ID, so only the
-previewed plan is applied.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `request` | | What should change, in the person's words |
-| `plan_id` | | From the dry run; required with `confirm` |
-| `confirm` | `false` | Apply the previewed plan |
 
 ### `list_connections`
 
@@ -1077,16 +1275,6 @@ caller uploaded. Without `confirm`, says what the Routine will do with it.
 | `upload_id` | | A file uploaded for this Routine, in place of `text` |
 | `confirm` | `false` | Add the previewed document |
 
-### `get_instructions`
-
-Read-only. A Routine's Instructions in plain language: how it words its
-messages, what it asks a person about first, its deadlines and reminders.
-Each part says whether it is the template's or was changed for this Routine.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
 ### `update_instructions`
 
 Changes a Routine's Instructions. Takes the change in plain language or as
@@ -1100,20 +1288,6 @@ Instructions as they would read after the change.
 | `edits` | | Or exact edits to the text, in place of `request` |
 | `confirm` | `false` | Apply the previewed change |
 | `reset` | `false` | Return a changed part to the template's |
-
-### `list_history`
-
-Read-only. What has happened in a Routine, newest first: work it ran and how
-each ended, its conversation, and changes to its items, each with who or what
-made it.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `kind` | all | `work`, `conversation` or `changes` |
-| `row_id` | | Only what happened to this item |
-| `since` | | ISO-8601 time |
-| `cursor` | | From the previous page |
 
 ### `read_history_entry`
 
