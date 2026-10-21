@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 38 tools. With them it
+The hosted MCP server gives a person's assistant 39 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made and make one from an account already
@@ -169,7 +169,7 @@ next_cursor: eyJ2Ijox…
 
 Show one Routine: its details, your membership, and its Routine Template, with the version it's on, the latest version, where its updates come from (Popcorn, or this workspace's own copy of the template), whether the latest install landed, and its Connections: each account or webhook the template needs, and whether it's connected.
 
-A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what list_rows filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked [in Popcorn] opens a form there; take_action takes the others.
+A Routine made with duplicate_routine also shows how far its copy got, and any part that didn't copy, with why. A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what list_rows filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked [in Popcorn] opens a form there; take_action takes the others.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -267,6 +267,57 @@ Created #claims-west (id: 0141…b3), a private Routine in Acme.
 Members: you, @jlee.
 Claim Coordinator (claimcoordinator) is installing in the background. Watch get_routine("0141…b3")'s Install: field until it says installed.
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
+```
+
+### `duplicate_routine`
+
+[writes]
+
+Create a new Routine in this workspace that copies an existing one's setup: its Routine Template, on the same line, its Routine Settings and agent notes, its own Steps, its guidelines, and the References it has added.
+
+Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection. The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with confirm=true to create the Routine. The template installs in the background, then the copy runs; get_routine's Copied from: field shows each part as it lands, and any that didn't, with why. A name already used in this workspace is refused, with the ID of the Routine that has it. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The ID of the Routine to copy (not its name). |
+| `name` [required] | `str` | The new Routine's name, e.g. "claims-east". Spaces become hyphens; the response shows the name it got. |
+| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. The original's members aren't copied. Default `False`. |
+| `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
+| `confirm` | `bool` | true to create the Routine. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
+
+**Example** — “Make a copy of #claims-west for the east office, called claims-east.”
+
+```text
+→ duplicate_routine(routine_id="0141…b3", name="claims-east")
+
+**Dry run.** Nothing was changed.
+
+Duplicate: #claims-east, a Routine in Acme, copied from #claims-west.
+- Template: Claim Coordinator (claimcoordinator), fork line "acme" at 0.15.1-acme.2, as #claims-west is.
+- Joins fork line "acme", this workspace's own copy of the template. One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme", and versions published there reach it within a day.
+- Members: everyone in the workspace (a Routine that isn't private adds every member).
+Copied:
+- Routine Settings and agent notes: 2 changed from the template's (chase_days, popcorn.agent_notes.intake).
+- Steps: the Routine's own ("Claims intake", installed 2026-10-12, sha256 3f9c1a0b2d4e).
+- Guidelines for its agent: 1.
+- References: questions, each read into the copy as it was first added.
+Not copied:
+- References picked from Google Drive: standard_retainer. The new Routine starts with no Google Drive connection, so these are picked again in Popcorn once someone connects it.
+- Credentials among its Routine Settings: crm_api_key. Set them in the new Routine in Popcorn.
+- Connections: Gmail, Google Calendar, Google Drive. Someone sets them up in the new Routine before it runs.
+- What people told its agent, and its items, History, messages and members.
+The template installs in the background once the Routine exists, then the copy runs, typically within a few minutes; get_routine's Copied from: field shows each part as it lands.
+
+Call again with `confirm=true` to create #claims-east as a copy of #claims-west.
+
+→ duplicate_routine(routine_id="0141…b3", name="claims-east", confirm=true)
+
+Created #claims-east (id: be23…ef), a Routine in Acme, copied from #claims-west.
+Members: everyone in the workspace (a Routine that isn't private adds every member).
+Claim Coordinator (claimcoordinator) is installing in the background, and the copy runs once it lands. Watch get_routine("be23…ef")'s Copied from: field until every part is in.
+Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
+Pick again in Popcorn once Google Drive is connected: standard_retainer.
 ```
 
 ### `change_routine`
@@ -1456,18 +1507,6 @@ Three rules run through it:
    which stops receiving its template's improvements.
 3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
    since a write is the worst place to resolve a name to the wrong Routine.
-
-### `duplicate_routine`
-
-Makes a new Routine that starts as a copy of an existing one: its template,
-Routine Settings, Instructions and References, but none of its items or
-History. Connections are not copied, because they sign in as a person.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | The Routine to copy |
-| `name` | | The new Routine's name |
-| `confirm` | `false` | Create the previewed copy |
 
 ### `update_instructions`
 
