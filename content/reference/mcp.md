@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 39 tools. With them it
+The hosted MCP server gives a person's assistant 40 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made and make one from an account already
@@ -1100,7 +1100,7 @@ It runs in the background; the Routine's runs in Popcorn show how it ended.
 
 List the Connections a Routine needs: the accounts and other services its template works through.
 
-For each, whether it is made, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not made. Whether an account has since been revoked isn't checked. Making a Connection is a person's job, done in Popcorn in the browser; the response says where. You can't make one from here. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
+For each, whether it is made, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not made. Whether an account has since been revoked isn't checked. make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1122,7 +1122,63 @@ Routine: #intake (c7d2…5b)
   Uses: webhook carrier-portal
   Without it: Popcorn shows the Routine as not ready, and nothing from the other system starts claim intake.
 Whether a connected account has since been revoked or its sign-in has expired isn't checked here.
-A person makes a Connection in Popcorn, in the browser, not from here: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
+make_connection makes a Connection from an account the person has already signed in to, or makes its webhook. For a Google account not yet signed in to, or one whose sign-in lacks access, make_connection gives a sign-in link to pass on when it can. Any other account is signed in to in Popcorn, in the browser: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
+```
+
+### `make_connection`
+
+[writes] [destructive]
+
+Make one of a Routine's Connections: connect an account you have signed in to, or make the webhook another system posts to.
+
+For an email, calendar or files Connection, call it without account first: it lists your accounts that can serve it, each with whether its sign-in allows everything the Connection needs. Then call it with account, an address or ID from that list: a dry run of what it will connect, what it replaces and what runs after. With confirm=true it connects the account, gives the Routine the access it needs, and runs the template's on_auth_change step if it has one, all in one call. The answer is each Connection made, as list_connections shows it. Only your own accounts can be connected; a teammate connects theirs. Connecting an account to a Connection that has none also connects it to the Routine's other Connections of its provider that have none yet and that its sign-in allows (one Google account serves the inbox, calendar and Drive together); the dry run names each one, and the answer says which were connected. Pass only=true to connect the named Connection alone. Replacing a Connection's account changes no other. A Google sign-in is done from here: when you have no Google account that can serve, or yours is signed out or lacks access, the answer (or the refusal) carries a sign-in link, asking for everything the Routine's unconnected Google Connections need. Pass the link to the person as it is, and nothing else from it: it works once, within minutes, and only for the person who asked, who finishes it signed in to Popcorn in the browser it opens. Once they say they have, call make_connection again (without account, to see the account, then with it). An account of another provider is signed in to in Popcorn; the answer says where. For a webhook Connection, call it without account: a dry run of the webhook it makes, and of the one it replaces if one serves it already, whose address then stops working. With confirm=true it makes the webhook and answers with its address, once. The address is a credential: anyone who has it can post to the Routine. Give it only to whoever sets up the other system; nothing here shows it again. Popcorn's channel agent is never given it, since its answers reach the whole Routine: the answer says [secret] in its place, and the person reads it on the Connection's card in Popcorn. An e-signature Connection isn't made here: its keys are workspace secrets a workspace admin or owner saves in Popcorn, and the refusal names them. Never pass a key or a password to this tool. It takes routine_id, the Routine's ID, as every tool that writes does. Making a Connection needs workspace admin, or membership of the Routine, and an archived Routine can't be changed.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `connection` [required] | `str` | The Connection's id or label, as list_connections shows it. |
+| `account` | `str` | Your account's address or ID, for an email, calendar or files Connection. Omit it to list your accounts. |
+| `confirm` | `bool` | true to make it. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. |
+| `only` | `bool` | true to connect the account to this Connection alone, not to the Routine's other unconnected ones it can serve. Default `False`. |
+
+**Example** — “Connect the adjusters' calendar account to #intake so it can book inspections.”
+
+```text
+→ make_connection(routine_id="c7d2…5b", connection="Adjuster calendar")
+
+Routine: #intake (c7d2…5b)
+- Adjuster calendar (calendar): NOT MADE
+  Without it: book inspection can't run; the rest of the Routine keeps working.
+It needs: https://www.googleapis.com/auth/calendar.events
+Your accounts that can serve it:
+- adjusters@acme.example (google), id 9a3e…71: allows everything it needs
+- dana.smith@gmail.com (google), id 1c7d…94: its sign-in doesn't allow https://www.googleapis.com/auth/calendar.events; a person reconnects it in Popcorn to add that
+To connect one, call make_connection again with account set to its address or id, for a dry run.
+To connect an account not listed, a person signs in to it in Popcorn, in the browser: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, then Connect on the Adjuster calendar card. That can't be done from here. Only your own accounts are listed; a teammate connects theirs.
+
+→ make_connection(routine_id="c7d2…5b", connection="gcal", account="adjusters@acme.example")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+- Connection: Adjuster calendar (calendar)
+- Account: adjusters@acme.example (google), yours
+- Connects it as gcal
+- Lets this Routine use it for: https://www.googleapis.com/auth/calendar.events
+- Then runs on_auth_change, the template's own check after a Connection changes
+
+Call again with `confirm=true` to connect adjusters@acme.example (google) as Adjuster calendar.
+
+→ make_connection(routine_id="c7d2…5b", connection="gcal", account="adjusters@acme.example", confirm=true)
+
+Routine: #intake (c7d2…5b)
+Connected adjusters@acme.example (google) as Adjuster calendar.
+- Bound: gcal
+- Started on_auth_change (workflow_id: member-run:on_auth_change)
+- Adjuster calendar (calendar): made
+  Uses: adjusters@acme.example (google), connected by Dana Smith
+  Without it: book inspection can't run; the rest of the Routine keeps working.
 ```
 
 ## References
