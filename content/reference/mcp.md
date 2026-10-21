@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-20
+deployed: 2026-10-21
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 36 tools. With them it
+The hosted MCP server gives a person's assistant 38 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made, see what starts its work and run a
@@ -1078,7 +1078,7 @@ A person makes a Connection in Popcorn, in the browser, not from here: open #int
 
 The documents a Routine works from (its References), each with what it is used for, when it was added and by whom, and the ones it is still waiting for.
 
-A Reference marked required is one the template counts on; the Routine works without it until someone adds it. read_reference returns one's text, or a download link for a file that isn't text. A person adds or replaces a Reference in Popcorn. On a workspace that guards personal data, file names aren't listed.
+A Reference marked required is one the template counts on; the Routine works without it until someone adds it. read_reference returns one's text, or a download link for a file that isn't text. A Reference add_reference can't take is marked with why. On a workspace that guards personal data, file names aren't listed.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1097,11 +1097,12 @@ Routine: #intake (c7d2…5b)
 - Standard retainer agreement  reference "standard_retainer"  [required]
   Used for: The retainer every retained claimant signs.
   Added 2026-10-09 08:53, picked from Google Drive; who picked it isn't recorded · file Retainer 2026.pdf · pdf
+  add_reference can't add it: it is picked from Google Drive, in Popcorn.
 - Fee schedule  reference "fee_schedule"
   Used for: The fees quoted when a claimant asks what it costs.
   Still waiting: nobody has added it yet.
 read_reference(routine="#intake", reference="<name>") returns one's text or a download link.
-A person adds or replaces a Reference in the Routine, in Popcorn; adding one starts work, which list_triggers shows.
+add_reference adds or replaces a Reference not marked otherwise, as its card in Popcorn does; adding one starts work, which list_triggers shows.
 ```
 
 ### `read_reference`
@@ -1135,6 +1136,97 @@ Thanks for reaching out. To get your claim started, please reply with:
 1. The date of the loss
 2. Your policy number
 3. Photos of the damage
+```
+
+### `create_reference_upload`
+
+[writes]
+
+Get a URL to upload one file for one of a Routine's References, for add_reference to take.
+
+Nothing changes in the Routine until add_reference is confirmed. Upload with the curl line this returns, then call add_reference with the upload_id. The upload goes straight to Popcorn's file storage host, which an assistant whose network access is restricted (such as claude.ai's sandbox) may not reach. In that case, pass a text Reference to add_reference as `text` instead, or add the file in Popcorn. One file per upload, for this Routine and Reference only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; at most 50 MiB (a text file 1.5 MB), and of a kind the Reference takes (the refusal says which). The URL works for 15 minutes. Not for a Reference picked from Google Drive, or one holding the Routine's Steps; list_references marks both. Workspace admins and members of the Routine only.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `filename` [required] | `str` | The file's name with its extension, e.g. fees.pdf; the extension decides what kind of file it is. |
+| `size` [required] | `int` | The file's size in bytes. |
+| `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |
+
+**Example** — “Here's our 2026 fee schedule PDF; give it to #intake.”
+
+```text
+→ create_reference_upload(routine_id="c7d2…5b", reference="fee_schedule", filename="Fee schedule 2026.pdf", size=48211, sha256="5d41402abc4b2a76b9719d911017c5925d41402abc4b2a76b9719d911017c592")
+
+Routine: #intake (c7d2…5b)
+Upload for Fee schedule (reference "fee_schedule"): 48,211 bytes, sha256 5d41402a….
+upload_id: 4e1a9c07….pdf
+method: PUT
+url: https://acme-uploads.s3.us-west-2.amazonaws.com/4e1a….pdf?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…
+headers:
+  Content-Type: application/pdf
+  x-amz-checksum-sha256: XUFAKrxL…
+The URL works for 15 minutes.
+
+Run this with FILE replaced by the file's path; it prints nothing when the upload succeeds:
+curl -fsS -T FILE -H 'Content-Type: application/pdf' -H 'x-amz-checksum-sha256: XUFAKrxL…' 'https://acme-uploads.s3.us-west-2.amazonaws.com/4e1a….pdf?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…'
+
+Then add it: add_reference(routine_id="c7d2…5b", reference="fee_schedule", upload_id="4e1a9c07….pdf") shows what it changes first.
+If curl can't connect to acme-uploads.s3.us-west-2.amazonaws.com, this organization doesn't allow it: add the Reference in Popcorn instead.
+
+→ add_reference(routine_id="c7d2…5b", reference="fee_schedule", upload_id="4e1a9c07b2d35f68/0000000000000001/7c2e91d04f3b4a6e8d5c1b0a9f7e6d51.pdf")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+Add: Fee schedule (reference "fee_schedule") on #intake.
+- From upload 4e1a9c07….pdf: a PDF (.pdf), 48,211 bytes, file Fee schedule 2026.pdf.
+- First add: nobody has added it yet.
+- Used for: The fees quoted when a claimant asks what it costs.
+- Popcorn reads the file in the background, and the Routine works from it from then on.
+
+Call again with `confirm=true` to add it.
+```
+
+### `add_reference`
+
+[writes] [destructive]
+
+Add one of a Routine's References, or replace the one it has, as Replace on the Reference's card in Popcorn does.
+
+Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with create_reference_upload. Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with change_routine; list_references marks both. Without confirm=true this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; list_references shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check list_references first. Workspace admins and members of the Routine only.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
+| `upload_id` | `str` | The upload_id create_reference_upload gave, once the file is uploaded. |
+| `confirm` | `bool` | true to add it. Show the user the dry run first. Default `False`. |
+
+**Example** — “Add a fourth question to #intake's questions: the claim number.”
+
+```text
+→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+Add: Questions and first email (reference "questions") on #intake.
+- From the text given: 236 characters, added as a plain text file (questions.txt).
+- Replaces the one in now. Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+- Used for: The questions, validation instructions and email wording for intake.
+- Required: the template counts on it, and what it is used for starts working once it's in.
+- Popcorn reads the file in the background, and the Routine works from it from then on.
+
+Call again with `confirm=true` to replace it.
+
+→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n", confirm=true)
+
+Routine: #intake (c7d2…5b)
+Started replacing Questions and first email (reference "questions").
+Popcorn reads the file in the background. list_references shows it once it's in, as added just now; if it isn't after a few minutes, the Reference's card in Popcorn says why.
 ```
 
 ## Status
@@ -1370,19 +1462,6 @@ History. Connections are not copied, because they sign in as a person.
 | `routine_id` | | The Routine to copy |
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
-
-### `add_reference`
-
-Adds a document to a Routine, or replaces one, from text or a file the
-caller uploaded. Without `confirm`, says what the Routine will do with it.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `reference` | | Which document this is, as `list_references` names it |
-| `text` | | The document as text |
-| `upload_id` | | A file uploaded for this Routine, in place of `text` |
-| `confirm` | `false` | Add the previewed document |
 
 ### `update_instructions`
 
