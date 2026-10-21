@@ -501,3 +501,8 @@
   concept: reference-documents
   pass: add_reference adds or replaces it from text or an uploaded file, as a dry run first and then confirm=true; a Reference picked from Google Drive, or the Routine's Steps, stays in Popcorn or change_routine, and list_references marks which
   trap: says no tool adds a Reference, or that add_reference can replace the Routine's Steps
+
+- q: Can my assistant make a copy of our west claims Routine for the east office?
+  concept: routines
+  pass: duplicate_routine, as a dry run first, copies the template on the same line, Routine Settings, Steps, guidelines and file References; Connections, credentials, Google Drive References, items and members are not copied; get_routine's Copied from line shows each part as it lands
+  trap: says the copy brings its Connections, items or members along, or that no tool copies a Routine
