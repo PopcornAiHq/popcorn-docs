@@ -506,3 +506,8 @@
   concept: routines
   pass: duplicate_routine, as a dry run first, copies the template on the same line, Routine Settings, Steps, guidelines and file References; Connections, credentials, Google Drive References, items and members are not copied; get_routine's Copied from line shows each part as it lands
   trap: says the copy brings its Connections, items or members along, or that no tool copies a Routine
+
+- q: Can my assistant connect my Google account to my intake Routine?
+  concept: connections
+  pass: make_connection connects an account the person has already signed in to, as a dry run first and then confirm=true; it lists their own accounts that can serve, and for a Google account not yet signed in to it may give a sign-in link the person finishes in the browser
+  trap: says an assistant can't make a Connection, or asks for the password
