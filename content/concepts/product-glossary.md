@@ -57,9 +57,10 @@ its terms the product term it belongs to.
   several.
   *Not to be confused with* an Action, which is a person moving one item on.
 - **Connection** — An account Popcorn uses on the Routine's behalf, such as a
-  mailbox it reads from or a calendar it books into. A person connects it in
-  the browser, because it signs in as them; an assistant can say which ones a
-  Routine is missing, but cannot make one.
+  mailbox it reads from or a calendar it books into. It signs in as a person,
+  so only their own accounts can be connected; an assistant can say which ones
+  a Routine is missing and, after a dry run, connect an account the person has
+  signed in to, or make a webhook.
 - **Reference** — A document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. A Reference informs the Routine; it
   is not one of the items the Routine tracks.
