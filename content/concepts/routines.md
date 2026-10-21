@@ -7,8 +7,9 @@ summary: >
   A Routine is one piece of ongoing work Popcorn runs for you, such as claims
   intake, made from a Routine Template. An assistant finds Routines with
   list_routines, reads one with get_routine — its template, the version it
-  runs, whether the latest install landed, its Connections — and starts a new
-  one from a template with create_routine.
+  runs, whether the latest install landed, its Connections — starts a new
+  one from a template with create_routine, and copies one with
+  duplicate_routine.
 concepts: [customizing-a-routine, connections, set-up-a-routine]
 layer: product
 ---
@@ -49,6 +50,7 @@ Routine take its ID only, so a write never lands on the wrong one by name.
 | Version | the template version it runs, and whether it is the latest |
 | Install | whether the latest version has finished installing |
 | Connections | each account the template needs, and whether it is connected |
+| Copied from | for a duplicate, the Routine it copies and how far the copy has got |
 
 `wait_seconds` (up to 20) waits for an install in progress to land before
 answering, which is how an assistant follows a new Routine until it is ready.
@@ -61,6 +63,33 @@ Routine from, each with what it does and the Connections it needs.
 From a template it is a dry run first, showing the version that will install
 and the Connections someone has to set up; the walkthrough is
 [setting up a Routine](https://docs.popcorn.ai/product/guides/set-up-a-routine.md).
+
+## Copying one
+
+> "Make a copy of #claims-west for the east office, called claims-east."
+
+`duplicate_routine` makes a new Routine that starts as a copy of an existing
+one. Like `create_routine` it is a dry run first, and the dry run lists both
+what it copies and what it leaves out:
+
+| Copied | Not copied |
+|---|---|
+| its template, on the same line: a copy of a Routine on this workspace's own copy of the template joins that copy too, which is one-way | its Connections, which sign in as a person, so someone sets them up again |
+| its Routine Settings and agent notes | credentials among its Routine Settings |
+| its own Steps, as they are now | References picked from Google Drive, which are picked again once the copy has a Google Drive Connection |
+| its agent's guidelines | what people told its agent |
+| References added from a file | its items, History, messages and members |
+
+Called again with `confirm=true`, it creates the Routine, private or open
+to the workspace as `create_routine` does, not with the original's members.
+The template installs in the background, and the copy runs once it lands.
+`get_routine`'s **Copied from** line shows each part as it lands, and names
+any part that didn't, with what to do about it.
+
+In practice the templates Popcorn ships keep most of their References in
+Google Drive, so a copy usually starts with its settings, Steps and
+guidelines, and someone connects its accounts and picks its References
+again in Popcorn.
 
 > **Platform note** — A Routine is what the CLI and the API call a *channel*,
 > and its template's code is an *app bundle*. The `#name` and the IDs are the
