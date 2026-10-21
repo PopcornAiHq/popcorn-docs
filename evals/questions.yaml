@@ -389,8 +389,8 @@
 
 - q: The Routine says an account is missing. Can my assistant connect our Gmail for it?
   concept: connections
-  pass: no — a Connection signs in as a person, so that person connects it in the Routine's settings in Popcorn; get_routine shows which are NOT CONNECTED
-  trap: tries to connect the account through a tool, or asks for the password
+  pass: yes, if it is the person's own Gmail and they have signed in to it — make_connection lists their accounts, dry-runs the one chosen, and connects it with confirm=true; a teammate's account is theirs to connect, and a Google sign-in may come back as a link to pass on
+  trap: asks for the password, connects without a dry run, or connects someone else's account
 
 - q: Where does a Routine get the policy document it checks claims against?
   concept: reference-documents
@@ -484,8 +484,8 @@
 
 - q: Why hasn't my intake Routine booked any inspections? Is something not connected?
   concept: connections
-  pass: list_connections lists each Connection the Routine needs as made or NOT MADE, whose account it uses, and what stops without it; a person makes a missing one in Popcorn, in the browser
-  trap: says an assistant can connect the account itself, or that no tool shows what stops without a Connection
+  pass: list_connections lists each Connection the Routine needs as made or NOT MADE, whose account it uses, and what stops without it; make_connection makes a missing one after a dry run, from an account the person has signed in to
+  trap: says no tool shows what stops without a Connection, or asks for a password
 
 - q: Which documents is my claims Routine still waiting for, and can my assistant read the questions it sends?
   concept: reference-documents
@@ -506,3 +506,8 @@
   concept: routines
   pass: duplicate_routine, as a dry run first, copies the template on the same line, Routine Settings, Steps, guidelines and file References; Connections, credentials, Google Drive References, items and members are not copied; get_routine's Copied from line shows each part as it lands
   trap: says the copy brings its Connections, items or members along, or that no tool copies a Routine
+
+- q: Can my assistant connect my Google account to my intake Routine?
+  concept: connections
+  pass: make_connection connects an account the person has already signed in to, as a dry run first and then confirm=true; it lists their own accounts that can serve, and for a Google account not yet signed in to it may give a sign-in link the person finishes in the browser
+  trap: says an assistant can't make a Connection, or asks for the password
