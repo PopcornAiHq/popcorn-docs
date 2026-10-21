@@ -6,9 +6,10 @@ group: How work arrives
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. It informs the Routine and is not one
-  of its items. People add References in Popcorn; adding some, such as a
-  policy, starts work, which list_triggers shows. No assistant tool reads or
-  adds a Reference yet.
+  of its items. list_references names the ones a Routine has and the ones
+  it is still waiting for, and read_reference returns one's text or a
+  download link. People add References in Popcorn; adding some starts work,
+  which list_triggers lists.
 concepts: [triggers, customizing-a-routine]
 layer: product
 ---
@@ -34,22 +35,64 @@ questions and its first email, and adding the agreement, a Google Doc or a
 Word file, makes it the one sent for signature. The sample email is the one Reference
 that Routine requires.
 
-## What an assistant can do with them
+## Which References a Routine has
 
-An assistant can see which documents start work, through `list_triggers`. It
-cannot yet list a Routine's References, read one, or add one: a person does
-that in Popcorn.
+> "What documents does #intake work from?"
 
-## What the assistant tools would need to show
+`list_references` lists every Reference the Routine's template expects:
 
-These pages describe the present, so this section is a design input, not a
-promise: nothing depends on it arriving. A tool for References would need to
-list each one with what it is used for, when it was added and by whom, and
-the ones the Routine is still waiting for; read one's text, or give a download
-link for a file that is not text; and add or replace one, saying first what
-the Routine will do with it. The MCP reference's
-[proposed tools](https://docs.popcorn.ai/product/reference/mcp.md) sketch `list_references`,
-`read_reference` and `add_reference`.
+```text
+3 References: 2 added, 1 still waiting.
+- Questions and first email  reference "questions"  [required]
+  Used for: The questions, validation instructions and email wording for intake.
+  Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+- Fee schedule  reference "fee_schedule"
+  Used for: The fees quoted when a claimant asks what it costs.
+  Still waiting: nobody has added it yet.
+```
+
+Each one says what the Routine uses it for, whether the Routine requires
+it, and, once added, when and by whom, with its file. A Reference picked
+from Google Drive shows when it was picked, but not who picked it: Popcorn
+doesn't record that. In a claims intake Routine, whose agreement is always
+a Drive pick, most listings say so.
+
+## Reading one
+
+`read_reference` takes a Reference as `list_references` names it. A text
+document comes back as its text, cut if it is long, with a link to the
+whole file; any other file, such as a PDF, comes back as a download link
+that works for a limited time.
+
+## Adding or replacing one
+
+`add_reference` adds or replaces a Reference from text, or from a file sent
+with `create_reference_upload`. It is a dry run first: it says whether this
+is a first add or a replacement and what the Routine uses the document for,
+and refuses a file the Reference doesn't take. Called again with
+`confirm=true`, it starts the same work Popcorn's **Replace** button starts.
+An assistant whose network access is restricted may not reach the upload,
+and sends a text document as `text` instead.
+
+Two kinds of Reference stay in Popcorn, and `list_references` marks each
+one with why:
+
+- **A Reference picked from Google Drive.** A person picks it in Popcorn.
+- **The Routine's Steps.** `change_routine` changes them, with a preview
+  and a way back; `add_reference` won't replace them wholesale.
+
+In the templates Popcorn ships today, every Reference is one of these, so
+in practice a person still adds them in Popcorn.
+
+The same people can add a Reference as in Popcorn: a workspace admin, or a
+member of the Routine who isn't a guest.
+
+## On a workspace that guards personal data
+
+A Reference is free text, which no Column marking can vouch for. So on a
+workspace that guards personal data, `list_references` leaves out file
+names, and `read_reference` returns neither the text nor a link: it says
+when the Reference was added and by whom, and that Popcorn shows it.
 
 > **Platform note** — The References a template expects are its manifest's
 > `documents:` key, and a document that starts work names the flow it starts.

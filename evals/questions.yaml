@@ -481,3 +481,23 @@
   concept: instructions
   pass: get_instructions lists the Routine's Instructions by part, with where each came from and what changes it
   trap: says to read the template's AGENT.md only, or that no tool shows them
+
+- q: Why hasn't my intake Routine booked any inspections? Is something not connected?
+  concept: connections
+  pass: list_connections lists each Connection the Routine needs as made or NOT MADE, whose account it uses, and what stops without it; a person makes a missing one in Popcorn, in the browser
+  trap: says an assistant can connect the account itself, or that no tool shows what stops without a Connection
+
+- q: Which documents is my claims Routine still waiting for, and can my assistant read the questions it sends?
+  concept: reference-documents
+  pass: list_references lists each Reference as added (when and by whom) or still waiting; read_reference returns a text one's text, or a download link for any other file
+  trap: says no tool lists or reads a Routine's References
+
+- q: Show me one change to an item in full, with what the run that made it did.
+  concept: history
+  pass: read_history_entry with an entry_id from list_history shows every field the change touched, before and after, and the run that made it, step by step
+  trap: says get_row shows the earlier values, or that only the one-line summary is available
+
+- q: Can my assistant replace the fee schedule document on my Routine?
+  concept: reference-documents
+  pass: add_reference adds or replaces it from text or an uploaded file, as a dry run first and then confirm=true; a Reference picked from Google Drive, or the Routine's Steps, stays in Popcorn or change_routine, and list_references marks which
+  trap: says no tool adds a Reference, or that add_reference can replace the Routine's Steps

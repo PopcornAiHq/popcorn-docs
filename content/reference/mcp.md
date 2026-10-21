@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-20
+deployed: 2026-10-21
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 32 tools. With them it
+The hosted MCP server gives a person's assistant 38 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made, see what starts its work and run a
@@ -198,7 +198,8 @@ Connections:
 - Claims inbox (email): connected: claims@acme.example (google)
 - Adjuster calendar (calendar): NOT CONNECTED; work that uses it can't run
 - Carrier portal (webhook): connected: carrier-portal
-Whether a connected account still has the access it needs isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
+Whether a connected account has since been revoked or its sign-in has expired isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
+list_connections says whose account each one uses and what stops without it.
 ```
 
 ### `list_routine_templates`
@@ -308,7 +309,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 3999d0e82324).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version da0f2c32d3f4).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -338,14 +339,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 3999d0e82324).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version da0f2c32d3f4).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 15 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version d453af4e0a64. To go back: change_routine with revert_to="d453af4e…".
+Before it: version a7f32001e8f5. To go back: change_routine with revert_to="a7f32001…".
 ```
 
 ## Apps
@@ -1036,6 +1037,198 @@ Started morning (daily digest).
 It runs in the background; the Routine's runs in Popcorn show how it ended.
 ```
 
+## Connections
+
+### `list_connections`
+
+[read-only]
+
+List the Connections a Routine needs: the accounts and other services its template works through.
+
+For each, whether it is made, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not made. Whether an account has since been revoked isn't checked. Making a Connection is a person's job, done in Popcorn in the browser; the response says where. You can't make one from here. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “Why hasn't #intake booked any inspections?”
+
+```text
+→ list_connections(routine="#intake")
+
+Routine: #intake (c7d2…5b)
+3 Connections, 1 not made:
+- Claims inbox (email): made
+  Uses: claims@acme.example (google), connected by Dana Smith
+  Without it: Popcorn shows the Routine as not ready, and claim intake can't run.
+- Adjuster calendar (calendar): NOT MADE
+  Without it: book inspection can't run; the rest of the Routine keeps working.
+- Carrier portal (webhook): made
+  Uses: webhook carrier-portal
+  Without it: Popcorn shows the Routine as not ready, and nothing from the other system starts claim intake.
+Whether a connected account has since been revoked or its sign-in has expired isn't checked here.
+A person makes a Connection in Popcorn, in the browser, not from here: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
+```
+
+## References
+
+### `list_references`
+
+[read-only]
+
+The documents a Routine works from (its References), each with what it is used for, when it was added and by whom, and the ones it is still waiting for.
+
+A Reference marked required is one the template counts on; the Routine works without it until someone adds it. read_reference returns one's text, or a download link for a file that isn't text. A Reference add_reference can't take is marked with why. On a workspace that guards personal data, file names aren't listed.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “What documents does #intake work from?”
+
+```text
+→ list_references(routine="#intake")
+
+Routine: #intake (c7d2…5b)
+3 References: 2 added, 1 still waiting.
+- Questions and first email  reference "questions"  [required]
+  Used for: The questions, validation instructions and email wording for intake.
+  Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+- Standard retainer agreement  reference "standard_retainer"  [required]
+  Used for: The retainer every retained claimant signs.
+  Added 2026-10-09 08:53, picked from Google Drive; who picked it isn't recorded · file Retainer 2026.pdf · pdf
+  add_reference can't add it: it is picked from Google Drive, in Popcorn.
+- Fee schedule  reference "fee_schedule"
+  Used for: The fees quoted when a claimant asks what it costs.
+  Still waiting: nobody has added it yet.
+read_reference(routine="#intake", reference="<name>") returns one's text or a download link.
+add_reference adds or replaces a Reference not marked otherwise, as its card in Popcorn does; adding one starts work, which list_triggers shows.
+```
+
+### `read_reference`
+
+[read-only]
+
+One of a Routine's References: its text, or a download link for a file that isn't text, such as a PDF.
+
+A long text is cut, and the download link gives the whole file. A link works for a limited time; call again for a fresh one. On a workspace that guards personal data, neither the text nor a link is returned: Popcorn shows the file.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+
+**Example** — “Show me the questions #intake sends.”
+
+```text
+→ read_reference(routine="#intake", reference="questions")
+
+Routine: #intake (c7d2…5b)
+Reference: Questions and first email (questions)
+Used for: The questions, validation instructions and email wording for intake.
+Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+Text:
+Subject: Your claim with Acme
+
+Hi {first_name},
+
+Thanks for reaching out. To get your claim started, please reply with:
+1. The date of the loss
+2. Your policy number
+3. Photos of the damage
+```
+
+### `create_reference_upload`
+
+[writes]
+
+Get a URL to upload one file for one of a Routine's References, for add_reference to take.
+
+Nothing changes in the Routine until add_reference is confirmed. Upload with the curl line this returns, then call add_reference with the upload_id. The upload goes straight to Popcorn's file storage host, which an assistant whose network access is restricted (such as claude.ai's sandbox) may not reach. In that case, pass a text Reference to add_reference as `text` instead, or add the file in Popcorn. One file per upload, for this Routine and Reference only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; at most 50 MiB (a text file 1.5 MB), and of a kind the Reference takes (the refusal says which). The URL works for 15 minutes. Not for a Reference picked from Google Drive, or one holding the Routine's Steps; list_references marks both. Workspace admins and members of the Routine only.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `filename` [required] | `str` | The file's name with its extension, e.g. fees.pdf; the extension decides what kind of file it is. |
+| `size` [required] | `int` | The file's size in bytes. |
+| `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |
+
+**Example** — “Here's our 2026 fee schedule PDF; give it to #intake.”
+
+```text
+→ create_reference_upload(routine_id="c7d2…5b", reference="fee_schedule", filename="Fee schedule 2026.pdf", size=48211, sha256="5d41402abc4b2a76b9719d911017c5925d41402abc4b2a76b9719d911017c592")
+
+Routine: #intake (c7d2…5b)
+Upload for Fee schedule (reference "fee_schedule"): 48,211 bytes, sha256 5d41402a….
+upload_id: 4e1a9c07….pdf
+method: PUT
+url: https://acme-uploads.s3.us-west-2.amazonaws.com/4e1a….pdf?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…
+headers:
+  Content-Type: application/pdf
+  x-amz-checksum-sha256: XUFAKrxL…
+The URL works for 15 minutes.
+
+Run this with FILE replaced by the file's path; it prints nothing when the upload succeeds:
+curl -fsS -T FILE -H 'Content-Type: application/pdf' -H 'x-amz-checksum-sha256: XUFAKrxL…' 'https://acme-uploads.s3.us-west-2.amazonaws.com/4e1a….pdf?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…'
+
+Then add it: add_reference(routine_id="c7d2…5b", reference="fee_schedule", upload_id="4e1a9c07….pdf") shows what it changes first.
+If curl can't connect to acme-uploads.s3.us-west-2.amazonaws.com, this organization doesn't allow it: add the Reference in Popcorn instead.
+
+→ add_reference(routine_id="c7d2…5b", reference="fee_schedule", upload_id="4e1a9c07b2d35f68/0000000000000001/7c2e91d04f3b4a6e8d5c1b0a9f7e6d51.pdf")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+Add: Fee schedule (reference "fee_schedule") on #intake.
+- From upload 4e1a9c07….pdf: a PDF (.pdf), 48,211 bytes, file Fee schedule 2026.pdf.
+- First add: nobody has added it yet.
+- Used for: The fees quoted when a claimant asks what it costs.
+- Popcorn reads the file in the background, and the Routine works from it from then on.
+
+Call again with `confirm=true` to add it.
+```
+
+### `add_reference`
+
+[writes] [destructive]
+
+Add one of a Routine's References, or replace the one it has, as Replace on the Reference's card in Popcorn does.
+
+Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with create_reference_upload. Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with change_routine; list_references marks both. Without confirm=true this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; list_references shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check list_references first. Workspace admins and members of the Routine only.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine_id` [required] | `str` | The Routine's ID (not its name). |
+| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
+| `upload_id` | `str` | The upload_id create_reference_upload gave, once the file is uploaded. |
+| `confirm` | `bool` | true to add it. Show the user the dry run first. Default `False`. |
+
+**Example** — “Add a fourth question to #intake's questions: the claim number.”
+
+```text
+→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n")
+
+Routine: #intake (c7d2…5b)
+**Dry run.** Nothing was changed.
+
+Add: Questions and first email (reference "questions") on #intake.
+- From the text given: 236 characters, added as a plain text file (questions.txt).
+- Replaces the one in now. Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
+- Used for: The questions, validation instructions and email wording for intake.
+- Required: the template counts on it, and what it is used for starts working once it's in.
+- Popcorn reads the file in the background, and the Routine works from it from then on.
+
+Call again with `confirm=true` to replace it.
+
+→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n", confirm=true)
+
+Routine: #intake (c7d2…5b)
+Started replacing Questions and first email (reference "questions").
+Popcorn reads the file in the background. list_references shows it once it's in, as added just now; if it isn't after a few minutes, the Reference's card in Popcorn says why.
+```
+
 ## Status
 
 ### `get_status`
@@ -1160,23 +1353,23 @@ Newest first, a page at a time. Each change shows when, who made it (a person by
 Routine: #intake (c7d2…5b) · table: clients
 Item: row 88
 8 entries, newest first:
-- 2026-10-18 10:20 · Popcorn (signing webhook): Retainer signed
+- 2026-10-18 10:20 · Popcorn (signing webhook): Retainer signed (entry_id 9)
   Status: Retainer sent → Signed
   1 other field changed: Why: Retainer sent; waiting for the signature. → —
-- 2026-10-17 16:10 · Dana Smith: Matter updated
+- 2026-10-17 16:10 · Dana Smith: Matter updated (entry_id 7)
   1 field changed: Matter: Car accident → Car accident, rear-ended
-- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer
+- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer (entry_id 6)
   Status: Needs review → Retainer sent
   Why: Retainer sent; waiting for the signature.
   1 other field changed: Retainer Sent At: 2026-10-17T15:00:00+00:00
-- 2026-10-16 11:30 · Popcorn (chase turn): Answered all 5 intake questions
+- 2026-10-16 11:30 · Popcorn (chase turn): Answered all 5 intake questions (entry_id 4)
   Status: Waiting on answers → Needs review
   Why: Answers are in; check them before the retainer goes out.
   1 other field changed: Answers: {"injured": "yes", "insurer": "Acme Mutual"}
 - 2026-10-16 11:29 · Popcorn: Email turn at intake: assess reply
   verdict: complete · reason: all_answered
   Summary: Ben Garrett answered all five questions.
-- 2026-10-14 09:05 · Popcorn (chase turn): Sent the questions to Ben
+- 2026-10-14 09:05 · Popcorn (chase turn): Sent the questions to Ben (entry_id 2)
   Status: New → Waiting on answers
   Why: Waiting on answers to 5 intake questions.
   1 other field changed: Questions Sent: 5
@@ -1184,7 +1377,8 @@ Item: row 88
   verdict: approve · reason: first_contact
   Email: subject "Your intake questions, Ben Garrett", sent 2026-10-14 09:05
   Summary: Asked Ben Garrett the 5 intake questions.
-- 2026-10-14 09:00 · Popcorn (intake): Created as New
+- 2026-10-14 09:00 · Popcorn (intake): Created as New (entry_id 1)
+read_history_entry with an entry_id shows that change in full, with what the run that made it did.
 Runs that changed it on this page:
 - signing webhook: succeeded · started 2026-10-18 10:19 by a webhook · ended 2026-10-18 10:20
 - cta apply: succeeded · started 2026-10-17 14:59 by a person's button · ended 2026-10-17 15:00
@@ -1194,6 +1388,42 @@ Runs that changed it on this page:
 A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
 Only runs that wrote to this item are listed; a run that only read it isn't.
 History goes back 30 days; older changes aren't kept.
+```
+
+### `read_history_entry`
+
+[read-only]
+
+One change from an item's History, in full: every field it changed, before and after, who or what made it and why, and, when Popcorn's work made it, what that run did, in order, and how it ended.
+
+Only the fields the change touched are shown, not the whole item. Email content isn't part of History.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+| `entry_id` [required] | `int` | The entry's ID, as list_history shows it ("entry_id 6" is 6). |
+
+**Example** — “Show me entry 6 of row 88's history in #intake in full: what changed and what the run did.”
+
+```text
+→ read_history_entry(routine="#intake", entry_id=6)
+
+Routine: #intake (c7d2…5b) · table: clients
+Item: row 88
+- 2026-10-17 15:00 · Popcorn, for a person (cta apply): Send retainer (entry_id 6)
+  Status: Needs review → Retainer sent
+  Why: Retainer sent; waiting for the signature.
+Each field it changed, before → after:
+- Status: Needs review → Retainer sent
+- Why: Answers are in; check them before the retainer goes out. → Retainer sent; waiting for the signature.
+- Retainer Sent At: 2026-10-17T15:00:00+00:00
+The run that made it:
+- cta apply: succeeded · started 2026-10-17 14:59 by a person's button · ended 2026-10-17 15:00
+  What it did, in order:
+  - load item: completed · 0.4s
+  - send retainer: completed · 0.8s · attempt 2 · the signing provider didn't answer in time
+  - apply: completed · 1.2s
+A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
 ```
 
 ## Proposed tools
@@ -1233,48 +1463,6 @@ History. Connections are not copied, because they sign in as a person.
 | `name` | | The new Routine's name |
 | `confirm` | `false` | Create the previewed copy |
 
-### `list_connections`
-
-Read-only. The Connections a Routine needs, each with whether it is made,
-whose account it uses, and what stops while it is missing. Making one is a
-person's job, in the browser; the result says where.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `list_references`
-
-Read-only. The documents a Routine works from, each with what it is used for,
-when it was added and by whom, and the ones the Routine is still waiting for.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `read_reference`
-
-Read-only. One Reference's text, or a download link for a file that is not
-text.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `reference` | | As `list_references` names it |
-
-### `add_reference`
-
-Adds a document to a Routine, or replaces one, from text or a file the
-caller uploaded. Without `confirm`, says what the Routine will do with it.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `reference` | | Which document this is, as `list_references` names it |
-| `text` | | The document as text |
-| `upload_id` | | A file uploaded for this Routine, in place of `text` |
-| `confirm` | `false` | Add the previewed document |
-
 ### `update_instructions`
 
 Changes a Routine's Instructions. Takes the change in plain language or as
@@ -1288,13 +1476,3 @@ Instructions as they would read after the change.
 | `edits` | | Or exact edits to the text, in place of `request` |
 | `confirm` | `false` | Apply the previewed change |
 | `reset` | `false` | Return a changed part to the template's |
-
-### `read_history_entry`
-
-Read-only. One entry from `list_history` in full: a run's steps and result, a
-message and its replies, or a change's before and after.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `entry_id` | | From `list_history` |
