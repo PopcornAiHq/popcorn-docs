@@ -16,7 +16,8 @@ layer: product
 The hosted MCP server gives a person's assistant 38 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
-Routine's Connections are made, see what starts its work and run a
+Routine's Connections are made and make one from an account already
+signed in to or as a webhook, see what starts its work and run a
 schedule now, list and take the Actions on its items, read and change its
 settings, read its tables and rows and add, change or delete rows, and read
 the files of the app a Routine runs, fork it onto the workspace's own line,
@@ -36,7 +37,8 @@ tools that write into a Routine take `routine_id`, the ID only. A listing
 returns one page and a `next_cursor` to pass back with the same arguments.
 A fork, a publish, an install that moves a Routine onto another line,
 creating a Routine from a template, running a Trigger, taking an Action,
-changing a setting and deleting rows are a dry run until called again with
+making a Connection, changing a setting and deleting rows are a dry run
+until called again with
 `confirm=true`. An
 install that brings a Routine to its own line's head starts at once, and
 so does creating a Routine with no template.
@@ -233,7 +235,7 @@ Each row shows the template's name, its slug (what create_routine's `template` t
 
 Create a Routine in this workspace, optionally from a Routine Template.
 
-Without `template` the Routine is created at once. With `template` the first call is a dry run that changes nothing: it shows the version that will install and the connections someone sets up before it runs. Call again with confirm=true to create it. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands. A name already used in this workspace is refused, with the ID of the Routine that has it.
+Without `template` the Routine is created at once (for Popcorn's channel agent it is a dry run first, like any other). With `template` the first call is a dry run that changes nothing: it shows the version that will install and the connections someone sets up before it runs. Call again with confirm=true to create it. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands. A name already used in this workspace is refused, with the ID of the Routine that has it.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -283,6 +285,7 @@ Only a Routine whose template keeps its Steps with the Routine can be changed th
 | `confirm` | `bool` | true to install. Show the person the proposal (or the revert's check) first. Default `False`. |
 | `revert_to` | `str` | "previous", "template", or a version (sha) to go back to. |
 | `run_key` | `str` | The run_key a revert's check gave, with confirm=true. |
+| `plan_id` | `str` | The plan_id get_routine_change or the revert's check gave, with confirm=true. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “In #intake, once a claimant signs the retainer, have them book the interview straight away.”
 
@@ -1015,6 +1018,7 @@ Its schedule is unchanged: the next scheduled run still happens. The run does wh
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `trigger` [required] | `str` | The schedule's name, as list_triggers shows it. |
 | `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Send #intake's morning digest now; don't wait.”
 
@@ -1204,6 +1208,7 @@ Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file u
 | `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
 | `upload_id` | `str` | The upload_id create_reference_upload gave, once the file is uploaded. |
 | `confirm` | `bool` | true to add it. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Add a fourth question to #intake's questions: the claim number.”
 
@@ -1306,6 +1311,7 @@ Refused for an item the Action isn't offered on now. Without confirm=true this i
 | `action` [required] | `str` | The Action, as list_actions names it (its "action"). |
 | `confirm` | `bool` | true to act. Show the user the dry run first. Default `False`. |
 | `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same items and action. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Close claim 4471 in #intake.”
 
