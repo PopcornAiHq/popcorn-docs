@@ -66,10 +66,26 @@ that works for a limited time.
 
 ## Adding or replacing one
 
-A person adds or replaces a Reference in the Routine, in Popcorn. An
-assistant can't yet: `add_reference` is among the MCP reference's
-[proposed tools](https://docs.popcorn.ai/product/reference/mcp.md), and nothing depends on it
-arriving.
+`add_reference` adds or replaces a Reference from text, or from a file sent
+with `create_reference_upload`. It is a dry run first: it says whether this
+is a first add or a replacement and what the Routine uses the document for,
+and refuses a file the Reference doesn't take. Called again with
+`confirm=true`, it starts the same work Popcorn's **Replace** button starts.
+An assistant whose network access is restricted may not reach the upload,
+and sends a text document as `text` instead.
+
+Two kinds of Reference stay in Popcorn, and `list_references` marks each
+one with why:
+
+- **A Reference picked from Google Drive.** A person picks it in Popcorn.
+- **The Routine's Steps.** `change_routine` changes them, with a preview
+  and a way back; `add_reference` won't replace them wholesale.
+
+In the templates Popcorn ships today, every Reference is one of these, so
+in practice a person still adds them in Popcorn.
+
+The same people can add a Reference as in Popcorn: a workspace admin, or a
+member of the Routine who isn't a guest.
 
 ## On a workspace that guards personal data
 
