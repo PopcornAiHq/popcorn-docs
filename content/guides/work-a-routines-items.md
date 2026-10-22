@@ -81,12 +81,14 @@ shows the new Status once it has applied.
 - **A wrong value** — `update_row` with the Columns to change and the
   revision from `get_row`. If someone changed the Row in the meantime,
   nothing is written and the response shows the Row as it is now.
-- **A missing item** — `create_rows`. A Row that matches an existing one
-  merges into it rather than adding a duplicate.
+- **A missing item** — `create_rows`, after its dry run. A Row that
+  matches an existing one merges into it rather than adding a duplicate. An
+  added item is picked up by the Routine's next run, which may send it an
+  email, and the dry run says so.
 - **A duplicate** — `delete_rows`, after its dry run. A deleted Row cannot
   be restored with these tools.
 
-None of these start work, and none can set a Status: that changes only by an
+None of these start work by themselves, and none can set a Status: that changes only by an
 Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/product/concepts/tables.md).
 
 ## 6. Run the Routine's work now

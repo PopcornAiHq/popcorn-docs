@@ -7,8 +7,9 @@ summary: >
   A Routine's Tables hold its items — claims, orders, contacts — as Rows and
   Columns. An assistant lists and reads them (list_tables, get_table,
   list_rows with filters, get_row) and adds, changes and deletes Rows
-  (create_rows, update_row, delete_rows). Changing a Row starts no work, and
-  a Row's Status changes only by an Action.
+  (create_rows and delete_rows after a dry run, update_row). An added Row
+  can be a new item the Routine's work picks up; a Row's Status changes
+  only by an Action.
 concepts: [actions-and-status, work-a-routines-items]
 layer: product
 ---
@@ -37,17 +38,23 @@ workspace, and a Column holding a credential is never shown or written.
 
 ## Writing
 
-- `create_rows` adds up to 50 Rows. A Row that matches an existing one on
-  the Table's identifying Columns merges into it instead of adding another,
-  and the response says which Rows were added and which merged.
+- `create_rows` adds up to 50 Rows, after a dry run. A Row that matches an
+  existing one on the Table's identifying Columns merges into it instead of
+  adding another. The dry run says which Rows would be added and which would
+  merge, and what an added Row starts; the call with `confirm=true` and the
+  same Rows writes them, and its response says which were added and which
+  merged.
 - `update_row` changes some Columns of one Row. It needs the Row's revision
   from `get_row`: if the Row changed since, nothing is written and the
   response shows it as it is now.
 - `delete_rows` deletes Rows by ID, after a dry run. A deleted Row cannot be
   restored with these tools.
 
-Writing a Row starts no work, and some Columns keep their own rules: a notes
-Column may append what is written rather than replace it, and a first-seen
+Writing a Row starts nothing by itself. On the Table a Routine's Statuses
+run on, though, an added Row is a new item: it starts at its first Status,
+and the Routine's next run acts on it for real, which on a Routine that
+sends email means that item's first email. Some Columns keep their own
+rules: a notes Column may append what is written rather than replace it, and a first-seen
 date may keep its first value. `update_row`'s response names any Column
 where that happened. A Row's **Status** cannot be written at all: it changes
 when an [Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md) is taken or the
