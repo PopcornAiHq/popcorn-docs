@@ -37,7 +37,9 @@ Work that a person starts on one item is an
 A person can also add items without a Trigger: by asking the Routine's agent
 in Popcorn to add someone, or by giving it a spreadsheet of them. Either way
 the item starts its first [Step](https://docs.popcorn.ai/product/concepts/steps.md). `create_rows`
-writes a Row too, but starts no work, so it is not a way in.
+adds a Row without starting anything itself, but on the Table the Routine's
+Statuses run on that Row is a new item too, and the Routine's next run acts
+on it. Its dry run says so before anything is written.
 
 In a claims intake Routine, a second arrival for someone already there, by
 the same email address or phone number, updates their item and never starts
