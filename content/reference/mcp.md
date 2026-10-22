@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-21
+deployed: 2026-10-22
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -241,10 +241,10 @@ Without `template` the Routine is created at once (for Popcorn's channel agent i
 |---|---|---|
 | `name` [required] | `str` | The Routine's name, e.g. "claims-west". Spaces become hyphens; the response shows the name it got. |
 | `template` | `str` | A Routine Template's slug from list_routine_templates, e.g. "claimcoordinator". |
-| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. Default `False`. |
+| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
 | `confirm` | `bool` | true to create a Routine from a template. Show the user the dry run first. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for template, private and members: leave them out and the create takes the dry run's, or send them and they must be the same. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Set up a private #claims-west Routine from the claims template, with Jordan in it.”
 
@@ -281,10 +281,10 @@ Nothing is copied that belongs to the work or the people: not its items, History
 |---|---|---|
 | `routine_id` [required] | `str` | The ID of the Routine to copy (not its name). |
 | `name` [required] | `str` | The new Routine's name, e.g. "claims-east". Spaces become hyphens; the response shows the name it got. |
-| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. The original's members aren't copied. Default `False`. |
+| `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. The original's members aren't copied. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
 | `confirm` | `bool` | true to create the Routine. Show the user the dry run first. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for private and members: leave them out and the copy takes the dry run's, or send them and they must be the same. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Make a copy of #claims-west for the east office, called claims-east.”
 
@@ -336,7 +336,7 @@ Only a Routine whose template keeps its Steps with the Routine can be changed th
 | `confirm` | `bool` | true to install. Show the person the proposal (or the revert's check) first. Default `False`. |
 | `revert_to` | `str` | "previous", "template", or a version (sha) to go back to. |
 | `run_key` | `str` | The run_key a revert's check gave, with confirm=true. |
-| `plan_id` | `str` | The plan_id get_routine_change or the revert's check gave, with confirm=true. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The plan_id get_routine_change or the revert's check gave, with confirm=true; it stands in for the run_key. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “In #intake, once a claimant signs the retainer, have them book the interview straight away.”
 
@@ -363,7 +363,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version da0f2c32d3f4).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 6735ca2f3d17).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -393,14 +393,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version da0f2c32d3f4).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 6735ca2f3d17).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 15 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version a7f32001e8f5. To go back: change_routine with revert_to="a7f32001…".
+Before it: version ac0957546dca. To go back: change_routine with revert_to="ac095754…".
 ```
 
 ## Apps
