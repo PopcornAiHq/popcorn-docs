@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.61.7
+version: 0.63.0
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -14,7 +14,7 @@ concepts: [template-authoring, publish-and-apply, fork-line]
 layer: platform
 ---
 
-The 83 commands `popcorn` 0.61.7 lists in its help menu, under the
+The 87 commands `popcorn` 0.63.0 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -23,6 +23,24 @@ This page is generated from `popcorn --help` and `popcorn commands` by
 have disagree, the CLI is right: run `popcorn <command> --help`.
 
 ## Messages
+
+### `message answer`
+
+Answer an agent's question card, as tapping it in the app does
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<conversation>` | yes | Channel name (#general) or UUID |
+| `--channel <value>` |  | Channel name (#general) or UUID — the same argument, spelled the way every command accepts |
+| `--message <value>` | yes | The question's message id (from `message questions`) |
+| `--thread <str>` |  | Thread the question was asked in (its root message id) |
+| `--question <int>` |  | Which question on the card the flags answer (default 1); the others go as skipped, as in the app |
+| `--option <value>` |  | Pick option N (repeat on a pick-any question) |
+| `--label <value>` |  | Pick the option with this label (repeat on a pick-any question) |
+| `--custom <str>` |  | Free-text answer, alone or beside a pick |
+| `--skip` |  | Skip the question |
+| `--answers <str>` |  | Every question at once, as a JSON list (literal, @file or @-): [{"option": 1}, {"label": ["A", "B"], "custom": "…"}, {"skip": true}] |
+| `--dry-run` |  | Print the answers part that would be sent, and send nothing |
 
 ### `message delete`
 
@@ -78,6 +96,17 @@ Read message history
 | `--interval <int>` |  | Poll interval in seconds (default 3, with --watch) Default `3`. |
 | `--count <int>` |  | Exit after receiving N messages (with --watch) |
 | `--max-wait <float>` |  | Exit after N seconds even if no messages received (with --watch) |
+
+### `message questions`
+
+List an agent's unanswered question cards, numbered for `message answer`
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<conversation>` | yes | Channel name (#general) or UUID |
+| `--channel <value>` |  | Channel name (#general) or UUID — the same argument, spelled the way every command accepts |
+| `--thread <str>` |  | Thread ID to look in |
+| `--limit <int>` |  | Recent messages to look through (default 50) |
 
 ### `message react`
 
@@ -538,6 +567,31 @@ List rows in a table
 | `--filter <str>` |  | Equality map, e.g. '{"Status":"firing"}' |
 | `--limit <int>` |  | Max rows (default 50) |
 | `--cursor <str>` |  | Cursor from a previous response's pagination.next |
+
+### `table import`
+
+Create rows in bulk from a .jsonl, .json (array) or .csv file
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<name>` | yes | Table name |
+| `--channel <value>` | yes | Channel name (#general) or UUID |
+| `--file <str>` | yes | Rows to create: .jsonl/.ndjson (an object per line), .json (an array of objects) or .csv (header row = column names, cells typed from the table's schema); '-' for stdin |
+| `--format <value>` |  | Input format when the file's extension doesn't say (required for '-') One of `jsonl`, `json`, `csv`. |
+| `--merge-on <value>` |  | Column identifying an existing row to write over instead of adding one (repeatable). A match REPLACES that row: columns the new row omits are emptied |
+| `--batch-size <int>` |  | Rows per request (default 500); each batch is written or refused whole |
+| `--skip <int>` |  | Skip the first N rows of the file — resume after a failed batch |
+
+### `table row create`
+
+Create one row and print it as `row get` would
+
+| Argument | Required | Notes |
+|---|---|---|
+| `<name>` | yes | Table name |
+| `--channel <value>` | yes | Channel name (#general) or UUID |
+| `--data <str>` | yes | JSON object of the row's columns (use '@-' for stdin, '@path' for a file) |
+| `--merge-on <value>` |  | Column identifying an existing row to write over instead of adding one (repeatable). A match REPLACES that row: columns the new row omits are emptied |
 
 ### `table row get`
 
