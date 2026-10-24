@@ -82,6 +82,7 @@ GROUPS = {
     "search_messages": "Messages",
     "app_bundle": "Apps",
     "flows": "Flows",
+    "setup": "Setup",  # A Routine's setup checklist and what each step still needs.
     "settings": "Routine settings",
     "instructions": "Instructions",
     "agent_store": "Tables",
