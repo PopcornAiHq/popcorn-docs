@@ -23,8 +23,8 @@ things in, and the choices you cannot take back afterwards.
 A channel is what the product calls a **Routine**, and an app a **Routine
 Template** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)); this guide uses the CLI's names.
 It runs from the CLI throughout. An assistant over MCP can publish the same
-change with `publish_app`, but it is not given the flow-run tools that step 7
-uses to check the result.
+change with `create_routine_version`, but it is not given the flow-run tools
+that step 7 uses to check the result.
 
 The running example adds a `handoffs` table to an app on `#example-intake`:
 one row per ticket handed to someone, where a repeat hand-off updates the

@@ -290,16 +290,16 @@ is a dry run until it is called again with `confirm=true`:
 
 | CLI | MCP |
 |---|---|
-| `app checkout` | `list_app_files`, then `read_app_file` per file |
-| `app fork` | `fork_app` |
-| `app validate`, then `app publish` | `publish_app`: its dry run reports every check publish would fail, each file's diff and the reach; the confirm publishes by `plan_id` |
+| `app checkout` | `list_routine_files`, then `read_routine_file` per file |
+| `app fork` | `copy_routine_template` |
+| `app validate`, then `app publish` | `create_routine_version`: its dry run reports every check publish would fail, each file's diff and the reach; the confirm publishes by `plan_id` |
 | `app status` | `get_routine`, whose `Install:` field says whether the install landed |
-| `app apply` | `install_app` |
+| `app apply` | `install_routine` |
 
-`publish_app` takes changes, not a tree: each one creates, deletes, renames or
-edits one file with text ops, and an edit carries the `sha256` it was read at.
-A file the assistant generated rather than typed goes up through
-`create_app_upload`. The
+`create_routine_version` takes changes, not a tree: each one creates, deletes,
+renames or edits one file with text ops, and an edit carries the `sha256` it
+was read at. A file the assistant generated rather than typed goes up through
+`create_routine_file_upload`. The
 [MCP reference](https://docs.popcorn.ai/product/reference/mcp.md) has the arguments.
 
 ### The app list is filtered by your release track
