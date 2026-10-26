@@ -32,9 +32,9 @@ edit `manifest.yaml`, check it, read the error, repeat. One thing is
 different. The CLI's own checks do not look inside `states:`; the graph is
 checked only when the server parses the manifest. `popcorn app validate`
 sends it there when run logged in from a fork checkout with edits, and
-`app publish` (or `publish_app`'s dry run) always does. The check stops at the
-first problem, so a new graph usually takes several rounds to pass, one error
-at a time. Run those rounds with `app validate`, which mints no version.
+`app publish` (or `create_routine_version`'s dry run) always does. The check
+stops at the first problem, so a new graph usually takes several rounds to
+pass, one error at a time. Run those rounds with `app validate`, which mints no version.
 
 ## The worked example
 
