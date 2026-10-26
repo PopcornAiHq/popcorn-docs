@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-deployed: 2026-10-22
+deployed: 2026-10-26
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -13,7 +13,7 @@ concepts: [app-bundle, publish-and-apply, fork-line]
 layer: product
 ---
 
-The hosted MCP server gives a person's assistant 40 tools. With them it
+The hosted MCP server gives a person's assistant 41 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made and make one from an account already
@@ -363,7 +363,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 7704514a6500).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 1bf13eb70563).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -393,14 +393,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 7704514a6500).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 1bf13eb70563).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
-get_routine shows all 15 Steps.
+get_routine shows all 16 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version 8d613be47c1f. To go back: change_routine with revert_to="8d613be4…".
+Before it: version 0096e731db97. To go back: change_routine with revert_to="0096e731…".
 ```
 
 ## Apps
@@ -624,6 +624,39 @@ curl -fsS -T FILE -H 'x-amz-checksum-sha256: nyyfLJ8s…' 'https://uploads.popco
 Then publish it with this change (add expected_sha256 to replace a file that exists):
 {"path": "code/engine/engine.js", "from_upload": "3f6a…93"}
 If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
+```
+
+## Setup
+
+### `get_setup`
+
+[read-only]
+
+Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in order: each done or not, which are required, and what each one left still needs (a Connection, a document, a booking page, a value).
+
+A step that keeps a value shows what is set. It only reads. A Routine whose template builds its checklist from its Steps says when that hasn't happened yet, and lists the template's own steps meanwhile. A Routine with no checklist says so.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `routine` [required] | `str` | Routine name ("#intake") or ID. |
+
+**Example** — “What's left to set up on #intake?”
+
+```text
+→ get_setup(routine="#intake")
+
+Routine: #intake (c7d2…5b)
+Setup: 4 of 6 steps done; 1 required left.
+- [done] Connect your company email (step: connect_email)
+- [left] Connect the adjusters' calendar (step: connect_calendar)
+  Needs a Connection: make_connection makes it, and list_connections shows what it needs.
+- [done, required] Intake: choose the questions document (step: document_questions)
+- [done] Add your booking page (step: connect_booking_link) · set: "Consult with Acme"
+  Warning: No booking of this page yet, so whose calendar it is can't be told until its first booking.
+- [left, required] Days to wait for a reply (step: setting_wait_days)
+  Needs a value for Days to wait for a reply (days, 1–30); it is set in the Routine's Today tab.
+- [done] Connect your intake form (step: connect_intake_webhook)
+Also needed, with no step Popcorn shows: secret:portal_token.
 ```
 
 ## Routine settings
@@ -927,7 +960,7 @@ State: Status = open · Stage = open
 
 Add rows to one of a Routine's tables.
 
-A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the row's state or a credential). The response says which rows were added and which merged. Adding rows starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns. Each call adds its rows: if a call timed out, check with list_rows before sending it again.
+Without confirm=true this is a dry run that adds nothing: it says which rows would be added and which would merge into an existing row, and what an added row starts. A new row on the table the Routine's Statuses run on is a new item, and the Routine's work acts on it for real (on a Routine that sends email, its first email goes out on the next run). Show the person the dry run, and confirm only once they agree. Popcorn's channel agent adds the rows a member asked for at once, with no dry run, as it does update_row. A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one (get_table shows it), else the columns merge_on names. A merge on merge_on changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the row's state or a credential). The confirmed response says which rows were added and which merged. Columns the Routine's Statuses own are refused (they change only by an Action), and so are credential columns. Each confirm adds its rows: if one timed out, check with list_rows before sending it again.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -935,11 +968,25 @@ A row whose merge key matches an existing row merges into it instead of adding a
 | `table` [required] | `str` | The table's name, as list_tables shows it. |
 | `rows` [required] | `list[dict[str, Any]]` | The rows, each an object of column: value. At most 50. |
 | `merge_on` | `list[str]` | Columns that identify an existing row to merge into, for a table with no merge key of its own. |
+| `confirm` | `bool` | true to add the rows, sending the same rows and merge_on as the dry run. Show the user the dry run first. Default `False`. |
 
 **Example** — “Add claim 5002 for Kim, $900, to #intake, and update 4471's amount to 13,000 while you're at it.”
 
 ```text
 → create_rows(routine_id="c7d2…5b", table="claims", rows=[{"claim_no": "5002", "claimant": "Kim", "amount": 900}, {"claim_no": "4471", "amount": 13000}], merge_on=["claim_no"])
+
+Routine: #intake (c7d2…5b) · table: claims
+**Dry run.** Nothing was changed.
+
+Add 2 rows to claims; each row sent, in order:
+- 1: added
+- 2: merges into row 88 (on claim_no)
+- Each added row is a new item: it starts at its first Status, and the Routine's own work picks it up on its next run (list_triggers shows what runs and when). What that work does with it is real: on a Routine that sends email, the item's first email.
+- A merge changes an existing item's columns; its Status changes only by an Action or the Routine's own work.
+
+Call again with `confirm=true` to add them, sending the same rows.
+
+→ create_rows(routine_id="c7d2…5b", table="claims", rows=[{"claim_no": "5002", "claimant": "Kim", "amount": 900}, {"claim_no": "4471", "amount": 13000}], merge_on=["claim_no"], confirm=true)
 
 Routine: #intake (c7d2…5b) · table: claims
 Added 1 row and merged 1 into existing rows:
@@ -1062,7 +1109,7 @@ Documents:
 
 Run one of a Routine's schedules now, with the inputs it runs with on schedule.
 
-Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started.
+Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started. A started run comes back with its reference, which list_history's run follows.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1079,7 +1126,7 @@ Its schedule is unchanged: the next scheduled run still happens. The run does wh
 Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
-Run: the morning schedule's work (daily digest) on #intake, now.
+Run: the morning schedule's work on #intake, now.
 - Schedule: cron '0 8 * * 1-5' (America/Los_Angeles); unchanged by this run.
 - It runs as it would on schedule, in the background: posts, emails and row changes are real.
 
@@ -1088,8 +1135,9 @@ Call again with `confirm=true` to run it now.
 → run_trigger(routine_id="c7d2…5b", trigger="morning", confirm=true)
 
 Routine: #intake (c7d2…5b)
-Started morning (daily digest).
-It runs in the background; the Routine's runs in Popcorn show how it ended.
+Started the morning schedule's work.
+Run: run_WzEs…
+It runs in the background. list_history with that run shows how it is going or how it ended, and the items it changed; each of those items' own History lists it too.
 ```
 
 ## Connections
@@ -1450,13 +1498,14 @@ It applies in the background; get_row shows each item's new Status once it has.
 
 What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
 
-Newest first, a page at a time. Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far.
+Newest first, a page at a time. Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far. With run instead of row_id, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did).
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `row_id` [required] | `int` | The item's row ID, as list_rows shows it ("row 88" is 88). |
+| `row_id` | `int` | The item's row ID, as list_rows shows it ("row 88" is 88). |
 | `cursor` | `str` | next_cursor from the previous page, with the same other arguments. |
+| `run` | `str` | A run's reference, as run_trigger gives it, in place of row_id. |
 
 **Example** — “What happened with row 88 in #intake?”
 
