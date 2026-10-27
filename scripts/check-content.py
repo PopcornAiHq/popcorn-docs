@@ -60,7 +60,8 @@ _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
-_UPDATED = re.compile(r"^updated:\s*(?P<value>.*)$", re.M)
+_UPDATED = re.compile(r"^updated:[ \t]*(?P<value>.*)$", re.M)
+_VERSION = re.compile(r"^version\s*:", re.M)
 _DEPLOYED = re.compile(r"^deployed\s*:", re.M)
 _OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
@@ -114,6 +115,10 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         problems.append(f"layout '{layout.group('value').strip()}' is not one of {sorted(LAYOUTS)}")
 
     updated = _UPDATED.search(front)
+    if len(_UPDATED.findall(front)) > 1:
+        problems.append("updated: appears more than once; the build would show the last")
+    if updated and _VERSION.search(front):
+        problems.append("a page has version: or updated:, never both")
     if updated and path.parent.name != "reference":
         problems.append("updated: is for a generated reference page; git knows when a hand-written one changed")
     elif updated:
