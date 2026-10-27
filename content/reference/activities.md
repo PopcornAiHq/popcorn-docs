@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-updated: 2026-10-26
+updated: 2026-10-27
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -1242,7 +1242,9 @@ largest in the system, because the default `/memories` mount puts every
 channel's free-form member learnings there, while a channel entity only
 ever holds one channel's. Prefer an exact `category` at
 `scope: workspace`. Set `include_content: false` for
-a cheap key/category browse.
+a cheap key/category browse. `key` / `keys` are filtered by the API
+too: reading a few keys out of a large category costs those rows, not
+the category.
 
 Read-only: safe to retry.
 
@@ -1254,7 +1256,8 @@ Read-only: safe to retry.
 | `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel, dm and knowledge agents mount that same entity read-write and unconfined, and memoryhelper, dreamer and persona edit it by id, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
 | `category` | string, optional | no | Exact category to list, e.g. 'kb:page'. Exclusive with category_prefix. |
 | `category_prefix` | string, optional | no | List every category starting with this prefix, e.g. 'kb:'. Exclusive with category. Filtered worker-side after listing everything at the scope. |
-| `key` | string, optional | no | Only the memory (or memories, if duplicates raced) whose metadata key_field equals this value. |
+| `key` | string, optional | no | Only the memory (or memories, if duplicates raced) whose metadata key_field equals this value. Exclusive with keys. |
+| `keys` | list of string, optional | no | Only memories whose metadata key_field is one of these (at most 200), in one call. Rows come back in listing order, not in the order of `keys`; a key with no memory is simply absent, and an empty list returns nothing. Exclusive with key. |
 | `key_field` | string | no | Metadata field that holds a memory's key. Default 'key'; the app stores use 'fact_id' and 'page_key'. Default `"key"`. |
 | `include_content` | boolean | no | When false, `content` is null on every row — a cheap way to see which keys and categories exist. Default `true`. |
 | `limit` | integer | no | Maximum rows returned (1..500), applied after filtering. Fewer come back when the 1 MiB output budget fills first; `has_more` reports truncation by either. Default `100`. |
@@ -1487,6 +1490,7 @@ is null for a DM, group DM or self-DM, which have no name of their own.
 | `after` | string, optional | no | Only messages sent at or after this ISO-8601 instant (what `foundation.math.offset` emits). `Z`, an offset, a naive timestamp (read as UTC) and a bare date (midnight UTC) all parse. |
 | `before` | string, optional | no | Only messages sent before this ISO-8601 instant. |
 | `humans_only` | boolean | no | Leave out messages a bot, agent or app wrote (the records `is_bot` would mark true). Applied by the search itself, before `sort` and `limit`: bot messages never take a place on the page, so `limit` human messages come back when that many match (less any the access check hides). On its own it is not a filter: pair it with at least one of the others. Default `false`. |
+| `open_channels_only` | boolean | no | Keep only hits in open channels (workspace, public, shared). Leaves out DMs, group DMs, self-DMs and private channels — even ones the bot is a member of, and the run's own channel if it is private — before the page comes back. Use it when reading a member's messages for anything shown beyond the channel they were said in. Applied after paging: pages can come back short with `has_more` true. On its own it is not a filter. Default `false`. |
 | `sort` | `relevance` / `date_desc` / `date_asc`, optional | no | relevance / date_desc / date_asc. Default: relevance when `query` is set, date_desc (newest first) otherwise. |
 | `limit` | integer | no | Page size, 1–100. Default `50`. |
 | `offset` | integer | no | Skip this many hits: pass back `next_offset` to read the following page. Default `0`. |
@@ -1927,9 +1931,15 @@ not numbers — an increment (`$inc`) primitive is deliberately not built.
 Update one table row's cells by its record id.
 
 Applies `patch` (column → value) to the row identified by `record_id`;
-columns not in the patch are left unchanged. `expected_rev` (from the
-row's `_rev`) makes the write conditional: a concurrent change 412s
-(retryable) instead of silently clobbering.
+columns not in the patch are left unchanged. Without a fence the write
+lands whatever else changed. A fence makes it conditional on what the
+caller read, and a write it refuses 412s (`AgentStoreStaleRev`)
+instead of silently clobbering. One fence per call:
+
+* `expected_rev` (the row's `_rev`): nothing in the row changed;
+* `unchanged_since` + `unchanged`: these columns did not change.
+  The patched columns are always among them; other cells may have
+  moved, and the patch lands over them on the fresh revision.
 
 **Arguments**
 
@@ -1939,7 +1949,9 @@ row's `_rev`) makes the write conditional: a concurrent change 412s
 | `table_name` | string | yes |  |
 | `record_id` | integer | yes |  |
 | `patch` | object | yes |  |
-| `expected_rev` | integer, optional | no |  |
+| `expected_rev` | integer, optional | no | Fence: write only if NOTHING in the row changed since it was read, given as the revision read (the row's _rev). Any other write in between refuses it (AgentStoreStaleRev). Not with unchanged_since. |
+| `unchanged_since` | object, optional | no | Fence: write only if the patched columns and the `unchanged` ones still hold what they held in this row as it was read: a list_rows row (cells plus _rev) or a get_record result (data plus rev). It must carry its revision. Other cells may have changed since, and are kept. Not with expected_rev. |
+| `unchanged` | list of string | no | With unchanged_since: the columns the write was decided on besides the ones it patches (those are always checked). Any of them changed refuses the write (AgentStoreStaleRev), naming them. |
 | `change_kind` | string, optional | no | change.kind slug for the audit row, e.g. investigation_applied. Unset = anonymous workflow write. |
 | `change_action` | string, optional | no | Human one-liner for the audit row (≤140 chars). |
 | `change_detail` | object | no | Extra machine fields for the audit row's change blob. |
@@ -2158,6 +2170,8 @@ email, no avatar. No match is an empty list. Read-only: safe to retry.
 | `display_name` | string, optional | The user's chosen name; null if unset (fall back to `username`). |
 | `username` | string, optional | Login handle. |
 | `is_bot` | boolean, optional | True for agent / bot accounts. |
+| `timezone` | string, optional | The IANA timezone the user chose, e.g. 'America/New_York'. Null when they left it on 'auto' (the device's clock decides, so the server knows no zone) or it is unknown: fall back, e.g. to the workspace's or UTC. |
+| `role` | string, optional | Workspace role: owner, admin, member, guest or workspace_agent. Null when unknown. A guest is an outside collaborator; leave them out of anything about members. |
 
 ### `foundation.users.get`
 
@@ -2165,7 +2179,9 @@ Look up workspace users by id and return their display identity.
 
 Give exactly one of `user_id` or `user_ids`. Ids that do not resolve
 come back with `found: false` rather than failing the step. Returns
-names only: no email, no avatar. Read-only: safe to retry.
+names, the bot flag, the user's chosen timezone and workspace role
+(either null when unknown): no email, no avatar. Read-only: safe to
+retry.
 
 **Arguments**
 
@@ -2192,6 +2208,8 @@ names only: no email, no avatar. Read-only: safe to retry.
 | `display_name` | string, optional | The user's chosen name; null if unset (fall back to `username`). |
 | `username` | string, optional | Login handle. |
 | `is_bot` | boolean, optional | True for agent / bot accounts. |
+| `timezone` | string, optional | The IANA timezone the user chose, e.g. 'America/New_York'. Null when they left it on 'auto' (the device's clock decides, so the server knows no zone) or it is unknown: fall back, e.g. to the workspace's or UTC. |
+| `role` | string, optional | Workspace role: owner, admin, member, guest or workspace_agent. Null when unknown. A guest is an outside collaborator; leave them out of anything about members. |
 
 ## foundation.workflow
 
