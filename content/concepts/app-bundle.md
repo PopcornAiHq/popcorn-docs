@@ -58,8 +58,8 @@ reads it when it needs it rather than carrying it in every prompt. An explicit
 
 ## The tree has a fixed shape
 
-`prompts/` and `templates/` are descended one level and seeded into the
-Routine's Settings (the platform's *channel config*), as
+`prompts/` and `templates/` are descended one level and seeded as
+Routine Settings, into the platform's *channel config*, as
 `$channel.prompts.<stem>` and `$channel.templates.<stem>`. `code/` holds one
 directory per block, each with exactly one entrypoint — `main.py` or
 `index.js`, never both — and is not seeded anywhere: `foundation.code.execute`

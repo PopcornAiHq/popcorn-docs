@@ -1,6 +1,6 @@
 ---
 id: scalar-tiers
-title: How a template declares its Routine Settings
+title: Scalar tiers and Routine Settings
 order: 4
 group: What a bundle holds
 summary: >
@@ -14,10 +14,13 @@ layer: platform
 product_terms: [Routine Settings]
 ---
 
-This is the build side of
-[Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md):
-where a Routine's settings come from in the template it is made from. Many of
-a Routine's Settings — its switches and its send modes — are scalars
+Scalars are one source of a Routine's
+[Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md).
+The `default_scalars:` tier, `popcorn.*` keys included, is where a Routine's
+switch-type settings come from; the `scalars:` tier is configuration the
+template owns, not a setting. Channel parameters and the `prompts/` and
+`templates/` files are the other sources of settings, outside this page. Many
+of a Routine's Settings — its switches and its send modes — are scalars
 underneath. A scalar is a named string on a Routine — always a string on the
 wire, unlike a channel parameter, which keeps its declared type. Two
 manifest tiers write them, a third family of keys is reserved by the
@@ -58,7 +61,7 @@ declares.
 
 ## `popcorn.*` is reserved
 
-Keys beginning `popcorn.` are a platform convention, not template state. Every
+Keys beginning `popcorn.` are a platform convention, not something a template defines. Every
 Routine Template reads the same keys with the same meaning, so an operator learns one
 set of switches rather than one per template.
 
@@ -81,7 +84,7 @@ multi-week process can be exercised in minutes; `off` is dormant. A template's
 own `set_app_mode` flow, where it has one, also retunes the Routine's schedules
 for `test` and pauses them for `off`. `popcorn.app_gate` restricts only what
 a template that defines rollout levels initiates, and `popcorn.app_agent: off`
-stops agent runs only in the app activities that honour it. The last two fail
+stops agent runs only in the `app.*` activities that honour it. The last two fail
 open, the send modes fail closed.
 
 Declare none of them under `scalars:`.
@@ -92,8 +95,8 @@ owner of a switch that belongs to the operator. Where a bundle wants to ship
 an opinion about one, `default_scalars:` is the sanctioned way — it cannot move
 a Routine that already has a value.
 
-A Routine's scalars that a person sets, and its channel parameters, are its
-**Routine Settings**; over MCP, `list_routine_settings` lists them. What a
+A Routine's scalars that a person sets, from `default_scalars:`, and its
+channel parameters are its **Routine Settings**; over MCP, `list_routine_settings` lists them. What a
 template *shows* in its settings panel is a separate, deliberately smaller
 choice: the bundle promotes candidates into the panel through `strings.yaml`,
 and anything unpromoted stays readable in the developer view.

@@ -33,7 +33,7 @@ it is worth reading once in full.
 | `schedules` | replace the schedules the bundle manages, by (flow, slug) — see `schedules` |
 | `webhooks` | create if missing; never updated, never deleted |
 | `triggers` | the set is replaced; a trigger's `enabled` is written the first time only, so a member's toggle survives upgrades |
-| `connections`, `documents`, `required_connections` | replaced on first install; on an update, kept where the Routine's copy was edited (see `scalar-tiers`). `required_connections` is the legacy flat list |
+| `connections`, `documents`, `required_connections` | replaced on first install; on an update, kept where the Routine's value was edited (see `scalar-tiers`). `required_connections` is the legacy flat list |
 | `status_kinds` | merge per kind — kinds the bundle stops declaring stay; on an update, a value a member edited is kept |
 | `states` | validated as a graph at publish, read at run time from the bound version. A bundle declares `states` or `recipe`, never both |
 | `recipe` | declares that the graph ships as `recipe.yaml`, which publish then requires and validates like `states`; `document` (the config key, default `recipe`) and an optional `contract`. Install never overwrites a revision the Routine installed itself: it checks that revision against the new version and refuses the update if it no longer fits. `process` is the legacy name — see [the recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md) |
@@ -68,10 +68,10 @@ change is not touched at all, so a member's pause survives.
 
 ## Labelling a parameter
 
-A switch gets its label and description from `strings.yaml`. A channel
-parameter gets them from `channel_parameter_fields:`, which maps a top-level
-parameter to an optional `label` (up to 60 characters) and `description` (up
-to 400). The Routine Settings tools print them beside the value, so whoever
+A switch gets its label and description from `strings.yaml`.
+A channel parameter gets them from `channel_parameter_fields:`, which maps a
+top-level parameter to an optional `label` (up to 60 characters) and
+`description` (up to 400). The Routine Settings tools print them beside the value, so whoever
 changes a setting knows what it holds without reading the flows:
 
 ```yaml
@@ -97,8 +97,8 @@ and a present key with no mapping under it.
 **An untyped bundle clears `app_type` and `channel_agent`.** A manifest with
 no `app_type:` strips whatever the Routine had, which changes the client's
 entire interface; one with no `channel_agent:` hands members back to the
-default agent. Never install an untyped bundle into a Routine running a real
-Routine Template. `app validate` warns with `clears-app-type`.
+default agent. Never install an untyped bundle into a Routine whose template sets
+`app_type`. `app validate` warns with `clears-app-type`.
 
 **Table changes are additive, so a rename is not a rename.** The reconcile adds
 the new column and orphans the old one, with the data still in the old.

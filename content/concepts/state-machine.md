@@ -16,8 +16,8 @@ product_terms: [Status, Action]
 ---
 
 An item's Status, and the Actions it offers, are not one flat field.
-Underneath, a Routine's row is a **tuple of small machines**, and the single
-chip a user sees is a projection of that tuple.
+Underneath, a row of the table the machines run over is a **tuple of small
+machines**, and the single chip a user sees is a projection of that tuple.
 
 A bundle declares the machines, their states, and the transitions between them
 in its manifest's `states:` section, or in a recipe the Routine can replace
@@ -135,7 +135,7 @@ The checks prove structure, not intent.
 
 ## The recipe: a graph each Routine can replace
 
-A `states:` graph belongs to the template's version (the CLI calls it a
+A `states:` graph belongs to the template's version (the platform calls it a
 *bundle version*), so every Routine on that version runs the same one, and
 changing it means publishing a new version.
 The **recipe** tier ships the same graph as a document of its own,
@@ -146,7 +146,7 @@ of its own is running one.
 ```yaml
 # manifest.yaml
 recipe:
-  document: recipe   # the configuration key an installed revision lives under; the default
+  document: recipe   # the channel-config document key an installed revision lives under; the default
   contract: chase    # optional: an engine contract the graph must also satisfy
 ```
 
