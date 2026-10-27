@@ -1310,6 +1310,7 @@ def document(
     url: str = "",
     noindex: bool = False,
     lookup: bool = False,
+    own_date: bool = False,
 ) -> str:
     """Wrap rendered content in a standalone page: header, sidebar, page, rail.
 
@@ -1325,6 +1326,11 @@ def document(
 
     ``lookup`` marks a page of entries, the reference pages, where each
     third-level heading starts an entry and is styled as one.
+
+    ``own_date`` marks a page that shows its own date beside its title — a
+    generated reference's `updated:`. Its footer leaves out "Last updated",
+    which is the time of the commit the site was built from and the same on
+    every page, so the page shows one date, not two that can disagree.
     """
     attr = lambda text: html.escape(text, quote=True)
     head = [f'<meta name="description" content="{attr(description)}">'] if description else []
@@ -1372,7 +1378,7 @@ def document(
 {content}
 </main>
 <aside class="rail">{rail}</aside>
-<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{last_updated()}</span>
+<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{"" if own_date else last_updated()}</span>
 <span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}
