@@ -112,7 +112,8 @@ something generates them — never hand-written in the meantime.
 designed and not built, so nothing can generate them. The text lives in
 `sync-mcp.py` rather than the page, so the page still has one writer, and it
 says plainly that nothing depends on the tools arriving. Each tool leaves that
-section when it ships and the generator starts finding it.
+section when it ships and the generator starts finding it, or when its design
+is dropped.
 
 **The test:** *is there a symbol in the backend that already enforces this?*
 Then it is generated, and hand-writing it creates a second source that will

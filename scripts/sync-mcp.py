@@ -28,7 +28,7 @@ The page also carries a "Proposed tools" section, which is the one part of
 the reference no source generates: tools that are designed but not built.
 It is kept here, as `PROPOSED`, so the page still has one writer and is
 never edited by hand, and it is deleted as the tools ship and start being
-generated like the rest. Nothing in it may name a ticket, a pull request, a
+generated like the rest, or as a design is dropped. Nothing in it may name a ticket, a pull request, a
 private repository or a design document; describe the tool and stop.
 
 Some tools carry a worked example: a request a person might make, the calls
@@ -182,20 +182,6 @@ caller uploaded. Without `confirm`, says what the Routine will do with it.
 | `text` | | The document as text |
 | `upload_id` | | A file uploaded for this Routine, in place of `text` |
 | `confirm` | `false` | Add the previewed document |
-
-### `update_instructions`
-
-Changes a Routine's Instructions. Takes the change in plain language or as
-an edit to the text `get_instructions` returned. Without `confirm`, shows the
-Instructions as they would read after the change.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `request` | | The change, in the person's words |
-| `edits` | | Or exact edits to the text, in place of `request` |
-| `confirm` | `false` | Apply the previewed change |
-| `reset` | `false` | Return a changed part to the template's |
 
 ### `read_history_entry`
 
