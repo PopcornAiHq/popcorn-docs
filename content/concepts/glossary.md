@@ -364,8 +364,8 @@ listed under its entry. **Version** is close behind.
 - **copy** — A workspace's own series of versions of a Routine Template, with
   one head and a name; the CLI calls it a *fork line* (`kind: fork`,
   `fork_name`). Until a Routine is copied it runs Popcorn's own version, the
-  shared series Popcorn publishes (MCP output calls it the *product line*;
-  the API, `kind: product`). Making a copy
+  shared series Popcorn publishes (MCP output says *Popcorn's*; the API,
+  `kind: product`). Making a copy
   (`copy_routine_template`, `popcorn app fork --name <copy>`) starts it
   byte-identical to the version the Routine runs and moves the Routine onto
   it; a copy is required before a publish, and it is one-way: a Routine on a
@@ -439,7 +439,7 @@ where the reader will meet it; this table is where to look one up.
 
 | Name | In the product | Where you'll see it |
 |---|---|---|
-| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses, MCP output (`App: …`) |
+| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses |
 | channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
 | project | Routine | older MCP tools and the web app; *not to be confused with* `feature.state.project`, which recomposes a row's Status |
 | tracker | Routine | older product copy and MCP descriptions; many templates also name their main table `tracker` |
@@ -447,5 +447,6 @@ where the reader will meet it; this table is where to look one up.
 | channel config | a Routine's configuration: Routine Settings, for its parameters; Connections, for its integrations; it also holds the Routine's installed recipe and other sections | `popcorn channel-config`, `$channel.*` in a flow |
 | agent store | a Routine's tables, scalars and files: Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
 | record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
-| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API, `line:` in MCP output |
+| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API |
+| product line | Popcorn's own version of a Routine Template, before a copy | `popcorn app list`, `kind: product` on the API |
 | bundle version | a version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |

@@ -13,8 +13,8 @@ concepts: [customizing-a-routine, versions, app-bundle]
 part: build
 ---
 
-A Routine made from a Routine Template runs Popcorn's own version of it
-(MCP output calls it the *product line*), which every workspace can install. To change what the
+A Routine made from a Routine Template runs Popcorn's own version of it,
+which every workspace can install. To change what the
 Routine is built from, the workspace makes a copy of the template (the CLI
 calls it a *fork line*): a series of versions the workspace owns, which it
 publishes to. Which changes need a copy, and which stay with one Routine
