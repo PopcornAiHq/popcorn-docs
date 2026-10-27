@@ -85,6 +85,10 @@ def _phrase(term: str) -> re.Pattern[str]:
     return re.compile(r"(?<![\w-])" + re.escape(term) + r"(?:s|es)?(?![\w-])", re.I)
 
 
+def _singular(term: str) -> str:
+    return term[:-1] if term.endswith("s") and not term.endswith("ss") else term
+
+
 def prose(body: str) -> str:
     """The body as a reader reads it: no code, no addresses, no Platform notes."""
     lines, in_note = [], False
@@ -103,7 +107,9 @@ def main() -> int:
         (e for e in entries() if e not in guarded and any(_phrase(n).search(e) for n in guarded)),
         key=len, reverse=True,
     )
-    mask_patterns = [_phrase(m) for m in masks]
+    # Some entries are headed in the plural ("channel parameters"), and prose
+    # also uses them in the singular, so a mask matches from the singular up.
+    mask_patterns = [_phrase(_singular(m)) for m in masks]
     patterns = [(n, _phrase(n)) for n in sorted(guarded, key=len, reverse=True)]
 
     found: dict[str, list[str]] = {}
