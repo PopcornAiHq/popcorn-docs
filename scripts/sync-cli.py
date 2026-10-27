@@ -132,7 +132,6 @@ def page(schema: dict, help_text: str) -> str:
         "  commands. The CLI installs from its GitHub repository, not PyPI; this page",
         "  describes one release, and `popcorn <command> --help` describes yours.",
         "concepts: [template-authoring, versions, copying-a-template]",
-        "layer: platform",
         "---",
         "",
         f"The {count} commands `popcorn` {version} lists in its help menu, under the",

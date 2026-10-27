@@ -2,7 +2,7 @@
 """Report the names a page still uses where the product has its own word.
 
 Every page is written in the product's words (`INFORMATION-ARCHITECTURE.md`,
-"One vocabulary, in both layers"). The CLI, the API and older copy still call
+"One vocabulary"). The CLI, the API and older copy still call
 some things by other names, and the glossary's table "Names you'll
 see elsewhere" pairs each with the product's word. This script reads that
 table and lists each prose use of one of its names on a hand-written page.

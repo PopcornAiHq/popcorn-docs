@@ -10,7 +10,7 @@ summary: >
   condition can therefore change how the first compares. To select rows, filter
   in the query instead of gating a step.
 concepts: [flow-grammar, references]
-layer: platform
+part: build
 ---
 
 `when:` gates a step, a block, or — on a `foreach` step — each item. Routing

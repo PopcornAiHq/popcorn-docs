@@ -9,15 +9,15 @@ summary: >
   `then` launches themselves. Every publish check is listed with its exact
   error — `no expected edge enters`, a terminal left by staff — and its fix.
 concepts: [state-machine, manifest-keys, app-bundle]
-layer: platform
+part: build
 ---
 
 This guide takes one state graph from design to a published, wired graph.
 What a state machine *is* — the tuple, the projection, why a button is an
-edge — is [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md),
+edge — is [the state machine](https://docs.popcorn.ai/build/concepts/state-machine.md),
 and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
-**Action** (see the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)).
+**Action** (see the [glossary](https://docs.popcorn.ai/glossary/glossary.md)).
 
 A Routine Template ships its graph in one of two places. The keys and the
 engine are the same for both, and so are the graph's publish checks; a recipe
@@ -39,11 +39,11 @@ either:
 
 A template declares one or the other, never both. What else a recipe carries,
 and how a Routine's own revision is installed and kept, is in
-[the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md)'s
+[the state machine](https://docs.popcorn.ai/build/concepts/state-machine.md)'s
 last section.
 
 The loop is the ordinary one from
-[changing a Routine Template](https://docs.popcorn.ai/platform/guides/template-authoring.md):
+[changing a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md):
 edit the graph, check it, read the error, repeat. One thing is
 different. The CLI's own checks do not look inside the graph, in
 `recipe.yaml` or under `states:`; it is checked only when the server parses

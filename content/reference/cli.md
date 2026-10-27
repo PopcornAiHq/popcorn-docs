@@ -11,7 +11,6 @@ summary: >
   commands. The CLI installs from its GitHub repository, not PyPI; this page
   describes one release, and `popcorn <command> --help` describes yours.
 concepts: [template-authoring, versions, copying-a-template]
-layer: platform
 ---
 
 The 87 commands `popcorn` 0.63.0 lists in its help menu, under the

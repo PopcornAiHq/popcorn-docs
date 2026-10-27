@@ -10,7 +10,7 @@ summary: >
   and what changes it: update_routine_setting for wording that is a setting,
   change_routine for its Steps, Popcorn for the rest.
 concepts: [routine-settings, customizing-a-routine]
-layer: product
+part: use
 ---
 
 A Routine's **Instructions** are what it should do and how, in plain
@@ -29,11 +29,11 @@ Instructions come from more than one place:
 - **Wording that is a Routine Setting** — the text of a reminder email, a
   prompt the agent writes from. `list_routine_settings` lists these, and
   `update_routine_setting` changes one with edits to its text (see
-  [Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md)).
+  [Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md)).
 - **What people tell the Routine's agent** in the Routine itself — "always
   copy the adjuster", "ask me before sending anything to the carrier". The
   agent keeps the preferences and decisions it is given.
-- **Each [Step](https://docs.popcorn.ai/product/concepts/steps.md)'s own instructions**, in a
+- **Each [Step](https://docs.popcorn.ai/use/concepts/steps.md)'s own instructions**, in a
   Routine that has Steps: the questions a Step asks and what a complete
   answer to each needs, the wording of its emails, and a note on how to
   handle it. A Step's first email uses the opening and closing of the sample
@@ -71,9 +71,9 @@ There is no single tool that rewrites the Instructions. Wording that is a
 setting is changed with `update_routine_setting`, and a Routine's Steps, with
 their own instructions, are changed with `change_routine`, which shows the
 change before anything is installed (see
-[Steps](https://docs.popcorn.ai/product/concepts/steps.md)). The rest is changed in Popcorn, by
+[Steps](https://docs.popcorn.ai/use/concepts/steps.md)). The rest is changed in Popcorn, by
 telling the Routine's agent.
 
 The template's guidance is its `AGENT.md` and the prompt files it seeds,
-which [app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md)
+which [app bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md)
 describes.

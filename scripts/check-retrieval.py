@@ -43,7 +43,9 @@ def main() -> int:
 
     for question, expected in questions():
         terms = retrieval.query_terms(pages, question)
-        ranked = sorted(pages, key=lambda p: retrieval._score(p, terms), reverse=True)
+        # The server's own ranking, tie-break included: a tie left to input
+        # order would pass or fail on how the pages happen to be sorted.
+        ranked = retrieval.rank(pages, terms)
         top = [p["id"] for p in ranked[:TOP_N]]
         if not any(e in top for e in expected):
             misses.append((question, expected, top))

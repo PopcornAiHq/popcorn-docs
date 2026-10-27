@@ -10,7 +10,6 @@ summary: >
   Routine's app — with their arguments, generated from the server's own
   definitions.
 concepts: [app-bundle, versions, copying-a-template]
-layer: product
 ---
 
 The hosted MCP server gives a person's assistant 41 tools. With them it
@@ -1592,7 +1591,7 @@ A run a person's button started shows as Popcorn, for a person: runs don't recor
 
 **None of these tools exist yet, and nothing depends on them arriving.** They
 are a design for the tools a person's assistant uses to run Routines, named
-in the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)'s
+in the [glossary](https://docs.popcorn.ai/glossary/glossary.md)'s
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 

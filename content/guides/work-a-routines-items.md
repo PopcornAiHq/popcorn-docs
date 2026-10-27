@@ -10,11 +10,11 @@ summary: >
   item; correct Rows with update_row; and run a scheduled Trigger now with
   run_trigger.
 concepts: [reviews, actions-and-status, tables]
-layer: product
+part: use
 ---
 
 This guide covers the day-to-day: finding the items waiting for someone,
-making the call at their [Review](https://docs.popcorn.ai/product/concepts/reviews.md), and
+making the call at their [Review](https://docs.popcorn.ai/use/concepts/reviews.md), and
 fixing what is wrong on them. The example works `#intake`, a claims intake
 Routine whose main Table holds one Row per potential client.
 
@@ -51,7 +51,7 @@ created and last changed, and the revision `update_row` needs in step 5.
 
 `list_history` shows what happened to the item, newest first: each change,
 who or what made it and why, and the work that made it. See
-[History](https://docs.popcorn.ai/product/concepts/history.md).
+[History](https://docs.popcorn.ai/use/concepts/history.md).
 
 ## 3. See what it offers
 
@@ -89,7 +89,7 @@ shows the new Status once it has applied.
   be restored with these tools.
 
 None of these start work by themselves, and none can set a Status: that changes only by an
-Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/product/concepts/tables.md).
+Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/use/concepts/tables.md).
 
 ## 6. Run the Routine's work now
 

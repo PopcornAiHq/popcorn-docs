@@ -9,7 +9,7 @@ summary: >
   permissions, in that workspace, until you disconnect it or sign out of
   Popcorn.
 concepts: [routines, connections, reviews]
-layer: product
+part: use
 ---
 
 An assistant connected to Popcorn can find your Routines, see where their
@@ -66,12 +66,12 @@ Some things are done in Popcorn itself, not through an assistant:
 
 - **A Connection**, such as the mailbox a Routine sends from,
   because it signs in as you. An assistant can say which
-  [Connections](https://docs.popcorn.ai/product/concepts/connections.md) a Routine is missing.
+  [Connections](https://docs.popcorn.ai/use/concepts/connections.md) a Routine is missing.
 - **Reading or posting a Routine's messages**, and seeing its runs.
-- **Changing a Routine's [Steps](https://docs.popcorn.ai/product/concepts/steps.md) or
-  [Instructions](https://docs.popcorn.ai/product/concepts/instructions.md)**, by telling its
+- **Changing a Routine's [Steps](https://docs.popcorn.ai/use/concepts/steps.md) or
+  [Instructions](https://docs.popcorn.ai/use/concepts/instructions.md)**, by telling its
   agent.
 - **Choices that open a form**, such as sending an agreement whose fields a
   person checks first.
 
-Next: [setting up a Routine](https://docs.popcorn.ai/product/guides/set-up-a-routine.md).
+Next: [setting up a Routine](https://docs.popcorn.ai/use/guides/set-up-a-routine.md).

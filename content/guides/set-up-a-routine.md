@@ -8,7 +8,7 @@ summary: >
   first), wait for its template to install, have the right person connect each
   account it needs, then check what starts its work with list_triggers.
 concepts: [routines, connections, triggers]
-layer: product
+part: use
 ---
 
 This guide starts from "we need a Routine for this" and ends with a Routine
@@ -18,7 +18,7 @@ through the Popcorn MCP server; one step needs the person themselves.
 
 The example sets up a private Routine for western-region claims, called
 `#claims-west`, from the Chase template, whose
-[Steps](https://docs.popcorn.ai/product/concepts/steps.md) start as a claims intake: questions, a
+[Steps](https://docs.popcorn.ai/use/concepts/steps.md) start as a claims intake: questions, a
 Review, then the retainer.
 
 ## Or describe it in Popcorn
@@ -78,7 +78,7 @@ settings in Popcorn, in a browser. Tell them which ones, and why — work that
 uses a missing Connection cannot run.
 
 When they are done, `get_routine` again: every Connection should read
-connected. See [Connections](https://docs.popcorn.ai/product/concepts/connections.md).
+connected. See [Connections](https://docs.popcorn.ai/use/concepts/connections.md).
 
 ## 5. See what starts its work
 
@@ -89,14 +89,14 @@ the messages and documents that start work, and any other system that posts to
 it. A Chase Routine needs its sample email before its first Step can ask
 anything, and its agreement before it can send one; adding them is a
 person's step in Popcorn (see
-[References](https://docs.popcorn.ai/product/concepts/reference-documents.md)).
+[References](https://docs.popcorn.ai/use/concepts/reference-documents.md)).
 
 To see the Routine work without waiting, `run_trigger` runs one of its
 schedules now — a dry run first, because the work is real. See
-[Triggers](https://docs.popcorn.ai/product/concepts/triggers.md).
+[Triggers](https://docs.popcorn.ai/use/concepts/triggers.md).
 
 ## Next
 
 To tune how the Routine behaves — when it sends reminders, how its emails
 read — see
-[changing how a Routine behaves](https://docs.popcorn.ai/product/guides/change-how-a-routine-behaves.md).
+[changing how a Routine behaves](https://docs.popcorn.ai/use/guides/change-how-a-routine-behaves.md).

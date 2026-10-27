@@ -10,7 +10,7 @@ summary: >
   update, not only the one you changed. It is one-way: nothing undoes a copy
   or moves a Routine back to Popcorn's version.
 concepts: [customizing-a-routine, versions, app-bundle]
-layer: platform
+part: build
 ---
 
 A Routine made from a Routine Template runs Popcorn's version of it, the
@@ -19,7 +19,7 @@ Routine is built from, the workspace makes a copy of the template (the CLI
 calls it a *fork line*): a series of versions the workspace owns, which it
 publishes to. Which changes need a copy, and which stay with one Routine
 without one, is in
-[customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md).
+[customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md).
 This page is what a copy costs and how to make one.
 
 ## Making one
@@ -41,7 +41,7 @@ The copy starts byte-identical to the version the Routine runs, and the
 Routine moves onto it, so nothing it runs changes at that moment. Copying
 needs only membership of the Routine; publishing to the copy afterwards needs
 a workspace admin (see
-[versions](https://docs.popcorn.ai/platform/concepts/versions.md)).
+[versions](https://docs.popcorn.ai/build/concepts/versions.md)).
 
 A copy comes first. A publish lands on a copy the workspace owns, so a
 publish based on Popcorn's version is refused. Over MCP, a Routine still on

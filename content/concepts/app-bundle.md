@@ -10,7 +10,7 @@ summary: >
   payload left there installs as one; keep payloads outside the bundle.
   A manifest with a version is what makes it publishable.
 concepts: [versions, manifest-keys, flow-grammar]
-layer: platform
+part: build
 ---
 
 A Routine Template is, underneath, an app bundle: a directory. Installing it
@@ -42,7 +42,7 @@ they are. `config.yaml` is the legacy name for the manifest and is reserved
 too — a flow saved under that name becomes the manifest instead.
 
 `recipe.yaml`, and its legacy name `process.yaml`, are reserved for the
-[recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md): a
+[recipe](https://docs.popcorn.ai/build/concepts/state-machine.md): a
 state graph each Routine can replace. Publish requires one when the manifest
 declares `recipe:` (or `process:`), and refuses one when it does not, rather
 than installing it as a flow. A bundle that ships both names is refused.

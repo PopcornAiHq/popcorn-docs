@@ -10,7 +10,6 @@ summary: >
   work in, its Tables hold it, its Status says where each item stands and
   its Actions move it on. A closing table maps the other names.
 concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a-template, versions, flow-grammar, scalar-tiers, merge-policy, state-machine]
-layer: product
 ---
 
 The words a person sees, and the words an assistant should use when it talks
@@ -45,14 +44,14 @@ listed under its entry. **Version** is close behind.
   script or a note should hold the ID, which the API calls
   `conversation_id`. The CLI and the MCP read tools accept either and resolve
   a name to the ID; tools that write take the ID. See
-  [Routines](https://docs.popcorn.ai/product/concepts/routines.md).
+  [Routines](https://docs.popcorn.ai/use/concepts/routines.md).
 - **Routine Template** — The starting point a Routine is made from, such as
   a claims coordinator. One template can start many Routines, and a Routine
   made from one keeps receiving the template's improvements unless it has been
   changed into a copy of its own (see *customizing a Routine*). Its files are
   its *app bundle*. The set of templates is fixed by Popcorn: changing an
   existing one, through a copy, is self-serve, and adding a new one is not.
-  See [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
+  See [App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md).
 - **Inbox Scan** — The Routine Template that reads a mailbox, suggests
   Routines from the work it finds there, and shows how the team writes.
 - **customizing a Routine** — Changing one Routine without changing the
@@ -64,7 +63,7 @@ listed under its entry. **Version** is close behind.
   offer) gives it a copy of its own instead. That copy no longer
   receives the template's improvements, which cannot be undone. Popcorn says
   which kind a change is before it makes it. See
-  [Customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md).
+  [Customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md).
 - **member**, **role** — Always qualify them. A **workspace member** is a
   person in that workspace, and its **workspace role** is `owner`, `admin`,
   `member`, `guest` or `workspace_agent`. A **Routine member** has a
@@ -108,7 +107,7 @@ listed under its entry. **Version** is close behind.
   everything that starts a flow: schedules, webhooks, message triggers,
   documents, states and other flows. **`trigger_workflow`** is a webhook mode.
   *Not to be confused with* an Action, which is a person moving one item on.
-  See [Triggers](https://docs.popcorn.ai/product/concepts/triggers.md).
+  See [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md).
 - **schedule** — The scheduled kind of Trigger: a manifest `schedules:` entry
   that runs a flow on an `interval:` or a `cron:`, keyed by flow name and
   `slug`. Its cadence exists three ways: **declared** in the manifest,
@@ -117,7 +116,7 @@ listed under its entry. **Version** is close behind.
   `deadline` or `window` schedule's spread offset can move a daily cron off
   the declared minute. `popcorn app status` compares armed with declared, and
   uses intended to tell a deliberate difference from drift. See
-  [Schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md).
+  [Schedules in a manifest](https://docs.popcorn.ai/build/concepts/schedules.md).
 - **webhook** — The Trigger for another system posting to a Routine: a
   per-Routine ingest URL (`popcorn webhook list --show-url`) whose
   `action_mode` is `silent`, `as_is`, `ai_enhanced` or `trigger_workflow`. In
@@ -143,13 +142,13 @@ listed under its entry. **Version** is close behind.
   ends without error; a person's or agent's `flow run` is refused with 409
   `missing_integrations`. `connections:` declares what to connect and stops
   nothing. See
-  [Connections](https://docs.popcorn.ai/product/concepts/connections.md).
+  [Connections](https://docs.popcorn.ai/use/concepts/connections.md).
 - **Reference** — A document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. A Reference informs the Routine; it
   is not one of the items the Routine tracks. *Not to be confused with* a
-  [value reference](https://docs.popcorn.ai/platform/concepts/references.md)
+  [value reference](https://docs.popcorn.ai/build/concepts/references.md)
   in a flow, such as `$steps.fetch.output`. See
-  [References](https://docs.popcorn.ai/product/concepts/reference-documents.md).
+  [References](https://docs.popcorn.ai/use/concepts/reference-documents.md).
 - **booking page** — The calendar link people book a meeting through. A
   booking made on it can start an item's work, or complete a booking Step.
 - **signing provider** — The service an agreement is sent through for
@@ -162,13 +161,13 @@ listed under its entry. **Version** is close behind.
   how to word a follow-up, when to ask a person first, which deadlines matter,
   when to send a reminder. Changing them changes how the Routine behaves from
   then on. See
-  [Instructions](https://docs.popcorn.ai/product/concepts/instructions.md).
+  [Instructions](https://docs.popcorn.ai/use/concepts/instructions.md).
 - **Routine Settings** — The values that tune a Routine without changing
   what it does: switches that turn a behaviour on or off, and values such as a
   reminder interval or a sender name. A setting reaches only its own Routine,
   can be set back, and survives the template's improvements. Many are a
   Routine's scalars or channel parameters. See
-  [Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md).
+  [Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md).
 - **channel parameters** — Typed values in a Routine's configuration, read in
   a flow as `$channel.<name>`; the prompts and templates a bundle seeds are
   folded into them, as `$channel.prompts.<name>` and
@@ -179,12 +178,12 @@ listed under its entry. **Version** is close behind.
   `popcorn channel-config show` prints the whole configuration. *Not to be
   confused with* scalars, which are not in `$channel.*`. They are Routine
   Settings. See
-  [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+  [Scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md).
 - **scalar** — A flat `key → text` value on a Routine, always a string on
   the wire (`popcorn table scalar get` and `set`). A manifest declares
   scalars in one of two tiers, and a value a flow writes at runtime belongs
   in neither. A scalar a person sets, such as a switch, is a Routine Setting.
-  See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+  See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md).
 - **Agent**, **channel agent**, **app agent** — The assistant inside a
   Routine that does its work and that people talk to. It follows the
   Routine's Instructions, and it asks before the steps the Instructions say
@@ -196,7 +195,7 @@ listed under its entry. **Version** is close behind.
   defines for itself under `agents/<name>/` (`agent.yaml`, `prompt.md`,
   `schemas/*.json`), which a flow runs with `foundation.agent.invoke`; with
   `chat: true` in `agent.yaml` it can also serve as the Routine's Agent. See
-  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
+  [App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md).
 
 ## What it does
 
@@ -213,13 +212,13 @@ listed under its entry. **Version** is close behind.
   `await_approval` step pauses one run until a person replies; it is not how
   a Routine's Reviews or Approvals are built. *Not to be confused with* a
   Trigger, which brings an item in; Steps are what happens to it after. See
-  [Steps](https://docs.popcorn.ai/product/concepts/steps.md) and
-  [The shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
+  [Steps](https://docs.popcorn.ai/use/concepts/steps.md) and
+  [The shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md).
 - **Review** — The kind of Step where a person decides instead of Popcorn.
   The item waits, says why, and offers the Actions that decide where it goes
   next. *Not to be confused with* an Action: a Review is the Step that
   waits, and an Action is the button that ends it. See
-  [Reviews](https://docs.popcorn.ai/product/concepts/reviews.md).
+  [Reviews](https://docs.popcorn.ai/use/concepts/reviews.md).
 - **Approval** — One kind of Review, "should this go ahead?", and the
   outcome of a Review that passes.
 - **state machine** — What a Routine's Steps, Status and Actions are built
@@ -227,13 +226,13 @@ listed under its entry. **Version** is close behind.
   small machines. At least one is not an overlay; the first of those is the
   primary, usually a **funnel** (the milestone that moves forward). An
   **overlay** (`overlay: true`) holds what is true alongside it. See
-  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+  [State machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md).
 - **recipe** — A template's state graph shipped as a root `recipe.yaml`,
   declared by the manifest's `recipe:` block instead of `states:`; it is how
   a Routine's Steps are written. Each Routine can install a revision of its
   own, which runs pinned per run and survives the template's updates.
   Formerly **process** (`process:`, `process.yaml`). See
-  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+  [State machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md).
 - **state**, **event**, **transition** — A machine's values; the named
   things that happen, grouped in families the template names (`staff.*`,
   `world.*`, `system.*`, …); and the edge an event fires, from one set of
@@ -255,8 +254,8 @@ listed under its entry. **Version** is close behind.
   type, format, display and label and the column order follow the manifest,
   and any other setting it declares, on or off, wins; a setting it leaves out
   keeps its installed value. `popcorn table schema <name>` prints one. See
-  [Tables](https://docs.popcorn.ai/product/concepts/tables.md) and
-  [Table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md).
+  [Tables](https://docs.popcorn.ai/use/concepts/tables.md) and
+  [Table columns](https://docs.popcorn.ai/build/concepts/table-columns.md).
 - **Row** — One item in a Table: one claim, one order. *Row* is the word in
   the CLI (`popcorn table rows`, `table row get`) and most `store`
   activities, and in a flow a row carries `_record_id` and `_rev`.
@@ -271,7 +270,7 @@ listed under its entry. **Version** is close behind.
   transition or projected patch that writes it is refused; a plain store
   write is not, and lasts only until the engine next projects the row. *Not
   to be confused with* a run's status or outcome. See
-  [Actions and Status](https://docs.popcorn.ai/product/concepts/actions-and-status.md).
+  [Actions and Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md).
 - **outcome** — Two senses. An item's outcome is the Status a finished item
   ends on, such as *Retained* or *Not retained*. A run's outcome is what a
   caller branches on when the run ends: `succeeded`, `failed` or
@@ -281,7 +280,7 @@ listed under its entry. **Version** is close behind.
   upsert does to its existing value. A table's merge key decides which
   existing row an insert matches. `merge_on` names the match per call, for a
   table without a merge key; on a table with one, `merge_on` is ignored. See
-  [Column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
+  [Column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md).
 - **rev**, **`If-Match`** — A revision token for a conditional write. A row
   carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
   `foundation.store.patch_row`); a Routine's configuration carries a string
@@ -296,19 +295,19 @@ listed under its entry. **Version** is close behind.
 - **Action** — Something a person does to move an item on: approve, send,
   archive, retry. A Routine offers an item the Actions that make sense for
   where it stands, so the buttons and the Status cannot disagree. See
-  [Actions and Status](https://docs.popcorn.ai/product/concepts/actions-and-status.md).
+  [Actions and Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md).
 - **CTA** — An Action as a template declares it: the button, declared on the
   transition it fires (`cta:`), so the graph and the interface cannot
   disagree. Only a staff-family transition may carry one.
 - **History** — What has happened in a Routine: the work it ran and how each
   run ended, the conversation in it, and the changes to its items, with who or
   what made each one. See
-  [History](https://docs.popcorn.ai/product/concepts/history.md).
+  [History](https://docs.popcorn.ai/use/concepts/history.md).
 - **run** — One execution of a flow, and one entry of a Routine's History,
   identified by its `workflow_id` (`popcorn flow runs get <workflow-id>`). A
   run is started by `flow run`, a schedule, a webhook, a message trigger, a
   document, a state machine, an agent or another flow. See
-  [Debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).
+  [Debugging a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).
 
 ## Building a template
 
@@ -318,13 +317,13 @@ listed under its entry. **Version** is close behind.
   `agents/` directories. The template's slug, such as `claimcoordinator`, is
   the manifest's `app_type:`. *Not to be confused with* the bundle's own
   `templates/` directory, which holds email text. See
-  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
+  [App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md).
 - **manifest** — `manifest.yaml` at the bundle root; `config.yaml` is still
   read under its legacy name. Each key has its own install semantics, and an
   absent key is not the same as an empty one. An unknown top-level key is
   ignored; an unknown key inside `connections:`, `documents:` or `triggers:`
   is refused.
-  See [Manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).
+  See [Manifest keys](https://docs.popcorn.ai/build/concepts/manifest-keys.md).
 - **flow** — A YAML file at the bundle root declaring inputs, steps and
   outputs; a Routine's Triggers and Actions start one. Its identity is the
   `name:` inside the file, not the filename, so changing `name:` deletes one
@@ -332,20 +331,20 @@ listed under its entry. **Version** is close behind.
   such as the one `popcorn flow get` takes, hold that name. *Not to be
   confused with* a workflow: the webhook mode `trigger_workflow` starts a
   flow. See
-  [The shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
+  [The shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md).
 - **activity** — A platform operation a step calls, named
   `<tier>.<domain>.<verb>`, such as `foundation.store.list_rows`, sometimes
   with more segments before the verb (`app.delivery.briefing.collect`); the
   tiers are `foundation`, `feature`, `app` and `system`. The **activity
   catalog** (`popcorn flow activities`) decides what a flow can do. See the
-  [activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
+  [activity reference](https://docs.popcorn.ai/reference/activities.md).
 - **`call_flow`** — A step that runs another flow of the same bundle as a
   child, pinned to the parent's version. By default (`mode: wait`) it waits
   for the child's outputs; `mode: detach` returns once the child has started.
   Its key is `flow:`. *Not to be confused with* the activity
   `foundation.workflow.start_flow`, which starts a separate run that reads the
   Routine's version afresh and cannot be waited on; its key is `flow_name:`.
-  See [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  See [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 
 ## Versions and copies
 
@@ -358,7 +357,7 @@ listed under its entry. **Version** is close behind.
   with* a flow's own `version:`, an integer inside the flow file that a
   `call_flow` step reports as `flow_version`; `flow_version` on a flow-run
   response, which is the bundle's `version_id`; or a table's schema version.
-  See [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  See [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **copy** — A workspace's own series of versions of a Routine Template, with
   one head and a name; the CLI calls it a *fork line* (`kind: fork`,
   `fork_name`). Until a Routine is copied it runs the **product line**, the
@@ -372,26 +371,26 @@ listed under its entry. **Version** is close behind.
   one copy does it unasked. A workspace may own several copies of one
   template, and two copies can each hold a `1.0.1`. `popcorn app lines`
   lists them. See
-  [Copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md).
+  [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md).
 - **head** — The newest version on a copy; on the product line, the version
   the workspace's release track points at. `list_routine_files` and
   `popcorn app checkout` read a copy's head, and a publish must be based on
   it; on a Routine still on the product line they read the version it runs.
   *Not to be confused with* the version a Routine runs, which lags the head
   while an install has not landed. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **publish** — Minting the next version on a copy, with
   `create_routine_version` or `popcorn app publish`. It needs a workspace
   admin, starts an install on the Routine it names, and reaches every other
   Routine on the copy through their daily updates. It publishes to a *copy*,
   not to one Routine. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **install** — Bringing one Routine to one version: reconciling its tables,
   scalars, configuration, schedules and webhooks, then moving it onto the
   version last. Installs follow creating a Routine from a template, a
   publish, an apply and a daily update. An install can be blocked or can
   skip, and the version exists either way. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **apply** — `install_routine` without `copy`, or `popcorn app apply`: bring
   one Routine on a copy up to that copy's head, from the server's state
   alone. It takes no version, says there is nothing to do when the Routine is
@@ -400,26 +399,26 @@ listed under its entry. **Version** is close behind.
   the workspace's copy if there is exactly one, and otherwise is reported
   current even when behind. An apply is refused on a Routine locked against
   template updates. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **daily update** — Each Routine's scheduled daily install of its copy's
   head, which is how a publish reaches the Routines you did not publish from,
   and how a Routine on the product line reaches its release track's head. It
   runs as the workspace agent and never moves a Routine onto a copy. It skips
   archived Routines, Routines locked against template updates, and Routines
   with no update schedule. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **checkout** — A CLI operation, not a server one. `popcorn app checkout`
   writes a version's files to disk with a `.popcorn-app.json` baseline that
   records the template, the version it came from and the Routine's ID. It
   checks out the head (see *head*); `--version <id>` checks out a past
   version, which `app publish` refuses. Over MCP, `list_routine_files` and
   `read_routine_file` read the same files without a checkout. See
-  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+  [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **release track** — `alpha`, `beta` or `stable`: which product versions a
   workspace is offered, set per workspace and defaulting to stable. It filters
   `popcorn app list` and `popcorn channel templates`, and the API never says
   which track a workspace is on. See
-  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+  [Authoring an app bundle](https://docs.popcorn.ai/build/guides/template-authoring.md).
 
 ## Names you'll see elsewhere
 

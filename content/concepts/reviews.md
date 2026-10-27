@@ -10,12 +10,12 @@ summary: >
   lists what is waiting and why; take_action takes a choice, except one that
   opens a form in Popcorn.
 concepts: [steps, actions-and-status, routine-settings]
-layer: product
+part: use
 ---
 
-A **Review** is a [Step](https://docs.popcorn.ai/product/concepts/steps.md) where the Routine stops
+A **Review** is a [Step](https://docs.popcorn.ai/use/concepts/steps.md) where the Routine stops
 and waits for a person. The item says why it is waiting and offers a few
-choices, each an [Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md) that
+choices, each an [Action](https://docs.popcorn.ai/use/concepts/actions-and-status.md) that
 leads somewhere: on to the next Step, straight to an outcome, or past work
 already done.
 
@@ -68,6 +68,6 @@ moves the item on by itself.
 
 In the template, a Review is a state that warns, with the transitions people
 can take from it (see
-[state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md)).
+[state machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md)).
 It is not a flow's `await_approval`, which pauses one run until someone
 replies.

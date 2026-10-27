@@ -11,13 +11,13 @@ summary: >
   blocked install. A run keeps its version, so a Routine upgraded mid-run
   never mixes code.
 concepts: [copying-a-template, app-bundle, manifest-keys]
-layer: platform
+part: build
 ---
 
 A Routine runs one version of its template at a time. A change to the
 template reaches it in two steps that are easy to conflate: a **publish**
 makes a new version on the workspace's copy of the template (see
-[copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md)),
+[copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md)),
 and an **install** brings one Routine onto it. A version can exist while no
 Routine runs it, and that gap is where most confusion about "did my change
 go out" lives.
@@ -72,7 +72,7 @@ A publish is refused when:
 - a `tables:` entry would be refused by the store at install — an unknown
   `type` or `display` kind, a `format` that does not suit its type, a merge
   setting without the policy it belongs to, and the other column rules in
-  [adding a table](https://docs.popcorn.ai/platform/guides/adding-a-table.md). The
+  [adding a table](https://docs.popcorn.ai/build/guides/adding-a-table.md). The
   refusal names each table and column
 - the version or its content already exists (below)
 
@@ -153,7 +153,7 @@ ended, which re-running the publish cannot cover. On a locked Routine it is
 refused rather than queued. A Routine on Popcorn's version takes new versions
 through its daily update, not through a retry; an install there in a
 workspace that owns exactly one copy moves it onto that copy instead (see
-[copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md)).
+[copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md)).
 
 ## A run keeps the version it started on
 
@@ -172,7 +172,7 @@ with `call_flow` inherits its parent's version.
   outlives an install sees rows the new version wrote. The parameters and
   Connections behind `$channel.*` are pinned with the run, so a parameter
   edited mid-run is seen only by later runs. So is a Routine's installed
-  [recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md): a run
+  [recipe](https://docs.popcorn.ai/build/concepts/state-machine.md): a run
   already going keeps judging rows by the graph it started with.
 - **Only `call_flow` inherits the version.** `foundation.workflow.start_flow`
   starts a separate run, which reads the Routine's version when it starts: if

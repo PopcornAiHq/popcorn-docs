@@ -28,7 +28,6 @@ under test. The mismatch this guards is decided at build time.
 
 from __future__ import annotations
 
-import json
 import pathlib
 import re
 import sys
@@ -38,7 +37,7 @@ BUILD = ROOT / "build"
 SITE = "https://docs.popcorn.ai"
 
 # The corpus-level files, reached directly rather than as a page.
-INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html", "404.html", "robots.txt", "sitemap.xml", "search.json", "moved.json"}
+INDEX_FILES = {"llms.txt", "llms-full.txt", "chunks.json", "index.html", "404.html", "robots.txt", "sitemap.xml", "search.json"}
 
 _HREF = re.compile(r'href="([^"]+)"')
 _LOC = re.compile(r"<loc>([^<]+)</loc>")
@@ -79,17 +78,6 @@ def hrefs() -> list[tuple[str, str]]:
     return out
 
 
-def moved() -> dict[str, str]:
-    """Old address → new, for the pages that moved when the site gained layers.
-
-    The old addresses keep answering with a pointer, for links already out in
-    the world. They are not pages: nothing of ours should link one, and no
-    index needs to name one.
-    """
-    path = BUILD / "moved.json"
-    return json.loads(path.read_text())["moved"] if path.exists() else {}
-
-
 def main() -> int:
     urls = advertised()
     if not urls:
@@ -97,14 +85,12 @@ def main() -> int:
         return 1
 
     files = emitted()
-    stubs = moved()
-    pages = {f for f in files if f.endswith(".md") and f not in INDEX_FILES and f not in stubs}
+    pages = {f for f in files if f.endswith(".md") and f not in INDEX_FILES}
 
-    dead = [u for u in urls if u not in files or u in stubs]
+    dead = [u for u in urls if u not in files]
     orphans = sorted(pages - set(urls))
-    links = [(src, t) for src, t in hrefs() if src not in stubs]
+    links = hrefs()
     broken = [(src, t) for src, t in links if t not in files]
-    stale = [(src, t) for src, t in links if t in stubs]
     # The sitemap is what a search engine indexes, so a dead entry there is a
     # dead search result.
     sitemap = BUILD / "sitemap.xml"
@@ -119,17 +105,10 @@ def main() -> int:
         print(f"✖  build/{path} was emitted but nothing links to it", file=sys.stderr)
     for src, target in broken:
         print(f"✖  {src} links to /{target}, which was not emitted", file=sys.stderr)
-    for src, target in stale:
-        print(f"✖  {src} links to /{target}, an old address; link /{stubs[target]}",
-              file=sys.stderr)
-
-    if dead or orphans or broken or stale:
+    if dead or orphans or broken:
         return 1
 
-    print(
-        f"✔  {len(urls)} advertised URLs and {len(links)} page links "
-        f"all resolve to an emitted file; {len(stubs)} old addresses point onward"
-    )
+    print(f"✔  {len(urls)} advertised URLs and {len(links)} page links all resolve to an emitted file")
     return 0
 
 

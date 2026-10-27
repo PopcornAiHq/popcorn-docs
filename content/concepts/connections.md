@@ -11,7 +11,7 @@ summary: >
   account the person signed in to, or as a webhook. For Google it can hand
   them the sign-in link.
 concepts: [routines, set-up-a-routine]
-layer: product
+part: use
 ---
 
 A Connection is an account Popcorn uses on a Routine's behalf: the mailbox it

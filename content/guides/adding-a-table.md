@@ -9,18 +9,18 @@ summary: >
   and each later install adds to it and never removes. Publish refuses a
   column the store would reject; a later publish can change a merge policy.
 concepts: [manifest-keys, merge-policy, copying-a-template, versions, app-bundle]
-layer: platform
+part: build
 ---
 
 This guide adds one Table to a Routine Template a Routine already runs, and
 ends with the Table on the Routine and a flow writing Rows to it. The loop
 around it (copy, edit, check, publish) is the one in
-[changing a Routine Template](https://docs.popcorn.ai/platform/guides/template-authoring.md),
-and [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) is the column reference. This one is the order to do
+[changing a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md),
+and [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) is the column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
 The CLI calls a Routine a *channel* and its template an *app*, so the
-commands keep those names (see the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)).
+commands keep those names (see the [glossary](https://docs.popcorn.ai/glossary/glossary.md)).
 This guide runs from the CLI throughout. An assistant over MCP can publish the same
 change with `create_routine_version`, but it is not given the flow-run tools
 that step 7 uses to check the result.
@@ -44,7 +44,7 @@ is enough. A table is a change to what the template is built from, so no
 setting can stand in for it. Adding one gives the Routine a copy of its own,
 which no longer receives the template's improvements. Copying is permanent, and a
 publish reaches every Routine on the copy, not only this one. See
-[copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md) before copying the template of a
+[copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md) before copying the template of a
 production Routine.
 
 ## 2. Declare the table
@@ -70,7 +70,7 @@ tables:
       on_conflict: merge
 ```
 
-A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) lists the
+A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) lists the
 rest: `format`, which belongs to one type and is checked on every write,
 `display`, `label`, the governance flags, `index` and `unique`.
 
@@ -92,7 +92,7 @@ around it and a later change does not rewrite what is already stored.
 
 The merge key decides which row a write lands on, and each column's merge
 policy decides what happens to that column on that row. Both are explained
-in [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
+in [column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md).
 Keep `on_conflict: merge`: `replace` swaps the whole row for the incoming one
 and applies no column policy at all. The example uses three policies:
 
@@ -144,7 +144,7 @@ steps:
 The write sends every column on every call. The first write inserts the
 row exactly as sent, so `Reopened` starts at `0`. After that, the
 accumulating policies act only on columns a write carries (see
-[column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md)).
+[column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md)).
 
 The other activities you will usually need are:
 
@@ -158,7 +158,7 @@ The other activities you will usually need are:
 - `foundation.store.get_record`: reads one row by id.
 
 Their arguments are in the
-[activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
+[activity reference](https://docs.popcorn.ai/reference/activities.md).
 
 The store checks each value against its column's `type`, `format` and
 `required`. On a merging write, including `patch_row`, it checks the whole
@@ -202,7 +202,7 @@ the `handoffs` table before it binds the Routine to the new version, so no
 run on the new version can reach a Routine without the table. The other
 Routines on the copy get the table at their own daily update, apart from the
 ones that take no updates (see
-[versions](https://docs.popcorn.ai/platform/concepts/versions.md)).
+[versions](https://docs.popcorn.ai/build/concepts/versions.md)).
 The publish prints how many Routines will update, but only after the version
 exists.
 

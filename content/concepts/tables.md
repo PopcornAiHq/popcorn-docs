@@ -11,7 +11,7 @@ summary: >
   can be a new item the Routine's work picks up; a Row's Status changes
   only by an Action.
 concepts: [actions-and-status, work-a-routines-items]
-layer: product
+part: use
 ---
 
 A Routine's **Tables** hold what it keeps: one Table of claims, one of
@@ -57,8 +57,8 @@ sends email means that item's first email. Some Columns keep their own
 rules: a notes Column may append what is written rather than replace it, and a first-seen
 date may keep its first value. Those rules are the Column's merge policy,
 declared in the template (see
-[table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) and
-[column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md)). `update_row`'s response names any Column
+[table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) and
+[column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md)). `update_row`'s response names any Column
 where that happened. A Row's **Status** cannot be written at all: it changes
-when an [Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md) is taken or the
+when an [Action](https://docs.popcorn.ai/use/concepts/actions-and-status.md) is taken or the
 Routine moves the item on.

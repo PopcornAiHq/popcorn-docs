@@ -11,7 +11,7 @@ summary: >
   declared transition). Policies apply only on a merging write; stored values
   change on their next write.
 concepts: [manifest-keys]
-layer: platform
+part: build
 ---
 
 Every Column in a Routine's Tables has a merge policy, which decides what

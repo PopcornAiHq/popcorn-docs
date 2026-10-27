@@ -10,7 +10,7 @@ summary: >
   after reading the proposal; its other Instructions, in Popcorn; or a copy of
   its own.
 concepts: [routine-settings, customizing-a-routine, instructions]
-layer: product
+part: use
 ---
 
 This guide starts from a request such as "remind people every three days
@@ -65,7 +65,7 @@ Three other kinds of change remain:
 
 - **How the Routine's agent should act** — "ask me before sending anything
   to the carrier", "always copy the adjuster". That is its
-  [Instructions](https://docs.popcorn.ai/product/concepts/instructions.md): a person tells the
+  [Instructions](https://docs.popcorn.ai/use/concepts/instructions.md): a person tells the
   Routine's agent in Popcorn.
 - **Its steps** — another question before the agreement goes out, a review
   before a meeting is booked. Where the template keeps its steps with the
@@ -74,10 +74,10 @@ Three other kinds of change remain:
 - **What the Routine is built from** — a new Table, a new kind of Trigger, a
   kind of step its template does not offer. That gives the Routine a copy of its own, which
   no longer receives the template's improvements and cannot be undone. See
-  [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)
+  [customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md)
   before agreeing to it. Making that change is building on the template
   itself: see
-  [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+  [authoring an app bundle](https://docs.popcorn.ai/build/guides/template-authoring.md).
 
 ## 6. Change its Steps
 

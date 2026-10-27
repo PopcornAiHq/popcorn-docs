@@ -10,7 +10,7 @@ summary: >
   approval gate, a child flow, or a nested block, whose inner steps are
   private. `foreach` repeats a step per item, at most five in parallel.
 concepts: [references, conditions, on-error, schedules]
-layer: platform
+part: build
 ---
 
 A flow is how a bundle does work. Nothing in the product names it: a flow
@@ -66,7 +66,7 @@ outputs:
   source_hint, delivery_id, webhook_id}` as its inputs, and only from a
   webhook in `trigger_workflow` mode. `payload` is an `object`, so read its
   fields as
-  [extracting fields or deriving them](https://docs.popcorn.ai/platform/concepts/extract-or-derive.md)
+  [extracting fields or deriving them](https://docs.popcorn.ai/build/concepts/extract-or-derive.md)
   describes.
 - **`timeout_seconds`** and **`heartbeat_seconds`** on a step override the
   default per-attempt timeout; a heartbeat only matters for an activity that
@@ -74,7 +74,7 @@ outputs:
 
 What a flow may call is the activity catalog, served by the platform:
 `popcorn flow activities`, or the
-[activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
+[activity reference](https://docs.popcorn.ai/reference/activities.md).
 Author against `foundation` and `feature` activities at `release` or `beta`;
 `app.*` activities are one Routine Template's own logic, which a copy of it
 keeps calling; they are not a surface to author against.

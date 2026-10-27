@@ -303,7 +303,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     out = []
     for label, groups in sections:
-        # A layer heading: a label with no links, above the kinds it holds.
+        # A part heading: a label with no links, above the kinds it holds.
         if groups is None:
             out.append(f'<p class="nav-layer">{html.escape(label, quote=False)}</p>')
             continue

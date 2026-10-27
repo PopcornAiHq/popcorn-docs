@@ -17,7 +17,7 @@ browser. The agent-facing files sit at the root.
 | `/llms-full.txt` | every written page in full; the generated reference pages by title, summary and URL |
 | `/chunks.json` | one record per page — what the MCP server reads |
 | `/search.json` | titles, headings and entry names per page — what the site's search reads |
-| `/<layer>/<kind>/<id>.md` | one page as Markdown — `/product/glossary/product-glossary.md`, `/platform/concepts/fork-line.md` |
+| `/<layer>/<kind>/<id>.md` | one page as Markdown — `/glossary/product-glossary.md`, `/build/concepts/fork-line.md` |
 | `/<layer>/<kind>/<id>.html` | the same page for a person |
 | `/moved.json` | each page's address from before the site had layers, and where it is now; the old address answers with that pointer |
 

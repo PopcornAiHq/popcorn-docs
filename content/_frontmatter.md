@@ -89,7 +89,7 @@ words; the layers differ in which platform terms may appear in prose.
 
 - `product` — for a Popcorn user and their assistant: Routines, Routine
   Templates, Triggers, Actions, Status, Routine Settings, in the
-  [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)'s
+  [product glossary](https://docs.popcorn.ai/glossary/product-glossary.md)'s
   terms. Such a page names a platform term only inside a **Platform note** —
   a blockquote that opens `> **Platform note** —` and links the platform page
   that explains the term. `scripts/check-layer.py` fails a product page that
@@ -99,7 +99,7 @@ words; the layers differ in which platform terms may appear in prose.
   too, keeping the file-level terms the reader types (`manifest`, flow,
   activity) and giving a platform term with a product word once, as the
   other name: "a copy of the template (the CLI calls it a *fork line*)". The
-  [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)
+  [platform glossary](https://docs.popcorn.ai/glossary/glossary.md)
   pairs each platform term with its product word, and
   `INFORMATION-ARCHITECTURE.md` has the rule in full.
   It opens with the product idea before the mechanism ("A Routine's

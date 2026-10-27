@@ -10,11 +10,11 @@ summary: >
   absent — the tier for an operator-owned switch and for `popcorn.*` keys such
   as the send mode. Never declare a value a flow writes at runtime.
 concepts: [manifest-keys]
-layer: platform
+part: build
 ---
 
 Scalars are one source of a Routine's
-[Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md).
+[Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md).
 The `default_scalars:` tier, `popcorn.*` keys included, is where a Routine's
 switch-type settings come from; the `scalars:` tier is configuration the
 template owns, not a setting. Channel parameters and the `prompts/` and
