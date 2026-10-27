@@ -5865,6 +5865,14 @@ the auth to the bound Google account before the read.
 | `primed` | boolean | True when this call started a new cursor (empty input cursor, or `reset`); it returns no events. |
 | `reset` | boolean | True when the input cursor had expired and a new one was primed: changes since the old cursor are lost, reconcile from a read of your own. |
 
+`GcalAttachment`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `file_id` | string | Drive file id. |
+| `title` | string | File title (capped at 200 chars), e.g. '… - Notes by Gemini' or '… - Transcript'. |
+| `mime_type` | string | The file's MIME type. |
+
 `GcalAttendee`:
 
 | Field | Type | Notes |
@@ -5899,6 +5907,8 @@ the auth to the bound Google account before the read.
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
+| `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
+| `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |
@@ -5930,6 +5940,14 @@ the auth to the bound Google account before the read.
 | `events` | list of GcalEventSummary | Events in the window. |
 | `count` | integer | Number of events returned. |
 
+`GcalAttachment`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `file_id` | string | Drive file id. |
+| `title` | string | File title (capped at 200 chars), e.g. '… - Notes by Gemini' or '… - Transcript'. |
+| `mime_type` | string | The file's MIME type. |
+
 `GcalAttendee`:
 
 | Field | Type | Notes |
@@ -5964,6 +5982,8 @@ the auth to the bound Google account before the read.
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
+| `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
+| `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |
