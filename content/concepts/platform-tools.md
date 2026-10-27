@@ -5,17 +5,16 @@ order: 9
 group: What a bundle holds
 summary: >
   A bundle's chat agent has only the flows its agent.yaml maps and the
-  channel's memory, unless it opts in to platform tools under
+  Routine's memory, unless it opts in to platform tools under
   platform_tools: — ask_user, set_reminder, show_setup_step,
   workspace_memory_read, and Popcorn's MCP tools by name. Only chat: true
   agents may; an unknown name fails validation.
-concepts: [app-bundle, publish-and-apply, channel-binding]
-layer: platform
-product_terms: [Agent]
+concepts: [app-bundle, versions, tables]
+part: build
 ---
 
 An app agent is defined under `agents/<name>/` in a bundle (see
-[App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md)). What
+[App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md)). What
 it can call is decided by its `agent.yaml` and nothing else: nothing a member
 writes, and nothing a tool returns, can add a tool.
 
@@ -27,12 +26,12 @@ writes, and nothing a tool returns, can add a tool.
   maps it.
 - **Its terminal tool**, when a flow invokes it headless: the `submit:` tool
   whose accepted call is the agent's result.
-- **The channel's memory**, when members chat with it (`chat: true`), unless
+- **The Routine's memory**, when members chat with it (`chat: true`), unless
   it says `memory: false`.
 
 ## Opting in to platform tools
 
-A `chat: true` agent may also have tools the platform's own channel agents
+A `chat: true` agent may also have tools the platform's own Routine agents
 have, each with the same rules, by naming them:
 
 ```yaml
@@ -45,12 +44,16 @@ platform_tools:
 | Entry | What the agent gets |
 |---|---|
 | `ask_user` | A question card for the members. One card per run, and the card ends the run: the answers start the next one. |
-| `set_reminder` | `set_reminder` and `cancel_reminder`: one reminder per channel, which brings this same agent back to the thread later. |
-| `show_setup_step` | One of the channel's unfinished setup steps as a card the members complete in the conversation. Shares `ask_user`'s one card per run. |
+| `set_reminder` | `set_reminder` and `cancel_reminder`: one reminder per Routine, which brings this same agent back to the thread later. |
+| `show_setup_step` | One of the Routine's unfinished setup steps as a card the members complete in the conversation. Shares `ask_user`'s one card per run. |
 | `workspace_memory_read` | The memory shell also shows the workspace's memory, read only. Needs the agent's own memory. |
-| `popcorn__<tool>` | One of Popcorn's MCP tools (`popcorn__list_rows`, `popcorn__update_row`, …), acting on this channel as the member being answered. |
-| `tables_read` | Shorthand for this channel's tables, read only: `popcorn__list_tables`, `popcorn__get_table`, `popcorn__list_rows`, `popcorn__get_row`. |
+| `popcorn__<tool>` | One of Popcorn's MCP tools (`popcorn__list_rows`, `popcorn__update_row`, …), acting on this Routine as the member being answered. Reading the Routine's tables is the same tools, named one by one: `popcorn__list_tables`, `popcorn__get_table`, `popcorn__list_rows`, `popcorn__get_row`. |
 | `popcorn_mcp` | Shorthand for every `popcorn__` tool an agent may have. |
+
+The `popcorn__` tools reach this Routine only, as the Routine's own Agent's
+do: naming another Routine is refused before anything of it is read. The
+few workspace-wide ones, such as `popcorn__list_routines`, answer as for the
+member, and still cannot open another Routine.
 
 A headless agent may name none: a flow that invokes it has no member to ask,
 nothing to come back to and nobody to act as. An agent that has both a
