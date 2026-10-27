@@ -538,7 +538,7 @@ A new version reaches every Routine on that copy: this Routine installs it now, 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). It installs the new version first. |
-| `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. |
+| `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. Just after copy_routine_template, the Popcorn version the copy was made from works too. |
 | `changes` | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` | `str` | What changed and why, in a sentence or two. |
 | `confirm` | `bool` | true to create the version. Show the user the dry run first. Default `False`. |
