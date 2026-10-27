@@ -16,11 +16,11 @@ product_terms: [Status, Action]
 ---
 
 An item's Status, and the Actions it offers, are not one flat field.
-Underneath, a tracker row is a **tuple of small machines**, and the single
+Underneath, a Routine's row is a **tuple of small machines**, and the single
 chip a user sees is a projection of that tuple.
 
 A bundle declares the machines, their states, and the transitions between them
-in its manifest's `states:` section, or in a recipe the channel can replace
+in its manifest's `states:` section, or in a recipe the Routine can replace
 (the last section below). The platform ships the engine and runs the graph; the bundle
 ships the graph and the vocabulary. The platform knows none of your state
 names — only its own few words: `none`, `same`, and the `system` and `staff`
@@ -30,7 +30,7 @@ event families.
 column the tier reads or writes — here `Status`, `CTAs`, `Stage`,
 `Tracking Mode`, `Decision`, and `Why`, where the reason for the last
 transition is written unless `status.why_column` names another. A `states:`
-graph is read at run time from the version the channel is bound to; install
+graph is read at run time from the version the Routine is bound to; install
 writes only the display hints it adds to those columns.
 
 ```yaml
@@ -133,19 +133,20 @@ you can always publish is a graph that is well-formed and wrong — reachable
 states that no event fires in practice, a terminal state reached too early.
 The checks prove structure, not intent.
 
-## The recipe: a graph each channel can replace
+## The recipe: a graph each Routine can replace
 
-A `states:` graph belongs to the bundle version, so every channel on that
-version runs the same one, and changing it means publishing a new version.
+A `states:` graph belongs to the template's version (the CLI calls it a
+*bundle version*), so every Routine on that version runs the same one, and
+changing it means publishing a new version.
 The **recipe** tier ships the same graph as a document of its own,
-`recipe.yaml` at the bundle's root, and lets each channel install a revision
+`recipe.yaml` at the bundle's root, and lets each Routine install a revision
 of its own. A Routine with [Steps](https://docs.popcorn.ai/product/concepts/steps.md)
 of its own is running one.
 
 ```yaml
 # manifest.yaml
 recipe:
-  document: recipe   # the channel-config key an installed revision lives under; the default
+  document: recipe   # the configuration key an installed revision lives under; the default
   contract: chase    # optional: an engine contract the graph must also satisfy
 ```
 
@@ -156,19 +157,20 @@ included. What differs is where the graph lives:
 - **A bundle declares `states:` or `recipe:`, never both.** `recipe:` needs a
   `tables:` section, as `states:` does. Publish refuses a `recipe:` with no
   `recipe.yaml`, and a `recipe.yaml` with no `recipe:`.
-- **The bundle's own recipe is in force until the channel installs one.** An
-  installed revision is stored in the channel's config, and the sha256 of its
-  text is its identity. Earlier revisions stay readable, so a channel can go
-  back to one, or to the bundle's own. An assistant does this with
+- **The bundle's own recipe is in force until the Routine installs one.** An
+  installed revision is stored in the Routine's configuration (the
+  *channel config*), and the sha256 of its text is its identity. Earlier
+  revisions stay readable, so a Routine can go back to one, or to the
+  bundle's own. An assistant does this with
   `change_routine`; a flow, with `feature.recipe.install`.
 - **An install refuses a revision the rows cannot follow**: one whose graph
   does not declare a value a stored machine column holds, or that moves a
   machine to another column or table. Moving stored state is a migration,
   not an install.
-- **A run pins the revision in force when it starts**, with the channel
-  config, so it judges every row by one graph whatever is installed
+- **A run pins the revision in force when it starts**, with the Routine's
+  configuration, so it judges every row by one graph whatever is installed
   meanwhile.
-- **A bundle update keeps the channel's revision**, and first checks it
+- **A bundle update keeps the Routine's revision**, and first checks it
   against the new version — the flows its edges launch, the tables, the
   contract. When it no longer fits, the whole update is refused before
   anything is written.

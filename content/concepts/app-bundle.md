@@ -5,9 +5,9 @@ order: 1
 group: What a bundle holds
 summary: >
   A Routine Template is an app bundle: a directory of YAML plus optional code
-  that turns an empty channel into a Routine — tables, flows, schedules and
-  webhooks. Every non-reserved YAML file at the bundle's root is a flow, so a
-  sample payload left there installs as one; keep payloads outside the bundle.
+  that gives an empty Routine its tables, flows, schedules and webhooks.
+  Every non-reserved YAML file at the bundle's root is a flow, so a sample
+  payload left there installs as one; keep payloads outside the bundle.
   A manifest with a version is what makes it publishable.
 concepts: [bundle-version, manifest-keys, flow-identity]
 layer: platform
@@ -15,20 +15,20 @@ product_terms: [Routine Template]
 ---
 
 A Routine Template is, underneath, an app bundle: a directory. Installing it
-into an empty channel — the platform's word for a Routine — gives that
-channel tables to hold state, flows to do work, and schedules and webhooks
-to start them.
+into an empty Routine (the CLI and the API call a Routine a *channel*) gives
+that Routine tables to hold state, flows to do work, and schedules and
+webhooks to start them.
 
 ```
 myapp/
 ├── manifest.yaml      tables, scalars, schedules, webhooks, states, …
 ├── AGENT.md           notes the channel agent reads on demand
-├── README.md          human documentation, installed as a channel file
+├── README.md          human documentation, installed as a file in the Routine
 ├── strings.yaml       user-facing copy, locale-sectioned
 ├── recipe.yaml        the state graph, when the manifest declares recipe:
 ├── some_flow.yaml     one flow per file, at the root
-├── prompts/           seeded as channel config
-├── templates/         seeded as channel config
+├── prompts/           seeded as Routine Settings
+├── templates/         seeded as Routine Settings
 ├── code/<block>/      custom Python or Node the flows call
 └── agents/<name>/     an app agent: agent.yaml, prompt.md, schemas/*.json — nothing else
 ```
@@ -44,7 +44,7 @@ too — a flow saved under that name becomes the manifest instead.
 
 `recipe.yaml`, and its legacy name `process.yaml`, are reserved for the
 [recipe](https://docs.popcorn.ai/platform/concepts/state-machine.md): a
-state graph each channel can replace. Publish requires one when the manifest
+state graph each Routine can replace. Publish requires one when the manifest
 declares `recipe:` (or `process:`), and refuses one when it does not, rather
 than installing it as a flow. A bundle that ships both names is refused.
 
@@ -52,15 +52,16 @@ than installing it as a flow. A bundle that ships both names is refused.
 scratch copy or a sample payload left at the root installs, quietly. A YAML
 file in a subdirectory is never a flow.
 
-`AGENT.md` is stored on the channel as the `agent_docs` scalar; the agent
+`AGENT.md` is stored on the Routine as the `agent_docs` scalar; the agent
 reads it when it needs it rather than carrying it in every prompt. An explicit
 `agent_docs` under `scalars:` wins over the file.
 
 ## The tree has a fixed shape
 
-`prompts/` and `templates/` are descended one level and seeded into channel
-config, as `$channel.prompts.<stem>` and `$channel.templates.<stem>`. `code/`
-holds one directory per block, each with exactly one entrypoint — `main.py` or
+`prompts/` and `templates/` are descended one level and seeded into the
+Routine's Settings (the platform's *channel config*), as
+`$channel.prompts.<stem>` and `$channel.templates.<stem>`. `code/` holds one
+directory per block, each with exactly one entrypoint — `main.py` or
 `index.js`, never both — and is not seeded anywhere: `foundation.code.execute`
 reads a block by name at run time. A block is descended to any depth, so it
 may be a small package. Block files must be UTF-8 text, may carry any
