@@ -53,7 +53,7 @@ outputs:
   ids: $steps.fetch.output.rows
 ```
 
-- **`required_integrations`** names what the channel must connect, keyed by
+- **`required_integrations`** names what the Routine must connect, keyed by
   the name steps read as `$channel.integrations.<name>`. A run refuses to
   start while one is unconnected; `provider` constrains which account may
   back it.
@@ -77,7 +77,8 @@ What a flow may call is the activity catalog, served by the platform:
 `popcorn flow activities`, or the
 [activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
 Author against `foundation` and `feature` activities at `release` or `beta`;
-`app.*` activities are private to shipped apps.
+`app.*` activities are one Routine Template's own logic, which a copy of it
+keeps calling; they are not a surface to author against.
 
 ## A step is exactly one of five things
 

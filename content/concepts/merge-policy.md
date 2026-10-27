@@ -91,7 +91,7 @@ next time a write merges into it. After `concat` becomes `replace`, a row
 keeps its accumulated text until its next write replaces it; after `replace`
 becomes `keep`, the value a row already holds is the one kept.
 
-A schema change made by the channel's agent cannot change a policy: the
+A schema change made by the Routine's agent cannot change a policy: the
 store carries the installed one forward. It drops to `replace` only when
 that change leaves the column unable to hold it: retyped out of what the
 policy requires, or an `increment_on_change` column whose `merge_when`
@@ -102,6 +102,6 @@ column is gone.
 The columns in a schema's `merge_key.any_of` must be indexed — `index: true`,
 `unique: true`, or computed — and string-typed unless computed. `app publish`
 refuses a manifest that breaks either rule, so it never reaches an install. A
-merge key set on the channel rather than in the manifest is checked when the
+merge key set on the Routine rather than in the manifest is checked when the
 install writes the table, so a manifest that declares `index: false` on one
 of its columns fails that install.

@@ -23,7 +23,7 @@ through references.
 | `$steps.<id>.output.*` | a prior step's result |
 | `$steps.<id>.<collect>` | a `foreach` step's collected list, under the name `collect:` gave it |
 | `$steps.<id>.error` | a step skipped under `on_error: skip`: its `type` and `message` |
-| `$channel.*` | channel config — `channel_parameters` plus the seeded `integrations` / `integration_list`; scalars are **not** here |
+| `$channel.*` | the Routine's Settings and Connections (the *channel config*) — `channel_parameters` plus the seeded `integrations` / `integration_list`; scalars, including the switches among Routine Settings, are **not** here |
 | `$trigger.*` | what triggered the run |
 | `as:` name | the current item inside a `foreach` |
 
@@ -32,9 +32,9 @@ through references.
 closed set, so a typo in it is caught offline. Every key is always present;
 one that does not apply to the run's trigger kind (`user_id` on a scheduled
 run, say) resolves to null rather than erroring. `$channel` is not closed:
-its keys come from a per-channel config the bundle cannot see, which is why
-an unrecognized one is a warning. `workspace_id` is never an input; it rides
-the auth context.
+its keys come from each Routine's own parameters and Connections, which the
+bundle cannot see, so an unrecognized one is a warning. `workspace_id` is
+never an input; it rides the auth context.
 
 **A `foreach` alias shadows `$channel` and `$trigger`**, deliberately, so
 `as: channel` or `as: trigger` keeps working. It does not shadow `$inputs` or

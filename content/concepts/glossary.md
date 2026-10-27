@@ -157,7 +157,8 @@ Product term: **Routine**, except where an entry says otherwise.
 - **tracker** — An older word for a channel that runs an app, from earlier
   product copy and MCP descriptions ("each channel is a tracker"). Product
   term: Routine. Many apps also name their main table
-  `tracker`, and the state-machine page's "tracker row" means a row of it.
+  `tracker`, and the state-machine page's example runs its machines over a
+  table of that name.
 - **workspace** — The tenant: it owns channels, users and fork lines. Its
   users are its members, each with a workspace role (see *member*).
   `popcorn workspace switch` changes which one the CLI acts on. Product term:
@@ -346,7 +347,7 @@ entry says otherwise.
 - **scalar** — A flat `key → text` value on a channel, always a string on
   the wire (`popcorn table scalar get` and `set`). A manifest declares
   scalars in one of two tiers, and a value a flow writes at runtime belongs
-  in neither. See [The three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+  in neither. See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
   Product term: Routine Settings, for a scalar a person sets, such as a
   switch; a value a flow writes at runtime has none.
 - **merge policy**, **merge key** — A column's merge policy decides what an
@@ -431,3 +432,22 @@ transitions behind them stay out of the product.
   engine next projects the row. *Not to be
   confused with* a run's status or outcome, or a user's presence, which the
   API also calls `status`. Product term: Status.
+
+## Names you'll see elsewhere
+
+The CLI, the API and older copy call some things by a name the product
+doesn't use. Pages say the product's word and give the other name once,
+where the reader will meet it; this table is where to look one up.
+
+| Name | In the product | Where you'll see it |
+|---|---|---|
+| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses, MCP output (`App: …`) |
+| channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
+| project | Routine | older MCP tools and the web app |
+| tracker | Routine | older product copy and MCP descriptions |
+| channel template | Routine Template | `popcorn channel templates`, `popcorn channel create --template` |
+| channel config | Routine Settings, for its parameters; Connections, for its integrations | `popcorn channel-config`, `$channel.*` in a flow |
+| agent store | Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
+| record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
+| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API, `line:` in MCP output |
+| bundle version | a version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |
