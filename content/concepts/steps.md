@@ -11,12 +11,12 @@ summary: >
   change_routine changes them from a description, showing the change before it
   goes in.
 concepts: [reviews, customizing-a-routine, routine-settings]
-layer: product
+part: use
 ---
 
 A Routine's **Steps** are the work it does on each item, in order. Each Step
 asks for one thing and follows up until it has it. Then the item moves on to
-the next Step, or stops at a [Review](https://docs.popcorn.ai/product/concepts/reviews.md) for a
+the next Step, or stops at a [Review](https://docs.popcorn.ai/use/concepts/reviews.md) for a
 person to decide.
 
 Not every Routine has Steps. One that follows deliveries or alerts tracks each
@@ -44,7 +44,7 @@ one of a Step's questions.
 
 A Step sends its first email, then follows up on a reminder schedule while
 nothing comes back, within the Routine's sending hours. The schedule and the
-hours are [Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md), and a
+hours are [Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md), and a
 Step can have its own. When the follow-ups run out, the item closes with a
 reason, such as *No response*. A reply after that reopens the Step it went
 quiet on.
@@ -63,7 +63,7 @@ A person changes the Steps by describing the change, for example "ask for
 their date of birth too" or "check with me before the agreement goes out":
 to the Routine's agent in Popcorn, or to an assistant with `change_routine`. The change stays with this Routine and survives the template's
 improvements (see
-[customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)). An
+[customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md)). An
 earlier version, or the template's own, can be put back, and a change that
 would remove a Step items are still at is refused.
 
@@ -83,7 +83,7 @@ takes a few minutes to draft a change:
    after, what it would set on each Step, what the agent assumed and any
    questions it left open, and whether it passed the checks against the
    Routine's items. Part of a proposal that is really a
-   [Routine Setting](https://docs.popcorn.ai/product/concepts/routine-settings.md) says so.
+   [Routine Setting](https://docs.popcorn.ai/use/concepts/routine-settings.md) says so.
 3. **Confirm it.** `change_routine` with the `change_id` and `confirm=true`
    installs it, checking it once more first.
 
@@ -92,7 +92,7 @@ template's own, after a dry run. One change is drafted at a time on a
 Routine, and it works only where the template keeps its Steps with the
 Routine.
 
-> **Platform note** — A Routine's Steps are the states of its template's
-> state machine, and a Routine with Steps of its own has them installed as a
-> recipe. A Step is not a flow's `step:`. See
-> [State machines](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+In the template, a Routine's Steps are the states of its state machine, and
+a Routine with Steps of its own has them installed as a recipe (see
+[state machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md)).
+A Step is not one of a flow's `steps:`.

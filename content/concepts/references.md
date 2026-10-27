@@ -10,8 +10,7 @@ summary: >
   lacks is a hard ReferenceError that on_error cannot catch. Index arrays with
   dots, and keep spaces out of any column a flow dereferences.
 concepts: [flow-grammar, on-error, table-columns]
-layer: platform
-product_terms: []
+part: build
 ---
 
 A step's `args`, `when:` and `foreach:`, and a flow's `outputs:`, read values
@@ -55,7 +54,7 @@ segments may be numeric, which means an array index. Brackets are rejected as
 malformed and would be treated as a literal string.
 
 A column a flow dereferences, as `$row.<Column>`, therefore needs a name with
-no spaces; see [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md).
+no spaces; see [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md).
 
 ## A missing key fails the run
 
@@ -77,7 +76,7 @@ response, not the catalog.
 `$inputs.payload.name` is statically unreachable, because an input
 declaration has no way to describe an object's properties. Get a typed shape
 first: see
-[extracting fields or deriving them](https://docs.popcorn.ai/platform/concepts/extract-or-derive.md).
+[extracting fields or deriving them](https://docs.popcorn.ai/build/concepts/extract-or-derive.md).
 
 ## Nothing in a reference computes
 

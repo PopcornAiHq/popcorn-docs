@@ -10,7 +10,7 @@ summary: >
   a schedule now, without waiting for its time, for real after a dry run. A
   schedule's cadence is a Routine Setting.
 concepts: [routine-settings, actions-and-status, work-a-routines-items]
-layer: product
+part: use
 ---
 
 A Trigger is how work arrives in a Routine. A Routine can have several, and
@@ -30,13 +30,13 @@ to sign) that set up its Steps when they are added. A booking made on its
 booking page reaches it through one of those schedules.
 
 Work that a person starts on one item is an
-[Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md), not a Trigger.
+[Action](https://docs.popcorn.ai/use/concepts/actions-and-status.md), not a Trigger.
 
 ## Adding items by hand
 
 A person can also add items without a Trigger: by asking the Routine's agent
 in Popcorn to add someone, or by giving it a spreadsheet of them. Either way
-the item starts its first [Step](https://docs.popcorn.ai/product/concepts/steps.md). `create_rows`
+the item starts its first [Step](https://docs.popcorn.ai/use/concepts/steps.md). `create_rows`
 adds a Row without starting anything itself, but on the Table the Routine's
 Statuses run on that Row is a new item too, and the Routine's next run acts
 on it. Its dry run says so before anything is written.
@@ -68,11 +68,11 @@ starts work by happening.
 
 ## Changing one
 
-A schedule's cadence is a [Routine Setting](https://docs.popcorn.ai/product/concepts/routine-settings.md):
+A schedule's cadence is a [Routine Setting](https://docs.popcorn.ai/use/concepts/routine-settings.md):
 changing it reaches this Routine only and survives the template's
 improvements. Adding a new kind of Trigger changes what the Routine is built
-from (see [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)).
+from (see [customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md)).
 
-> **Platform note** — A scheduled Trigger is a *schedule* in the template's
-> manifest, and the work it starts is a *flow*. See
-> [Schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md).
+In the template, a scheduled Trigger is an entry in its manifest's
+`schedules:`, and the work it starts is a flow (see
+[schedules in a manifest](https://docs.popcorn.ai/build/concepts/schedules.md)).

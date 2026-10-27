@@ -10,8 +10,7 @@ summary: >
   attributes but never drops or renames one. A flow can dereference only a
   column whose name has no spaces.
 concepts: [merge-policy, manifest-keys, adding-a-table]
-layer: platform
-product_terms: [Table, Column]
+part: build
 ---
 
 A Routine's Tables, and each Table's Columns, are declared in its template's
@@ -34,7 +33,7 @@ tables:
 ```
 
 What a repeat write does to each column, and how a merge key picks the row,
-is [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
+is [column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md).
 
 ## Type, format, display
 

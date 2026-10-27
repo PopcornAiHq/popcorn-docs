@@ -121,7 +121,7 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
     )
 
 
-LAYERS = ("product", "platform")
+PARTS = ("use", "build")
 
 
 def query_terms(pages: list[dict], query: str) -> set[str]:
@@ -130,7 +130,7 @@ def query_terms(pages: list[dict], query: str) -> set[str]:
     A term in the id, title or summary of more than half the pages tells them
     apart no better than a stop word, and the 8× an id or title hit is worth
     lets it decide the ranking anyway. "Routine" is the case that forced this:
-    once the product layer existed, nearly every page named one, and a guide
+    once every page was in the product's words, nearly every page named one, and a guide
     with "Routine" in its title outranked the concept a question was asking
     about. Measured on the corpus, so the list follows the pages. A query made
     only of such terms keeps them, since an empty one would match nothing.
@@ -147,20 +147,34 @@ def query_terms(pages: list[dict], query: str) -> set[str]:
     return (terms - shared) or terms
 
 
-def search(pages: list[dict], query: str, limit: int = 5, layer: str | None = None) -> str:
-    if layer is not None and layer not in LAYERS:
-        return f"layer must be one of {', '.join(LAYERS)}, or omitted to search both."
-    if layer is not None:
-        pages = [p for p in pages if p.get("layer") == layer]
+def _tier(page: dict) -> int:
+    """Which page wins a tie: using Popcorn and the glossary, then building
+    templates, then the references.
+
+    A user's assistant is the first reader, and the glossary is where it looks
+    a word up. A reference page is reached by naming an entry, which `_score`
+    already rewards, so on a plain tie the page of prose answers better.
+    """
+    if page.get("part") == "use" or page.get("section") == "glossary":
+        return 2
+    return 1 if page.get("part") == "build" else 0
+
+
+def rank(pages: list[dict], terms: set[str]) -> list[dict]:
+    """Pages best first, as search returns them. Only a tie consults the tier:
+    a page that answers the question better always outranks one that merely
+    shares its nouns."""
+    return sorted(pages, key=lambda p: (_score(p, terms), _tier(p)), reverse=True)
+
+
+def search(pages: list[dict], query: str, limit: int = 5, part: str | None = None) -> str:
+    if part is not None and part not in PARTS:
+        return f"part must be one of {', '.join(PARTS)}, or omitted to search both."
+    if part is not None:
+        # The glossary and the references have no part: they serve both.
+        pages = [p for p in pages if p.get("part") in (part, None)]
     terms = query_terms(pages, query)
-    # A user's assistant is the first reader, so on an equal score the page in
-    # the product's words comes first. Only a tie: a platform page that answers
-    # the question better still outranks one that merely uses the right nouns.
-    ranked = sorted(
-        pages,
-        key=lambda p: (_score(p, terms), p.get("layer") == "product"),
-        reverse=True,
-    )
+    ranked = rank(pages, terms)
     hits = [p for p in ranked if _score(p, terms)][:limit]
 
     if hits:

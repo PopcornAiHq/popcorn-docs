@@ -17,9 +17,8 @@ browser. The agent-facing files sit at the root.
 | `/llms-full.txt` | every written page in full; the generated reference pages by title, summary and URL |
 | `/chunks.json` | one record per page — what the MCP server reads |
 | `/search.json` | titles, headings and entry names per page — what the site's search reads |
-| `/<layer>/<kind>/<id>.md` | one page as Markdown — `/product/glossary/product-glossary.md`, `/platform/concepts/fork-line.md` |
-| `/<layer>/<kind>/<id>.html` | the same page for a person |
-| `/moved.json` | each page's address from before the site had layers, and where it is now; the old address answers with that pointer |
+| `/<part>/<kind>/<id>.md` | one page as Markdown — `/use/concepts/tables.md`, `/build/concepts/copying-a-template.md`; the glossary and the references have no part: `/glossary/glossary.md`, `/reference/cli.md` |
+| `/<part>/<kind>/<id>.html` | the same page for a person |
 
 ## Layout
 
@@ -56,8 +55,7 @@ python3 scripts/emit.py              # rebuild build/ from empty
 python3 scripts/check-links.py       # every advertised URL and page link resolves
 python3 scripts/check-retrieval.py   # every eval question surfaces its concept
 python3 scripts/check-highlight.py   # YAML highlighting never changes a block's text
-python3 scripts/check-layer.py       # product pages use no platform term outside a Platform note
-python3 scripts/check-vocabulary.py  # reports names still used where the product has its own word
+python3 scripts/check-vocabulary.py --strict  # no page uses a name the product has its own word for
 ./scripts/check-public-repo.sh       # no internal references — reads the STAGED tree
 ```
 

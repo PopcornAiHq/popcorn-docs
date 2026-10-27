@@ -2,8 +2,8 @@
 """Report the names a page still uses where the product has its own word.
 
 Every page is written in the product's words (`INFORMATION-ARCHITECTURE.md`,
-"One vocabulary, in both layers"). The CLI, the API and older copy still call
-some things by other names, and the platform glossary's table "Names you'll
+"One vocabulary"). The CLI, the API and older copy still call
+some things by other names, and the glossary's table "Names you'll
 see elsewhere" pairs each with the product's word. This script reads that
 table and lists each prose use of one of its names on a hand-written page.
 
@@ -16,16 +16,16 @@ A name is allowed:
 * inside a longer glossary entry: "channel agent" and "channel parameters"
   are terms of their own, not the name "channel"
 
-Not checked: the two glossaries, which define the names; generated pages
+Not checked: the glossary, which defines the names, and generated pages
 (those carrying `deployed:` or `version:`), whose text comes from the
-platform itself; and Platform notes, which exist to name the other term.
+platform itself.
 
 Some names are everyday English as well — a person's *app*, a *project*, a
 *record* of what happened — and can't be told apart from the platform's word
 in prose, while in code they are allowed anyway. Those are left to review.
 
-Report-only by default: it lists what is left and exits 0. `--strict` exits 1
-when anything is listed.
+CI and the pre-commit hook run it with `--strict`, which exits 1 when
+anything is listed. Without it, it only reports.
 """
 
 from __future__ import annotations
@@ -37,7 +37,6 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 GLOSSARY = CONTENT / "concepts" / "glossary.md"
-PRODUCT_GLOSSARY = CONTENT / "concepts" / "product-glossary.md"
 TABLE_HEADING = "## Names you'll see elsewhere"
 
 # Names that are also everyday words; see the module docstring.
@@ -45,15 +44,22 @@ ORDINARY = {"app", "project", "record"}
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _GENERATED = re.compile(r"^(deployed|version):", re.M)
+# An entry can head with several terms, as "- **Agent**, **channel agent** —":
+# each is a term of its own, and masks the name it holds.
 _ENTRY = re.compile(
-    r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?", re.M
+    r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?"
+    r"(?P<more>(?:, \*\*[^*]+\*\*)*)",
+    re.M,
 )
-_FENCE = re.compile(r"^```.*?^```", re.S | re.M)
-_CODE = re.compile(r"`[^`\n]+`")
+_MORE = re.compile(r"\*\*([^*]+)\*\*")
+# A fence may be indented inside a list item, and a code span may wrap a line.
+_FENCE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
+# A span may wrap a line but not cross a blank one, so a stray backtick
+# cannot hide the paragraphs after it.
+_CODE = re.compile(r"`(?:[^`\n]|\n(?![ \t]*\n))+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
 # Single-asterisk italics, not `**bold**`: a name in italics is being mentioned.
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
-_NOTE = re.compile(r"^> \*\*Platform note\*\*")
 
 
 def names() -> list[str]:
@@ -74,11 +80,10 @@ def names() -> list[str]:
 
 def entries() -> set[str]:
     out = set()
-    for path in (GLOSSARY, PRODUCT_GLOSSARY):
-        for m in _ENTRY.finditer(path.read_text()):
-            for name in (m.group("term"), m.group("short")):
-                if name:
-                    out.add(name.strip().strip("`").lower())
+    for m in _ENTRY.finditer(GLOSSARY.read_text()):
+        for name in (m.group("term"), m.group("short"), *_MORE.findall(m.group("more") or "")):
+            if name:
+                out.add(name.strip().strip("`").lower())
     return out
 
 
@@ -92,13 +97,11 @@ def _singular(term: str) -> str:
 
 
 def prose(body: str) -> str:
-    """The body as a reader reads it: no code, no addresses, no Platform notes."""
-    lines, in_note = [], False
-    for line in body.splitlines():
-        in_note = bool(_NOTE.match(line)) or (in_note and line.startswith(">"))
-        lines.append("" if in_note else line)
-    text = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), "\n".join(lines))
-    return _LINK.sub("]", _CODE.sub("", text))
+    """The body as a reader reads it: no code and no addresses."""
+    text = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), body)
+    # A wrapped code span keeps its line breaks, so line numbers stay true.
+    text = _CODE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    return _LINK.sub("]", text)
 
 
 def paragraphs(text: str) -> list[tuple[int, str]]:
@@ -135,7 +138,7 @@ def main() -> int:
     found: dict[str, list[str]] = {}
     checked = 0
     for f in sorted(CONTENT.rglob("*.md")):
-        if f.name.startswith("_") or f in (GLOSSARY, PRODUCT_GLOSSARY):
+        if f.name.startswith("_") or f == GLOSSARY:
             continue
         doc = _DOC.match(f.read_text())
         if not doc or _GENERATED.search(doc.group("fm")):

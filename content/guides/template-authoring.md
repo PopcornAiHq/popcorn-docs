@@ -9,9 +9,8 @@ summary: >
   `create_routine_version`, or with the CLI's `app checkout`, `validate`,
   `publish` (an agent runs it with `--yes`) and `status`. A new template is
   not self-serve. `flow validate` is the authority on a flow.
-concepts: [app-bundle, manifest-keys, flow-grammar, publish-and-apply, fork-line]
-layer: platform
-product_terms: [Routine Template]
+concepts: [app-bundle, manifest-keys, flow-grammar, versions, copying-a-template]
+part: build
 ---
 
 A **Routine Template** is made of an **app bundle**: a directory of YAML
@@ -20,7 +19,7 @@ state, flows to do work, schedules and webhooks to invoke them. The CLI and
 the API call a Routine a *channel* and its template an *app*, so the commands
 below keep those names; the CLI's `channel templates` command and
 `--template` flag name the template. The
-[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md) has the product's words.
+[glossary](https://docs.popcorn.ai/glossary/glossary.md) has the product's words.
 
 > **Which path you are on decides how fast you can iterate.** A *new*
 > template (a new `app_type`) is not self-serve: the set of installable
@@ -66,13 +65,13 @@ The shipped `alerttracker` template is the running example: one producer
 `fields.extract` and upserts one row per alert, and no model anywhere in it.
 The choice it embodies — *extract* fields the payload states, or *derive* ones
 it does not — is
-[extracting fields or deriving them](https://docs.popcorn.ai/platform/concepts/extract-or-derive.md), and it is the
+[extracting fields or deriving them](https://docs.popcorn.ai/build/concepts/extract-or-derive.md), and it is the
 single most consequential choice in a webhook-backed template.
 [`examples/alerttracker/GOTCHAS.md`](https://github.com/PopcornAiHq/popcorn-cli/blob/main/examples/alerttracker/GOTCHAS.md) is
 the raw evidence log from building an LLM-normalised, multi-producer version
 of that template, and is behind most of the rules the concept pages state. Read it
 as a record: it says so itself, and some of its findings predate the
-[merge policies](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
+[merge policies](https://docs.popcorn.ai/build/concepts/merge-policy.md).
 
 > **Do not copy a bundle out of a repo.** The cut-down bundles under the CLI
 > repo's `tests/fixtures/bundles/` exist to exercise `app validate`; none
@@ -96,7 +95,7 @@ mytemplate/
 Only `manifest.yaml` is meaningful on its own, and a publish needs it — with
 a `version:` — so everything else is optional. The full tree, the reserved
 names and what publish leaves behind are
-[app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md). Two rules from it that cost the most when
+[app bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md). Two rules from it that cost the most when
 missed:
 
 - **Every other root-level `.yaml` is a flow**, and a nested one is not a flow
@@ -105,7 +104,7 @@ missed:
   behind at publish and reported by `app validate` as `path-not-published`.
 - **A flow's identity is its `name:`, not its filename**, so renaming `name:`
   is one flow leaving and another arriving; see
-  [a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
+  [a flow's identity is its name](https://docs.popcorn.ai/build/concepts/flow-grammar.md#a-flow-s-identity-is-its-name).
 
 ## 2. How a bundle gets installed
 
@@ -191,7 +190,7 @@ installs nothing until confirmed. `create_routine_version` takes changes, not a 
 creates, deletes, renames or edits one file with text ops, and an edit
 carries the `sha256` it was read at. A file the assistant generated rather
 than typed goes up through `create_routine_file_upload`. The
-[MCP reference](https://docs.popcorn.ai/product/reference/mcp.md) has the arguments.
+[MCP reference](https://docs.popcorn.ai/reference/mcp.md) has the arguments.
 
 From the CLI, the loop is:
 
@@ -301,7 +300,7 @@ copy the Routine runs (normally the very version it is bound to; the two
 differ only while an install has not landed), so it is the one source that
 cannot be stale. `app checkout --version <id>` reads an earlier version of the
 same line instead, read-only — the way to recover the tree from before a bad
-publish (see `bundle-version`).
+publish (see `versions`).
 When you want to study how a shipped template does something, spend a scratch
 Routine on it rather than looking for a copy in a repo:
 
@@ -347,16 +346,16 @@ debug.
 ## 3. What the manifest declares
 
 Every key is optional, and each has its own install semantics:
-[manifest keys and what install does to them](https://docs.popcorn.ai/platform/concepts/manifest-keys.md) is the
+[manifest keys and what install does to them](https://docs.popcorn.ai/build/concepts/manifest-keys.md) is the
 table. The keys with pages of their own:
 
 | Key | Page |
 |---|---|
-| `tables` | [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) and [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md); adding one end to end is [adding a table](https://docs.popcorn.ai/platform/guides/adding-a-table.md) |
-| `scalars`, `default_scalars` | [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md) |
-| `schedules` | [schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md) |
-| `states` | [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); writing one is [authoring a states tier](https://docs.popcorn.ai/platform/guides/states-authoring.md) |
-| `recipe` | the same graph as a root `recipe.yaml` each Routine can replace — the recipe section of [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); it is written like a `states:` section |
+| `tables` | [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) and [column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md); adding one end to end is [adding a table](https://docs.popcorn.ai/build/guides/adding-a-table.md) |
+| `scalars`, `default_scalars` | [scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md) |
+| `schedules` | [schedules in a manifest](https://docs.popcorn.ai/build/concepts/schedules.md) |
+| `states` | [state machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md); writing one is [authoring a states tier](https://docs.popcorn.ai/build/guides/states-authoring.md) |
+| `recipe` | the same graph as a root `recipe.yaml` each Routine can replace — the recipe section of [state machines in a bundle](https://docs.popcorn.ai/build/concepts/state-machine.md); it is written like a `states:` section |
 
 Three traps are worth carrying into every edit:
 
@@ -374,17 +373,17 @@ Three traps are worth carrying into every edit:
 
 A flow's grammar is four concept pages, each answering one question:
 
-- [The shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md) — the file's keys, the five kinds
+- [The shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md) — the file's keys, the five kinds
   of step, blocks, `call_flow` and `foreach`.
-- [References in a flow](https://docs.popcorn.ai/platform/concepts/references.md) — the `$` roots, the syntax,
+- [References in a flow](https://docs.popcorn.ai/build/concepts/references.md) — the `$` roots, the syntax,
   and why nothing in a reference computes.
-- [Conditions in a flow](https://docs.popcorn.ai/platform/concepts/conditions.md) — `when:`'s two rails, and
+- [Conditions in a flow](https://docs.popcorn.ai/build/concepts/conditions.md) — `when:`'s two rails, and
   filtering rows instead of gating steps.
-- [Step errors and retries](https://docs.popcorn.ai/platform/concepts/on-error.md) — `on_error`, the default of
+- [Step errors and retries](https://docs.popcorn.ai/build/concepts/on-error.md) — `on_error`, the default of
   four attempts, and what no policy catches.
 
 Reading fields off a webhook payload is
-[extracting fields or deriving them](https://docs.popcorn.ai/platform/concepts/extract-or-derive.md).
+[extracting fields or deriving them](https://docs.popcorn.ai/build/concepts/extract-or-derive.md).
 
 ## 5. The authoring loop
 
@@ -521,7 +520,7 @@ Watch for these when reading results:
 - `start_flow` is asynchronous. A parent that launches a child reports
   Completed immediately; check the **child's** run. When the parent needs the
   result, use a `call_flow:` step with `mode: wait` instead (see
-  [the shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md)).
+  [the shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md)).
 - Posting the same webhook body twice does not test your merge logic — the
   *webhook layer* drops a delivery whose body is byte-identical (SHA-256) to
   one seen in the last five minutes, and no flow runs at all. Vary the body
@@ -541,19 +540,19 @@ publish.
 1. `version:` advances every publish, and `--bump` is the way to do it (§2b).
 2. The manifest keeps `app_type:` and `channel_agent:` (§3).
 3. No flow-written value is declared under `scalars:` —
-   [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+   [scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md).
 4. Every schedule's `flow:` names a flow the bundle has —
-   [schedules](https://docs.popcorn.ai/platform/concepts/schedules.md).
+   [schedules](https://docs.popcorn.ai/build/concepts/schedules.md).
 5. Table changes only add: no column is dropped or renamed, and a column a
-   flow dereferences has no spaces — [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md).
+   flow dereferences has no spaces — [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md).
 6. A step with a side effect sets `retry: 0` —
-   [step errors](https://docs.popcorn.ai/platform/concepts/on-error.md).
+   [step errors](https://docs.popcorn.ai/build/concepts/on-error.md).
 7. Every key a reference reads is guaranteed upstream, by `required` in an
    `output_schema` or `$exists: true` in a filter —
-   [references](https://docs.popcorn.ai/platform/concepts/references.md).
+   [references](https://docs.popcorn.ai/build/concepts/references.md).
 8. A second condition in a `when:` did not change how the first compares —
-   [conditions](https://docs.popcorn.ai/platform/concepts/conditions.md).
+   [conditions](https://docs.popcorn.ai/build/concepts/conditions.md).
 9. Fields the payload states are extracted, not derived —
-   [extract or derive](https://docs.popcorn.ai/platform/concepts/extract-or-derive.md).
+   [extract or derive](https://docs.popcorn.ai/build/concepts/extract-or-derive.md).
 10. A markdown post sets `format: markdown`, on every edit too —
-    [the shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
+    [the shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md).

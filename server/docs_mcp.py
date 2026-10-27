@@ -44,23 +44,29 @@ _READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False)
 
 
 @mcp.tool(annotations=_READ_ONLY)
-def search_docs(query: str, limit: int = 5, layer: str | None = None) -> str:
+def search_docs(
+    query: str, limit: int = 5, part: str | None = None, layer: str | None = None
+) -> str:
     """Find Popcorn concepts matching a question or phrase.
 
     Returns each match's summary, never its full text — read one with get_doc.
     A query that matches nothing returns the nearest entries rather than an
     empty result.
 
-    Pages are in one of two layers. "product" pages describe Routines in the
-    words a Popcorn user sees; "platform" pages describe what a Routine
-    Template is made of, for someone building one. Omit layer to search both.
+    Pages are in one of two parts. "use" pages are about working with
+    Routines; "build" pages are about what a Routine Template is made of, for
+    someone building or changing one. The glossary and the references belong
+    to both. Omit part to search everything.
 
     Args:
         query: a question, error message, or phrase
         limit: maximum results (default 5)
-        layer: "product" or "platform" to search one layer only
+        part: "use" or "build" to search one part, with the glossary and references
+        layer: the old name of `part`; "product" means "use", "platform" "build"
     """
-    return retrieval.search(_pages, query, limit=limit, layer=layer)
+    if part is None and layer is not None:
+        part = {"product": "use", "platform": "build"}.get(layer, layer)
+    return retrieval.search(_pages, query, limit=limit, part=part)
 
 
 @mcp.tool(annotations=_READ_ONLY)
@@ -68,7 +74,7 @@ def get_doc(doc_id: str) -> str:
     """Read one Popcorn concept in full, by its id.
 
     Args:
-        doc_id: an id from search_docs, e.g. "fork-line"
+        doc_id: an id from search_docs, e.g. "copying-a-template"
     """
     return retrieval.get(_pages, doc_id)
 
@@ -77,7 +83,7 @@ def get_doc(doc_id: str) -> str:
 def explain(term: str) -> str:
     """What a Popcorn term means — one answer, plus the near neighbours.
 
-    For a word met mid-task ("concat", "bound", "fork line") where the question
+    For a word met mid-task ("concat", "head", "copy") where the question
     is what it means here, not what documents mention it.
 
     Args:

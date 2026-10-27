@@ -11,25 +11,28 @@ summary: >
   download link. People add References in Popcorn; adding some starts work,
   which list_triggers lists.
 concepts: [triggers, customizing-a-routine]
-layer: product
+part: use
 ---
 
 A **Reference** is a document a Routine works from: the agreement it sends
 for signature, the sample email a Step's questions and wording come from,
 the policy it checks claims against, an example of a good reply. A Reference informs the Routine. It is not one of the
 items the Routine tracks, which live in its
-[Tables](https://docs.popcorn.ai/product/concepts/tables.md).
+[Tables](https://docs.popcorn.ai/use/concepts/tables.md).
 
 A Routine's template says which References it expects, and the Routine works
 without one it is still waiting for until someone adds it. A Reference belongs
 to its Routine: adding or replacing one changes that Routine only, and survives
-the template's improvements.
+the template's improvements. The References a template expects are its
+manifest's `documents:` key, where a document that starts work names the flow
+it starts (see
+[manifest keys](https://docs.popcorn.ai/build/concepts/manifest-keys.md)).
 
 ## Where they live today
 
 People add and replace References in the Routine, in Popcorn. Adding some
 documents also starts work, and `list_triggers` shows those under
-**Documents** (see [Triggers](https://docs.popcorn.ai/product/concepts/triggers.md)). In a
+**Documents** (see [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md)). In a
 claims intake Routine, adding the sample email sets up the first Step's
 questions and its first email, and adding the agreement, a Google Doc or a
 Word file, makes it the one sent for signature. The sample email is the one Reference
@@ -93,7 +96,3 @@ A Reference is free text, which no Column marking can vouch for. So on a
 workspace that guards personal data, `list_references` leaves out file
 names, and `read_reference` returns neither the text nor a link: it says
 when the Reference was added and by whom, and that Popcorn shows it.
-
-> **Platform note** — The References a template expects are its manifest's
-> `documents:` key, and a document that starts work names the flow it starts.
-> See [manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).

@@ -46,52 +46,52 @@
 # the connection the summary is meant to supply. Keep them as reports.
 
 - q: I renamed a flow and now its schedule never fires.
-  concept: flow-identity
+  concept: flow-grammar
   pass: identity is the name inside the file, so the rename deleted one flow and created another; the manifest's schedule still names the old flow, so install dropped it — point the schedule at the new name
   trap: suggests the schedule cache is stale, or to re-publish, or to check the cron expression
 
 - q: Does the filename of a flow matter?
-  concept: flow-identity
+  concept: flow-grammar
   pass: no — the name inside the file is the identity; the filename is free
   trap: says the filename must match the flow name
 
 - q: I dropped a sample payload into the bundle and something odd installed.
-  concept: app-bundle, flow-identity
+  concept: app-bundle, flow-grammar
   pass: every non-reserved YAML file at the bundle root installs as a flow; sample payloads belong outside the bundle directory
   trap: blames the manifest, says unrecognised files are ignored, or says to keep it in the bundle renamed to .json
 
 - q: I published half an hour ago and the channel still runs the old version.
-  concept: bundle-version, publish-and-apply
+  concept: versions
   pass: minting the version and installing it are separate; the install was blocked or skipped, so check what the channel runs and finish it with apply
   trap: says to wait for a cache, redeploy, or republish
 
 - q: Can I fix a bad version by republishing the same version number with corrected files?
-  concept: bundle-version
+  concept: versions
   pass: no — versions are immutable; the same number with different content is refused; publish forward instead
   trap: says yes, or suggests deleting the version first
 
 - q: I want to roll back to 1.2.0. Can I publish its exact files again as 1.4.0?
-  concept: bundle-version
+  concept: versions
   pass: no — content identical to an earlier version on the line is refused because its digest is taken; change something, such as the changelog, and publish forward
   trap: says yes, because the version number is new
 
 - q: I only wanted to change one channel, but a colleague says theirs changed too.
-  concept: fork-line
+  concept: copying-a-template
   pass: a publish is a line operation — every channel on the fork line converges, each on its own daily update
   trap: says that cannot happen, or blames a shared template, or suggests it was a bad apply
 
 - q: How do I undo a fork?
-  concept: fork-line
+  concept: copying-a-template
   pass: there is no unfork and no way to re-bind an earlier version; an old version can be read by id with app checkout --version and its content published forward; treat the fork as one-way
   trap: invents an unfork or a rollback command
 
 - q: Which version should I base my edits on, the one the channel runs or the newest?
-  concept: fork-line, channel-binding
+  concept: copying-a-template, versions
   pass: the line's head is the publish base; a publish based on anything else, including the bound version when it lags, is refused
   trap: says the bound version, because that is what is live
 
 - q: We upgraded the app while a long flow was mid-run. Did it pick up the new code?
-  concept: channel-binding
+  concept: versions
   pass: no — the run pins its version at start and keeps pairing that flow with that code until it ends
   trap: says yes, or says it depends, or warns about mixed versions
 
@@ -191,37 +191,37 @@
   trap: blames the then when condition, or says the engine launches it asynchronously and to wait
 
 - q: What actually happens when I run apply?
-  concept: publish-and-apply
+  concept: versions
   pass: it brings that one channel to its own line's head, takes no version from the caller, and reports already-current when there is nothing to do
   trap: says it publishes, or that it can move a channel to a version you name
 
 - q: Is there anything that stops me publishing a change that affects everyone?
-  concept: publish-and-apply
+  concept: versions
   pass: no — the guards check permission and validity, none asks about reach; how many channels it reaches is reported only after the version exists
   trap: claims a confirmation, a dry run, or a staged rollout exists
 
 - q: I published a bad version yesterday. Can I get the files from the version before it?
-  concept: bundle-version, fork-line
+  concept: versions, copying-a-template
   pass: yes — app checkout --version <id> reads an earlier version of the line read-only; to make it current, copy its files over a fresh checkout of the head and publish forward
   trap: says no version-addressed read exists, or that the old version can be re-bound or republished as-is
 
 - q: My fork's new manifest dropped app_type. Will publish stop me?
-  concept: publish-and-apply, manifest-keys
+  concept: versions, manifest-keys
   pass: no — publish treats it as the line's app, and every install of that version clears app_type and channel_agent on each channel on the line; keep both keys
   trap: says publish refuses a manifest whose app_type differs from its line, so it is safe
 
 - q: What is a Routine, and is it the same as a project or a channel?
-  concept: product-glossary, glossary
+  concept: glossary
   pass: yes — a Routine is the product's name for one piece of ongoing work Popcorn runs; the MCP tools and web app call it a project, and the API and CLI a channel
   trap: describes a Routine as a flow, a schedule, or a separate object from the project
 
 - q: If I change a setting on one Routine, will it lose the template's future updates?
-  concept: product-glossary, routine-settings, change-how-a-routine-behaves
+  concept: glossary, routine-settings, change-how-a-routine-behaves
   pass: no — a setting reaches only that Routine, can be set back and survives the template's improvements; only a change to what the Routine is built from, such as its Tables or the steps it runs, gives it a copy of its own, which stops receiving them
   trap: says every change stops updates, or that a setting reaches every Routine made from the template
 
 - q: A person asks what triggers their Routine. What counts as a Trigger?
-  concept: product-glossary, glossary
+  concept: glossary
   pass: how work arrives — a schedule, a message in the Routine, a document added to it, a booking through its calendar link, or another system posting to it (in the platform, schedules, webhooks, message triggers and documents)
   trap: counts a person's Action, such as an approval, as a Trigger, or says Trigger always needs a qualifier
 
@@ -318,7 +318,7 @@
   trap: says the reference is stale and needs regenerating, or that the activity was removed
 
 - q: Why did my schedule disappear after I published a new version of the bundle?
-  concept: schedules, flow-identity
+  concept: schedules, flow-grammar
   pass: install reconciles schedules by (flow, slug); a schedule whose flow is not in the bundle — a typo or a renamed flow — is skipped and then deleted as undeclared
   trap: says schedules are never deleted by install, or blames the daily update
 
@@ -353,7 +353,7 @@
   trap: uses fields.extract with a default for severity, or trusts the output schema to reject junk
 
 - q: Why does my customized Routine no longer get the template's improvements?
-  concept: product-glossary, fork-line, customizing-a-routine
+  concept: glossary, copying-a-template, customizing-a-routine
   pass: a change to what the Routine is built from gave it a copy of its own (a fork line), and a fork line no longer receives product releases; forking cannot be undone
   trap: says the improvements are paused and can be resumed, or to re-install the product template
 
@@ -363,7 +363,7 @@
   trap: declares the send mode under scalars:, which install then owns
 
 - q: How does a Routine decide which Actions an item offers?
-  concept: product-glossary, state-machine, states-authoring
+  concept: glossary, state-machine, states-authoring
   pass: the template declares state machines; each Action is the button on a staff edge, offered when the edge is legal from where the item stands
   trap: says Actions are configured separately from Status
 

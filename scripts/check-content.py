@@ -24,17 +24,22 @@ Checks, in the order a writer meets them:
 * `deployed`, when present, is a real `YYYY-MM-DD` date — it is shown to
   readers as the day the page was last regenerated, so a malformed one would
   be published as a claim about freshness nobody can read. Its old name,
-  `platform:`, is refused: `layer: platform` uses the word for something else
+  `platform:`, is refused
 * no `source:` field. The backend symbols behind a page are private names,
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
   stops one page at a time bringing the field back
-* `layer` is `product` or `platform`. It is what the site's two sections, the
-  lens check (`check-layer.py`) and search all read, so a page without one
-  would belong to neither
+* `part` is `use` or `build`: which half of the site the page is in, Using
+  Popcorn or Building Routine Templates. The sidebar, the page's address and
+  search all read it, so a page without one would belong to neither. The
+  glossary and the reference pages serve both parts and carry none. The
+  field's old name, `layer:`, is refused
 * no `applies_to:` field. It recorded which readers a page was for and
-  nothing read it; `layer` replaced it, and a page that needs the CLI says so
+  nothing read it; a page that needs the CLI says so
   in its prose
+* no `product_terms:` field. It named the product terms a page written in
+  the platform's words explained; every page is now written in the
+  product's words, so nothing reads it
 """
 
 from __future__ import annotations
@@ -58,9 +63,11 @@ _DEPLOYED = re.compile(r"^deployed:\s*(?P<value>.*)$", re.M)
 _OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
-_LAYER = re.compile(r"^layer:\s*(?P<value>.*)$", re.M)
-LAYERS = {"product", "platform"}
+_PART = re.compile(r"^part\s*:\s*(?P<value>.*)$", re.M)
+PARTS = {"use", "build"}
+_LAYER = re.compile(r"^layer\s*:", re.M)
 _APPLIES_TO = re.compile(r"^applies_to\s*:", re.M)
+_PRODUCT_TERMS = re.compile(r"^product_terms\s*:", re.M)
 
 
 def check(path: pathlib.Path, ids: set[str]) -> list[str]:
@@ -115,18 +122,28 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
             problems.append(f"deployed '{value}' is not a YYYY-MM-DD date")
     if _OLD_PLATFORM.search(front):
         problems.append(
-            "platform: is the old name of the deploy-date field; write deployed: "
-            "(platform now names a layer)"
+            "platform: is the old name of the deploy-date field; write deployed:"
         )
 
-    layer = _LAYER.search(front)
-    if not layer:
-        problems.append(f"no layer — every page is one of {sorted(LAYERS)}")
-    elif layer.group("value").strip() not in LAYERS:
-        problems.append(f"layer '{layer.group('value').strip()}' is not one of {sorted(LAYERS)}")
+    # The glossary and the references serve both parts; every other page is in one.
+    shared = path.parent.name == "reference" or (ident is not None and ident.group(1) == "glossary")
+    part = _PART.search(front)
+    if _LAYER.search(front):
+        problems.append("layer: is renamed part: — use for using Popcorn, build for building templates")
+    elif shared and part:
+        problems.append("part: is for a page in one part; the glossary and the references have none")
+    elif not shared and not part:
+        problems.append(f"no part — every page but the glossary and the references is one of {sorted(PARTS)}")
+    elif part and part.group("value").strip() not in PARTS:
+        problems.append(f"part '{part.group('value').strip()}' is not one of {sorted(PARTS)}")
 
     if _APPLIES_TO.search(front):
         problems.append("applies_to: is retired — say in the page's prose when it needs the CLI")
+    if _PRODUCT_TERMS.search(front):
+        problems.append(
+            "product_terms: is retired — every page is written in the product's words, "
+            "so none needs to declare which it explains"
+        )
 
     if _SOURCE.search(front):
         problems.append(

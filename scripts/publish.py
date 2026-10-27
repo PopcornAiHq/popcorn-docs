@@ -36,7 +36,6 @@ bucket, still served until something says otherwise.
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import pathlib
 import subprocess
@@ -93,28 +92,23 @@ def local_files() -> dict[str, pathlib.Path]:
 
 
 # The files that point at pages rather than being one: the indexes advertise
-# every page's address, and the old-address stubs (moved.json) each name the
-# page that replaced them.
+# every page's address.
 INDEXES = {
     "index.html", "llms.txt", "llms-full.txt", "chunks.json", "search.json",
-    "sitemap.xml", "robots.txt", "moved.json",
+    "sitemap.xml", "robots.txt",
 }
 
 
 def upload_order(files: dict[str, pathlib.Path]) -> list[str]:
-    """Pages and assets first, then the indexes, then the old-address stubs.
+    """Pages and assets first, then the indexes.
 
-    Uploads go one key at a time, and the build's paths sort old addresses
-    (`concepts/…`) ahead of the layered ones (`platform/…`, `product/…`). In
-    path order a stub went live saying "moved to X" minutes before X existed,
-    and an index advertised pages still on their way. Uploading what is
-    pointed at before what points means a link never names a missing file.
+    Uploads go one key at a time, so in path order an index could advertise
+    pages still on their way. Uploading what is pointed at before what points
+    means a link never names a missing file.
     """
-    moved_file = BUILD / "moved.json"
-    stubs = set(json.loads(moved_file.read_text())["moved"]) if moved_file.exists() else set()
 
     def rank(key: str) -> int:
-        return 2 if key in stubs else 1 if key in INDEXES else 0
+        return 1 if key in INDEXES else 0
 
     return sorted(files, key=lambda k: (rank(k), k))
 

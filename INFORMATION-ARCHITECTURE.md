@@ -7,30 +7,36 @@ nobody can say which one a new file belongs in.
 Each section below states its audience, what belongs in it, and the one test
 that decides a borderline case.
 
-## Two layers, across every section
+## Two parts, across every section
 
-Every page also declares a `layer`, which cuts across concepts, guides and
-reference.
+Every page but the glossary and the references declares a `part`, which cuts
+across concepts and guides.
 
-- **`product`** — for a Popcorn user and their assistant, in the product
-  glossary's words. Popcorn is used headless, so this is what an assistant
+- **`use`**, Using Popcorn — for a Popcorn user and their assistant, working
+  with Routines. Popcorn is used headless, so this is what an assistant
   connected over MCP reads first.
-- **`platform`** — for someone building or customizing a Routine Template
-  without access to the backend.
+- **`build`**, Building Routine Templates — for someone building or changing
+  a Routine Template without access to the backend.
+
+The glossary and the reference pages serve both parts, so they have none.
+They are listed once, after both, and sit at `/glossary/` and `/reference/`.
 
 **The test:** *would a Popcorn user who never builds a template need this?*
-Then it is product, and it names a platform term only inside a Platform note.
+Then it is `use`.
 
-## One vocabulary, in both layers
+Nothing internal has a part here. Backend symbols, services and why the
+platform is built the way it is stay out of this public repository.
 
-The layer says what a page is about, not which words it uses. The person who
+## One vocabulary
+
+The part says what a page is about, not which words it uses. The person who
 runs a Routine is usually the one who copies its template and changes it, and
 the MCP tools already speak to them in the product's words:
-`copy_routine_template`, `create_routine_version`, `install_routine`. A page
-about building a template uses the same words.
+`copy_routine_template`, `create_routine_version`, `install_routine`. Every
+page uses the same words.
 
-- **A platform term with a product word is written the product way**, and
-  the other name is given once, where the reader will meet it: "a copy of
+- **A name with a product word is written the product way**, and the other
+  name is given once, in italics, where the reader will meet it: "a copy of
   the template (the CLI calls it a *fork line*)". A Routine is not a
   channel, and a Routine Template is not an app, in prose on any page.
 - **A file-level term with no product word is used as it is:** `manifest`,
@@ -40,12 +46,19 @@ about building a template uses the same words.
   (`popcorn app fork`, `channel_parameters:`), whatever the prose around it
   calls the thing.
 
-The platform glossary is where each platform term meets its product word.
-It is a lookup for the names the CLI, the API and the files use, not the
-vocabulary to write in.
+The glossary's table "Names you'll see elsewhere" pairs each name the CLI,
+the API and older copy use with the product's word. `scripts/check-vocabulary.py
+--strict` reads it and fails a hand-written page that uses one of those names
+in prose; the everyday words among them (*app*, *project*, *record*) are left
+to review.
 
-Nothing internal has a layer here. Backend symbols, services and why the
-platform is built the way it is stay out of this public repository.
+## Ids
+
+A page's id is the last part of its URL and the handle everything else names
+it by. It never changes meaning and is never reused for another page. When
+pages are merged, the ids of the ones absorbed are retired: removed from every
+`concepts:` list, eval question, generator and link that named them, in this
+repository and in the ones that link it. Old addresses are not redirected.
 
 ## `content/concepts/`
 

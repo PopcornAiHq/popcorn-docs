@@ -10,9 +10,8 @@ summary: >
   value written to the column lasts until the next projection. The graph is
   a manifest `states:` section or a `recipe.yaml` each Routine can replace.
   Publish proves structure only.
-concepts: [manifest-keys, channel-binding, states-authoring, app-bundle]
-layer: platform
-product_terms: [Status, Action]
+concepts: [manifest-keys, versions, states-authoring, app-bundle]
+part: build
 ---
 
 An item's Status, and the Actions it offers, are not one flat field.
@@ -140,7 +139,7 @@ A `states:` graph belongs to the template's version (the platform calls it a
 changing it means publishing a new version.
 The **recipe** tier ships the same graph as a document of its own,
 `recipe.yaml` at the bundle's root, and lets each Routine install a revision
-of its own. A Routine with [Steps](https://docs.popcorn.ai/product/concepts/steps.md)
+of its own. A Routine with [Steps](https://docs.popcorn.ai/use/concepts/steps.md)
 of its own is running one.
 
 ```yaml

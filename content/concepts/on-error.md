@@ -10,8 +10,7 @@ summary: >
   `$steps.<id>.error`; `fallback` is accepted but runs as `fail`. A missing
   reference fails before the activity runs, so no policy catches it.
 concepts: [flow-grammar, references, debugging-a-failed-run]
-layer: platform
-product_terms: []
+part: build
 ---
 
 A step's `on_error:` decides what its failure does to the run and how often
@@ -52,8 +51,8 @@ the step's arguments are resolved, before the activity is invoked, so
 `on_error` never sees it and a retry cannot fix it. Guarantee the key
 upstream: in an `output_schema`'s `required`, or with `$exists: true` in the
 query that produced the rows. See
-[references in a flow](https://docs.popcorn.ai/platform/concepts/references.md).
+[references in a flow](https://docs.popcorn.ai/build/concepts/references.md).
 
 A `when:` that cannot be evaluated (`PredicateError`) is likewise an
 authoring bug that fails the run at once. Reading a failure end to end is
-[debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).
+[debugging a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).

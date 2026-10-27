@@ -11,7 +11,7 @@ summary: >
   one from a template with create_routine, and copies one with
   duplicate_routine.
 concepts: [customizing-a-routine, connections, set-up-a-routine]
-layer: product
+part: use
 ---
 
 A Routine is one piece of ongoing work that Popcorn runs for you: claims
@@ -24,7 +24,10 @@ Every Routine is made from a **Routine Template**, the starting point that
 says what kind of work it is: a claims coordinator, an order follow-up. One
 template can start many Routines, and each keeps receiving the template's
 improvements unless it has been given a copy of its own (see
-[customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)).
+[customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md)).
+The CLI and the API call a Routine a *channel*, with the same `#name` and
+IDs, and a template's files are its
+[app bundle](https://docs.popcorn.ai/build/concepts/app-bundle.md).
 
 ## Finding one
 
@@ -62,7 +65,7 @@ Routine from, each with what it does and the Connections it needs.
 `create_routine` makes the Routine, private or open to the whole workspace.
 From a template it is a dry run first, showing the version that will install
 and the Connections someone has to set up; the walkthrough is
-[setting up a Routine](https://docs.popcorn.ai/product/guides/set-up-a-routine.md).
+[setting up a Routine](https://docs.popcorn.ai/use/guides/set-up-a-routine.md).
 
 ## Copying one
 
@@ -90,7 +93,3 @@ In practice the templates Popcorn ships keep most of their References in
 Google Drive, so a copy usually starts with its settings, Steps and
 guidelines, and someone connects its accounts and picks its References
 again in Popcorn.
-
-> **Platform note** — A Routine is what the CLI and the API call a *channel*,
-> and its template's code is an *app bundle*. The `#name` and the IDs are the
-> same in both. See [app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).

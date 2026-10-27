@@ -11,7 +11,7 @@ summary: >
   read_history_entry shows one entry in full. The Routine's conversation is
   read in Popcorn.
 concepts: [actions-and-status, triggers, tables]
-layer: product
+part: use
 ---
 
 A Routine's **History** is what has happened in it:
@@ -25,7 +25,11 @@ A Routine's **History** is what has happened in it:
 - **its conversation** — the messages people and its agent posted in it.
 
 History answers "did the reminder go out?", "why is this claim closed?" and
-"who sent the retainer?".
+"who sent the retainer?". An item's History is the audit log kept for its
+Row, and each run in it is a run of one of the template's flows, which the
+CLI also reads;
+[debugging a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md)
+follows one to its cause.
 
 ## One item's History
 
@@ -79,7 +83,3 @@ item is about: each entry is titled by its kind instead, such as *Email sent*,
 *Reply assessed* or *Action taken: Send retainer*. `read_history_entry`
 follows the same rule, and also leaves out a failed run's error message,
 which can quote the item; it shows only how the run ended.
-
-> **Platform note** — An item's History is the agent store's audit log for
-> its Row, and a run is a *flow run*, which the CLI also reads. See
-> [debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).

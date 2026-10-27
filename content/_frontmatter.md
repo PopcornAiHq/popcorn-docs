@@ -5,31 +5,34 @@ the MCP server. A file missing `id` or `summary` fails the build.
 
 ```yaml
 ---
-id: fork-line                  # stable, kebab-case, citable, NEVER renamed
-title: Fork lines              # a noun phrase, not a sentence
-order: 9                       # reading position within its section
+id: copying-a-template         # kebab-case, citable; never reused for another page
+title: Copying a template      # a noun phrase, not a sentence
+order: 14                      # reading position within its section
 group: How a version ships     # optional: sidebar group within the section
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 deployed: 2026-09-25           # optional, generated pages only: the deploy's date
 summary: >                     # THE PRODUCT — under 400 characters
-  A fork line is a workspace's own version series of an app. Publishing to it
-  moves every channel on that line, not just the one you edited.
-concepts: [publish, channel-binding]   # other ids, for "see also" and search
-layer: platform                        # product | platform — which layer the page speaks
-product_terms: [customizing a Routine] # platform pages: the product terms it explains; [] for none
+  A copy of a Routine Template is the workspace's own version series of it.
+  Publishing a version to it reaches every Routine on the copy, not just the
+  one you edited.
+concepts: [versions, customizing-a-routine]   # other ids, for "see also" and search
+part: build                    # use | build — which half of the site; none on the glossary and references
 ---
 ```
 
 ## Field notes
 
-**`id`** is a permanent address. It is the page's URL, the handle MCP
-responses and `get_doc` use, and what another page's `concepts:` names.
-Renaming one breaks all three, so choose it as if it were a URL, because it is.
+**`id`** is the page's handle: the last part of its URL, what MCP responses
+and `get_doc` use, and what another page's `concepts:` names. An id never
+changes meaning and is never reused for another page. When a page is merged
+into another, its id is retired: removed everywhere it is named, in this
+repository and in the ones that link it, not redirected. Choose one as if it
+were a URL, because it is.
 
 **`summary`** is what an agent gets back from `search_docs` and often the only
 thing it ever reads. Three rules: state the fact, then its consequence; use the
-platform's own nouns; never open with "This page describes."
+product's words, as every page does; never open with "This page describes."
 
 The 400-character cap is not a style preference. Search returns many summaries
 in one response, and the whole response lands in the model's context, so an
@@ -81,36 +84,30 @@ page is. It changes only when something else on the page does, so a deploy
 that changes nothing leaves the page untouched; a hand run that changes the
 page drops the line, since it does not know which deploy it read. A page has
 `version` or `deployed`, never both, and a hand-written page has neither. The
-field was once called `platform:`, which `check-content.py` now refuses:
-`layer: platform` uses that word for the page's layer.
+field was once called `platform:`, which `check-content.py` now refuses.
 
-**`layer`** says what the page is about, using a Routine or building its
-template, and it is required. Both layers are written in the product's
-words; the layers differ in which platform terms may appear in prose.
+**`part`** says which half of the site the page is in, and it is required on
+every page but the glossary and the reference pages.
 
-- `product` — for a Popcorn user and their assistant: Routines, Routine
-  Templates, Triggers, Actions, Status, Routine Settings, in the
-  [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)'s
-  terms. Such a page names a platform term only inside a **Platform note** —
-  a blockquote that opens `> **Platform note** —` and links the platform page
-  that explains the term. `scripts/check-layer.py` fails a product page that
-  uses one anywhere else, taking the terms from the platform glossary.
-- `platform` — for someone building a Routine Template: the bundle format,
-  the CLI, flows, copies and versions. It is written in the product's words
-  too, keeping the file-level terms the reader types (`manifest`, flow,
-  activity) and giving a platform term with a product word once, as the
-  other name: "a copy of the template (the CLI calls it a *fork line*)". The
-  [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)
-  pairs each platform term with its product word, and
-  `INFORMATION-ARCHITECTURE.md` has the rule in full.
-  It opens with the product idea before the mechanism ("A Routine's
-  scheduled Triggers are schedules in its template's manifest"), and declares
-  **`product_terms:`**, the product glossary terms it explains. Its summary
-  names one of them, so a reader arriving in the product's words finds the
-  word they came with. `product_terms: []` declares a page with no product
-  term, such as the flow grammar; leaving the field out fails
-  `check-layer.py`. Generated reference pages are exempt.
+- `use` — Using Popcorn: for a Popcorn user and their assistant, working with
+  Routines, their Triggers, Actions, Status and Routine Settings.
+- `build` — Building Routine Templates: for someone building or changing a
+  template, its files, flows, copies and versions. It opens with the product
+  idea before the mechanism ("A Routine's scheduled Triggers are schedules in
+  its template's manifest").
+
+The glossary and the reference pages serve both halves, so they carry no
+`part:`, sit at `/glossary/…` and `/reference/…`, and are listed once, after
+both, in the sidebar. Every page, in either half, is written in the product's
+words: file-level terms the reader types (`manifest`, flow, activity) stay,
+and a name the CLI or the API uses where the product has its own word is given
+once, in italics, as the other name — "a copy of the template (the CLI calls it
+a *fork line*)". The [glossary](https://docs.popcorn.ai/glossary/glossary.md)
+pairs each such name with the product's word in its table "Names you'll see
+elsewhere", and `scripts/check-vocabulary.py --strict` fails a page that uses
+one in prose. `INFORMATION-ARCHITECTURE.md` has the rule in full.
 
 The field describes the page, not its reader: someone building a template
-reads both layers. A page that needs the CLI says so in its first paragraph;
-the retired `applies_to:` field is refused.
+reads both halves. A page that needs the CLI says so in its first paragraph.
+Three retired fields are refused: `layer:` (the old name of `part:`),
+`product_terms:` and `applies_to:`.

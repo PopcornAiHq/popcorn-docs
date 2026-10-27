@@ -9,8 +9,8 @@ summary: >
   with it and survive the template's improvements. A new Table or a kind of
   step the template does not offer gives it a copy of its own, which no
   longer receives those improvements and cannot be undone.
-concepts: [routine-settings, instructions, routines]
-layer: product
+concepts: [routine-settings, instructions, routines, copying-a-template]
+part: use
 ---
 
 Customizing a Routine is changing how one Routine works without touching the
@@ -23,14 +23,14 @@ improvements.
 Most changes belong to the Routine alone, and the template's improvements
 leave them in place:
 
-- **[Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md)** — a reminder
+- **[Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md)** — a reminder
   interval, a sending mode, a schedule's cadence, the wording of an email.
   Each reaches this Routine only and can be set back.
-- **[Connections](https://docs.popcorn.ai/product/concepts/connections.md)** — the accounts it
+- **[Connections](https://docs.popcorn.ai/use/concepts/connections.md)** — the accounts it
   reads from and books into.
-- **[Instructions](https://docs.popcorn.ai/product/concepts/instructions.md)** — what its agent
+- **[Instructions](https://docs.popcorn.ai/use/concepts/instructions.md)** — what its agent
   should do and how.
-- **[References](https://docs.popcorn.ai/product/concepts/reference-documents.md)** — the
+- **[References](https://docs.popcorn.ai/use/concepts/reference-documents.md)** — the
   documents it works from.
 - **Its steps**, where its template keeps them with the Routine: what each
   step asks for, their order, their wording, and where the Routine stops for
@@ -60,8 +60,9 @@ assistant makes is a dry run first, and the dry run for a copy of its own says
 so. `get_routine` shows which kind a Routine is today, as **Updates from**:
 Popcorn, or this workspace's own copy.
 
-> **Platform note** — A copy of its own is a *fork line*: the workspace's own
-> version series of the template, changed by publishing to it. See
-> [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md), and
-> [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md) for
-> making the change itself.
+A copy of its own is the workspace's own series of versions of the template
+(the CLI calls it a *fork line*), and a change reaches it by publishing a new
+version. [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md)
+says what a copy costs and how to make one, and
+[authoring an app bundle](https://docs.popcorn.ai/build/guides/template-authoring.md)
+how to make the change itself.

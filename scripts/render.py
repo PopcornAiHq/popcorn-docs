@@ -47,7 +47,6 @@ import highlight
 _FENCE = re.compile(r"^```")
 _RULE = re.compile(r"^-{3,}\s*$")
 _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
-_PLATFORM_NOTE = re.compile(r"^\*\*Platform note\*\*\s*(?:[—–-]\s*)?(?P<rest>.*)$")
 # A list item may be indented up to three spaces, as Markdown allows; four is
 # where an indented code block begins.
 _ORDERED = re.compile(r"^ {0,3}\d+\.\s+(?P<text>.+)$")
@@ -304,9 +303,9 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     out = []
     for label, groups in sections:
-        # A layer heading: a label with no links, above the kinds it holds.
+        # A part heading: a label with no links, above the kinds it holds.
         if groups is None:
-            out.append(f'<p class="nav-layer">{html.escape(label, quote=False)}</p>')
+            out.append(f'<p class="nav-part">{html.escape(label, quote=False)}</p>')
             continue
         if label is None:
             out.append("".join(
@@ -325,20 +324,6 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
                 parts.append(f"<ul>{items}</ul>")
         out.append("<div>" + "".join(parts) + "</div>")
     return '<nav class="site-nav" aria-label="Docs">' + "".join(out) + "</nav>"
-
-
-def moved_page(title: str, to: str) -> str:
-    """The HTML answer at a page's old address: a redirect, and a link for
-    anything that does not follow one. Not indexed, and canonical to the new
-    address, so a search engine moves its result rather than keeping both."""
-    t, u = html.escape(title, quote=False), html.escape(to)
-    return (
-        "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
-        f"<title>{t} — moved</title>"
-        f'<meta http-equiv="refresh" content="0; url={u}">'
-        f'<link rel="canonical" href="{u}"><meta name="robots" content="noindex">'
-        f'</head><body><p>This page moved to <a href="{u}">{u}</a>.</p></body></html>\n'
-    )
 
 
 def rail(*, contents: str = "", related: list[Link] = ()) -> str:
@@ -491,18 +476,6 @@ def body(md: str, *, terms: bool = False) -> str:
             while i < len(lines) and _QUOTE.match(lines[i]):
                 inner.append(_QUOTE.match(lines[i]).group("text"))
                 i += 1
-            note = _PLATFORM_NOTE.match(inner[0])
-            if note:
-                # A Platform note is where a product page names the mechanism
-                # under its words. It is set apart, and labelled, so a reader
-                # who only wants the product can see what to skip. The .md
-                # output keeps it as a plain blockquote.
-                inner[0] = note.group("rest")
-                out.append(
-                    '<aside class="platform-note"><p class="platform-note-label">'
-                    f"Platform note</p>{body(chr(10).join(inner))}</aside>"
-                )
-                continue
             out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
             continue
 
@@ -758,11 +731,11 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: .08em; color: var(--fg); }
 .site-nav > :first-child .nav-section { margin-top: 0; }
-.nav-layer { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
-.nav-layer + div .nav-section { margin-top: .75rem; }
+.nav-part { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
+.nav-part + div .nav-section { margin-top: .75rem; }
 .solo { margin-top: 1.25rem !important; }
 .site-nav > .solo:first-child { margin-top: 0 !important; }
-.nav-layer + .solo { margin-top: .75rem !important; }
+.nav-part + .solo { margin-top: .75rem !important; }
 .sidebar details { margin: .2rem 0 .4rem; }
 .sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
 .sidebar details ul { padding-left: .8rem; }
@@ -896,9 +869,6 @@ h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1
 li:target { background: var(--wash); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--wash); }
 blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--brand); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
-.platform-note { margin: 0 0 1.4rem; padding: .75rem 1rem; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--card); }
-.platform-note p:last-child { margin-bottom: 0; }
-.platform-note-label { margin: 0 0 .3rem; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
    follow the page instead. */
