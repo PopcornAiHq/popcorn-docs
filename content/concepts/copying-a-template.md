@@ -28,7 +28,8 @@ This page is what a copy costs and how to make one.
 |---|---|---|
 | copy the template a Routine runs | `copy_routine_template(routine_id, name)` | `popcorn app fork --channel <routine> --name <copy>`, or `popcorn app checkout --channel <routine> --fork=<copy>`, which copies and checks out in one step |
 | move a Routine onto a copy the workspace already has | `install_routine(routine_id, copy=<name>)` | `popcorn app fork --channel <routine> --name <copy>` with the existing copy's name |
-| see what a Routine runs | `get_routine`, whose **Updates from** says Popcorn or this workspace's own copy | `popcorn app list --channel <routine>` |
+| see what a Routine runs | `get_routine`, whose **Updates from** says Popcorn or this workspace's own copy; `list_routines` says it for every Routine (`· Popcorn's` or `· copy "<name>"`) | `popcorn app list --channel <routine>` |
+| list the Routines on a copy | `list_routines(template=<template>, copy=<name>)`, the ones you can see | |
 | list the workspace's copies | | `popcorn app lines` |
 
 `copy_routine_template` is a dry run until it is called again with
@@ -61,7 +62,9 @@ other Routines does not matter. A change tested on one Routine reaches the
 others on the copy. The exceptions are in
 [installing](https://docs.popcorn.ai/build/concepts/versions.md#installing):
 the install on the Routine you published from can be blocked, and the daily
-update skips some Routines.
+update skips some Routines. `create_routine_version`'s dry run counts the
+other Routines a new version will update, and `list_routines` with
+`template` and `copy` names the Routines on the copy that you can see.
 
 A Routine already on a copy can never move to another one. So a change
 meant to reach some Routines and not their siblings needs a second, named
