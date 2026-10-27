@@ -362,7 +362,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 1bf13eb70563).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version ec72d16cd4b6).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -392,14 +392,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 1bf13eb70563).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version ec72d16cd4b6).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 16 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version 0096e731db97. To go back: change_routine with revert_to="0096e731…".
+Before it: version 59b9d71647ae. To go back: change_routine with revert_to="59b9d716…".
 ```
 
 ## Apps
