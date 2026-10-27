@@ -431,3 +431,22 @@ transitions behind them stay out of the product.
   engine next projects the row. *Not to be
   confused with* a run's status or outcome, or a user's presence, which the
   API also calls `status`. Product term: Status.
+
+## Names you'll see elsewhere
+
+The CLI, the API and older copy call some things by a name the product
+doesn't use. Pages say the product's word and give the other name once,
+where the reader will meet it; this table is where to look one up.
+
+| Name | In the product | Where you'll see it |
+|---|---|---|
+| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses, MCP output (`App: …`) |
+| channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
+| project | Routine | older MCP tools and the web app |
+| tracker | Routine | older product copy and MCP descriptions |
+| channel template | Routine Template | `popcorn channel templates`, `popcorn channel create --template` |
+| channel config | Routine Settings, for its parameters; Connections, for its integrations | `popcorn channel-config`, `$channel.*` in a flow |
+| agent store | Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
+| record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
+| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API, `line:` in MCP output |
+| bundle version | a version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |
