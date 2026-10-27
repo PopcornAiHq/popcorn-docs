@@ -23,7 +23,10 @@ items the Routine tracks, which live in its
 A Routine's template says which References it expects, and the Routine works
 without one it is still waiting for until someone adds it. A Reference belongs
 to its Routine: adding or replacing one changes that Routine only, and survives
-the template's improvements.
+the template's improvements. The References a template expects are its
+manifest's `documents:` key, where a document that starts work names the flow
+it starts (see
+[manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md)).
 
 ## Where they live today
 
@@ -93,7 +96,3 @@ A Reference is free text, which no Column marking can vouch for. So on a
 workspace that guards personal data, `list_references` leaves out file
 names, and `read_reference` returns neither the text nor a link: it says
 when the Reference was added and by whom, and that Popcorn shows it.
-
-> **Platform note** — The References a template expects are its manifest's
-> `documents:` key, and a document that starts work names the flow it starts.
-> See [manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).

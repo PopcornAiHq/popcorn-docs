@@ -92,7 +92,7 @@ template's own, after a dry run. One change is drafted at a time on a
 Routine, and it works only where the template keeps its Steps with the
 Routine.
 
-> **Platform note** — A Routine's Steps are the states of its template's
-> state machine, and a Routine with Steps of its own has them installed as a
-> recipe. A Step is not a flow's `step:`. See
-> [State machines](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+In the template, a Routine's Steps are the states of its state machine, and
+a Routine with Steps of its own has them installed as a recipe (see
+[state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md)).
+A Step is not one of a flow's `steps:`.

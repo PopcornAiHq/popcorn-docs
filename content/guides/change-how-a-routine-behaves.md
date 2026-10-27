@@ -75,11 +75,9 @@ Three other kinds of change remain:
   kind of step its template does not offer. That gives the Routine a copy of its own, which
   no longer receives the template's improvements and cannot be undone. See
   [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)
-  before agreeing to it.
-
-> **Platform note** — Making that second kind of change is building on the
-> template itself: see
-> [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+  before agreeing to it. Making that change is building on the template
+  itself: see
+  [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 
 ## 6. Change its Steps
 

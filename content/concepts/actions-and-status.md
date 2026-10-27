@@ -24,7 +24,10 @@ An **Action** is something a person does to move an item on: *Send
 retainer* or *Already signed* at a [Review](https://docs.popcorn.ai/product/concepts/reviews.md),
 *Stop tracking* and *Resume tracking* on any item, *Try again* after an error.
 An item offers only the Actions that make sense for where it stands, so the
-buttons and the Status cannot disagree.
+buttons and the Status cannot disagree. Both come from the same place: the
+template declares state machines, Status is worked out from them, and each
+Action is the button on one of their transitions (see
+[state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md)).
 
 There is no Action that archives an item. An item closes for a reason the
 Routine records, such as *No response* when the follow-ups run out, or a
@@ -52,7 +55,3 @@ offer the Action now is refused.
 
 The Action applies in the background; `get_row` shows the item's new Status
 once it has.
-
-> **Platform note** — Status is a projection of *state machines* the template
-> declares, and each Action is the button on one of their transitions. See
-> [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).

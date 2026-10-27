@@ -66,7 +66,8 @@ change stays with this Routine and survives the template's improvements; it
 does not give the Routine a copy of its own. Without a Review, the Routine
 moves the item on by itself.
 
-> **Platform note** — A Review is a state that warns, with the transitions
-> people can take from it. It is not a flow's `await_approval`, which pauses
-> one run until someone replies. See
-> [State machines](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+In the template, a Review is a state that warns, with the transitions people
+can take from it (see
+[state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md)).
+It is not a flow's `await_approval`, which pauses one run until someone
+replies.

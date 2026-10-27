@@ -55,11 +55,10 @@ run on, though, an added Row is a new item: it starts at its first Status,
 and the Routine's next run acts on it for real, which on a Routine that
 sends email means that item's first email. Some Columns keep their own
 rules: a notes Column may append what is written rather than replace it, and a first-seen
-date may keep its first value. `update_row`'s response names any Column
+date may keep its first value. Those rules are the Column's merge policy,
+declared in the template (see
+[table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) and
+[column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md)). `update_row`'s response names any Column
 where that happened. A Row's **Status** cannot be written at all: it changes
 when an [Action](https://docs.popcorn.ai/product/concepts/actions-and-status.md) is taken or the
 Routine moves the item on.
-
-> **Platform note** — Those per-Column rules are *merge policies*, declared
-> in the template. See [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md)
-> and [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).

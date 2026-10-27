@@ -73,6 +73,6 @@ changing it reaches this Routine only and survives the template's
 improvements. Adding a new kind of Trigger changes what the Routine is built
 from (see [customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md)).
 
-> **Platform note** — A scheduled Trigger is a *schedule* in the template's
-> manifest, and the work it starts is a *flow*. See
-> [Schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md).
+In the template, a scheduled Trigger is an entry in its manifest's
+`schedules:`, and the work it starts is a flow (see
+[schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md)).

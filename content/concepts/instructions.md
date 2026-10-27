@@ -74,5 +74,6 @@ change before anything is installed (see
 [Steps](https://docs.popcorn.ai/product/concepts/steps.md)). The rest is changed in Popcorn, by
 telling the Routine's agent.
 
-> **Platform note** — The template's guidance is its `AGENT.md` and the
-> prompt files it seeds. See [app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
+The template's guidance is its `AGENT.md` and the prompt files it seeds,
+which [app bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md)
+describes.

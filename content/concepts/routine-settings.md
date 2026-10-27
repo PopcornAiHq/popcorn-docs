@@ -64,6 +64,7 @@ Secrets, and the Routine's [Instructions](https://docs.popcorn.ai/product/concep
 are not changed here; they change in Popcorn. The walkthrough is
 [changing how a Routine behaves](https://docs.popcorn.ai/product/guides/change-how-a-routine-behaves.md).
 
-> **Platform note** — Many settings are a channel's *scalars* or *channel
-> parameters*, and the prompts and email templates are files the template
-> seeds. See [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+In the template, many settings are the Routine's scalars or channel
+parameters, and the prompts and email templates are files the template
+seeds; [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md)
+says which declarations become settings.
