@@ -77,7 +77,8 @@ What a flow may call is the activity catalog, served by the platform:
 `popcorn flow activities`, or the
 [activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
 Author against `foundation` and `feature` activities at `release` or `beta`;
-`app.*` activities are private to the Routine Templates Popcorn ships.
+`app.*` activities are one Routine Template's own logic, which a copy of it
+keeps calling; they are not a surface to author against.
 
 ## A step is exactly one of five things
 
