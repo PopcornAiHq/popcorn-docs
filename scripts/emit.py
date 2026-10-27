@@ -178,6 +178,20 @@ LEGACY_LAYER = {"use": "product", "build": "platform", "glossary": "product", "r
 def legacy_layer(page: dict) -> str:
     return LEGACY_LAYER[page.get("part") or nav_section(page)]
 
+
+def check_part(page: dict) -> None:
+    """Stop the build, naming the page, when its `part` does not fit its kind.
+
+    check-content.py reports the same with the rest of the contract; this is
+    for a build run on its own, which would otherwise fail on a KeyError or
+    put a shared page under one part."""
+    part, kind = page.get("part"), nav_section(page)
+    if kind in SHARED and part:
+        sys.exit(f"✖  {page['id']}: a {kind} page has no part:, but this one says '{part}'")
+    if kind not in SHARED and part not in _PARTS:
+        sys.exit(f"✖  {page['id']}: part: must be one of {', '.join(_PARTS)}, not {part!r}")
+
+
 # Pages listed under a kind other than their directory's. The glossary lives
 # in content/concepts/ but is looked up rather than read through. An id never
 # changes meaning, which is what makes naming one here safe.
@@ -360,8 +374,11 @@ def not_found(pages: list[dict]) -> str:
 
 
 def pager(page: dict, pages: list[dict]) -> str:
-    """Previous and next within the page's own section, in reading order."""
-    peers = [p for p in pages if nav_section(p) == nav_section(page)]
+    """Previous and next within the page's own part and section, in reading order."""
+    peers = [
+        p for p in pages
+        if nav_section(p) == nav_section(page) and p.get("part") == page.get("part")
+    ]
     i = next(n for n, p in enumerate(peers) if p["id"] is page["id"])
     links = []
     if i > 0:
@@ -427,6 +444,8 @@ def main() -> int:
     if not pages:
         print("✖  no content", file=sys.stderr)
         return 1
+    for page in pages:
+        check_part(page)
 
     # Rebuild from empty. Without this a page that was renamed or deleted in
     # `content/` keeps its old file here, and the publish is a sync rather than

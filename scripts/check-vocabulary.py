@@ -54,7 +54,9 @@ _ENTRY = re.compile(
 _MORE = re.compile(r"\*\*([^*]+)\*\*")
 # A fence may be indented inside a list item, and a code span may wrap a line.
 _FENCE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
-_CODE = re.compile(r"`[^`]+`")
+# A span may wrap a line but not cross a blank one, so a stray backtick
+# cannot hide the paragraphs after it.
+_CODE = re.compile(r"`(?:[^`\n]|\n(?![ \t]*\n))+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
 # Single-asterisk italics, not `**bold**`: a name in italics is being mentioned.
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")

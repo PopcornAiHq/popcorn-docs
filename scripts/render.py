@@ -305,7 +305,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
     for label, groups in sections:
         # A part heading: a label with no links, above the kinds it holds.
         if groups is None:
-            out.append(f'<p class="nav-layer">{html.escape(label, quote=False)}</p>')
+            out.append(f'<p class="nav-part">{html.escape(label, quote=False)}</p>')
             continue
         if label is None:
             out.append("".join(
@@ -324,20 +324,6 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
                 parts.append(f"<ul>{items}</ul>")
         out.append("<div>" + "".join(parts) + "</div>")
     return '<nav class="site-nav" aria-label="Docs">' + "".join(out) + "</nav>"
-
-
-def moved_page(title: str, to: str) -> str:
-    """The HTML answer at a page's old address: a redirect, and a link for
-    anything that does not follow one. Not indexed, and canonical to the new
-    address, so a search engine moves its result rather than keeping both."""
-    t, u = html.escape(title, quote=False), html.escape(to)
-    return (
-        "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
-        f"<title>{t} — moved</title>"
-        f'<meta http-equiv="refresh" content="0; url={u}">'
-        f'<link rel="canonical" href="{u}"><meta name="robots" content="noindex">'
-        f'</head><body><p>This page moved to <a href="{u}">{u}</a>.</p></body></html>\n'
-    )
 
 
 def rail(*, contents: str = "", related: list[Link] = ()) -> str:
@@ -745,11 +731,11 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: .08em; color: var(--fg); }
 .site-nav > :first-child .nav-section { margin-top: 0; }
-.nav-layer { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
-.nav-layer + div .nav-section { margin-top: .75rem; }
+.nav-part { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
+.nav-part + div .nav-section { margin-top: .75rem; }
 .solo { margin-top: 1.25rem !important; }
 .site-nav > .solo:first-child { margin-top: 0 !important; }
-.nav-layer + .solo { margin-top: .75rem !important; }
+.nav-part + .solo { margin-top: .75rem !important; }
 .sidebar details { margin: .2rem 0 .4rem; }
 .sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
 .sidebar details ul { padding-left: .8rem; }
