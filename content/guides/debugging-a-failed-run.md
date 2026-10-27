@@ -3,11 +3,12 @@ id: debugging-a-failed-run
 title: Debugging a failed run
 order: 3
 summary: >
-  When a Routine's History shows work that went wrong: find the flow run, read
-  its `outcome` rather than its status, read the failure with `flow runs get
-  --include-errors` and the steps with `flow runs timeline`, fix, publish, and
-  run again once the install lands. Also runs that succeed having done
-  nothing, and ones that never start.
+  When a Routine's History shows work gone wrong: read it over MCP with
+  `list_history` and `read_history_entry`, then find the flow run, read its
+  `outcome` rather than its status, read the failure with `flow runs get
+  --include-errors` and the steps with `flow runs timeline`, fix, publish,
+  and run again once the install lands. Also runs that succeed
+  having done nothing, and ones that never start.
 concepts: [versions, flow-grammar, template-authoring]
 layer: platform
 product_terms: [History]
@@ -16,14 +17,40 @@ product_terms: [History]
 This guide starts from a flow run that did the wrong thing, or from one you
 expected and cannot find, and ends with a fixed version running. Editing and
 publishing are the loop in
-[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md);
+[changing a Routine Template](https://docs.popcorn.ai/platform/guides/template-authoring.md);
 this page is the reading half of it.
 
-Commands that act on a channel take it as `--channel`, a `#name` or a UUID;
-the examples write `<channel>`. A channel is what the product calls a
-**Routine**, and its runs are part of the Routine's **History** (see the
-[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)). An assistant connected over MCP is not given the
-flow-run tools, so this loop runs from the CLI.
+A Routine's runs are part of its **History** (see the
+[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)). The CLI calls a Routine a
+*channel*: its commands take one as `--channel`, a `#name` or a UUID, and the
+examples write `<channel>`.
+
+## Start in History, over MCP
+
+An assistant connected to Popcorn over MCP is not given the flow-run tools,
+but it can read runs in the Routine's History: an item's History lists the
+runs that changed it, and a run it started can be followed whether or not it
+changed any item:
+
+- **`list_history`**, with the `routine` and an item's `row_id`, lists that
+  item's changes newest first, each with who or what made it and its
+  `entry_id`, and under them the runs that changed it and how each ended.
+- **`read_history_entry`**, with an `entry_id`, shows that one change in
+  full: every field it changed, before and after, and, when a run made it,
+  what the run did, step by step in order, each with its outcome and any
+  failure message, and how the run ended.
+- **`list_history` with `run`** in place of `row_id` follows one run: how it
+  is going or how it ended, with its failure message, and the items it
+  changed, or what it did when it changed none. It takes the run reference
+  `run_trigger` returns, so it follows a run the assistant started.
+
+History has limits that send you to the CLI. A run is listed under an item
+only when it wrote to that item, so a run that failed before writing anything
+is in no item's History. In a workspace that guards personal data, a failure
+shows only that a step failed, not its message. And History names a run by
+the work it did, never by its `workflow_id`, which is how the CLI addresses
+a run. For the activity failures, the full timeline and the inputs to run it
+again, go on.
 
 ## 1. Find the run
 
@@ -99,7 +126,7 @@ omits them. What each part says:
 | `current_activities` | On a live run only: what is in flight, its attempt against its maximum, and `last_failure`, the error behind the current retry. This is why a run is stuck. |
 | `outputs` | On a completed run only: the flow's declared `outputs:`. |
 | `inputs` | The inputs the run was started with — what to pass to run it again. A child started by `call_flow` may lack a large input it reads from its parent's history instead. |
-| `version_id` | The bundle version the run pinned, printed as `version:`. Null (`-`) until the run has pinned, and on runs older than the field. |
+| `version_id` | The version of the template the run pinned, printed as `version:`. Null (`-`) until the run has pinned, and on runs older than the field. |
 
 The detail names **activities, not step ids** — `foundation.store.upsert_rows`,
 not `record_alert`. The timeline names both:
@@ -129,7 +156,7 @@ The failures you will meet most:
   the flow's top-level `outputs:`: resolved after the last step, it is retried
   by the engine and the run stays `Running` with nothing in flight — cancel it
   and fix the reference. A `$channel.<name>` reference to a parameter the
-  channel has not set fails the same way; `channel-config show` (§4) finds
+  Routine has not set in its Routine Settings fails the same way; `channel-config show` (§4) finds
   those before a run does.
 - **An activity's own error.** The top of the chain is the activity failing,
   with no `type`; its `cause` carries the activity's error type and message.
@@ -154,19 +181,19 @@ is accepted but runs as `fail`.
 ## 4. A run that succeeded and did nothing
 
 **A required integration is not connected.** A flow's
-`required_integrations:` is checked when a run starts. When one is not in the
-channel config — or is connected to an account of a different provider than
-the flow declares — the run stops before its first step and ends `Completed`,
+`required_integrations:` is checked when a run starts. When one is not among
+the Routine's Connections — or is connected to an account of a different
+provider than the flow declares — the run stops before its first step and ends `Completed`,
 `succeeded`, with empty `outputs`. That is deliberate: a scheduled tick on a
-channel nobody has configured yet must not fail every interval. The run
-detail does not say why it did nothing, so ask the channel:
+Routine nobody has configured yet must not fail every interval. The run
+detail does not say why it did nothing, so ask the Routine:
 
 ```bash
 popcorn channel-config show --channel <channel> --strict
 ```
 
 It compares every flow's `$channel.*` references and required integrations
-with what the channel has. `missing_integrations`, `missing_parameters` and
+with what the Routine has. `missing_integrations`, `missing_parameters` and
 `provider_mismatches` are the findings that break a run, and `--strict` exits
 5 on any of them. Connect the account with
 `popcorn channel-config integrations set`.
@@ -202,7 +229,7 @@ and counts of fires skipped because the previous run was still going
 (`skipped (overlap)`) and fires missed (`missed (catchup)`). Its `note` is
 written by whatever last rewrote the schedule, and is usually the only
 explanation of a cadence that differs from the manifest. `app status` compares
-the channel's armed schedules with the manifest's. It prints a difference the
+the Routine's armed schedules with the manifest's. It prints a difference the
 platform explains — a `set_app_mode` retune, a spread offset — as a `note`,
 and exits non-zero only on one it cannot: a cadence or a pause nothing
 explains, or a declared schedule that was never installed. A schedule whose flow was renamed is dropped at install, with no error
@@ -211,7 +238,7 @@ explains, or a declared schedule that was never installed. A schedule whose flow
 To re-run a scheduled flow without waiting for its next fire,
 `popcorn schedule trigger <slug> --channel <channel>` runs it once now, with
 the inputs the schedule stores (over MCP, `run_trigger`). It takes the same slug, flow id or
-`schedule_id` as `schedule get`, and runs only a schedule the channel's bound
+`schedule_id` as `schedule get`, and runs only a schedule the Routine's bound
 manifest declares. It prints the run's `workflow_id` and the `flow runs get`
 command to follow it. When a run is already in flight and the schedule's
 overlap policy drops this one, it says `Not run`; `--overlap-policy allow_all`
@@ -233,7 +260,7 @@ reads its run's ending, then `completed` or `failed`, with the run's error in
 `error_message`. So a delivery can read `processing` for a while after its run
 has ended, and the run itself (`wh-<delivery id>`) is the faster read. A
 delivery is also `failed`, with no run at all, when its flow could not be
-resolved — the webhook names no flow, or a flow the channel no longer has —
+resolved — the webhook names no flow, or a flow the Routine no longer has —
 or its body yields no flow inputs, with the parse error in `error_message`.
 One whose run aged out of retention before the reconcile read it is `failed`
 too.
@@ -251,17 +278,17 @@ run`, or an agent running it — starts this flow.
 
 ## 6. Which version the run ran
 
-A run reads the channel's bound version once, when it starts, and keeps it to
+A run reads the Routine's bound version once, when it starts, and keeps it to
 the end. Its `call_flow` children share that version; a run started with
 `start_flow` reads the binding afresh — see
-[how a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
+[how a Routine runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
 A fix published while a run is going does not reach that run, and a run that
 started before the install landed ran the old version.
 
 `popcorn flow runs get` names the version the run pinned, as `version:`
 (`version_id` in `--json`). `popcorn flow run` prints the same number in its
 first line — `Started flow '<name>' (v<version_id>)`, printed with `--wait`
-only once the run succeeds. `app status` tells you whether the channel is on
+only once the run succeeds. `app status` tells you whether the Routine is on
 its line's head yet:
 
 ```bash
@@ -269,21 +296,21 @@ popcorn app status --channel <channel>    # run outside a checkout
 ```
 
 `Install: CURRENT` means new runs get the head. Every other state means the
-channel still runs an older version, and says why:
+Routine still runs an older version, and says why:
 
 | State | What it means |
 |---|---|
 | `INSTALLING` | an install is running, on its first attempt |
 | `RETRYING` | the running install has failed at least once; the last error follows |
-| `LOCKED` | app updates are locked on the channel, so nothing will move it |
+| `LOCKED` | its template's updates are locked on the Routine, so nothing will move it |
 | `FAILED` | the last install failed, with its error, error code and attempt count |
 | `SKIPPED` | the last install was skipped, with its reason |
 | `BEHIND` | nothing explains it: no install was started, or it is gone from history |
 
-A `Next:` line says what moves the channel on: on a fork line, usually
-`app apply`, followed by the full `popcorn app apply --channel '<channel>'`;
-for a locked channel, unlocking it first; on a product channel, the daily
-auto-update. `INSTALLING` and `RETRYING` have no `Next:`, since the install is
+A `Next:` line says what moves the Routine on: on a copy of its template
+(the CLI calls it a *fork line*), usually `app apply`, followed by the full
+`popcorn app apply --channel '<channel>'`; for a locked Routine, unlocking it
+first; on a Routine still on Popcorn's own template, the daily update. `INSTALLING` and `RETRYING` have no `Next:`, since the install is
 still running. When the install workflow could not be read, the report says the
 answer comes from the database alone, and a running install does not show.
 A failed or retrying install whose error the server classified also prints a
@@ -296,8 +323,9 @@ In `--json`, branch on `install.state`, one of the lowercase names above; the
 `retry_hint` as the server sent them. For a `failed` install, `error_code` says
 what kind of failure it was: `invalid_manifest`, `invalid_schedule` and
 `bundle_rejected` are the bundle's own and are fixed by publishing a corrected
-head; `app_mismatch` and `fork_line_conflict` mean the install targeted another
-app or line, and on a fork line `app apply` moves the channel to its own head;
+head; `app_mismatch` and `fork_line_conflict` mean the install targeted the wrong
+thing — another template, or Popcorn's own template or another copy — and on
+a copy `app apply` moves the Routine to its own head;
 `bundle_unavailable` means no published version was available; `internal` is a
 platform failure that no edit or publish fixes: report it with `workflow_id`.
 `retry_hint` already follows the code. `install_state` is only `current` or
@@ -326,7 +354,7 @@ version …`. Its `--json` carries the same `install` block, but no
    catches a reference that is absent only at runtime — that is what the run
    just told you.
 3. Publish: `popcorn app publish . --bump patch -m "..." --yes`. A publish
-   reaches every channel on the line, not only this one.
+   reaches every Routine on the copy, not only this one.
 4. Wait until `install.state` is `current` — `Install: CURRENT` from
    `popcorn app status --channel <channel>` — so the next run gets the fix.
    `FAILED`, `SKIPPED`, `LOCKED` or `BEHIND` will not clear by waiting: follow
