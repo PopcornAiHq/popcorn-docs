@@ -1,7 +1,7 @@
 ---
 id: states-authoring
 title: Authoring a states tier
-order: 10
+order: 12
 group: What a bundle holds
 summary: >
   Writing the state graph behind a Routine's Status and Actions, in

@@ -1,7 +1,7 @@
 ---
 id: state-machine
 title: State machines in a bundle
-order: 8
+order: 10
 group: What a bundle holds
 summary: >
   A Routine's Status and Actions come from state machines its template

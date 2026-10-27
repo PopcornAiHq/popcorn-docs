@@ -7,7 +7,7 @@ the MCP server. A file missing `id` or `summary` fails the build.
 ---
 id: copying-a-template         # kebab-case, citable; never reused for another page
 title: Copying a template      # a noun phrase, not a sentence
-order: 17                      # reading position within its part
+order: 2                       # reading position within its part
 group: How a version ships     # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
@@ -50,20 +50,23 @@ entry to that mapping, in a backend PR; `scripts/drift.py` reads it from a
 local backend checkout. Omit a page from it when no single symbol owns what
 it describes; do not invent one.
 
-**`order`** is the page's place in its part's reading path, starting at 1,
-with concepts and guides numbered in one sequence so a guide sits beside the
-concepts it puts to work: the sidebar, the previous/next links on every page,
-and `llms.txt` all follow it, and the landing page opens each kind at its
-first page in it. Filenames sort alphabetically, which is no reading order at all —
-it once put an advanced guide ahead of the one it builds on. Number by what a
-reader needs first; a page with no `order:` goes after the ordered ones.
+**`order`** is the page's place in its part's reading path, starting at 1.
+A part's concepts and guides are numbered in one sequence, so a guide sits
+beside the concepts it puts to work, and no two pages in a part share a
+number. The sidebar, the previous/next links on every page and `llms.txt` all
+follow it, and each Overview card opens its kind's first page. The glossary
+and the references have no part and are numbered within their kind.
+Filenames sort alphabetically, which is no reading order at all — it once put
+an advanced guide ahead of the one it builds on. Number by what a reader
+needs first; a page with no `order:` goes after the ordered ones.
 Renumbering is cheap, because nothing links to a position.
 
 **`group`** is the page's topic: a collapsible heading in the site sidebar,
-inside its part, holding concepts and guides alike — the sidebar names topics,
-never kinds. A group sits where its first page does in reading order, so it
-needs no order of its own. Pages without one sit directly under the part. Spell a group identically on every page in it — the label is the
-key.
+inside its part, holding concepts and guides alike — the sidebar names
+topics, never kinds. A group sits where its first page does in reading
+order, so it needs no order of its own, and a later page in it is listed
+there too. Pages without one sit directly under the part. Spell a group
+identically on every page in it — the label is the key.
 
 **`layout: lookup`** is for a page read by looking something up in it rather
 than top to bottom — the glossary and the reference pages. Its own entries

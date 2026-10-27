@@ -1,7 +1,7 @@
 ---
 id: extract-or-derive
 title: Extracting fields or deriving them
-order: 15
+order: 17
 group: How a flow runs
 summary: >
   To read fields off an object input, a flow needs an activity that declares

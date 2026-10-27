@@ -1,7 +1,7 @@
 ---
 id: table-columns
 title: Table columns
-order: 6
+order: 8
 group: What a bundle holds
 summary: >
   A Routine's Tables and Columns are declared in its template: a column has a

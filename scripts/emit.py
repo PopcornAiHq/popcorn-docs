@@ -135,7 +135,7 @@ def parse(path: pathlib.Path) -> dict:
 
 # The two parts of the site, Using Popcorn first: (frontmatter value, label,
 # who it is for). A page's part is the first segment of its URL and a heading
-# of the sidebar. Popcorn is used headless, so a user's assistant is the first
+# of the sidebar; the pages with no part follow both, under Look it up. Popcorn is used headless, so a user's assistant is the first
 # reader, and Using Popcorn leads.
 PARTS = [
     ("use", "Using Popcorn",
@@ -146,13 +146,14 @@ PARTS = [
      "files, flows and tools underneath, with no access to Popcorn's backend."),
 ]
 
-# The kinds of page within a part, in the order a reader meets them:
-# (kind, label, what it is for). The label heads the kind in the sidebar and
-# on its Overview card; the blurb is the card's text. A kind not listed here
-# still publishes, after these, under its own name.
+# The kinds of page, in the order a part's Overview cards show them:
+# (kind, label, what it is for). The sidebar lists topics, not kinds, so the
+# label is seen on the kind's Overview card, in a page's eyebrow and in
+# search; the blurb is the card's text. A kind not listed here still
+# publishes, after these, under its own name.
 SECTIONS = [
-    ("concepts", "Concepts", "One idea each, in reading order."),
-    ("guides", "Guides", "Walkthroughs, start to finish, each building on the last."),
+    ("concepts", "Concepts", "One idea each, explained in full."),
+    ("guides", "Guides", "Walkthroughs of one task, start to finish."),
     ("glossary", "Glossary", "Every term, with its synonyms and the collisions worth knowing."),
     ("reference", "Reference", "Generated from Popcorn itself, never written by hand."),
 ]
@@ -236,19 +237,32 @@ def reading_order(page: dict) -> tuple:
     return (part_rank, order is None, order or 0, rank, section, page["title"].lower())
 
 
+def by_topic(pages: list[dict]) -> list[dict]:
+    """The pages in the sidebar's order: each part's groups, then the rest.
+
+    A group sits where its first page does in reading order, so groups need
+    no order of their own; a later page in the same group joins it there.
+    The pager walks this order too, so Next is always the link below.
+    """
+    topics: dict[tuple, list[dict]] = {}
+    for page in pages:
+        key = (page.get("part") or "", page.get("group", "") if page.get("part") else "")
+        topics.setdefault(key, []).append(page)
+    return [page for group in topics.values() for page in group]
+
+
 def sidebar(pages: list[dict], current: str | None) -> str:
-    """The site sidebar: each part's `group:`s in reading order, then Look it up.
+    """The site sidebar: each part's `group:`s, then Look it up.
 
     A part lists topics, not kinds: a group holds concepts and guides alike,
-    so neither heading repeats under both parts. A group sits where its first
-    page does, so groups follow the reading order rather than needing an
-    order of their own; pages without a group sit directly under their part.
+    so neither heading repeats under both parts. Pages without a group sit
+    directly under their part.
     """
     parts: dict[str, dict[str, list]] = {}
     # The glossary and the references serve both parts, so they are listed
     # once, after them, under one heading rather than one each.
     shared: list = []
-    for page in pages:
+    for page in by_topic(pages):
         link = (render.inline(page["title"]), href(page), page["id"] == current)
         if not page.get("part"):
             shared.append(link)
@@ -280,8 +294,10 @@ def landing(pages: list[dict]) -> str:
     """The home page: what Popcorn is, what these pages cover, one way in each.
 
     It does not list every page — the sidebar beside it already does. Each
-    section gets a card that opens its first page in reading order, so the
-    way in follows `order:` rather than being chosen again here.
+    kind in a part gets a card that opens its first page in reading order, so
+    the way in follows `order:` rather than being chosen again here. The
+    cards follow SECTIONS, not reading order: a part opens with a guide, but
+    its concepts are still the first card.
     """
     first: dict[str, dict[str, dict]] = {}
     for page in pages:
@@ -293,7 +309,8 @@ def landing(pages: list[dict]) -> str:
         else:
             label, blurb = LOOK_UP
         cards = []
-        for section, page in sections.items():
+        for section, page in sorted(sections.items(), key=lambda kv: (
+                _KNOWN.index(kv[0]) if kv[0] in _KNOWN else len(_KNOWN))):
             kind, kind_blurb = section_info(section)
             cards.append(
                 f'<a class="card" id="{anchor(page)}" href="{href(page)}">'
@@ -361,7 +378,7 @@ def not_found(pages: list[dict]) -> str:
 
 def pager(page: dict, pages: list[dict]) -> str:
     """Previous and next within the page's own part, in the sidebar's order."""
-    peers = [p for p in pages if p.get("part") == page.get("part")]
+    peers = [p for p in by_topic(pages) if p.get("part") == page.get("part")]
     i = next(n for n, p in enumerate(peers) if p["id"] is page["id"])
     links = []
     if i > 0:

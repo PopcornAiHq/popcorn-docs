@@ -1,7 +1,7 @@
 ---
 id: app-bundle
 title: App bundles
-order: 2
+order: 4
 group: What a bundle holds
 summary: >
   A Routine Template is an app bundle: a directory of YAML plus optional code

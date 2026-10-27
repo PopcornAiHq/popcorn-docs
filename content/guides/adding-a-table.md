@@ -1,7 +1,7 @@
 ---
 id: adding-a-table
 title: Adding a table
-order: 9
+order: 11
 group: What a bundle holds
 summary: >
   Adding a Table to a Routine Template that already exists: declare it under

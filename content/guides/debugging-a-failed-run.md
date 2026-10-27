@@ -1,7 +1,7 @@
 ---
 id: debugging-a-failed-run
 title: Debugging a failed run
-order: 16
+order: 18
 group: How a flow runs
 summary: >
   When a Routine's History shows work gone wrong: read it over MCP with

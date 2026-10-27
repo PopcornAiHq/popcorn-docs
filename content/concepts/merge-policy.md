@@ -1,7 +1,7 @@
 ---
 id: merge-policy
 title: Column merge policy
-order: 7
+order: 9
 group: What a bundle holds
 summary: >
   A column's merge policy decides what an upsert does to an existing row:
