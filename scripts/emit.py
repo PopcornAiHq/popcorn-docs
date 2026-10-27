@@ -168,17 +168,6 @@ _PARTS = [name for name, *_ in PARTS]
 # `part:`, sit at /<kind>/<id>, and are listed once, after both parts.
 SHARED = {"glossary", "reference"}
 
-# chunks.json carries each page's `part`, and beside it the `layer` that
-# readers built before the field was renamed still look for. The glossary
-# answers as a page on using Popcorn and the references as building pages,
-# which is where a tie between them ranks in the docs server's search too.
-LEGACY_LAYER = {"use": "product", "build": "platform", "glossary": "product", "reference": "platform"}
-
-
-def legacy_layer(page: dict) -> str:
-    return LEGACY_LAYER[page.get("part") or nav_section(page)]
-
-
 def check_part(page: dict) -> None:
     """Stop the build, naming the page, when its `part` does not fit its kind.
 
@@ -465,7 +454,6 @@ def main() -> int:
             for k, v in {
                 **page,
                 "section": page_dir(page),
-                "layer": legacy_layer(page),
             }.items()
             if k != "source_dir"
         }
