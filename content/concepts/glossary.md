@@ -5,8 +5,8 @@ order: 1
 layout: lookup
 summary: >
   The words a person and their assistant use, from running a Routine to
-  building its template. A Routine (the CLI and API say channel; once a
-  project) is ongoing work made from a Routine Template; its Triggers bring
+  building its template. A Routine (the CLI and API say *channel*; once a
+  *project*) is ongoing work made from a Routine Template; its Triggers bring
   work in, its Tables hold it, its Status says where each item stands and
   its Actions move it on. A closing table maps the other names.
 concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a-template, versions, flow-grammar, scalar-tiers, merge-policy, state-machine]
@@ -14,7 +14,7 @@ concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a
 
 The words a person sees, and the words an assistant should use when it talks
 to one. Ask for an outcome in these terms, such as "add a reminder to this
-Routine" or "make me a copy of this Routine for the Denver office", and
+Routine" or "start a Routine like this one for the Denver office", and
 Popcorn decides what has to change underneath. The same words carry on into
 building a Routine Template; the files a template is made of keep their own
 names (`manifest`, flow, activity), because those are what a template author
@@ -78,7 +78,7 @@ listed under its entry. **Version** is close behind.
   role.
 - **active**, **deactivated** — Whether a person still belongs to the
   workspace; `get_user` reports it as **Active**. Removing someone from a
-  workspace deactivates them and marks them deleted; the record stays, and
+  workspace deactivates them and marks them deleted; their account stays, and
   Popcorn no longer finds them by email or username, so their requests to
   that workspace are refused with `user_not_found`. Joining the same
   workspace again with the same email reactivates the same person, ID
@@ -136,11 +136,14 @@ listed under its entry. **Version** is close behind.
   one account, read as `$channel.integrations.<name>` and set with
   `popcorn channel-config integrations set`. An **integration requirement**
   is what a template needs connected: a flow's `required_integrations:`, or
-  the manifest's `connections:`. Only `required_integrations:` is enforced,
-  and a run missing one (or bound to an account of another provider) does
-  nothing: started by a schedule, webhook, message trigger or another flow it
-  ends without error; a person's or agent's `flow run` is refused with 409
-  `missing_integrations`. `connections:` declares what to connect and stops
+  the manifest's `connections:`. Only `required_integrations:` is enforced:
+  while one is unconnected (or bound to an account of another provider) a
+  run does no work, ending before its first step with empty outputs, which a
+  schedule, a webhook or a message trigger sees as success. Starting the flow
+  directly is refused instead: `popcorn flow run` and
+  `foundation.workflow.start_flow` get 409 `missing_integrations`. A
+  `call_flow` step waiting on it fails, under its own `on_error`; a `detach`
+  child just ends empty. `connections:` declares what to connect and stops
   nothing. See
   [Connections](https://docs.popcorn.ai/use/concepts/connections.md).
 - **Reference** — A document a Routine works from: a policy, a price list, a
@@ -360,22 +363,27 @@ listed under its entry. **Version** is close behind.
   See [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **copy** — A workspace's own series of versions of a Routine Template, with
   one head and a name; the CLI calls it a *fork line* (`kind: fork`,
-  `fork_name`). Until a Routine is copied it runs the **product line**, the
-  shared series Popcorn publishes (`kind: product`). Making a copy
+  `fork_name`). Until a Routine is copied it runs Popcorn's own version, the
+  shared series Popcorn publishes (MCP output calls it the *product line*;
+  the API, `kind: product`). Making a copy
   (`copy_routine_template`, `popcorn app fork --name <copy>`) starts it
   byte-identical to the version the Routine runs and moves the Routine onto
   it; a copy is required before a publish, and it is one-way: a Routine on a
-  copy never returns to the product line. Moving a Routine still on the
-  product line onto a copy the workspace already has (`install_routine` with
-  `copy`) is called *adoption*, and an install in a workspace with exactly
-  one copy does it unasked. A workspace may own several copies of one
+  copy never returns to Popcorn's version. Moving a Routine still on
+  Popcorn's version onto a copy the workspace already has (`install_routine`
+  with `copy`) is called *adoption*, and an install in a workspace with
+  exactly one copy does it unasked. A workspace may own several copies of one
   template, and two copies can each hold a `1.0.1`. `popcorn app lines`
-  lists them. See
+  lists them. *Not to be confused with*
+  [copying a Routine](https://docs.popcorn.ai/use/concepts/routines.md)
+  (`duplicate_routine`), which makes a second Routine running the same
+  template, on the same copy if the first is on one, with its settings and
+  Steps; it makes no new copy of the template. See
   [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md).
-- **head** — The newest version on a copy; on the product line, the version
+- **head** — The newest version on a copy; on Popcorn's version, the version
   the workspace's release track points at. `list_routine_files` and
   `popcorn app checkout` read a copy's head, and a publish must be based on
-  it; on a Routine still on the product line they read the version it runs.
+  it; on a Routine still on Popcorn's version they read the version it runs.
   *Not to be confused with* the version a Routine runs, which lags the head
   while an install has not landed. See
   [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
@@ -395,14 +403,17 @@ listed under its entry. **Version** is close behind.
   one Routine on a copy up to that copy's head, from the server's state
   alone. It takes no version, says there is nothing to do when the Routine is
   current, and is the retry for an install that was blocked or failed. A
-  Routine still on the product line is not upgraded by an apply: it adopts
-  the workspace's copy if there is exactly one, and otherwise is reported
-  current even when behind. An apply is refused on a Routine locked against
-  template updates. See
+  Routine still on Popcorn's version is never upgraded by an apply, whose
+  answer depends on the workspace's copies: with exactly one, the Routine
+  adopts it; with two or more, the apply is refused as ambiguous unless it
+  names one; with none, nothing is installed, and the MCP says Popcorn's new
+  versions arrive through the daily update. An apply is refused on a Routine
+  locked against template updates. It needs a Routine role of `member` or
+  above, or a workspace admin. See
   [Versions](https://docs.popcorn.ai/build/concepts/versions.md).
 - **daily update** — Each Routine's scheduled daily install of its copy's
   head, which is how a publish reaches the Routines you did not publish from,
-  and how a Routine on the product line reaches its release track's head. It
+  and how a Routine on Popcorn's version reaches its release track's head. It
   runs as the workspace agent and never moves a Routine onto a copy. It skips
   archived Routines, Routines locked against template updates, and Routines
   with no update schedule. See
@@ -430,11 +441,11 @@ where the reader will meet it; this table is where to look one up.
 |---|---|---|
 | app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses, MCP output (`App: …`) |
 | channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
-| project | Routine | older MCP tools and the web app |
-| tracker | Routine | older product copy and MCP descriptions |
+| project | Routine | older MCP tools and the web app; *not to be confused with* `feature.state.project`, which recomposes a row's Status |
+| tracker | Routine | older product copy and MCP descriptions; many templates also name their main table `tracker` |
 | channel template | Routine Template | `popcorn channel templates`, `popcorn channel create --template` |
-| channel config | Routine Settings, for its parameters; Connections, for its integrations | `popcorn channel-config`, `$channel.*` in a flow |
-| agent store | Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
+| channel config | a Routine's configuration: Routine Settings, for its parameters; Connections, for its integrations; it also holds the Routine's installed recipe and other sections | `popcorn channel-config`, `$channel.*` in a flow |
+| agent store | a Routine's tables, scalars and files: Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
 | record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
 | fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API, `line:` in MCP output |
 | bundle version | a version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |

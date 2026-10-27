@@ -1,6 +1,6 @@
 ---
 id: versions
-title: "Versions: publishing and installing"
+title: Versions: publishing and installing
 order: 15
 group: How a version ships
 summary: >
@@ -44,8 +44,10 @@ asks before it publishes, naming the copy rather than a count, and reports
 the count only once the version exists.
 
 A publish is based on the copy's newest version, its **head**. A publish
-whose base is not the head is refused, because a diff computed against an
-older version would drop whatever the versions in between changed. A
+whose base is not the head is refused, unless the files it would publish
+are identical to the head's, which is how a retried publish succeeds; a diff
+computed against an older version would drop whatever the versions in
+between changed. A
 Routine's own version lags the head while an install has not landed, and
 for good on a Routine that takes no updates; that is why
 `list_routine_files` and `popcorn app checkout` read the head of a copy by
@@ -59,6 +61,7 @@ A publish is refused when:
 - the caller is not a workspace admin
 - the request carries no file changes and no deletions
 - the base is not a copy the workspace can see, or is no longer its head
+  and the files it would publish differ from the head's
 - the named Routine runs a different copy, or Popcorn's version
 - the tree has a path outside the bundle shape, two files under `prompts/` or
   `templates/` that would install under the same key (`prompts/x.md` and
@@ -150,9 +153,11 @@ says there is nothing to install (in the CLI's JSON, `already_current`) when
 the Routine already runs the head. It works from the
 server's state alone, so it still works after the session that published has
 ended, which re-running the publish cannot cover. On a locked Routine it is
-refused rather than queued. A Routine on Popcorn's version takes new versions
+refused rather than queued. It needs a Routine role of `member` or above,
+or a workspace admin. A Routine on Popcorn's version takes new versions
 through its daily update, not through a retry; an install there in a
-workspace that owns exactly one copy moves it onto that copy instead (see
+workspace that owns exactly one copy moves it onto that copy instead, and
+with two or more is refused as ambiguous unless it names one (see
 [copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md)).
 
 ## A run keeps the version it started on

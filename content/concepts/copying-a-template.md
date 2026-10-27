@@ -13,8 +13,8 @@ concepts: [customizing-a-routine, versions, app-bundle]
 part: build
 ---
 
-A Routine made from a Routine Template runs Popcorn's version of it, the
-**product line**, which every workspace can install. To change what the
+A Routine made from a Routine Template runs Popcorn's own version of it
+(MCP output calls it the *product line*), which every workspace can install. To change what the
 Routine is built from, the workspace makes a copy of the template (the CLI
 calls it a *fork line*): a series of versions the workspace owns, which it
 publishes to. Which changes need a copy, and which stay with one Routine
@@ -39,8 +39,9 @@ ever starts a new copy; joining an existing one is `install_routine` with
 
 The copy starts byte-identical to the version the Routine runs, and the
 Routine moves onto it, so nothing it runs changes at that moment. Copying
-needs only membership of the Routine; publishing to the copy afterwards needs
-a workspace admin (see
+needs a Routine role of `member` or above, or a workspace admin, so a guest
+of the Routine is refused, and so is a copy of an archived Routine;
+publishing to the copy afterwards needs a workspace admin (see
 [versions](https://docs.popcorn.ai/build/concepts/versions.md)).
 
 A copy comes first. A publish lands on a copy the workspace owns, so a
@@ -52,17 +53,25 @@ cannot be undone.
 ## A copy reaches every Routine on it
 
 A workspace has one copy of a template unless it names more, and **every
-Routine on a copy takes the copy's newest version**: the one you published
-from at once, and each of the others on its own daily update, within a day.
-The daily update runs as the workspace, not as the person who published, so
-whether that person is a member of the other Routines does not matter. A
-change tested on one Routine reaches the others on the copy.
+Routine on a copy is brought to the copy's newest version**: the one you
+published from by an install that starts at once, and each of the others by
+its own daily update, within a day. The daily update runs as the workspace,
+not as the person who published, so whether that person is a member of the
+other Routines does not matter. A change tested on one Routine reaches the
+others on the copy. The exceptions are in
+[installing](https://docs.popcorn.ai/build/concepts/versions.md#installing):
+the install on the Routine you published from can be blocked, and the daily
+update skips some Routines.
 
-To change one Routine without its siblings, it needs a second, named copy,
-not a second Routine on the same one. A second copy can only be started from
-a Routine still on Popcorn's version. Once a workspace has two copies of a
-template, a copy or an install that does not name one is refused as
-ambiguous.
+A Routine already on a copy can never move to another one. So a change
+meant to reach some Routines and not their siblings needs a second, named
+copy, started from a different Routine that is still on Popcorn's version;
+a second copy can only be started from such a Routine. Once a workspace has
+two copies of a template, a Routine still on Popcorn's version is refused
+as ambiguous when it is copied or installed without naming one: the CLI's
+`popcorn app fork` without `--name`, or an install that names no copy. A
+Routine already on a copy is unaffected; an install there catches it up to
+its own copy's head.
 
 ## A copy is one-way
 
