@@ -3,8 +3,8 @@ id: states-authoring
 title: Authoring a states tier
 order: 2
 summary: >
-  Writing the `states:` section behind a Routine's Status and Actions: stored,
-  derived and mirrored machines; states, events, transitions and buttons;
+  Writing the state graph behind a Routine's Status and Actions, in
+  `recipe.yaml` or `states:`: stored, derived and mirrored machines; states, events, transitions and buttons;
   guards; and the flows that fire an edge, which must start its `flow` and
   `then` launches themselves. Every publish check is listed with its exact
   error — `no expected edge enters`, a terminal left by staff — and its fix.
@@ -13,24 +13,39 @@ layer: platform
 product_terms: [Status, Action]
 ---
 
-This guide takes one `states:` section from design to a published, wired
-graph. What a state machine *is* — the tuple, the projection, why a button is
-an edge — is [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md),
+This guide takes one state graph from design to a published, wired graph.
+What a state machine *is* — the tuple, the projection, why a button is an
+edge — is [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md),
 and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
 **Action** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
 
-A bundle on the recipe tier ships this same graph as `recipe.yaml` rather
-than under `states:`, and everything in this guide applies to it unchanged:
-the keys, the engine and the publish checks are the same. What a recipe adds
-is in [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md)'s
+A Routine Template ships its graph in one of two places. The keys, the engine
+and the publish checks are the same for both, so everything after this
+section applies to either:
+
+- **A recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
+  at the bundle's root. This is what gives a Routine Steps it can change on
+  its own. The template's recipe is in force until a Routine installs a
+  revision of its own. Over MCP, an assistant changes a Routine's Steps with
+  `change_routine`, which refuses a Routine whose template declares no
+  `recipe:`, and drafts and installs the change by starting the template's
+  own flows named `recipe_build` and `recipe_install`.
+- **A `states:` section** in `manifest.yaml`, holding the same keys. Its
+  graph is fixed by the template version: every Routine on that version runs
+  the same one, and changing it means publishing a new version.
+
+A template declares one or the other, never both. What else a recipe carries,
+and how a Routine's own revision is installed and kept, is in
+[the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md)'s
 last section.
 
 The loop is the ordinary one from
-[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md):
-edit `manifest.yaml`, check it, read the error, repeat. One thing is
-different. The CLI's own checks do not look inside `states:`; the graph is
-checked only when the server parses the manifest. `popcorn app validate`
+[changing a Routine Template](https://docs.popcorn.ai/platform/guides/template-authoring.md):
+edit the graph, check it, read the error, repeat. One thing is
+different. The CLI's own checks do not look inside the graph, in
+`recipe.yaml` or under `states:`; it is checked only when the server parses
+the bundle. `popcorn app validate`
 sends it there when run logged in from a fork checkout with edits, and
 `app publish` (or `create_routine_version`'s dry run) always does. The check
 stops at the first problem, so a new graph usually takes several rounds to
@@ -38,10 +53,12 @@ pass, one error at a time. Run those rounds with `app validate`, which mints no 
 
 ## The worked example
 
-A tracker of requests that someone reviews. Most `states:` blocks later in
-this guide are changes to it, and every one was parsed by the engine.
+A table of requests that someone reviews. Most graph blocks later in this
+guide are changes to it, and every one was parsed by the engine. As a recipe,
+the manifest declares the table and `recipe:`:
 
 ```yaml
+# manifest.yaml
 tables:
   tracker:
     columns:
@@ -55,81 +72,90 @@ tables:
       - {name: CTAs, type: json}
       - {name: Why, type: string}
 
-states:
-  table: tracker
-  status: {column: Status, ctas_column: CTAs, why_column: Why}
-  machines:
-    review:
-      column: Stage
-      states:
-        received: {label: Received}
-        in_review: {label: In review}
-        approved: {label: Approved, tone: green, terminal: true}
-        declined: {label: Declined, tone: gray, terminal: reopenable}
-      groups: {open: [received, in_review]}
-    blocker:
-      overlay: true
-      states:
-        missing_info: {label: Missing information, warn: true}
-    hold:
-      column: Hold
-      overlay: true
-      states:
-        on_hold: {label: On hold, tone: gray}
-  events:
-    staff: [start_review, approve, decline, reopen, hold, release]
-    world: [withdrawn, info_missing, info_received]
-  guards:
-    has_owner: [{column: Owner, empty: false}]
-  transitions:
-    - on: staff.start_review
-      from: received
-      to: in_review
-      expected: true
-      cta: {kind: start-review, label: Start review}
-    - on: staff.approve
-      from: in_review
-      to: approved
-      expected: true
-      guard: [has_owner]
-      writes: {Decision: approve}
-      cta: {kind: approve, label: Approve}
-    - on: staff.decline
-      from: open
-      to: declined
-      expected: [in_review]
-      writes: {Decision: decline}
-      also: {hold: none}
-      cta: {kind: decline, label: Decline, prominence: quiet}
-    - on: staff.reopen
-      from: declined
-      to: in_review
-      writes: {Decision: ""}
-      cta: {kind: reopen, label: Reopen}
-    - on: staff.hold
-      from: hold.none
-      to: hold.on_hold
-      expected: true
-      when: [{machine: review, group: open}]
-      cta: {kind: hold, label: Put on hold}
-    - on: staff.release
-      from: hold.on_hold
-      to: hold.none
-      cta: {kind: release, label: Release}
-    - on: world.withdrawn
-      from: open
-      to: declined
-      writes: {Decision: withdrawn}
-      payload_writes: {Decision Note: note}
-      also: {hold: none}
-    - on: world.info_missing
-      from: blocker.none
-      to: blocker.missing_info
-      expected: true
-    - on: world.info_received
-      from: blocker.missing_info
-      to: blocker.none
+recipe: {}   # the graph is recipe.yaml
 ```
+
+and `recipe.yaml` holds the graph:
+
+```yaml
+# recipe.yaml
+table: tracker
+status: {column: Status, ctas_column: CTAs, why_column: Why}
+machines:
+  review:
+    column: Stage
+    states:
+      received: {label: Received}
+      in_review: {label: In review}
+      approved: {label: Approved, tone: green, terminal: true}
+      declined: {label: Declined, tone: gray, terminal: reopenable}
+    groups: {open: [received, in_review]}
+  blocker:
+    overlay: true
+    states:
+      missing_info: {label: Missing information, warn: true}
+  hold:
+    column: Hold
+    overlay: true
+    states:
+      on_hold: {label: On hold, tone: gray}
+events:
+  staff: [start_review, approve, decline, reopen, hold, release]
+  world: [withdrawn, info_missing, info_received]
+guards:
+  has_owner: [{column: Owner, empty: false}]
+transitions:
+  - on: staff.start_review
+    from: received
+    to: in_review
+    expected: true
+    cta: {kind: start-review, label: Start review}
+  - on: staff.approve
+    from: in_review
+    to: approved
+    expected: true
+    guard: [has_owner]
+    writes: {Decision: approve}
+    cta: {kind: approve, label: Approve}
+  - on: staff.decline
+    from: open
+    to: declined
+    expected: [in_review]
+    writes: {Decision: decline}
+    also: {hold: none}
+    cta: {kind: decline, label: Decline, prominence: quiet}
+  - on: staff.reopen
+    from: declined
+    to: in_review
+    writes: {Decision: ""}
+    cta: {kind: reopen, label: Reopen}
+  - on: staff.hold
+    from: hold.none
+    to: hold.on_hold
+    expected: true
+    when: [{machine: review, group: open}]
+    cta: {kind: hold, label: Put on hold}
+  - on: staff.release
+    from: hold.on_hold
+    to: hold.none
+    cta: {kind: release, label: Release}
+  - on: world.withdrawn
+    from: open
+    to: declined
+    writes: {Decision: withdrawn}
+    payload_writes: {Decision Note: note}
+    also: {hold: none}
+  - on: world.info_missing
+    from: blocker.none
+    to: blocker.missing_info
+    expected: true
+  - on: world.info_received
+    from: blocker.missing_info
+    to: blocker.none
+```
+
+As a `states:` section, the same graph is the manifest's `states:` key, with
+everything in `recipe.yaml` indented under it, in place of `recipe:`.
 
 It has three machines. `review` is the funnel, stored in `Stage`. `blocker`
 is an overlay with no column, so the bundle's own code decides it from the
@@ -169,8 +195,8 @@ information shows the warning, not the parking.
 | derived | no `column` | the bundle's code, handed in per row | the bundle's derivation changing |
 | mirror | `column:` plus `derive: true` | the bundle's code; the engine writes it into the column | the same, recorded in a column clients can read |
 
-A derived value reaches the engine as `machines`, keyed by record id as a
-string. That input goes to `feature.state.project`,
+A derived value reaches the engine as `machines`, keyed by each row's id (its
+`record_id`) as a string. That input goes to `feature.state.project`,
 `feature.state.transition` and `feature.state.check`:
 
 ```yaml
@@ -406,7 +432,7 @@ With no unconditional rule, anything the rules do not match falls through as
 before. With one, every machine no rule shows drops out of the Status
 vocabulary and its hint.
 
-`worklist: {table: issues, key: cause}` keeps one open row per tracker row
+`worklist: {table: issues, key: cause}` keeps one open row per `tracker` row
 whose shown status is a work item. The worklist table must declare every
 column the reconcile writes: `cause`, `Issue`, `Stage`, `Why`, `ctas`,
 `Status`, `Opened`, `Resolved` and `affected_record_ids`, or the names you
@@ -519,7 +545,7 @@ launch nothing:
 states: transitions name flows ['notify_requester'] that this bundle does not install (flows: ['cta_apply'])
 ```
 
-**`states:` needs `tables:`**, and the table it names must declare every
+**The graph needs `tables:`**, and the table it names must declare every
 column the tier reads or writes. That means the status, CTAs and Why
 columns, every stored machine column, every `writes` and `payload_writes`
 column, and every column a predicate reads. Otherwise the tier would write
@@ -530,6 +556,9 @@ states: a tables: section declaring its table is required
 states: table 'tracker' lacks columns ['Decision'] the states tier writes
 states: predicates read columns ['Owner'] that table 'tracker' does not declare
 ```
+
+A recipe with no `tables:` is refused as `recipe: a tables: section
+declaring the graph's table is required` instead.
 
 The predicate check exists because a missing column reads blank on every
 row, which would quietly make `has_owner` never hold.
@@ -745,7 +774,7 @@ It does not prove **intent**, which is still yours to check:
   button `when:` that cannot hold, publishes fine and offers nothing.
 
 `feature.state.spec` returns the resolved graph from the version the
-channel is bound to. It includes a Mermaid diagram per machine, and a
+Routine is bound to. It includes a Mermaid diagram per machine, and a
 `spine` of the expected edges alone, which is quick to read against what
 you meant. For the rows themselves, `feature.state.check` holds every row
 to the graph. Each stored value must be a declared state, each mirror must

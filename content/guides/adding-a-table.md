@@ -5,7 +5,7 @@ order: 4
 summary: >
   Adding a Table to a Routine Template that already exists: declare it under
   `tables:`, write it from a flow with `foundation.store.*`, run `app
-  validate`, then `app publish` from a fork line. Install creates the table,
+  validate`, then `app publish` from the workspace's copy of it. Install creates the table,
   and each later install adds to it and never removes. Publish refuses a
   column the store would reject; a later publish can change a merge policy.
 concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
@@ -13,39 +13,40 @@ layer: platform
 product_terms: [Table]
 ---
 
-This guide adds one table to an app a channel already runs, and ends with
-the table on the channel and a flow writing rows to it. The loop around it
-(fork, edit, check, publish) is the one in
-[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md),
+This guide adds one Table to a Routine Template a Routine already runs, and
+ends with the Table on the Routine and a flow writing Rows to it. The loop
+around it (copy, edit, check, publish) is the one in
+[changing a Routine Template](https://docs.popcorn.ai/platform/guides/template-authoring.md),
 and [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) is the column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
-A channel is what the product calls a **Routine**, and an app a **Routine
-Template** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)); this guide uses the CLI's names.
-It runs from the CLI throughout. An assistant over MCP can publish the same
+The CLI calls a Routine a *channel* and its template an *app*, so the
+commands keep those names (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
+This guide runs from the CLI throughout. An assistant over MCP can publish the same
 change with `create_routine_version`, but it is not given the flow-run tools
 that step 7 uses to check the result.
 
-The running example adds a `handoffs` table to an app on `#example-intake`:
-one row per ticket handed to someone, where a repeat hand-off updates the
-row instead of adding another one.
+The running example adds a `handoffs` table to the template `#example-intake`
+runs: one row per ticket handed to someone, where a repeat hand-off updates
+the row instead of adding another one.
 
-## 1. Check out a fork
+## 1. Check out a copy
 
-A publish lands on a fork line your workspace owns, so fork before you edit:
+A publish lands on a copy of the template your workspace owns (the CLI calls
+it a *fork line*), so copy it before you edit:
 
 ```bash
 popcorn app checkout --channel '#example-intake' --fork
 cd <app>
 ```
 
-If the channel is already on a fork, `app checkout --channel '#example-intake'`
-is enough. A table is a change to what the app is built from, so no setting can
-stand in for it. In the product's terms, it gives the Routine a copy of its
-own, which no longer receives the template's improvements. Forking is permanent, and a publish reaches every channel on the
-line, not only this one. See
-[fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md) before forking a
-production channel.
+If the Routine is already on a copy, `app checkout --channel '#example-intake'`
+is enough. A table is a change to what the template is built from, so no
+setting can stand in for it: it gives the Routine a copy of its own, which no
+longer receives the template's improvements. Copying is permanent, and a
+publish reaches every Routine on the copy, not only this one. See
+[fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md) before copying the template of a
+production Routine.
 
 ## 2. Declare the table
 
@@ -172,8 +173,8 @@ is stored silently, unless it differs from a declared column only by case.
 popcorn app validate .
 ```
 
-`app validate` reads the manifest and the flows together. Run from a fork
-checkout of the line's head, logged in, with a channel (`--channel`, else the
+`app validate` reads the manifest and the flows together. Run from a
+checkout of the copy's head, logged in, with a Routine (`--channel`, else the
 checkout's), and with edits since the checkout, it also sends them to the server, which runs the checks
 `app publish` runs without publishing anything. It does not check everything,
 though, and a problem it misses shows up at a later stage:
@@ -197,13 +198,13 @@ popcorn app publish . --bump patch -m "add handoffs table" --yes
 ```
 
 Publishing needs workspace-admin rights. The publish mints the next version
-on the fork line and starts an install on this channel. That install creates
-the `handoffs` table before it binds the channel to the new version, so no
-run on the new version can reach a channel without the table. The other
-channels on the line get the table at their own daily update, apart from the
+of the copy and starts an install on this Routine. That install creates
+the `handoffs` table before it binds the Routine to the new version, so no
+run on the new version can reach a Routine without the table. The other
+Routines on the copy get the table at their own daily update, apart from the
 ones that take no updates (see
 [publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md)).
-The publish prints how many channels will update, but only after the version
+The publish prints how many Routines will update, but only after the version
 exists.
 
 Publish runs every `tables:` entry through the same validation the store
@@ -226,15 +227,15 @@ merge key) run only once each column of that table is valid on its own. With
 `error_code: validation`.
 
 Publish checks the manifest's columns on their own. It cannot see a
-channel's table, and the install validates the schema it builds by merging
+Routine's table, and the install validates the schema it builds by merging
 the manifest with the columns already live there. A combination only that
-channel has can still fail the install: retyping a column the channel
+Routine has can still fail the install: retyping a column the Routine
 already indexes to `boolean` or `json`, for instance, without writing
 `index: false` and `unique: false`, since those keep their installed value
 unless the manifest states one. The reverse fails too: `index: false` on a
-column the channel's own merge key uses, because a merge key's columns must
+column the Routine's own merge key uses, because a merge key's columns must
 stay indexed. A failed install stops before it binds. The
-channel keeps its previous version, but not necessarily its previous tables:
+Routine keeps its previous version, but not necessarily its previous tables:
 a table listed before the failing one may already have been created or
 changed. The fix is another publish.
 
@@ -245,10 +246,10 @@ popcorn app status .
 popcorn table schema handoffs --channel '#example-intake'
 ```
 
-Inside a checkout, `app status` says either that the channel runs the line's
+Inside a checkout, `app status` says either that the Routine runs the copy's
 head, or that it is behind, and then why: an install still running or
 retrying, or one that failed, was skipped or is locked out. A failed install
-shows its error and error code, and a `Next:` line says what moves the channel on — usually
+shows its error and error code, and a `Next:` line says what moves the Routine on — usually
 `app apply`. In `--json`, from a checkout or from outside one with
 `--channel`, branch on `install.state`.
 
