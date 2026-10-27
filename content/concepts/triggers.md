@@ -1,7 +1,7 @@
 ---
 id: triggers
 title: Triggers
-order: 3
+order: 5
 group: How work arrives
 summary: >
   A Trigger is how work arrives in a Routine: on a schedule, from a message

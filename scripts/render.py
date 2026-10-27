@@ -294,8 +294,9 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     Each section is (label, groups) and each group is (label, links), where an
     empty group label means the links sit directly under the section. A
-    section labelled None has no heading at all — the home page's link, which
-    belongs to no section.
+    section labelled "" lists its groups under no heading of its own — a
+    part's topics, under the part's heading. A section labelled None has no
+    heading at all — the home page's link, which belongs to no section.
     """
     def link(title: str, href: str, current: bool) -> str:
         attrs = ' aria-current="page"' if current else ""
@@ -312,7 +313,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
                 f'<ul class="solo">{"".join(link(*l) for l in links)}</ul>' for _, links in groups
             ))
             continue
-        parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>']
+        parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>'] if label else []
         for group, links in groups:
             items = "".join(link(*l) for l in links)
             if group:

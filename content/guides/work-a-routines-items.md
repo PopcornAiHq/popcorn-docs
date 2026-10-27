@@ -1,7 +1,8 @@
 ---
 id: work-a-routines-items
 title: Reviewing what needs you
-order: 4
+order: 16
+group: What people do, and what happened
 summary: >
   Reviewing what needs you: see what is waiting and why with get_status; find
   the claims or other items at a Review, or still open, with list_rows,

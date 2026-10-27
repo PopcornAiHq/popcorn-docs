@@ -1,7 +1,7 @@
 ---
 id: steps
 title: Steps
-order: 6
+order: 8
 group: What it does
 summary: >
   A Routine's Steps are its work on each item, in order: what each one asks

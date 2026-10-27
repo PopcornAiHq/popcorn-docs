@@ -2,6 +2,7 @@
 id: connect-your-assistant
 title: Connecting your assistant
 order: 1
+group: Getting started
 summary: >
   Connecting an assistant to Popcorn: add the hosted MCP server at
   https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose a workspace, then

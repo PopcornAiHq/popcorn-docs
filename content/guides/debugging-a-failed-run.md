@@ -1,7 +1,8 @@
 ---
 id: debugging-a-failed-run
 title: Debugging a failed run
-order: 3
+order: 16
+group: How a flow runs
 summary: >
   When a Routine's History shows work gone wrong: read it over MCP with
   `list_history` and `read_history_entry`, then find the flow run, read its

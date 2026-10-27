@@ -1,7 +1,7 @@
 ---
 id: routine-settings
 title: Routine Settings
-order: 8
+order: 10
 group: How it behaves
 summary: >
   Routine Settings tune one Routine without changing what it does: whether

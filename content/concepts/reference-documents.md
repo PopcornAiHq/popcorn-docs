@@ -1,7 +1,7 @@
 ---
 id: reference-documents
 title: References
-order: 5
+order: 7
 group: How work arrives
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a

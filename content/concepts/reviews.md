@@ -1,7 +1,7 @@
 ---
 id: reviews
 title: Reviews
-order: 7
+order: 9
 group: What it does
 summary: >
   A Review is the kind of Step where a person makes the call instead of

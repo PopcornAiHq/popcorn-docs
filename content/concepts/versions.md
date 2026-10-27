@@ -1,7 +1,7 @@
 ---
 id: versions
 title: Versions: publishing and installing
-order: 15
+order: 18
 group: How a version ships
 summary: >
   A change reaches a Routine in two steps: publishing mints an immutable
