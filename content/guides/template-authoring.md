@@ -178,9 +178,10 @@ Over MCP, the copy can wait until a dry run passes: a Routine still on
 Popcorn's own template can dry-run a change, and needs its own copy only to
 publish it, so the step that cannot be undone comes after the check. That
 dry run holds no plan and shows no reach. After `copy_routine_template`, call
-`create_routine_version` again with the same changes and the new
-`base_version` that `list_routine_files` then shows, and confirm with the
-`plan_id` from that second dry run.
+`create_routine_version` again with the same `base_version`, changes and
+changelog: the copy starts with the same files, so the version the first
+dry run was based on names the copy's first version. Confirm with the
+`plan_id` from that second dry run, which shows the reach.
 
 Copying a template, a new version, an install onto another copy and a
 change to a setting are each a dry run until called again with
