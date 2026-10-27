@@ -35,3 +35,5 @@ jobs:
         run: scripts/check-highlight.py
       - name: Product pages speak the product's words
         run: scripts/check-layer.py
+      - name: Names still to put in the product's words (report only)
+        run: scripts/check-vocabulary.py
