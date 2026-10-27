@@ -10,8 +10,9 @@ table and lists each prose use of one of its names on a hand-written page.
 A name is allowed:
 
 * in code — `popcorn app fork` is what the reader types
-* in the parenthetical that gives it as the other name, which italicises it:
-  "a copy of the template (the CLI calls it a *fork line*)"
+* italicised, as the name being mentioned rather than used — usually the
+  parenthetical that gives it as the other name: "a copy of the template (the
+  CLI calls it a *fork line*)"
 * inside a longer glossary entry: "channel agent" and "channel parameters"
   are terms of their own, not the name "channel"
 
@@ -50,7 +51,8 @@ _ENTRY = re.compile(
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
 _CODE = re.compile(r"`[^`\n]+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
-_OTHER_NAME = re.compile(r"\([^()]*\*[^*()\n]+\*[^()]*\)")
+# Single-asterisk italics, not `**bold**`: a name in italics is being mentioned.
+_ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
 _NOTE = re.compile(r"^> \*\*Platform note\*\*")
 
 
@@ -96,7 +98,25 @@ def prose(body: str) -> str:
         in_note = bool(_NOTE.match(line)) or (in_note and line.startswith(">"))
         lines.append("" if in_note else line)
     text = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), "\n".join(lines))
-    return _OTHER_NAME.sub("", _LINK.sub("]", _CODE.sub("", text)))
+    return _LINK.sub("]", _CODE.sub("", text))
+
+
+def paragraphs(text: str) -> list[tuple[int, str]]:
+    """Each paragraph joined onto one line, with the body line it starts on.
+
+    A term wrapped across a line break ("a channel" / "parameter") is still
+    one term, so matching runs over paragraphs, not lines.
+    """
+    out, start, buf = [], 0, []
+    for lineno, line in enumerate(text.splitlines() + [""], 1):
+        if line.strip():
+            if not buf:
+                start = lineno
+            buf.append(line.strip())
+        elif buf:
+            out.append((start, _ITALIC.sub("", " ".join(buf))))
+            buf = []
+    return out
 
 
 def main() -> int:
@@ -121,12 +141,12 @@ def main() -> int:
         if not doc or _GENERATED.search(doc.group("fm")):
             continue
         checked += 1
-        for lineno, line in enumerate(prose(doc.group("body")).splitlines(), 1):
+        for lineno, line in paragraphs(prose(doc.group("body"))):
             for mask in mask_patterns:
                 line = mask.sub("", line)
             for name, pattern in patterns:
                 if pattern.search(line):
-                    found.setdefault(f.stem, []).append(f"body line {lineno}: '{name}'")
+                    found.setdefault(f.stem, []).append(f"paragraph at body line {lineno}: '{name}'")
                     line = pattern.sub("", line)
 
     total = sum(len(v) for v in found.values())
