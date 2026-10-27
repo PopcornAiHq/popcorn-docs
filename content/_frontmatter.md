@@ -84,7 +84,9 @@ page drops the line, since it does not know which deploy it read. A page has
 field was once called `platform:`, which `check-content.py` now refuses:
 `layer: platform` uses that word for the page's layer.
 
-**`layer`** says whose words the page is written in, and it is required.
+**`layer`** says what the page is about, using a Routine or building its
+template, and it is required. Both layers are written in the product's
+words; the layers differ in which platform terms may appear in prose.
 
 - `product` — for a Popcorn user and their assistant: Routines, Routine
   Templates, Triggers, Actions, Status, Routine Settings, in the
@@ -94,8 +96,13 @@ field was once called `platform:`, which `check-content.py` now refuses:
   that explains the term. `scripts/check-layer.py` fails a product page that
   uses one anywhere else, taking the terms from the platform glossary.
 - `platform` — for someone building a Routine Template: the bundle format,
-  the CLI, flows, fork lines, in the
-  [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)'s terms.
+  the CLI, flows, copies and versions. It is written in the product's words
+  too, keeping the file-level terms the reader types (`manifest`, flow,
+  activity) and giving a platform term with a product word once, as the
+  other name: "a copy of the template (the CLI calls it a *fork line*)". The
+  [platform glossary](https://docs.popcorn.ai/platform/glossary/glossary.md)
+  pairs each platform term with its product word, and
+  `INFORMATION-ARCHITECTURE.md` has the rule in full.
   It opens with the product idea before the mechanism ("A Routine's
   scheduled Triggers are schedules in its template's manifest"), and declares
   **`product_terms:`**, the product glossary terms it explains. Its summary
