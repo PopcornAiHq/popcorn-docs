@@ -1210,7 +1210,7 @@ via heartbeat details, so the count does not reset to 0.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | yes | The flow's own conversation UUID (must match the run's conversation). Required at every scope. |
-| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel, dm and knowledge agents mount that same entity read-write and unconfined, and memoryhelper, dreamer and persona edit it by id, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
+| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel and dm agents mount that same entity read-write and unconfined, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
 | `memory_id` | string, optional | no | Id of the memory to delete. Exclusive with category + key. |
 | `category` | string, optional | no | With `key`: the category to delete from. |
 | `key` | string, optional | no | With `category`: the key whose memories to delete. |
@@ -1253,7 +1253,7 @@ Read-only: safe to retry.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | yes | The flow's own conversation UUID (must match the run's conversation; other conversations' memories are not readable). Required at every scope. |
-| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel, dm and knowledge agents mount that same entity read-write and unconfined, and memoryhelper, dreamer and persona edit it by id, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
+| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel and dm agents mount that same entity read-write and unconfined, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
 | `category` | string, optional | no | Exact category to list, e.g. 'kb:page'. Exclusive with category_prefix. |
 | `category_prefix` | string, optional | no | List every category starting with this prefix, e.g. 'kb:'. Exclusive with category. Filtered worker-side after listing everything at the scope. |
 | `key` | string, optional | no | Only the memory (or memories, if duplicates raced) whose metadata key_field equals this value. Exclusive with keys. |
@@ -1306,7 +1306,7 @@ that follows a create whose response was lost finds the row and updates.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | yes | The flow's own conversation UUID (must match the run's conversation). Required at every scope. |
-| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel, dm and knowledge agents mount that same entity read-write and unconfined, and memoryhelper, dreamer and persona edit it by id, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
+| `scope` | `channel` / `workspace` | no | Who the memory belongs to. 'channel' (default) is this conversation's own memory — the entity the memory panel lists and the workflow and App Builder personas recall. 'workspace' is memory every channel in the workspace shares, written against the run's own workspace. 'workspace' is NOT private to the flow: the channel and dm agents mount that same entity read-write and unconfined, so an agent can rewrite or delete what a flow put there. Every workspace member can read it, none can delete it from a product surface, and concurrent writers from different channels are normal — use it for standing facts a flow can afford to rewrite, not for state it relies on. Default `"channel"`. |
 | `category` | string | yes | Category to write, e.g. 'quotes:vendor' or 'kb:page'. |
 | `key` | string | yes | Caller-chosen identity of this memory within its category, stored in the metadata at key_field. |
 | `key_field` | string | no | Metadata field that holds the key. Default 'key'; use 'fact_id' / 'page_key' to interoperate with the app stores. Default `"key"`. |
@@ -5902,6 +5902,9 @@ the auth to the bound Google account before the read.
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |
+| `visibility` | string | default / public / private / confidential. Empty when the proxy did not say: treat the event as private. |
+| `transparency` | string | opaque (blocks time) / transparent (shows as free). Empty when the proxy did not say. |
+| `event_type` | string | default / outOfOffice / focusTime / workingLocation / … (Google's eventType). Empty when the proxy did not say. |
 
 ### `feature.gcal.list_events`
 
@@ -5964,6 +5967,9 @@ the auth to the bound Google account before the read.
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |
+| `visibility` | string | default / public / private / confidential. Empty when the proxy did not say: treat the event as private. |
+| `transparency` | string | opaque (blocks time) / transparent (shows as free). Empty when the proxy did not say. |
+| `event_type` | string | default / outOfOffice / focusTime / workingLocation / … (Google's eventType). Empty when the proxy did not say. |
 
 ### `feature.gcal.merge_free_times`
 
