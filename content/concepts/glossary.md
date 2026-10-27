@@ -374,7 +374,8 @@ listed under its entry. **Version** is close behind.
   with `copy`) is called *adoption*, and an install in a workspace with
   exactly one copy does it unasked. A workspace may own several copies of one
   template, and two copies can each hold a `1.0.1`. `popcorn app lines`
-  lists them. *Not to be confused with*
+  lists them, and `list_routines` with `copy` lists the Routines on one.
+  *Not to be confused with*
   [copying a Routine](https://docs.popcorn.ai/use/concepts/routines.md)
   (`duplicate_routine`), which makes a second Routine running the same
   template, on the same copy if the first is on one, with its settings and
