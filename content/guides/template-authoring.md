@@ -9,7 +9,7 @@ summary: >
   MCP. A new app type is not self-serve. `flow validate` is the authority on a
   flow; the grammar, manifest keys and table rules are concept pages this
   guide links.
-concepts: [app-bundle, manifest-keys, flow-grammar, publish-and-apply, fork-line]
+concepts: [app-bundle, manifest-keys, flow-grammar, versions, copying-a-template]
 layer: platform
 product_terms: [Routine Template]
 ---

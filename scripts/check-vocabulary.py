@@ -3,7 +3,7 @@
 
 Every page is written in the product's words (`INFORMATION-ARCHITECTURE.md`,
 "One vocabulary, in both layers"). The CLI, the API and older copy still call
-some things by other names, and the platform glossary's table "Names you'll
+some things by other names, and the glossary's table "Names you'll
 see elsewhere" pairs each with the product's word. This script reads that
 table and lists each prose use of one of its names on a hand-written page.
 
@@ -16,7 +16,7 @@ A name is allowed:
 * inside a longer glossary entry: "channel agent" and "channel parameters"
   are terms of their own, not the name "channel"
 
-Not checked: the two glossaries, which define the names; generated pages
+Not checked: the glossary, which defines the names; generated pages
 (those carrying `deployed:` or `version:`), whose text comes from the
 platform itself; and Platform notes, which exist to name the other term.
 
@@ -37,7 +37,6 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 GLOSSARY = CONTENT / "concepts" / "glossary.md"
-PRODUCT_GLOSSARY = CONTENT / "concepts" / "product-glossary.md"
 TABLE_HEADING = "## Names you'll see elsewhere"
 
 # Names that are also everyday words; see the module docstring.
@@ -45,9 +44,14 @@ ORDINARY = {"app", "project", "record"}
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _GENERATED = re.compile(r"^(deployed|version):", re.M)
+# An entry can head with several terms, as "- **Agent**, **channel agent** —":
+# each is a term of its own, and masks the name it holds.
 _ENTRY = re.compile(
-    r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?", re.M
+    r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?"
+    r"(?P<more>(?:, \*\*[^*]+\*\*)*)",
+    re.M,
 )
+_MORE = re.compile(r"\*\*([^*]+)\*\*")
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
 _CODE = re.compile(r"`[^`\n]+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
@@ -74,11 +78,10 @@ def names() -> list[str]:
 
 def entries() -> set[str]:
     out = set()
-    for path in (GLOSSARY, PRODUCT_GLOSSARY):
-        for m in _ENTRY.finditer(path.read_text()):
-            for name in (m.group("term"), m.group("short")):
-                if name:
-                    out.add(name.strip().strip("`").lower())
+    for m in _ENTRY.finditer(GLOSSARY.read_text()):
+        for name in (m.group("term"), m.group("short"), *_MORE.findall(m.group("more") or "")):
+            if name:
+                out.add(name.strip().strip("`").lower())
     return out
 
 
@@ -135,7 +138,7 @@ def main() -> int:
     found: dict[str, list[str]] = {}
     checked = 0
     for f in sorted(CONTENT.rglob("*.md")):
-        if f.name.startswith("_") or f in (GLOSSARY, PRODUCT_GLOSSARY):
+        if f.name.startswith("_") or f == GLOSSARY:
             continue
         doc = _DOC.match(f.read_text())
         if not doc or _GENERATED.search(doc.group("fm")):

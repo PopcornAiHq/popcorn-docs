@@ -166,10 +166,10 @@ GENERATED = {"reference"}
 _KNOWN = [name for name, *_ in SECTIONS]
 _LAYERS = [name for name, *_ in LAYERS]
 
-# Pages listed under a kind other than their directory's. The two glossaries
-# live in content/concepts/ but are looked up rather than read through. An id
+# Pages listed under a kind other than their directory's. The glossary lives
+# in content/concepts/ but is looked up rather than read through. An id
 # is permanent by contract, which is what makes naming one here safe.
-NAV_SECTION = {"product-glossary": "glossary", "glossary": "glossary"}
+NAV_SECTION = {"glossary": "glossary"}
 
 
 def nav_section(page: dict) -> str:
@@ -190,11 +190,10 @@ def href(page: dict, suffix: str = ".html") -> str:
 # page written since never lived there, and a pointer for it would advertise
 # an address nobody ever linked. Frozen; never add to it.
 PRE_LAYER_PAGES = frozenset({
-    "concepts/app-bundle", "concepts/bundle-version", "concepts/channel-binding",
-    "concepts/conditions", "concepts/extract-or-derive", "concepts/flow-grammar",
-    "concepts/flow-identity", "concepts/fork-line", "concepts/glossary",
+    "concepts/app-bundle", "concepts/conditions", "concepts/extract-or-derive",
+    "concepts/flow-grammar", "concepts/glossary",
     "concepts/manifest-keys", "concepts/merge-policy", "concepts/on-error",
-    "concepts/product-glossary", "concepts/publish-and-apply", "concepts/references",
+    "concepts/references",
     "concepts/scalar-tiers", "concepts/schedules", "concepts/state-machine",
     "concepts/table-columns", "guides/adding-a-table", "guides/debugging-a-failed-run",
     "guides/states-authoring", "guides/template-authoring", "reference/activities",

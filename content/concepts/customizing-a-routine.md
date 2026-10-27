@@ -9,7 +9,7 @@ summary: >
   with it and survive the template's improvements. A new Table or a kind of
   step the template does not offer gives it a copy of its own, which no
   longer receives those improvements and cannot be undone.
-concepts: [routine-settings, instructions, routines]
+concepts: [routine-settings, instructions, routines, copying-a-template]
 layer: product
 ---
 
@@ -60,8 +60,9 @@ assistant makes is a dry run first, and the dry run for a copy of its own says
 so. `get_routine` shows which kind a Routine is today, as **Updates from**:
 Popcorn, or this workspace's own copy.
 
-> **Platform note** — A copy of its own is a *fork line*: the workspace's own
-> version series of the template, changed by publishing to it. See
-> [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md), and
-> [authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md) for
-> making the change itself.
+A copy of its own is the workspace's own series of versions of the template
+(the CLI calls it a *fork line*), and a change reaches it by publishing a new
+version. [Copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md)
+says what a copy costs and how to make one, and
+[authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md)
+how to make the change itself.

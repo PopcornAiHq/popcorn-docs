@@ -68,7 +68,7 @@ def get_doc(doc_id: str) -> str:
     """Read one Popcorn concept in full, by its id.
 
     Args:
-        doc_id: an id from search_docs, e.g. "fork-line"
+        doc_id: an id from search_docs, e.g. "copying-a-template"
     """
     return retrieval.get(_pages, doc_id)
 
@@ -77,7 +77,7 @@ def get_doc(doc_id: str) -> str:
 def explain(term: str) -> str:
     """What a Popcorn term means — one answer, plus the near neighbours.
 
-    For a word met mid-task ("concat", "bound", "fork line") where the question
+    For a word met mid-task ("concat", "head", "copy") where the question
     is what it means here, not what documents mention it.
 
     Args:

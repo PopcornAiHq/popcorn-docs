@@ -1,437 +1,425 @@
 ---
 id: glossary
-title: Platform glossary
-order: 2
+title: Glossary
+order: 1
 layout: lookup
 summary: >
-  The platform's nouns, each with its synonyms, its collisions and the product
-  term it belongs to. An app is the thing (in the product, a Routine Template);
-  its app bundle is its files. A channel (in the product, a Routine; once a
-  project) is what an app installs into, identified by its UUID because a
-  name can change.
-concepts: [product-glossary, app-bundle, bundle-version, fork-line, channel-binding, publish-and-apply, flow-identity, manifest-keys, scalar-tiers, merge-policy, state-machine]
-layer: platform
-product_terms: [Routine, Routine Template]
+  The words a person and their assistant use, from running a Routine to
+  building its template. A Routine (the CLI and API say channel; once a
+  project) is ongoing work made from a Routine Template; its Triggers bring
+  work in, its Tables hold it, its Status says where each item stands and
+  its Actions move it on. A closing table maps the other names.
+concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a-template, versions, flow-grammar, scalar-tiers, merge-policy, state-machine]
+layer: product
 ---
 
-The vocabulary of authors, tools and the API. Each entry gives the preferred
-term first, then the other names it goes by today, then what it is most often
-confused with, then the page that explains it. Where the CLI or the API still
-uses an older name, the entry says so; the older name keeps working.
+The words a person sees, and the words an assistant should use when it talks
+to one. Ask for an outcome in these terms, such as "add a reminder to this
+Routine" or "make me a copy of this Routine for the Denver office", and
+Popcorn decides what has to change underneath. The same words carry on into
+building a Routine Template; the files a template is made of keep their own
+names (`manifest`, flow, activity), because those are what a template author
+types.
 
-The product uses fewer, plainer words, defined in the
-[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md).
-Each section here names the product term its entries belong to, and an entry
-whose term differs from its section's says so. A platform term with no product
-term is one the product never shows: talking to a person, describe its effect
-instead.
+Each entry gives the term first, then the other names it goes by, then what
+it is most often confused with, then the page that explains it. The CLI, the
+API and older copy still call some things by other names; the table at the
+end, *Names you'll see elsewhere*, maps each to the word used here.
 
-Two words need a qualifier every time they are used: **trigger** and
-**integration**. Each has several meanings, listed under its entry. **Version**
-is close behind: see *bundle version*.
+Two words need a qualifier whenever they mean something other than the
+product's sense: **trigger** and **integration**. Each has several meanings,
+listed under its entry. **Version** is close behind.
 
-## Apps and bundles
+## Routines and workspaces
 
-Product term: **Routine Template**. The product shows the app; its bundle,
-manifest, versions and lines stay behind it.
-
-- **app** — One application, named by a slug such as `claimcoordinator`, and
-  everything published under that name. The manifest's `app_type:` and the
-  `app` field on app responses both carry the slug. The set of apps is fixed
-  on the server: editing an existing app is self-serve, and adding a new one
-  is not. *Not to be confused with* a channel: one app runs in many channels.
+- **workspace** — Your organisation's space in Popcorn. It holds its
+  Routines, its people, its Routine Templates and its copies of them, and an
+  assistant connected to Popcorn works in one workspace at a time. Its people
+  are its members, each with a workspace role (see *member*).
+  `popcorn workspace switch` changes which one the CLI acts on.
+- **Routine** — One piece of ongoing work that Popcorn runs for you, such as
+  claims intake or order follow-up, together with everything it needs: how
+  work arrives, what it knows, what it holds and who takes part. A Routine is
+  the one thing a person manages; ask for a change to it, and Popcorn works
+  out how to make it. It is identified by its ID; its `#name` can change, so a
+  script or a note should hold the ID, which the API calls
+  `conversation_id`. The CLI and the MCP read tools accept either and resolve
+  a name to the ID; tools that write take the ID. See
+  [Routines](https://docs.popcorn.ai/product/concepts/routines.md).
+- **Routine Template** — The starting point a Routine is made from, such as
+  a claims coordinator. One template can start many Routines, and a Routine
+  made from one keeps receiving the template's improvements unless it has been
+  changed into a copy of its own (see *customizing a Routine*). Its files are
+  its *app bundle*. The set of templates is fixed by Popcorn: changing an
+  existing one, through a copy, is self-serve, and adding a new one is not.
   See [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
-- **app bundle** (short: **bundle**) — The files of one version of an app:
-  `manifest.yaml`, the flow YAML files at the root, `AGENT.md`, `README.md`,
-  `strings.yaml`, and the `prompts/`, `templates/`, `code/` and `agents/`
-  directories. *Not to be confused with* the bundle's own `templates/`
-  directory, which holds email text. See
+- **Inbox Scan** — The Routine Template that reads a mailbox, suggests
+  Routines from the work it finds there, and shows how the team writes.
+- **customizing a Routine** — Changing one Routine without changing the
+  others made from the same template. Most changes stay with that one Routine
+  and survive the template's improvements: its Routine Settings, its
+  Connections, its Instructions and, where its template keeps them with the
+  Routine, its steps and the Actions between them. A change to what the
+  Routine is built from (a new Table, a kind of step its template does not
+  offer) gives it a copy of its own instead. That copy no longer
+  receives the template's improvements, which cannot be undone. Popcorn says
+  which kind a change is before it makes it. See
+  [Customizing a Routine](https://docs.popcorn.ai/product/concepts/customizing-a-routine.md).
+- **member**, **role** — Always qualify them. A **workspace member** is a
+  person in that workspace, and its **workspace role** is `owner`, `admin`,
+  `member`, `guest` or `workspace_agent`. A **Routine member** has a
+  membership of one Routine, and its role there is `owner`, `admin`,
+  `member`, `guest`, `agent` or `channel_agent`; a Routine's creator is its
+  owner. The two roles are separate, and `owner`, `admin`, `member` and
+  `guest` exist at both levels: someone who joins a Routine by invitation
+  from another workspace is a `guest` there whatever their workspace role.
+  A Routine's admin actions are open to its owners and admins and to
+  workspace admins, and only a workspace admin can publish a version of a
+  template. `get_user` and `list_workspace_members` report the workspace
+  role.
+- **active**, **deactivated** — Whether a person still belongs to the
+  workspace; `get_user` reports it as **Active**. Removing someone from a
+  workspace deactivates them and marks them deleted; the record stays, and
+  Popcorn no longer finds them by email or username, so their requests to
+  that workspace are refused with `user_not_found`. Joining the same
+  workspace again with the same email reactivates the same person, ID
+  included.
+- **bot**, **workspace agent** — A bot is an account with `is_bot` set, which
+  `get_user` reports as **Bot**. Every workspace is created with one, the
+  **workspace agent**: a bot with the workspace role `workspace_agent`, named
+  after the workspace's agent identity. Installs of a template's versions run
+  as the workspace agent, never as the person who asked, and it can read
+  every Routine in its workspace. The API that people sign in to refuses a
+  request made as a bot. *Not to be confused with* a Routine's Agent (see
+  *Agent*).
+
+## How work arrives
+
+- **Trigger** — How work arrives in a Routine: on a schedule, from a message
+  in the Routine, from a document added to it, from a booking made through
+  its calendar link, or from another system posting to it. A Routine can have
+  several. In this sense it needs no qualifier. Building a template, qualify
+  it: a **message trigger** is a manifest `triggers:` entry that runs a flow
+  for each message in the Routine, and its `enabled` is written once, by the
+  install that first brings the trigger to the Routine, and kept after that;
+  a flow's own `trigger:` key is refused at publish. **`$trigger`** is the
+  scope that says who and where asked for a run (`thread_id`, `message_id`,
+  `user_id`, …). The **trigger report** that `popcorn flow get` prints is
+  everything that starts a flow: schedules, webhooks, message triggers,
+  documents, states and other flows. **`trigger_workflow`** is a webhook mode.
+  *Not to be confused with* an Action, which is a person moving one item on.
+  See [Triggers](https://docs.popcorn.ai/product/concepts/triggers.md).
+- **schedule** — The scheduled kind of Trigger: a manifest `schedules:` entry
+  that runs a flow on an `interval:` or a `cron:`, keyed by flow name and
+  `slug`. Its cadence exists three ways: **declared** in the manifest,
+  **armed** on the Routine (what `popcorn schedule list` shows), and
+  **intended**, what Popcorn's own rewrites make of the armed cadence — a
+  `deadline` or `window` schedule's spread offset can move a daily cron off
+  the declared minute. `popcorn app status` compares armed with declared, and
+  uses intended to tell a deliberate difference from drift. See
+  [Schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md).
+- **webhook** — The Trigger for another system posting to a Routine: a
+  per-Routine ingest URL (`popcorn webhook list --show-url`) whose
+  `action_mode` is `silent`, `as_is`, `ai_enhanced` or `trigger_workflow`. In
+  `trigger_workflow` mode each delivery starts the flow named by
+  `trigger_flow_name`; responses spell that field `trigger_flow_id`, and it
+  holds the name. A **delivery** is one received payload
+  (`popcorn webhook deliveries`).
+- **Connection**, **integration** — An account Popcorn uses on the Routine's
+  behalf, such as a mailbox it reads from or a calendar it books into. It
+  signs in as a person, so only their own accounts can be connected; an
+  assistant can say which ones a Routine is missing and, after a dry run,
+  connect an account the person has signed in to, or make a webhook.
+  Building a template, *integration* is the word, and it always needs a
+  qualifier. A **connected account** is one person's account with a provider,
+  with an `integration_id` (`popcorn channel-config accounts` lists them). A
+  **channel integration** is a name in the Routine's configuration bound to
+  one account, read as `$channel.integrations.<name>` and set with
+  `popcorn channel-config integrations set`. An **integration requirement**
+  is what a template needs connected: a flow's `required_integrations:`, or
+  the manifest's `connections:`. Only `required_integrations:` is enforced,
+  and a run missing one (or bound to an account of another provider) does
+  nothing: started by a schedule, webhook, message trigger or another flow it
+  ends without error; a person's or agent's `flow run` is refused with 409
+  `missing_integrations`. `connections:` declares what to connect and stops
+  nothing. See
+  [Connections](https://docs.popcorn.ai/product/concepts/connections.md).
+- **Reference** — A document a Routine works from: a policy, a price list, a
+  form to fill, an example of good work. A Reference informs the Routine; it
+  is not one of the items the Routine tracks. *Not to be confused with* a
+  [value reference](https://docs.popcorn.ai/platform/concepts/references.md)
+  in a flow, such as `$steps.fetch.output`. See
+  [References](https://docs.popcorn.ai/product/concepts/reference-documents.md).
+- **booking page** — The calendar link people book a meeting through. A
+  booking made on it can start an item's work, or complete a booking Step.
+- **signing provider** — The service an agreement is sent through for
+  signature. Its account is set up per Routine, and Popcorn tracks who has
+  signed.
+
+## How it behaves
+
+- **Instructions** — What the Routine should do and how, in plain language:
+  how to word a follow-up, when to ask a person first, which deadlines matter,
+  when to send a reminder. Changing them changes how the Routine behaves from
+  then on. See
+  [Instructions](https://docs.popcorn.ai/product/concepts/instructions.md).
+- **Routine Settings** — The values that tune a Routine without changing
+  what it does: switches that turn a behaviour on or off, and values such as a
+  reminder interval or a sender name. A setting reaches only its own Routine,
+  can be set back, and survives the template's improvements. Many are a
+  Routine's scalars or channel parameters. See
+  [Routine Settings](https://docs.popcorn.ai/product/concepts/routine-settings.md).
+- **channel parameters** — Typed values in a Routine's configuration, read in
+  a flow as `$channel.<name>`; the prompts and templates a bundle seeds are
+  folded into them, as `$channel.prompts.<name>` and
+  `$channel.templates.<name>`. The manifest's `channel_parameters:` seeds
+  them per key and leaves a value the Routine changed alone on update. A run
+  pins them, with the rest of `$channel.*`, when it starts. The CLI calls them
+  `params`: `popcorn channel-config params set` and `unset`, and
+  `popcorn channel-config show` prints the whole configuration. *Not to be
+  confused with* scalars, which are not in `$channel.*`. They are Routine
+  Settings. See
+  [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+- **scalar** — A flat `key → text` value on a Routine, always a string on
+  the wire (`popcorn table scalar get` and `set`). A manifest declares
+  scalars in one of two tiers, and a value a flow writes at runtime belongs
+  in neither. A scalar a person sets, such as a switch, is a Routine Setting.
+  See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+- **Agent**, **channel agent**, **app agent** — The assistant inside a
+  Routine that does its work and that people talk to. It follows the
+  Routine's Instructions, and it asks before the steps the Instructions say
+  need a person. Building a template, it is the **channel agent**: the
+  manifest's `channel_agent:` proposes it and is written or cleared on every
+  install; a Routine-level override set by an operator wins over it, and the
+  workspace default applies when neither names an allowed agent. `AGENT.md`
+  holds notes it reads on demand. An **app agent** is an agent a template
+  defines for itself under `agents/<name>/` (`agent.yaml`, `prompt.md`,
+  `schemas/*.json`), which a flow runs with `foundation.agent.invoke`; with
+  `chat: true` in `agent.yaml` it can also serve as the Routine's Agent. See
   [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
-- **channel template** — The older name for an app and its bundle. It
-  survives in `popcorn channel templates` and
-  `popcorn channel create --template <app>`, which both mean the app. Prefer
-  *app* or *app bundle* in prose. See
-  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+
+## What it does
+
+- **Step** — Two senses, and the collision is the first one a template
+  author meets. A **Routine's Step** is one part of its work on each item, in
+  order: what it asks for, what finishes it, and how it follows up until then.
+  Not every Routine has Steps, and they are the states of its template's state
+  machine (see *state machine*). A **flow's step** is one entry in a flow's
+  `steps:`: exactly one of an `activity`, a `call_flow`, an `await_approval`,
+  a `sleep_seconds` or a nested `steps:` block, optionally with `when:`,
+  `foreach:` and `on_error:`. Not every kind takes every modifier:
+  `foreach:` is refused on `sleep_seconds`, `await_approval` and a nested
+  block, and `on_error.retry` on `call_flow` and a nested block. An
+  `await_approval` step pauses one run until a person replies; it is not how
+  a Routine's Reviews or Approvals are built. *Not to be confused with* a
+  Trigger, which brings an item in; Steps are what happens to it after. See
+  [Steps](https://docs.popcorn.ai/product/concepts/steps.md) and
+  [The shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
+- **Review** — The kind of Step where a person decides instead of Popcorn.
+  The item waits, says why, and offers the Actions that decide where it goes
+  next. *Not to be confused with* an Action: a Review is the Step that
+  waits, and an Action is the button that ends it. See
+  [Reviews](https://docs.popcorn.ai/product/concepts/reviews.md).
+- **Approval** — One kind of Review, "should this go ahead?", and the
+  outcome of a Review that passes.
+- **state machine** — What a Routine's Steps, Status and Actions are built
+  from: a manifest `states:` section, or a recipe, over one table — a set of
+  small machines. At least one is not an overlay; the first of those is the
+  primary, usually a **funnel** (the milestone that moves forward). An
+  **overlay** (`overlay: true`) holds what is true alongside it. See
+  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+- **recipe** — A template's state graph shipped as a root `recipe.yaml`,
+  declared by the manifest's `recipe:` block instead of `states:`; it is how
+  a Routine's Steps are written. Each Routine can install a revision of its
+  own, which runs pinned per run and survives the template's updates.
+  Formerly **process** (`process:`, `process.yaml`). See
+  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
+- **state**, **event**, **transition** — A machine's values; the named
+  things that happen, grouped in families the template names (`staff.*`,
+  `world.*`, `system.*`, …); and the edge an event fires, from one set of
+  states to another, writing facts as it goes. A **guard** is a condition an
+  edge requires. Two families are special: the staff family (`staff` unless
+  the section renames it) is the one Actions fire, and only `system` events
+  leave a terminal state.
+
+## What it holds
+
+- **item** — One thing a Routine works on, such as a potential client in an
+  intake Routine or an order on its way to a customer. Each item is a Row in
+  one of the Routine's Tables. An item is not always a person.
+- **Table** — A set of items the Routine keeps, such as claims, orders or
+  contacts, shown as rows and columns. Building a template, a table is a
+  named collection of rows with a schema: its columns, their merge policies
+  and an optional merge key. The manifest's `tables:` reconciles additively
+  — columns are added, never dropped or renamed — while a matched column's
+  type, format, display and label and the column order follow the manifest,
+  and any other setting it declares, on or off, wins; a setting it leaves out
+  keeps its installed value. `popcorn table schema <name>` prints one. See
+  [Tables](https://docs.popcorn.ai/product/concepts/tables.md) and
+  [Table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md).
+- **Row** — One item in a Table: one claim, one order. *Row* is the word in
+  the CLI (`popcorn table rows`, `table row get`) and most `store`
+  activities, and in a flow a row carries `_record_id` and `_rev`.
+- **Column** — One kind of information every Row in a Table has, such as a
+  due date or an amount.
+- **Cell** — One Row's value in one Column.
+- **Status** — Where an item stands, such as *Waiting on documents* or
+  *Approved*. Popcorn works it out from what has happened to the item, so it
+  changes when an Action is taken or the Routine moves the item on, not by
+  editing the Cell. Building a template, it is a row's status column, a
+  projection of its state machines: change it by firing an event. A state
+  transition or projected patch that writes it is refused; a plain store
+  write is not, and lasts only until the engine next projects the row. *Not
+  to be confused with* a run's status or outcome. See
+  [Actions and Status](https://docs.popcorn.ai/product/concepts/actions-and-status.md).
+- **outcome** — Two senses. An item's outcome is the Status a finished item
+  ends on, such as *Retained* or *Not retained*. A run's outcome is what a
+  caller branches on when the run ends: `succeeded`, `failed` or
+  `still_running`. *Not to be confused with* the run's status, which uses a
+  finer vocabulary.
+- **merge policy**, **merge key** — A column's merge policy decides what an
+  upsert does to its existing value. A table's merge key decides which
+  existing row an insert matches. `merge_on` names the match per call, for a
+  table without a merge key; on a table with one, `merge_on` is ignored. See
+  [Column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
+- **rev**, **`If-Match`** — A revision token for a conditional write. A row
+  carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
+  `foundation.store.patch_row`); a Routine's configuration carries a string
+  `rev`, which a per-key parameters patch accepts as `If-Match: "<rev>"`. A
+  mismatch is refused with status 412, `error: stale_rev` and the current
+  `rev`, for a row and for the configuration alike, and the CLI reports it as
+  a `conflict`. `popcorn channel-config params set` sends no `If-Match`, so
+  it never meets this refusal. *Not to be confused with* a version's id.
+
+## What people do, and what happened
+
+- **Action** — Something a person does to move an item on: approve, send,
+  archive, retry. A Routine offers an item the Actions that make sense for
+  where it stands, so the buttons and the Status cannot disagree. See
+  [Actions and Status](https://docs.popcorn.ai/product/concepts/actions-and-status.md).
+- **CTA** — An Action as a template declares it: the button, declared on the
+  transition it fires (`cta:`), so the graph and the interface cannot
+  disagree. Only a staff-family transition may carry one.
+- **History** — What has happened in a Routine: the work it ran and how each
+  run ended, the conversation in it, and the changes to its items, with who or
+  what made each one. See
+  [History](https://docs.popcorn.ai/product/concepts/history.md).
+- **run** — One execution of a flow, and one entry of a Routine's History,
+  identified by its `workflow_id` (`popcorn flow runs get <workflow-id>`). A
+  run is started by `flow run`, a schedule, a webhook, a message trigger, a
+  document, a state machine, an agent or another flow. See
+  [Debugging a failed run](https://docs.popcorn.ai/platform/guides/debugging-a-failed-run.md).
+
+## Building a template
+
+- **app bundle** (short: **bundle**) — The files of one version of a Routine
+  Template: `manifest.yaml`, the flow YAML files at the root, `AGENT.md`,
+  `README.md`, `strings.yaml`, and the `prompts/`, `templates/`, `code/` and
+  `agents/` directories. The template's slug, such as `claimcoordinator`, is
+  the manifest's `app_type:`. *Not to be confused with* the bundle's own
+  `templates/` directory, which holds email text. See
+  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md).
 - **manifest** — `manifest.yaml` at the bundle root; `config.yaml` is still
   read under its legacy name. Each key has its own install semantics, and an
   absent key is not the same as an empty one. An unknown top-level key is
   ignored; an unknown key inside `connections:`, `documents:` or `triggers:`
   is refused.
   See [Manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).
-- **bundle version** — One immutable published version of a bundle,
-  identified two ways: `version_id`, an integer the platform assigns (what
-  `app checkout --version` takes), and `semver`, the manifest's `version:`,
-  unique on its line. Name both when you name one. *Not to be confused with*
-  a flow's own `version:`, an integer inside the flow file that a `call_flow`
-  step reports as `flow_version`; `flow_version` on a flow-run response, which
-  is the bundle's `version_id`; or a table's schema version. See
-  [Bundle versions](https://docs.popcorn.ai/platform/concepts/bundle-version.md).
-- **line** — A series of bundle versions with one head. The **product line**
-  is the shared series Popcorn publishes (`kind: product`); a **fork line** is
-  one workspace's own series, with a name (`kind: fork`, `fork_name`). Two
-  lines can each hold a `1.0.1`. `popcorn app lines` lists a workspace's fork
-  lines. See [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
-- **fork** — Minting a fork line from the product version a channel runs,
-  with byte-identical content, and binding the channel to it. It is required
-  before a publish, and it is one-way: a channel on a fork line never returns
-  to the product line. `popcorn app fork --name <line>` names the line; a
-  workspace may own several per app. See
-  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
-- **head** — The newest version on a line; on the product line, the version
-  the workspace's release track points at. `popcorn app checkout` checks out
-  a fork line's head, and a publish must be based on it. A channel still on
-  the product line checks out its bound version. *Not to be confused with* the
-  bound version, which lags the head while an install has not landed. See
-  [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
-- **binding**, **bound version** — The one version a channel runs. A run
-  reads it once at start and stays pinned to it; table data is not pinned.
-  See [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
-- **release track** — `alpha`, `beta` or `stable`: which product versions a
-  workspace is offered, set per workspace and defaulting to stable. It filters
-  `popcorn app list` and `popcorn channel templates`, and the API never says
-  which track a workspace is on. *Not to be confused with* a tracker. See
-  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
-
-## Moving a version
-
-No product term. The product describes the effect instead: a Routine keeps
-receiving its template's improvements, and *customizing a Routine* says when a
-change gives it a copy of its own, which is what a fork does.
-
-- **publish** — Minting the next version on a fork line with
-  `popcorn app publish`. It needs workspace-admin rights, starts an install on
-  the channel you published from, and reaches every other channel on the line
-  through their daily updates. It publishes to a *line*, not to a channel. See
-  [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
-- **install** — Bringing one channel to one version: reconciling its tables,
-  scalars, channel config, schedules and webhooks, then binding it last.
-  Installs follow `channel create --template`, a publish, an apply and a daily
-  update. An install can be blocked or can skip, and the version exists
-  either way. See [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
-- **apply** — `popcorn app apply`: bring one channel on a fork line up to
-  that line's head, from server state alone. It takes no version, reports
-  `already_current` when there is nothing to do, and is the retry for an
-  install that was blocked or failed. A channel still on the product line is
-  not upgraded by an apply: it adopts the workspace's fork line if there is
-  exactly one, and otherwise reports `already_current` even when behind. An
-  apply is refused on a channel locked against app updates. See
-  [Publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md).
-- **adoption** — A channel still on the product version moving onto a fork
-  line the workspace already owns. A fork, or an apply in a workspace with
-  exactly one fork line of the app, does it. See
-  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
-- **daily update** — Each channel's scheduled daily install of its line's
-  head, which is how a publish reaches the channels you did not publish from,
-  and how a channel on the product line reaches its release track's head. It
-  never adopts a fork line. It skips archived channels, channels locked
-  against app updates, and
-  channels with no update schedule. See
-  [Fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md).
-- **checkout** — A CLI operation, not a server one. `popcorn app checkout`
-  writes a version's files to disk with a `.popcorn-app.json` baseline that
-  records the app, the version it came from and the channel's UUID. It checks
-  out the head (see *head*); `--version <id>` checks out a past version,
-  which `app publish` refuses. See
-  [Bundle versions](https://docs.popcorn.ai/platform/concepts/bundle-version.md).
-
-## Channels and workspaces
-
-Product term: **Routine**, except where an entry says otherwise.
-
-- **channel** — What an app installs into. The product calls it a
-  *Routine*, and older surfaces called it a *project* (see its entry); the API,
-  the CLI and these platform pages say *channel*. A
-  channel is identified by its UUID; its `#name` can change, so a script or
-  a note should hold the UUID. The CLI accepts either and resolves a name to
-  the UUID. On the wire the id is `conversation_id`, because the API's older
-  noun, *conversation* (see its entry), covers direct messages too. See
-  [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
-  Product term: Routine.
-- **project** — The older name for a channel in the MCP tools and the web
-  app, before both said *Routine*: the space a Routine's work lives in, with
-  its members, its messages and the app it runs. The API and the CLI call it a
-  *channel*, and the API's wider noun is *conversation*, so its id is
-  `conversation_id` on the wire and `#name` still names one. Product term:
-  Routine. *Not to be confused with* `feature.state.project`,
-  which recomposes a row's Status (see *Status*).
-- **tracker** — An older word for a channel that runs an app, from earlier
-  product copy and MCP descriptions ("each channel is a tracker"). Product
-  term: Routine. Many apps also name their main table
-  `tracker`, and the state-machine page's example runs its machines over a
-  table of that name.
-- **workspace** — The tenant: it owns channels, users and fork lines. Its
-  users are its members, each with a workspace role (see *member*).
-  `popcorn workspace switch` changes which one the CLI acts on. Product term:
-  workspace.
-- **conversation** — The API's noun for anything messages are posted in,
-  named by its `type`: a channel (`workspace_channel`, `public_channel`,
-  `private_channel`, `shared_channel` or `shared_private_channel`), a direct
-  message (`dm`), a group direct message (`group_dm`), or a self-DM
-  (`self_dm`), the conversation every user has with themselves. Its id is
-  `conversation_id` on the wire. Prefer *channel* when you mean a channel.
-  *Not to be confused with* a thread, which is replies inside a conversation.
-  No product term.
-- **shared channel** — A public or private channel with a member from
-  another workspace. It becomes `shared_channel` or `shared_private_channel`
-  when the first such person joins; a `workspace_channel` cannot be shared.
-  It keeps one home workspace, its `workspace_id`. Someone from another
-  workspace reaches it only through their channel membership, and app
-  operations there treat them as a workspace guest, whatever their role at
-  home. In the home workspace, a `shared_channel` can be read without joining,
-  like a public channel; a `shared_private_channel` needs membership. No
-  product term.
-- **channel config** — A per-channel document holding the channel
-  parameters and the channel integrations, among other sections; the prompts
-  and templates a bundle seeds are folded into the parameters, as
-  `$channel.prompts.<name>` and `$channel.templates.<name>`. Flows read the
-  parameters and integrations as `$channel.*`, and a run pins them at start.
-  `popcorn channel-config show` prints it. *Not to be
-  confused with* scalars, which live in the agent store and are not in
-  `$channel.*`. See
-  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
-  Product term: Routine Settings, for the parameters; its integrations are
-  Connections.
-- **channel parameters** — Typed values in the channel config, read as
-  `$channel.<name>`. The manifest's `channel_parameters:` seeds them per key
-  and leaves a value the channel changed alone on update. The CLI calls them
-  `params`: `popcorn channel-config params set` and `unset`. Product term:
-  Routine Settings.
-
-## People and messages
-
-Product term: messages, threads and reactions are part of a Routine's
-**History**. Users, members and roles have no product term.
-
-- **user** — A person's account in one workspace. There is one user per
-  workspace, so one email address in two workspaces is two users, with two
-  ids. Within a workspace, username and email are each unique. The MCP tool
-  `get_user` looks a user up by id, email or username, and takes `me` for the
-  caller. A bot is a user too (see *bot*).
-- **member**, **role** — Always qualify them. A **workspace member** is a
-  user of that workspace, and its **workspace role** is `owner`, `admin`,
-  `member`, `guest` or `workspace_agent`. A **channel member** is a user with
-  a membership of one channel, and its **channel role** is `owner`, `admin`,
-  `member`, `guest`, `agent` or `channel_agent`; a channel's creator is its
-  owner. The two roles are separate, and `owner`, `admin`, `member` and
-  `guest` exist at both levels: someone who joins a channel by invitation
-  from another workspace is a channel `guest` whatever their workspace role.
-  A channel's admin actions are open to its owners and admins and to
-  workspace admins. `get_user` reports the workspace role.
-- **bot**, **workspace agent** — A bot is a user with `is_bot` set. Every
-  workspace is created with one, the **workspace agent**: a bot user with the
-  workspace role `workspace_agent`, named after the workspace's agent
-  identity. App installs run as the workspace agent, never as the person who
-  asked, and it can read every conversation in its workspace. The API that
-  people sign in to refuses a request made as a bot. *Not to be confused with* the channel agent or an
-  app agent (see *Integrations and agents*), which a channel and a bundle
-  configure.
-- **active**, **deactivated** — Whether a user still belongs to its
-  workspace. Removing a user from a workspace deactivates it and marks it
-  deleted; the row stays, and the platform no longer finds the user by email
-  or username, so its requests to that workspace are refused with
-  `user_not_found`. Joining the same workspace again with the same email
-  reactivates the same user, id included.
-- **presence** — Whether a user is `online`, `away`, `busy` or `offline`. A
-  user can set themselves away, and an online user who has not been seen for
-  a while is moved to away. On the wire, and in `get_user`'s output, it is
-  called `status`. *Not to be confused with* a row's Status column (see
-  *Status*) or a run's status.
-- **message** — One post in a conversation, with an id (`message_id`), an
-  author (`user_id`) and content; it can be edited and deleted. *Not to be
-  confused with* a message trigger (see *trigger*), a manifest entry that
-  runs a flow for each message in a channel.
-- **thread**, **reply** — The replies under one message. A reply carries
-  `parent_message_id`, the message it answers, and `thread_id`, the id of the
-  message that started the thread; a reply to a reply joins the same thread
-  rather than starting a new one. The starting message carries
-  `thread_message_count` and `thread_last_reply_at`.
-- **reaction** — An emoji on a message. A message's `reactions` maps each
-  emoji to the ids of the users who added it.
-
-## Flows and runs
-
-No product term for a flow or what it is made of: they are how a Routine does
-its work, and stay behind it. What starts a run is a **Trigger**, and the
-runs themselves are part of a Routine's **History**; the entries say which.
-
 - **flow** — A YAML file at the bundle root declaring inputs, steps and
-  outputs. Its identity is the `name:` inside the file, not the filename, so
-  changing `name:` deletes one flow and creates another. Several fields and
-  arguments spelled `flow_id`, such as the one `popcorn flow get` takes, hold
-  that name. *Not to be confused with* a workflow: the webhook mode
-  `trigger_workflow` starts a flow. See
-  [A flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
-- **step** — One entry in a flow's `steps:`: exactly one of an `activity`, a
-  `call_flow`, an `await_approval`, a `sleep_seconds` or a nested `steps:`
-  block, optionally with `when:`, `foreach:` and `on_error:`. Not every kind
-  takes every modifier: `foreach:` is refused on `sleep_seconds`,
-  `await_approval` and a nested block, and `on_error.retry` on `call_flow` and
-  a nested block. *Not to be confused with* a Routine's Step, which is a
-  state of its state machine, not an entry in a flow. An `await_approval`
-  step pauses one run until a person replies; it is not how a Routine's
-  Reviews or Approvals are built. See
-  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
+  outputs; a Routine's Triggers and Actions start one. Its identity is the
+  `name:` inside the file, not the filename, so changing `name:` deletes one
+  flow and creates another. Several fields and arguments spelled `flow_id`,
+  such as the one `popcorn flow get` takes, hold that name. *Not to be
+  confused with* a workflow: the webhook mode `trigger_workflow` starts a
+  flow. See
+  [The shape of a flow](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
 - **activity** — A platform operation a step calls, named
   `<tier>.<domain>.<verb>`, such as `foundation.store.list_rows`, sometimes
   with more segments before the verb (`app.delivery.briefing.collect`); the
-  tiers
-  are `foundation`, `feature`, `app` and `system`. The **activity catalog**
-  (`popcorn flow activities`) decides what a flow can do. See the
+  tiers are `foundation`, `feature`, `app` and `system`. The **activity
+  catalog** (`popcorn flow activities`) decides what a flow can do. See the
   [activity reference](https://docs.popcorn.ai/platform/reference/activities.md).
 - **`call_flow`** — A step that runs another flow of the same bundle as a
   child, pinned to the parent's version. By default (`mode: wait`) it waits
   for the child's outputs; `mode: detach` returns once the child has started.
   Its key is `flow:`. *Not to be confused with* the activity
   `foundation.workflow.start_flow`, which starts a separate run that reads the
-  channel's binding afresh and cannot be waited on; its key is `flow_name:`.
-  See [How a channel runs a version](https://docs.popcorn.ai/platform/concepts/channel-binding.md).
-- **run** — One execution of a flow, identified by its `workflow_id`
-  (`popcorn flow runs get <workflow-id>`). A run is started by `flow run`, a
-  schedule, a webhook, a message trigger, a document, a state machine, an
-  agent or another flow. Product term: History.
-- **outcome** — What a caller branches on when a run ends: `succeeded`,
-  `failed` or `still_running`. *Not to be confused with* the run's status,
-  which uses a finer vocabulary, or with a row's Status column, or with the
-  product's outcome, the Status a finished item ends on. Product term:
-  History.
-- **trigger** — Always qualify it. A **message trigger** is a manifest
-  `triggers:` entry that runs a flow for each message in the channel, and its
-  `enabled` is written once, by the install that first brings the trigger to
-  the channel, and kept after that; a flow's own `trigger:` key is
-  refused at publish. **`$trigger`** is the scope that says who and where
-  asked for the run (`thread_id`, `message_id`, `user_id`, …). The **trigger
-  report** that `popcorn flow get` prints is what starts a flow: schedules,
-  webhooks, message triggers, documents, states and other flows. **`trigger_workflow`**
-  is a webhook mode. Product term: Trigger, for a message trigger and for what
-  the trigger report lists. The product's Trigger needs no qualifier: it means
-  only how work arrives.
-- **schedule** — A manifest `schedules:` entry that runs a flow on an
-  `interval:` or a `cron:`, keyed by flow name and `slug`. Its cadence exists
-  three ways: **declared** in the manifest, **armed** on the channel (what
-  `popcorn schedule list` shows), and **intended**, what the platform's own
-  rewrites make of the armed cadence — a `deadline` or `window` schedule's
-  spread offset can move a daily cron off the declared minute.
-  `popcorn app status` compares armed with declared, and uses intended to tell
-  a deliberate difference from drift. See
-  [Manifest keys](https://docs.popcorn.ai/platform/concepts/manifest-keys.md).
-  Product term: Trigger.
-- **webhook** — A per-channel ingest URL (`popcorn webhook list --show-url`)
-  whose `action_mode` is `silent`, `as_is`, `ai_enhanced` or
-  `trigger_workflow`. In `trigger_workflow` mode each delivery starts the
-  flow named by `trigger_flow_name`; responses spell that field
-  `trigger_flow_id`, and it holds the name. A **delivery** is one received
-  payload (`popcorn webhook deliveries`). Product term: Trigger.
+  Routine's version afresh and cannot be waited on; its key is `flow_name:`.
+  See [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
 
-## Data
+## Versions and copies
 
-Product term: **Table**, **Row**, **Column** and **Cell**, except where an
-entry says otherwise.
-
-- **agent store** — A channel's tables, scalars and files, scoped to that one
-  channel. The CLI reaches it through `popcorn table`, and flows through the
-  `foundation.store.*` activities. Some API paths and older pages call it the
-  data store. Product term: Table, for its tables; its scalars are Routine
-  Settings.
-- **table** — A named collection of rows with a schema: its columns, their
-  merge policies and an optional merge key. The manifest's `tables:`
-  reconciles additively — columns are added, never dropped or renamed — while
-  a matched column's type, format, display and label and the column order
-  follow the manifest, and any other setting it declares, on or off, wins; a
-  setting it leaves out keeps its installed value.
-  `popcorn table schema <name>` prints one.
-- **row**, **record** — One entry in a table. *Row* is the word in the CLI
-  (`popcorn table rows`, `table row get`), these pages and most `store`
-  activities; *record* is the wire word (`records`, `record_id`) and survives
-  in `foundation.store.get_record`. In a flow a row carries `_record_id` and
-  `_rev`.
-- **scalar** — A flat `key → text` value on a channel, always a string on
-  the wire (`popcorn table scalar get` and `set`). A manifest declares
-  scalars in one of two tiers, and a value a flow writes at runtime belongs
-  in neither. See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
-  Product term: Routine Settings, for a scalar a person sets, such as a
-  switch; a value a flow writes at runtime has none.
-- **merge policy**, **merge key** — A column's merge policy decides what an
-  upsert does to its existing value. A table's merge key decides which
-  existing row an insert matches. `merge_on` names the match per call, for a
-  table without a merge key; on a table with one, `merge_on` is ignored. See
-  [Column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md).
-  No product term.
-- **rev**, **`If-Match`** — A revision token for a conditional write. A row
-  carries an integer `rev` (`_rev` in a flow, the `expected_rev` argument of
-  `foundation.store.patch_row`); the channel config carries a string `rev`,
-  which a per-key parameters patch accepts as `If-Match: "<rev>"`. A mismatch
-  is refused with status 412, `error: stale_rev` and the current `rev`, for a
-  row and for the channel config alike, and the CLI reports it as a
-  `conflict`. `popcorn channel-config params set` sends no `If-Match`, so it
-  never meets this refusal. *Not to be confused with* a `version_id`. No
-  product term.
-
-## Integrations and agents
-
-Product terms: **Connection** and **Agent**; the entries say which.
-
-- **integration** — Always qualify it. A **connected account** is one
-  person's account with a provider, with an `integration_id`
-  (`popcorn channel-config accounts` lists them). A **channel integration** is
-  a name in the channel config bound to one account, read as
-  `$channel.integrations.<name>` and set with
-  `popcorn channel-config integrations set`. An **integration requirement** is
-  what a bundle needs connected: a flow's `required_integrations:`, or the
-  manifest's `connections:`. Only `required_integrations:` is enforced, and a
-  run missing one (or bound to an account of another provider) does nothing:
-  started by a schedule, webhook, message trigger or another flow it ends
-  without error; a person's or agent's `flow run` is refused with 409
-  `missing_integrations`. `connections:` declares what to connect and stops
-  nothing. Product term: Connection, for all three.
-- **channel agent** — The agent members talk to in a channel. The manifest's
-  `channel_agent:` proposes it and is written or cleared on every install; a
-  channel-level override set by an operator wins over it, and the workspace
-  default applies when neither names an allowed agent. `AGENT.md` holds notes
-  it reads on demand. Product term: Agent.
-- **app agent** — An agent a bundle defines for itself under
-  `agents/<name>/` (`agent.yaml`, `prompt.md`, `schemas/*.json`), which a
-  flow runs with `foundation.agent.invoke`. With `chat: true` in `agent.yaml`
-  it can also serve as a channel agent. See
-  [App bundles](https://docs.popcorn.ai/platform/concepts/app-bundle.md). Product
-  term: Agent.
-- **agent mode** — The CLI setting `POPCORN_AGENT=1`, which defaults
-  `--json`, `--quiet` and `--no-color` and suppresses upgrade prompts. It does
-  not imply `--yes`, and `app publish` requires `--yes` (or
-  `POPCORN_ASSUME_YES=1`) in agent mode. It has
-  nothing to do with the agents above. No product term.
-
-## State machines
-
-Product terms: **Status** and **Action**. The machines, states, events and
-transitions behind them stay out of the product.
-
-- **state machine** — A manifest `states:` section, or a recipe, over one table: a set of
-  small machines. At least one is not an overlay; the first of those is the
-  primary, usually a **funnel** (the milestone that moves forward). An
-  **overlay** (`overlay: true`) holds what is true alongside it. See
-  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
-- **recipe** — A bundle's state graph shipped as a root `recipe.yaml`,
-  declared by the manifest's `recipe:` block instead of `states:`. Each
-  channel can install a revision of its own, which runs pinned per run and
-  survives the bundle's updates. Formerly **process** (`process:`,
-  `process.yaml`). Product term: a Routine's Steps. See
-  [State machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md).
-- **state**, **event**, **transition** — A machine's values; the named
-  things that happen, grouped in families the bundle names (`staff.*`,
-  `world.*`, `system.*`, …); and the edge an event fires, from one set of
-  states to another, writing facts as it goes. A **guard** is a condition an
-  edge requires. Two families are special: the staff family (`staff` unless
-  the section renames it) is the one CTAs fire, and only `system` events
-  leave a terminal state.
-- **CTA** — The button a user sees, declared on the transition it fires
-  (`cta:`), so the graph and the interface cannot disagree. Only a
-  staff-family transition may carry one. Product term: Action.
-- **Status** — A row's status column, a projection of its machines. Change
-  it by firing an event. A state transition or projected patch that writes
-  it is refused; a plain store write is not, and lasts only until the
-  engine next projects the row. *Not to be
-  confused with* a run's status or outcome, or a user's presence, which the
-  API also calls `status`. Product term: Status.
+- **version** — One immutable published version of a Routine Template,
+  identified two ways: `version_id`, an integer Popcorn assigns (what
+  `popcorn app checkout --version` and the MCP tools' `version` take), and
+  `semver`, the manifest's `version:`, unique on its copy. Name both when you
+  name one. A Routine runs one version at a time, and a run reads it once at
+  start and stays pinned to it; table data is not pinned. *Not to be confused
+  with* a flow's own `version:`, an integer inside the flow file that a
+  `call_flow` step reports as `flow_version`; `flow_version` on a flow-run
+  response, which is the bundle's `version_id`; or a table's schema version.
+  See [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **copy** — A workspace's own series of versions of a Routine Template, with
+  one head and a name; the CLI calls it a *fork line* (`kind: fork`,
+  `fork_name`). Until a Routine is copied it runs the **product line**, the
+  shared series Popcorn publishes (`kind: product`). Making a copy
+  (`copy_routine_template`, `popcorn app fork --name <copy>`) starts it
+  byte-identical to the version the Routine runs and moves the Routine onto
+  it; a copy is required before a publish, and it is one-way: a Routine on a
+  copy never returns to the product line. Moving a Routine still on the
+  product line onto a copy the workspace already has (`install_routine` with
+  `copy`) is called *adoption*, and an install in a workspace with exactly
+  one copy does it unasked. A workspace may own several copies of one
+  template, and two copies can each hold a `1.0.1`. `popcorn app lines`
+  lists them. See
+  [Copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md).
+- **head** — The newest version on a copy; on the product line, the version
+  the workspace's release track points at. `list_routine_files` and
+  `popcorn app checkout` read a copy's head, and a publish must be based on
+  it; on a Routine still on the product line they read the version it runs.
+  *Not to be confused with* the version a Routine runs, which lags the head
+  while an install has not landed. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **publish** — Minting the next version on a copy, with
+  `create_routine_version` or `popcorn app publish`. It needs a workspace
+  admin, starts an install on the Routine it names, and reaches every other
+  Routine on the copy through their daily updates. It publishes to a *copy*,
+  not to one Routine. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **install** — Bringing one Routine to one version: reconciling its tables,
+  scalars, configuration, schedules and webhooks, then moving it onto the
+  version last. Installs follow creating a Routine from a template, a
+  publish, an apply and a daily update. An install can be blocked or can
+  skip, and the version exists either way. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **apply** — `install_routine` without `copy`, or `popcorn app apply`: bring
+  one Routine on a copy up to that copy's head, from the server's state
+  alone. It takes no version, says there is nothing to do when the Routine is
+  current, and is the retry for an install that was blocked or failed. A
+  Routine still on the product line is not upgraded by an apply: it adopts
+  the workspace's copy if there is exactly one, and otherwise is reported
+  current even when behind. An apply is refused on a Routine locked against
+  template updates. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **daily update** — Each Routine's scheduled daily install of its copy's
+  head, which is how a publish reaches the Routines you did not publish from,
+  and how a Routine on the product line reaches its release track's head. It
+  runs as the workspace agent and never moves a Routine onto a copy. It skips
+  archived Routines, Routines locked against template updates, and Routines
+  with no update schedule. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **checkout** — A CLI operation, not a server one. `popcorn app checkout`
+  writes a version's files to disk with a `.popcorn-app.json` baseline that
+  records the template, the version it came from and the Routine's ID. It
+  checks out the head (see *head*); `--version <id>` checks out a past
+  version, which `app publish` refuses. Over MCP, `list_routine_files` and
+  `read_routine_file` read the same files without a checkout. See
+  [Versions](https://docs.popcorn.ai/platform/concepts/versions.md).
+- **release track** — `alpha`, `beta` or `stable`: which product versions a
+  workspace is offered, set per workspace and defaulting to stable. It filters
+  `popcorn app list` and `popcorn channel templates`, and the API never says
+  which track a workspace is on. See
+  [Authoring an app bundle](https://docs.popcorn.ai/platform/guides/template-authoring.md).
 
 ## Names you'll see elsewhere
 

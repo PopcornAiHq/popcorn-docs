@@ -8,7 +8,7 @@ summary: >
   validate`, then `app publish` from a fork line. Install creates the table,
   and each later install adds to it and never removes. Publish refuses a
   column the store would reject; a later publish can change a merge policy.
-concepts: [manifest-keys, merge-policy, fork-line, publish-and-apply, app-bundle]
+concepts: [manifest-keys, merge-policy, copying-a-template, versions, app-bundle]
 layer: platform
 product_terms: [Table]
 ---

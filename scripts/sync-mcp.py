@@ -107,7 +107,7 @@ PROPOSED = """\
 
 **None of these tools exist yet, and nothing depends on them arriving.** They
 are a design for the tools a person's assistant uses to run Routines, named
-in the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)'s
+in the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)'s
 terms rather than the platform's. They are listed so an author can see what is
 being considered; names and arguments may change before any ships.
 
@@ -426,7 +426,7 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "  people, Routines, their Triggers, Actions, settings and tables, and a",
         "  Routine's app — with their arguments, generated from the server's own",
         "  definitions.",
-        "concepts: [app-bundle, publish-and-apply, fork-line]",
+        "concepts: [app-bundle, versions, copying-a-template]",
         "layer: product",
         "---",
         "",

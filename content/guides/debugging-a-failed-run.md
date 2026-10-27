@@ -8,7 +8,7 @@ summary: >
   --include-errors` and the steps with `flow runs timeline`, fix, publish, and
   run again once the install lands. Also runs that succeed having done
   nothing, and ones that never start.
-concepts: [channel-binding, publish-and-apply, flow-identity, template-authoring]
+concepts: [versions, flow-grammar, template-authoring]
 layer: platform
 product_terms: [History]
 ---

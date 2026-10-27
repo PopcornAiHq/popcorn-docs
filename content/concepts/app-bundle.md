@@ -9,7 +9,7 @@ summary: >
   Every non-reserved YAML file at the bundle's root is a flow, so a sample
   payload left there installs as one; keep payloads outside the bundle.
   A manifest with a version is what makes it publishable.
-concepts: [bundle-version, manifest-keys, flow-identity]
+concepts: [versions, manifest-keys, flow-grammar]
 layer: platform
 product_terms: [Routine Template]
 ---

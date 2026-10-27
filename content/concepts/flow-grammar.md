@@ -4,12 +4,12 @@ title: The shape of a flow
 order: 9
 group: How a flow runs
 summary: >
-  A flow is one YAML file at the bundle root: a name, inputs, steps and
-  outputs. A step is exactly one of five things — an activity, a sleep, an
-  approval gate, a child flow, or a nested block. A block keeps its inner
-  steps private and exposes only its declared outputs, and `foreach` repeats a
-  step per item, at most five in parallel.
-concepts: [flow-identity, references, conditions, on-error]
+  A flow is one YAML file at the bundle root, identified by the `name:`
+  inside it, not its filename, so renaming it deletes one flow and creates
+  another. A step is exactly one of five things: an activity, a sleep, an
+  approval gate, a child flow, or a nested block, whose inner steps are
+  private. `foreach` repeats a step per item, at most five in parallel.
+concepts: [references, conditions, on-error, schedules]
 layer: platform
 product_terms: []
 ---
@@ -79,6 +79,37 @@ What a flow may call is the activity catalog, served by the platform:
 Author against `foundation` and `feature` activities at `release` or `beta`;
 `app.*` activities are one Routine Template's own logic, which a copy of it
 keeps calling; they are not a surface to author against.
+
+## A flow's identity is its name
+
+A flow is identified by the `name:` inside the YAML. The filename is not part
+of its identity — any root-level `.yaml` or `.yml` name that is not reserved
+will do. If `name:` is missing the filename stem stands in, which is why
+`app validate` treats a missing name as an error, and two files resolving to
+the same name make the bundle unpublishable. The name is a slug: lowercase
+letters, digits, hyphens and underscores, starting with a letter or digit,
+at most 63 characters. Publish enforces it, and so does building a
+schedule's id.
+
+A Routine keeps no copy of its flows. Each version carries an index of its
+flows by name, and the Routine runs whatever the version it runs declares;
+a flow the new version no longer declares stops existing for that Routine.
+So changing `name:` is not a rename but a delete plus a create, and what
+happens to the things that addressed the old name depends on what they are:
+
+| Reference | After the old name disappears |
+|---|---|
+| a schedule in the manifest | skipped at install, then deleted as undeclared — a log line, no error |
+| a webhook that already exists | never updated, so it keeps pointing at the old name |
+| a trigger, document or state transition | the publish fails |
+
+Rename the references in the same change, or don't rename. `app validate`
+reports `schedule-unknown-flow` and `webhook-unknown-flow` before you
+publish. `popcorn flow get <name> --channel <routine>` reports everything
+that starts a flow — its schedules, webhooks and message trigger, read live
+from the Routine, and the document, state-transition and sibling-flow
+launches in the version it runs — so run it on the old and new names after a
+rename.
 
 ## A step is exactly one of five things
 

@@ -10,7 +10,7 @@ summary: >
   value written to the column lasts until the next projection. The graph is
   a manifest `states:` section or a `recipe.yaml` each Routine can replace.
   Publish proves structure only.
-concepts: [manifest-keys, channel-binding, states-authoring, app-bundle]
+concepts: [manifest-keys, versions, states-authoring, app-bundle]
 layer: platform
 product_terms: [Status, Action]
 ---

@@ -9,7 +9,7 @@ summary: >
   the queue and how a fire is spread. Each install of a new version reconciles
   schedules by (flow, slug), and a schedule whose `flow:` is not in the bundle
   (a typo in it, say) disappears: skipped, then deleted as undeclared.
-concepts: [manifest-keys, flow-identity]
+concepts: [manifest-keys, flow-grammar]
 layer: platform
 product_terms: [Trigger]
 ---
@@ -62,7 +62,7 @@ state and note.
 **A schedule whose `flow:` is not in the bundle is skipped — and is then
 deleted as undeclared**, so a typo in `flow:` removes the schedule it meant to
 keep. A renamed flow does the same; see
-[a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
+[a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-grammar.md).
 
 ## Live schedules can differ from the manifest
 

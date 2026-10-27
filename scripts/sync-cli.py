@@ -131,7 +131,7 @@ def page(schema: dict, help_text: str) -> str:
         "  mode, the `--json` envelope, exit codes and error codes follow the",
         "  commands. The CLI installs from its GitHub repository, not PyPI; this page",
         "  describes one release, and `popcorn <command> --help` describes yours.",
-        "concepts: [template-authoring, publish-and-apply, fork-line]",
+        "concepts: [template-authoring, versions, copying-a-template]",
         "layer: platform",
         "---",
         "",
