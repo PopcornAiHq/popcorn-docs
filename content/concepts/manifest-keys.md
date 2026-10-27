@@ -1,7 +1,7 @@
 ---
 id: manifest-keys
 title: Manifest keys and what install does to them
-order: 3
+order: 5
 group: What a bundle holds
 summary: >
   A Routine Template's manifest decides what install does to a Routine, key by

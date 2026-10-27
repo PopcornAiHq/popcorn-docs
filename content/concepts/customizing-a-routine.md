@@ -1,7 +1,7 @@
 ---
 id: customizing-a-routine
 title: Customizing a Routine
-order: 2
+order: 4
 group: Routines
 summary: >
   Customizing a Routine changes it alone. Its Routine Settings, Connections,

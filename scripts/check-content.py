@@ -19,6 +19,8 @@ Checks, in the order a writer meets them:
   and exactly why nobody sees it: the reference just silently stops working
 * `order`, when present, is a whole number from 1 — the build sorts by it, and
   a value it cannot read would crash the build rather than fail here by name
+* no two pages in a part share an `order`. A part's concepts and guides are
+  numbered in one sequence, and a tie would be settled by kind, out of sight
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
 * `updated`, when present, is a real `YYYY-MM-DD` date, on a generated
@@ -165,6 +167,27 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     return problems
 
 
+def shared_orders(files: list[pathlib.Path]) -> dict[pathlib.Path, list[str]]:
+    """Each page whose `order` another page in its part also has, and with whom.
+
+    Pages with no part are numbered within their kind, so they are left out."""
+    seen: dict[tuple[str, str], list[pathlib.Path]] = {}
+    for path in files:
+        doc = _DOC.match(path.read_text())
+        if not doc:
+            continue
+        part, order = _PART.search(doc.group("fm")), _ORDER.search(doc.group("fm"))
+        if part and order:
+            key = (part.group("value").strip(), order.group("value").strip())
+            seen.setdefault(key, []).append(path)
+    out: dict[pathlib.Path, list[str]] = {}
+    for (part, order), paths in seen.items():
+        for path in paths if len(paths) > 1 else []:
+            others = ", ".join(o.stem for o in paths if o != path)
+            out[path] = [f"order {order} is also {others}'s, in part {part}"]
+    return out
+
+
 def main() -> int:
     files = sorted((ROOT / "content").rglob("*.md"))
     files = [f for f in files if not f.name.startswith("_")]
@@ -175,9 +198,10 @@ def main() -> int:
     # A page's id is its filename, which the id check above enforces, so the
     # stems are the ids a `concepts:` entry may name.
     ids = {f.stem for f in files}
+    shared = shared_orders(files)
     failed = 0
     for path in files:
-        problems = check(path, ids)
+        problems = check(path, ids) + shared.get(path, [])
         if problems:
             failed += 1
             print(f"\n✖  {path.relative_to(ROOT)}")

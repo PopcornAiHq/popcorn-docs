@@ -1,7 +1,7 @@
 ---
 id: actions-and-status
 title: Actions and Status
-order: 11
+order: 14
 group: What people do, and what happened
 summary: >
   An item's Status says where it stands, such as Waiting on documents, and

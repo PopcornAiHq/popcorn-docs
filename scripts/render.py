@@ -294,8 +294,9 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     Each section is (label, groups) and each group is (label, links), where an
     empty group label means the links sit directly under the section. A
-    section labelled None has no heading at all — the home page's link, which
-    belongs to no section.
+    section whose groups are None is only a heading — a part's, or Look it
+    up. One labelled "" holds a part's topics, under that heading; one
+    labelled None is a plain list of links, such as the home page's.
     """
     def link(title: str, href: str, current: bool) -> str:
         attrs = ' aria-current="page"' if current else ""
@@ -303,7 +304,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     out = []
     for label, groups in sections:
-        # A part heading: a label with no links, above the kinds it holds.
+        # A part heading: a label with no links, above the topics it holds.
         if groups is None:
             out.append(f'<p class="nav-part">{html.escape(label, quote=False)}</p>')
             continue
@@ -312,7 +313,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
                 f'<ul class="solo">{"".join(link(*l) for l in links)}</ul>' for _, links in groups
             ))
             continue
-        parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>']
+        parts = []
         for group, links in groups:
             items = "".join(link(*l) for l in links)
             if group:
@@ -728,11 +729,8 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .sidebar a:hover { color: var(--fg); }
 .sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg);
   font-weight: 600; box-shadow: inset 2px 0 0 var(--brand); }
-.nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--fg); }
-.site-nav > :first-child .nav-section { margin-top: 0; }
 .nav-part { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
-.nav-part + div .nav-section { margin-top: .75rem; }
+.nav-part + div > :first-child { margin-top: .75rem; }
 .solo { margin-top: 1.25rem !important; }
 .site-nav > .solo:first-child { margin-top: 0 !important; }
 .nav-part + .solo { margin-top: .75rem !important; }

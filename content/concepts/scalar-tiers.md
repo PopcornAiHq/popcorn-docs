@@ -1,7 +1,7 @@
 ---
 id: scalar-tiers
 title: Scalar tiers and Routine Settings
-order: 4
+order: 6
 group: What a bundle holds
 summary: >
   Many Routine Settings are scalars, and a manifest writes them in one of two

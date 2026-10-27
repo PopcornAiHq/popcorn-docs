@@ -1,7 +1,7 @@
 ---
 id: routines
 title: Routines and Routine Templates
-order: 1
+order: 3
 group: Routines
 summary: >
   A Routine is one piece of ongoing work Popcorn runs for you, such as claims

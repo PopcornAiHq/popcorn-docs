@@ -135,7 +135,7 @@ def parse(path: pathlib.Path) -> dict:
 
 # The two parts of the site, Using Popcorn first: (frontmatter value, label,
 # who it is for). A page's part is the first segment of its URL and a heading
-# of the sidebar. Popcorn is used headless, so a user's assistant is the first
+# of the sidebar; the pages with no part follow both, under Look it up. Popcorn is used headless, so a user's assistant is the first
 # reader, and Using Popcorn leads.
 PARTS = [
     ("use", "Using Popcorn",
@@ -146,13 +146,14 @@ PARTS = [
      "files, flows and tools underneath, with no access to Popcorn's backend."),
 ]
 
-# The kinds of page within a part, in the order a reader meets them:
-# (kind, label, what it is for). The label heads the kind in the sidebar and
-# on its Overview card; the blurb is the card's text. A kind not listed here
-# still publishes, after these, under its own name.
+# The kinds of page, in the order a part's Overview cards show them:
+# (kind, label, what it is for). The sidebar lists topics, not kinds, so the
+# label is seen on the kind's Overview card, in a page's eyebrow and in
+# search; the blurb is the card's text. A kind not listed here still
+# publishes, after these, under its own name.
 SECTIONS = [
-    ("concepts", "Concepts", "One idea each, in reading order."),
-    ("guides", "Guides", "Walkthroughs, start to finish, each building on the last."),
+    ("concepts", "Concepts", "One idea each, explained in full."),
+    ("guides", "Guides", "Walkthroughs of one task, start to finish."),
     ("glossary", "Glossary", "Every term, with its synonyms and the collisions worth knowing."),
     ("reference", "Reference", "Generated from Popcorn itself, never written by hand."),
 ]
@@ -221,51 +222,61 @@ def part_info(part: str) -> tuple[str, str]:
 
 
 def reading_order(page: dict) -> tuple:
-    """Part first, then section, then the page's `order:`, then its title.
+    """Part first, then the page's `order:`, then its kind, then its title.
 
-    `order:` is what makes a reading path: filenames sort alphabetically,
-    which put an advanced guide ahead of the one it builds on. A page with
-    no `order:` goes after the ordered ones in its section.
+    `order:` numbers a part's pages in one sequence, concepts and guides
+    together, so a guide sits beside the concepts it puts to work. Filenames
+    sort alphabetically, which put an advanced guide ahead of the one it
+    builds on. A page with no `order:` goes after the ordered ones in its part.
     """
     part = page.get("part")
     part_rank = _PARTS.index(part) if part in _PARTS else len(_PARTS)
     section = nav_section(page)
     rank = _KNOWN.index(section) if section in _KNOWN else len(_KNOWN)
     order = page.get("order")
-    return (part_rank, rank, section, order is None, order or 0, page["title"].lower())
+    return (part_rank, order is None, order or 0, rank, section, page["title"].lower())
+
+
+def by_topic(pages: list[dict]) -> list[dict]:
+    """The pages in the sidebar's order: each part's groups, then the rest.
+
+    A group sits where its first page does in reading order, so groups need
+    no order of their own; a later page in the same group joins it there.
+    The pager walks this order too, so Next is always the link below.
+    """
+    topics: dict[tuple, list[dict]] = {}
+    for page in pages:
+        key = (page.get("part") or "", page.get("group", "") if page.get("part") else "")
+        topics.setdefault(key, []).append(page)
+    return [page for group in topics.values() for page in group]
 
 
 def sidebar(pages: list[dict], current: str | None) -> str:
-    """The site sidebar: sections in reading order, then `group:` within them.
+    """The site sidebar: each part's `group:`s, then Look it up.
 
-    A group sits where its first page does, so groups follow the reading
-    order rather than needing an order of their own; pages without a group
-    sit directly under their section.
+    A part lists topics, not kinds: a group holds concepts and guides alike,
+    so neither heading repeats under both parts. Pages without a group sit
+    directly under their part.
     """
-    parts: dict[str, dict[str, dict[str, list]]] = {}
-    # The glossary and the references serve both parts, so each is listed
-    # once, after them, rather than as a section of either.
-    shared: dict[str, list] = {}
-    for page in pages:
+    parts: dict[str, dict[str, list]] = {}
+    # The glossary and the references serve both parts, so they are listed
+    # once, after them, under one heading rather than one each.
+    shared: list = []
+    for page in by_topic(pages):
         link = (render.inline(page["title"]), href(page), page["id"] == current)
         if not page.get("part"):
-            shared.setdefault(nav_section(page), []).append(link)
+            shared.append(link)
             continue
-        groups = parts.setdefault(page["part"], {}).setdefault(nav_section(page), {})
-        groups.setdefault(page.get("group", ""), []).append(link)
+        parts.setdefault(page["part"], {}).setdefault(page.get("group", ""), []).append(link)
     # The home page leads the sidebar, current when no page is — `current`
     # is None only when the landing page is the one being built.
     out: list = [(None, [("", [("Overview", "/", current is None)])])]
-    for part, sections in parts.items():
-        # A part is a heading with no links of its own; its kinds follow.
+    for part, groups in parts.items():
         out.append((part_info(part)[0], None))
-        out += [
-            (section_info(section)[0], list(groups.items()))
-            for section, groups in sections.items()
-        ]
-    for kind, links in shared.items():
-        out.append((section_info(kind)[0], None))
-        out.append((None, [("", links)]))
+        out.append(("", list(groups.items())))
+    if shared:
+        out.append((LOOK_UP[0], None))
+        out.append((None, [("", shared)]))
     return render.site_nav(out)
 
 
@@ -283,8 +294,10 @@ def landing(pages: list[dict]) -> str:
     """The home page: what Popcorn is, what these pages cover, one way in each.
 
     It does not list every page — the sidebar beside it already does. Each
-    section gets a card that opens its first page in reading order, so the
-    way in follows `order:` rather than being chosen again here.
+    kind in a part gets a card that opens its first page in reading order, so
+    the way in follows `order:` rather than being chosen again here. The
+    cards follow SECTIONS, not reading order: a part opens with a guide, but
+    its concepts are still the first card.
     """
     first: dict[str, dict[str, dict]] = {}
     for page in pages:
@@ -296,7 +309,8 @@ def landing(pages: list[dict]) -> str:
         else:
             label, blurb = LOOK_UP
         cards = []
-        for section, page in sections.items():
+        for section, page in sorted(sections.items(), key=lambda kv: (
+                _KNOWN.index(kv[0]) if kv[0] in _KNOWN else len(_KNOWN))):
             kind, kind_blurb = section_info(section)
             cards.append(
                 f'<a class="card" id="{anchor(page)}" href="{href(page)}">'
@@ -363,11 +377,8 @@ def not_found(pages: list[dict]) -> str:
 
 
 def pager(page: dict, pages: list[dict]) -> str:
-    """Previous and next within the page's own part and section, in reading order."""
-    peers = [
-        p for p in pages
-        if nav_section(p) == nav_section(page) and p.get("part") == page.get("part")
-    ]
+    """Previous and next within the page's own part, in the sidebar's order."""
+    peers = [p for p in by_topic(pages) if p.get("part") == page.get("part")]
     i = next(n for n, p in enumerate(peers) if p["id"] is page["id"])
     links = []
     if i > 0:
@@ -378,7 +389,7 @@ def pager(page: dict, pages: list[dict]) -> str:
         nxt = peers[i + 1]
         links.append(f'<a class="next" rel="next" href="{href(nxt)}">'
                      f'<span>Next</span>{render.inline(nxt["title"])}</a>')
-    return f'<nav class="pager" aria-label="{section_info(nav_section(page))[0]}">' + "".join(links) + "</nav>\n" if links else ""
+    return f'<nav class="pager" aria-label="{part_info(page["part"])[0] if page.get("part") else LOOK_UP[0]}">' + "".join(links) + "</nav>\n" if links else ""
 
 
 def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:

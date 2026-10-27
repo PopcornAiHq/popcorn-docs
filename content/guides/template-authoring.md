@@ -2,6 +2,7 @@
 id: template-authoring
 title: Changing a Routine Template
 order: 1
+group: Getting started
 summary: >
   The loop for changing what a Routine Template does: check its settings,
   read its files, copy it, edit, publish a version, confirm the install
