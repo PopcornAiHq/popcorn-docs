@@ -410,9 +410,10 @@ def version_badge(page: dict) -> str:
 
     Only a page whose generator records one gets a badge. `version:` is the
     release the CLI reference describes, which it would otherwise mention only
-    mid-sentence. `deployed:` is the date of the prod deploy the activity and
-    MCP references were last regenerated from — the platform has no release
-    number a reader could use, so the date is what says how fresh the page is.
+    mid-sentence. `updated:` is the date of the prod deploy the activity and
+    MCP references were last regenerated from, which moves only when the page
+    does — the platform has no release number a reader could use, so the date
+    is what says how fresh the page is.
     A page has one or the other.
     """
     if page.get("version"):
@@ -420,9 +421,9 @@ def version_badge(page: dict) -> str:
         # value that arrives with one still reads as a version, not `vv…`.
         release = str(page["version"]).removeprefix("v")
         return f'<span class="version-badge" title="Generated from this release">v{release}</span>'
-    if page.get("deployed"):
+    if page.get("updated"):
         return (f'<span class="version-badge" title="Generated from the platform deployed on this date">'
-                f'deployed {page["deployed"]}</span>')
+                f'updated {page["updated"]}</span>')
     return ""
 
 

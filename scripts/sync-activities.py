@@ -16,7 +16,7 @@ of what is released.
 After each prod deploy the backend's deploy pipeline saves the catalog to a
 directory and runs the last form with the deploy's version, then opens a pull
 request here as the docs bot when the page changed. `--platform-version` sets
-the page's `deployed:` date; `platform_version.py` says when that line moves.
+the page's `updated:` date; `platform_version.py` says when that line moves.
 
 It shells out to the `popcorn` CLI rather than calling the API itself, so it
 runs on the credentials the author already has and needs no token of its own.

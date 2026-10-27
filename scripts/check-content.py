@@ -21,10 +21,11 @@ Checks, in the order a writer meets them:
   a value it cannot read would crash the build rather than fail here by name
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
-* `deployed`, when present, is a real `YYYY-MM-DD` date — it is shown to
-  readers as the day the page was last regenerated, so a malformed one would
-  be published as a claim about freshness nobody can read. Its old name,
-  `platform:`, is refused
+* `updated`, when present, is a real `YYYY-MM-DD` date, on a generated
+  reference page only — it is shown to readers as the day the page last
+  changed, so a malformed one would be published as a claim about freshness
+  nobody can read. A hand-written page has none: git knows when it changed.
+  Its old names, `deployed:` and `platform:`, are refused
 * no `source:` field. The backend symbols behind a page are private names,
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
@@ -59,7 +60,8 @@ _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
-_DEPLOYED = re.compile(r"^deployed:\s*(?P<value>.*)$", re.M)
+_UPDATED = re.compile(r"^updated:\s*(?P<value>.*)$", re.M)
+_DEPLOYED = re.compile(r"^deployed\s*:", re.M)
 _OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
@@ -111,19 +113,19 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     if layout and layout.group("value").strip() not in LAYOUTS:
         problems.append(f"layout '{layout.group('value').strip()}' is not one of {sorted(LAYOUTS)}")
 
-    deployed = _DEPLOYED.search(front)
-    if deployed:
-        value = deployed.group("value").strip()
+    updated = _UPDATED.search(front)
+    if updated and path.parent.name != "reference":
+        problems.append("updated: is for a generated reference page; git knows when a hand-written one changed")
+    elif updated:
+        value = updated.group("value").strip()
         try:
             if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
                 raise ValueError
             datetime.date.fromisoformat(value)
         except ValueError:
-            problems.append(f"deployed '{value}' is not a YYYY-MM-DD date")
-    if _OLD_PLATFORM.search(front):
-        problems.append(
-            "platform: is the old name of the deploy-date field; write deployed:"
-        )
+            problems.append(f"updated '{value}' is not a YYYY-MM-DD date")
+    if _DEPLOYED.search(front) or _OLD_PLATFORM.search(front):
+        problems.append("deployed: and platform: are old names of the date field; write updated:")
 
     # The glossary and the references serve both parts; every other page is in one.
     shared = path.parent.name == "reference" or (ident is not None and ident.group(1) == "glossary")
