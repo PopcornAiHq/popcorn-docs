@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-26
+updated: 2026-10-27
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -12,7 +12,7 @@ summary: >
 concepts: [app-bundle, versions, copying-a-template]
 ---
 
-The hosted MCP server gives a person's assistant 41 tools. With them it
+The hosted MCP server gives a person's assistant 43 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made and make one from an account already
@@ -294,7 +294,7 @@ Nothing is copied that belongs to the work or the people: not its items, History
 
 Duplicate: #claims-east, a Routine in Acme, copied from #claims-west.
 - Template: Claim Coordinator (claimcoordinator), fork line "acme" at 0.15.1-acme.2, as #claims-west is.
-- Joins fork line "acme", this workspace's own copy of the template. One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme", and versions published there reach it within a day.
+- Joins fork line "acme", this workspace's own copy of the template. One-way: a Routine on its own copy of a template never goes back to Popcorn's. From then on it follows copy "acme", and new versions of that copy reach it within a day.
 - Members: everyone in the workspace (a Routine that isn't private adds every member).
 Copied:
 - Routine Settings and agent notes: 2 changed from the template's (chase_days, popcorn.agent_notes.intake).
@@ -408,14 +408,14 @@ Before it: version 0096e731db97. To go back: change_routine with revert_to="0096
 
 [read-only]
 
-List the files of the app a Routine runs, with sizes and sha256.
+List the files of the Routine Template version a Routine runs, with sizes and sha256.
 
-The header names the app, its line and the version listed. By default that's the version edits are based on, and its version is the publish base: on a fork line, the line's head; on the product line, the version the Routine runs, which is what a fork copies. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_routine_file. To change how one Routine behaves, check list_routine_settings first: a fork is one-way, and a publish reaches every Routine on the line.
+The header names the template, whether it is Popcorn's or the workspace's own copy, and the version listed. By default that's the version edits are based on: on a copy, its newest version; on Popcorn's template, the version the Routine runs, which is what a copy starts from. That version is the base_version create_routine_version takes. Each row's sha256 is exact: copy it, don't retype it. Read a file's content with read_routine_file. To change how one Routine behaves, check list_routine_settings first: a copy of the template is one-way, and a new version reaches every Routine on that copy.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `version` | `int` | Another version of the Routine's own line, to read history. Omit for the publish base. |
+| `version` | `int | str` | An older version of the Routine's template, to read its history. Pass its number ("0.15.1") or its version id. Omit for the base for edits. |
 | `paths` | `list[str]` | Only files matching any of these: an exact path or a glob ("flows/*", "code/**"). |
 | `cursor` | `str` | next_cursor from the previous page. |
 
@@ -425,7 +425,7 @@ The header names the app, its line and the version listed. By default that's the
 → list_routine_files(routine="#intake")
 
 Routine: #intake (c7d2…5b)
-App: claimcoordinator · line: product · version 0.15.1 (version: 812) · head: yes
+Template: Claim Coordinator (claimcoordinator) · Popcorn's · 0.15.1 (version 812) · newest: yes
 6 of 6 files:
 - AGENT.md  53 B  sha256: f7834927…
 - flows/chase_estimate.yaml  21 B  sha256: 42def0cb…
@@ -437,7 +437,7 @@ App: claimcoordinator · line: product · version 0.15.1 (version: 812) · head:
 
 [read-only]
 
-Read one file of the app a Routine runs, exactly as stored.
+Read one file of the Routine Template version a Routine runs, exactly as stored.
 
 The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and next_cursor reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
 
@@ -445,7 +445,7 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `path` [required] | `str` | The file's path, as list_routine_files shows it. |
-| `version` | `int` | Another version of the Routine's own line. Omit for the publish base. |
+| `version` | `int | str` | An older version of the Routine's template: its number ("0.15.1") or its version id. Omit for the base for edits. |
 | `cursor` | `str` | next_cursor from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
@@ -454,7 +454,7 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 → read_routine_file(routine="#intake", path="manifest.yaml")
 
 Routine: #intake (c7d2…5b)
-App: claimcoordinator · line: product · version 0.15.1 (version: 812) · head: yes
+Template: Claim Coordinator (claimcoordinator) · Popcorn's · 0.15.1 (version 812) · newest: yes
 File: manifest.yaml  75 B  sha256: 4331d221…
 Whole file.
 Content:
@@ -467,15 +467,15 @@ version: 0.15.1
 
 [writes] [destructive]
 
-Fork the app a Routine runs into a new, named fork line.
+Give a Routine its own named copy of the Routine Template it runs.
 
-The line starts as a byte-identical copy of the product version the Routine runs, and the Routine moves onto it. That's one-way: the Routine never returns to the product line, stops receiving product updates, and from then on gets only what's published to its line. Only a fork line can be published to, with create_routine_version. To change how one Routine behaves, check list_routine_settings first: a setting reaches one Routine and can be set back. Fork only for what settings can't express. Validate an edit before forking with create_routine_version's dry run, since the fork is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The copy starts byte-identical to the version of Popcorn's template the Routine runs, and the Routine moves onto it. That's one-way: the Routine never goes back to Popcorn's template, stops receiving Popcorn's improvements, and from then on gets only the new versions of its copy. Only a copy takes new versions, with create_routine_version. To change how one Routine behaves, check list_routine_settings first: a setting reaches one Routine and can be set back. Copy the template only for what settings can't express. Check an edit first with create_routine_version's dry run, since the copy is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `name` [required] | `str` | The new line's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. Fork only creates a line; to move a Routine onto a line that exists, use install_routine(copy=...). |
-| `confirm` | `bool` | true to fork. Show the user the dry run first. Default `False`. |
+| `name` [required] | `str` | The copy's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. This only creates a copy; to move a Routine onto a copy that exists, use install_routine(copy=...). |
+| `confirm` | `bool` | true to make the copy. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
@@ -486,30 +486,30 @@ The line starts as a byte-identical copy of the product version the Routine runs
 Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
-Fork: claimcoordinator 0.15.1 (product line, version: 812) → new fork line "acme-intake".
-- The line starts as a byte-identical copy of 0.15.1. Nothing the Routine runs changes now.
-- #intake moves onto the line. Product updates stop reaching it.
-- One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme-intake", and versions published there reach it within a day.
-- Reach: this Routine only. Other Routines running claimcoordinator stay where they are.
-- Other fork lines of claimcoordinator in this workspace: "acme-west" (to join one instead: install_routine(copy=…)).
+Copy: Popcorn's Claim Coordinator (claimcoordinator) 0.15.1 (version 812) → new copy "acme-intake".
+- The copy starts byte-identical to 0.15.1. Nothing the Routine runs changes now.
+- #intake moves onto the copy. Popcorn's improvements stop reaching it.
+- One-way: a Routine on its own copy of a template never goes back to Popcorn's. From then on it follows copy "acme-intake", and new versions of that copy reach it within a day.
+- Reach: this Routine only. Other Routines running Claim Coordinator (claimcoordinator) stay where they are.
+- Other copies of Claim Coordinator (claimcoordinator) in this workspace: "acme-west" (to move onto one instead: install_routine(copy=…)).
 
-Call again with `confirm=true` to fork the app into line "acme-intake".
+Call again with `confirm=true` to make copy "acme-intake" of the template.
 ```
 
 ### `install_routine`
 
 [writes] [destructive]
 
-Install the newest version of a Routine's line on the Routine.
+Install the newest version of a Routine's copy of its template, or move it onto a copy the workspace already has.
 
-It installs the app the Routine already runs, never another one: a Routine runs another app only by creating a new Routine with create_routine(template=…). Without copy, this is a catch-up (as `popcorn app apply`): a Routine on a fork line installs its line's head. It runs without confirm, because the daily update would install the same version. Use it after a publish whose install was blocked, or when get_routine shows the Routine behind its line. With copy, or when a product-line Routine would join the workspace's only fork line, it's an adoption: the Routine moves onto that fork line, one-way, and installs its head. An adoption is a dry run that changes nothing unless confirm=true. It doesn't put an app on a Routine that has none, and product versions reach product-line Routines through the daily update, not through this tool. To change how one Routine behaves, check list_routine_settings first; a move between lines is one-way.
+It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…). Without copy, this is a catch-up (as `popcorn app apply`): a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. Use it after a create_routine_version whose install was blocked, or when get_routine shows the Routine behind its copy. With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. A move is a dry run that changes nothing unless confirm=true. It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. To change how one Routine behaves, check list_routine_settings first; a move onto a copy is one-way.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `copy` | `str` | A fork line of this Routine's app to move onto. |
-| `confirm` | `bool` | true to make an adoption. Show the user the dry run first. Default `False`. |
-| `plan_id` | `str` | The plan_id an adoption's dry run gave, with confirm=true and the same copy. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `copy` | `str` | The name of a copy of this Routine's template to move onto, as copy_routine_template named it. |
+| `confirm` | `bool` | true to make the move. Show the user the dry run first. Default `False`. |
+| `plan_id` | `str` | The plan_id a move's dry run gave, with confirm=true and the same copy. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 
@@ -519,29 +519,29 @@ It installs the app the Routine already runs, never another one: a Routine runs 
 Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
-Install: #intake moves from claimcoordinator 0.15.1 (product line) onto fork line "acme-west", at its head 0.16.0 (version: 913).
-- This changes which line the Routine is on. It installs 0.16.0, which isn't what the Routine runs now.
-- One-way: a Routine on a fork line never returns to the product line. From then on it follows "acme-west", and versions published there reach it within a day.
+Install: #intake moves from Popcorn's Claim Coordinator (claimcoordinator) 0.15.1 onto copy "acme-west", at its newest version 0.16.0 (version 913).
+- This changes which copy of the template the Routine follows. It installs 0.16.0, which isn't what the Routine runs now.
+- One-way: a Routine on its own copy of a template never goes back to Popcorn's. From then on it follows copy "acme-west", and new versions of that copy reach it within a day.
 - Reach: this Routine only.
 
-Call again with `confirm=true` to move #intake onto line "acme-west".
+Call again with `confirm=true` to move #intake onto copy "acme-west".
 ```
 
 ### `create_routine_version`
 
 [writes] [destructive]
 
-Publish changes to a Routine's app as the next version of its line.
+Save changes as the next version of the Routine's own copy of its Routine Template.
 
-A publish reaches every Routine on the Routine's fork line: this Routine installs the new version now, and every other Routine on the line updates at its daily check. Workspace admins only. To change how one Routine behaves, check list_routine_settings first, and publish only what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would publish, each file's diff, every check it would fail, warnings and the reach, and a plan_id. To publish, call again with routine_id, confirm=true and that plan_id alone: the changes needn't be sent again, and every check runs again. A Routine on the product line can dry-run changes, but must copy_routine_template before publishing them. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_routine_files or read_routine_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} {"path": "code/x/lib.js", "from_url": "https://unpkg.com/…", "sha256": "…"} {"path": "code/x/app.js", "from_upload": "<upload_id>"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every publish. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it. from_url has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per publish. Pin a version in the URL. To replace an existing file, add its expected_sha256. The dry run shows each file's sha256, and the publish takes exactly that content: a confirm by plan_id holds it, and a confirm that resends the changes must give each from_url change that sha256. Content that changed since the dry run is refused. from_upload takes a file you uploaded with create_routine_file_upload, for this Routine and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as from_url, and is published once.
+A new version reaches every Routine on that copy: this Routine installs it now, and every other Routine on the copy updates at its daily check. Workspace admins only. To change how one Routine behaves, check list_routine_settings first, and make a version only for what settings can't express. Without confirm=true it's a dry run that changes nothing: the version it would create, each file's diff, every check it would fail, warnings and the reach, and a plan_id. To create it, call again with routine_id, confirm=true and that plan_id alone: the changes needn't be sent again, and every check runs again. A Routine on Popcorn's template can dry-run changes, but needs its own copy (copy_routine_template) before they can be made. Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from list_routine_files or read_routine_file. {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]} {"path": "flows/new.yaml", "create": "<whole file>"} {"path": "flows/old.yaml", "delete": true, "expected_sha256": "…"} {"path": "flows/a.yaml", "rename": "flows/b.yaml", "expected_sha256": "…"} {"path": "code/x/lib.js", "from_url": "https://unpkg.com/…", "sha256": "…"} {"path": "code/x/app.js", "from_upload": "<upload_id>"} Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every new version. Every op is a text op. The anchor is the file's exact text and must match once: {"op": "replace", "old_string": "cron: 0 9 * * *", "new_string": "cron: 0 8 * * *"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end new_string with it. from_url has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per version. Pin a version in the URL. To replace an existing file, add its expected_sha256. The dry run shows each file's sha256, and the confirm takes exactly that content: a confirm by plan_id holds it, and a confirm that resends the changes must give each from_url change that sha256. Content that changed since the dry run is refused. from_upload takes a file you uploaded with create_routine_file_upload, for this Routine and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as from_url, and goes into one version only.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). It installs the new version first. |
-| `base_version` | `int` | The version the files were read from, as list_routine_files' header shows it: the line's head. |
+| `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. |
 | `changes` | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` | `str` | What changed and why, in a sentence or two. |
-| `confirm` | `bool` | true to publish. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to create the version. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of base_version, changes and changelog. |
 | `diff` | `DiffLevel` | How much of each file's diff the dry run shows: "full" (the default), "summary" (line counts) or "none". A deleted file is always one line. |
 
@@ -553,7 +553,7 @@ A publish reaches every Routine on the Routine's fork line: this Routine install
 Routine: #intake (c7d2…5b)
 **Dry run.** Nothing was changed.
 
-Publish: claimcoordinator 0.16.0 (version: 913) → 0.16.1 on fork line "acme-intake".
+New version: Claim Coordinator (claimcoordinator) 0.16.0 (version 913) → 0.16.1 on copy "acme-intake".
 Files:
 - manifest.yaml: edited, 3 ops applied
   ```diff
@@ -572,18 +572,18 @@ Files:
   -    cron: 0 9 * * 1-5
   +    cron: 0 8 * * 1-5
   ```
-Reach: #intake would install it now. 2 other Routines on this line will update at their daily check.
+Reach: #intake would install it now. 2 other Routines on this copy will update at their daily check.
 plan_id: pL4nC0nf1rmByRef9xQ2a7 (lasts 30 minutes)
 
-Call again with `confirm=true` to publish 0.16.1 to line "acme-intake": pass routine_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version, changes and changelog.
+Call again with `confirm=true` to create version 0.16.1 of copy "acme-intake": pass routine_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version, changes and changelog.
 
 → create_routine_version(routine_id="c7d2…5b", confirm=true, plan_id="pL4nC0nf1rmByRef9xQ2a7")
 
 Routine: #intake (c7d2…5b)
-Published claimcoordinator 0.16.1 (version: 44) to fork line "acme-intake". It is now the line's head.
+Created version 0.16.1 (version 44) of Claim Coordinator (claimcoordinator), copy "acme-intake". It is now the copy's newest version.
 #intake is installing it now.
-Reach: 2 other Routines on this line will update at their daily check.
-Published is not installed: get_routine's Install: field shows when #intake has it.
+Reach: 2 other Routines on this copy will update at their daily check.
+Created is not installed: get_routine's Install: field shows when #intake has it.
 Files now (the base for a next edit is version 44; use these sha256s as expected_sha256):
 - manifest.yaml  sha256: d00a8443…
 ```
@@ -594,12 +594,12 @@ Files now (the base for a next edit is version 44; use these sha256s as expected
 
 Get a URL to upload one file you made, for create_routine_version to take.
 
-For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then publish with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can be published for most of a day. Workspace admins only, like create_routine_version.
+For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then create the version with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like create_routine_version.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name), as for create_routine_version. |
-| `path` [required] | `str` | The bundle path the file will be published at, e.g. code/engine/lib.js. |
+| `path` [required] | `str` | The path the file will have in the template, e.g. code/engine/lib.js. |
 | `size` [required] | `int` | The file's size in bytes. |
 | `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |
 
@@ -615,12 +615,12 @@ method: PUT
 url: https://uploads.popcorn.ai/staging/8c1f…e2/3f6a…93?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=5e1d…
 headers:
   x-amz-checksum-sha256: nyyfLJ8s…
-URL expires: 2026-10-13T18:15:00Z. Publishable until 2026-10-14T17:00:00Z.
+URL expires: 2026-10-13T18:15:00Z. Usable in a version until 2026-10-14T17:00:00Z.
 
 Run this with FILE replaced by the file's path; it prints nothing when the upload succeeds:
 curl -fsS -T FILE -H 'x-amz-checksum-sha256: nyyfLJ8s…' 'https://uploads.popcorn.ai/staging/8c1f…e2/3f6a…93?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=5e1d…'
 
-Then publish it with this change (add expected_sha256 to replace a file that exists):
+Then pass it to create_routine_version with this change (add expected_sha256 to replace a file that exists):
 {"path": "code/engine/engine.js", "from_upload": "3f6a…93"}
 If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
 ```
@@ -1585,6 +1585,67 @@ The run that made it:
   - send retainer: completed · 0.8s · attempt 2 · the signing provider didn't answer in time
   - apply: completed · 1.2s
 A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
+```
+
+## Docs
+
+### `search_docs`
+
+[read-only]
+
+Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles, ids and summaries.
+
+Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines and fork lines, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `query` [required] | `str` | What you want to know, in your own words or by name. |
+| `limit` | `int` | How many pages to return, 1 to 10. Default `5`. |
+
+**Example** — “If I publish a change to our copy of the intake template, which Routines does it reach?”
+
+```text
+→ search_docs(query="publish a version to a copy")
+
+2 docs page(s) for 'publish a version to a copy':
+
+## Versions: publishing and installing (id: versions)
+A change reaches a Routine in two steps: publishing mints an immutable version of a Routine Template on its copy, and installing brings each Routine on the copy to it, the one published from at once and the rest on their daily update.
+
+## Copying a template (id: copying-a-template)
+Customizing a Routine beyond what its settings reach gives it a copy that the workspace owns (`popcorn app fork`). A copy comes before any publish, and a change published there reaches every Routine on it by their daily update, not only the one you changed. It is one-way: nothing undoes a copy or moves a Routine back to Popcorn's version.
+
+Read one with read_doc(doc_id).
+```
+
+### `read_doc`
+
+[read-only]
+
+Read one page of the Popcorn docs by its id (search_docs gives it), or one section of it.
+
+A page too long to return whole (the activity and MCP references) comes back as an outline of its sections; read one with `section`.
+
+| Argument | Type | Notes |
+|---|---|---|
+| `doc_id` [required] | `str` | The page's id, e.g. "manifest-keys" or "activities". |
+| `section` | `str` | A heading on the page, e.g. "foundation.http.request"; the first heading that matches is read, with what's under it. |
+
+**Example** — “Do I have to fork the template before I publish?”
+
+```text
+→ read_doc(doc_id="copying-a-template")
+
+# Copying a template (id: copying-a-template)
+https://docs.popcorn.ai/build….md
+
+Customizing a Routine beyond what its settings reach gives it a copy that the workspace owns (`popcorn app fork`). A copy comes before any publish, and a change published there reaches every Routine on it by their daily update, not only the one you changed. It is one-way: nothing undoes a copy or moves a Routine back to Popcorn's version.
+
+A Routine made from a Routine Template runs Popcorn's own version of it.
+To change what the Routine is built from, the workspace makes a copy of the
+template: a series of versions the workspace owns, which it publishes to.
+
+Related: customizing-a-routine, versions.
 ```
 
 ## Proposed tools
