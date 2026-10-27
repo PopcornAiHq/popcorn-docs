@@ -16,10 +16,33 @@ reference.
   glossary's words. Popcorn is used headless, so this is what an assistant
   connected over MCP reads first.
 - **`platform`** — for someone building or customizing a Routine Template
-  without access to the backend, in the platform glossary's words.
+  without access to the backend.
 
 **The test:** *would a Popcorn user who never builds a template need this?*
 Then it is product, and it names a platform term only inside a Platform note.
+
+## One vocabulary, in both layers
+
+The layer says what a page is about, not which words it uses. The person who
+runs a Routine is usually the one who copies its template and changes it, and
+the MCP tools already speak to them in the product's words:
+`copy_routine_template`, `create_routine_version`, `install_routine`. A page
+about building a template uses the same words.
+
+- **A platform term with a product word is written the product way**, and
+  the other name is given once, where the reader will meet it: "a copy of
+  the template (the CLI calls it a *fork line*)". A Routine is not a
+  channel, and a Routine Template is not an app, in prose on any page.
+- **A file-level term with no product word is used as it is:** `manifest`,
+  flow, activity, `call_flow`, merge policy. The reader types these, and a
+  page that renamed them would send the reader to translate it back.
+- **Code keeps its spelling.** A command, key or field is quoted exactly
+  (`popcorn app fork`, `channel_parameters:`), whatever the prose around it
+  calls the thing.
+
+The platform glossary is where each platform term meets its product word.
+It is a lookup for the names the CLI, the API and the files use, not the
+vocabulary to write in.
 
 Nothing internal has a layer here. Backend symbols, services and why the
 platform is built the way it is stay out of this public repository.
