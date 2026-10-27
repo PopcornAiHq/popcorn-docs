@@ -54,9 +54,12 @@ outputs:
 ```
 
 - **`required_integrations`** names what the Routine must connect, keyed by
-  the name steps read as `$channel.integrations.<name>`. A run refuses to
-  start while one is unconnected; `provider` constrains which account may
-  back it.
+  the name steps read as `$channel.integrations.<name>`. While one is
+  unconnected a run does no work: it ends before its first step, which a
+  schedule, webhook or message trigger sees as an empty success. A person's
+  or agent's `flow run` is refused instead (409 `missing_integrations`), and
+  a parent waiting on it through `call_flow` fails. `provider` constrains
+  which account may back it.
 - **`best_effort: true`** sends every start of the flow to the batch tier,
   however it was asked for, and the flows it launches follow it. For a
   fan-out nobody is waiting on.
