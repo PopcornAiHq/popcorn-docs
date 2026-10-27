@@ -55,7 +55,8 @@ fact:
 filter:
   Status: firing                                  # shorthand for $eq
   Last Seen: { $lt: $steps.cutoffs.output.iso }   # $gt $gte $lt $lte
-  Nudged At: { $exists: false }                   # $in, $contains too
+  Nudged At: { $exists: false }                   # $ne, $in, $contains too
+  "*": { $contains: acme }                        # the whole row; $contains only
 ```
 
 Ordering comparisons on ISO-8601 strings are correct because they are

@@ -53,9 +53,15 @@ outputs:
 ```
 
 - **`required_integrations`** names what the Routine must connect, keyed by
-  the name steps read as `$channel.integrations.<name>`. A run refuses to
-  start while one is unconnected; `provider` constrains which account may
-  back it.
+  the name steps read as `$channel.integrations.<name>`; `provider`
+  constrains which account may back it, and an account of another provider
+  counts as unconnected. While one is unconnected a run does no work: it ends
+  before its first step with empty outputs, which a schedule, a webhook, a
+  message trigger or running a schedule now sees as success. Starting the
+  flow directly is refused instead: `popcorn flow run` and a flow's
+  `foundation.workflow.start_flow` get 409 `missing_integrations`. A
+  `call_flow` step waiting on it fails, under its own `on_error`; a `detach`
+  child just ends empty.
 - **`best_effort: true`** sends every start of the flow to the batch tier,
   however it was asked for, and the flows it launches follow it. For a
   fan-out nobody is waiting on.
