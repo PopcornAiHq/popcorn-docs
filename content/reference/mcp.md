@@ -1595,7 +1595,7 @@ A run a person's button started shows as Popcorn, for a person: runs don't recor
 
 Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles, ids and summaries.
 
-Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines and fork lines, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
+Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
 
 | Argument | Type | Notes |
 |---|---|---|
