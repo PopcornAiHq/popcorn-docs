@@ -250,11 +250,16 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     sit directly under their section.
     """
     layers: dict[str, dict[str, dict[str, list]]] = {}
+    # Reference is looked up rather than read through, so it is listed once,
+    # after both layers, instead of as a section of each.
+    reference: list = []
     for page in pages:
+        link = (render.inline(page["title"]), href(page), page["id"] == current)
+        if nav_section(page) in GENERATED:
+            reference.append(link)
+            continue
         groups = layers.setdefault(page["layer"], {}).setdefault(nav_section(page), {})
-        groups.setdefault(page.get("group", ""), []).append(
-            (render.inline(page["title"]), href(page), page["id"] == current)
-        )
+        groups.setdefault(page.get("group", ""), []).append(link)
     # The home page leads the sidebar, current when no page is — `current`
     # is None only when the landing page is the one being built.
     out: list = [(None, [("", [("Overview", "/", current is None)])])]
@@ -265,6 +270,9 @@ def sidebar(pages: list[dict], current: str | None) -> str:
             (section_info(section)[0], list(groups.items()))
             for section, groups in sections.items()
         ]
+    if reference:
+        out.append((section_info("reference")[0], None))
+        out.append((None, [("", reference)]))
     return render.site_nav(out)
 
 

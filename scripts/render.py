@@ -762,6 +762,7 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .nav-layer + div .nav-section { margin-top: .75rem; }
 .solo { margin-top: 1.25rem !important; }
 .site-nav > .solo:first-child { margin-top: 0 !important; }
+.nav-layer + .solo { margin-top: .75rem !important; }
 .sidebar details { margin: .2rem 0 .4rem; }
 .sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
 .sidebar details ul { padding-left: .8rem; }
