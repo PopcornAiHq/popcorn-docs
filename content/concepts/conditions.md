@@ -49,7 +49,8 @@ real parser.
 
 ## Select rows with a filter, not a gate
 
-The agent-store filter DSL runs in the database rather than after the fact:
+The filter DSL for a table's rows runs in the database rather than after the
+fact:
 
 ```yaml
 filter:
