@@ -28,7 +28,9 @@ examples write `<channel>`.
 ## Start in History, over MCP
 
 An assistant connected to Popcorn over MCP is not given the flow-run tools,
-but it can read a run where it touched the Routine's items, in History:
+but it can read runs in the Routine's History: an item's History lists the
+runs that changed it, and a run it started can be followed whether or not it
+changed any item:
 
 - **`list_history`**, with the `routine` and an item's `row_id`, lists that
   item's changes newest first, each with who or what made it and its
@@ -321,8 +323,9 @@ In `--json`, branch on `install.state`, one of the lowercase names above; the
 `retry_hint` as the server sent them. For a `failed` install, `error_code` says
 what kind of failure it was: `invalid_manifest`, `invalid_schedule` and
 `bundle_rejected` are the bundle's own and are fixed by publishing a corrected
-head; `app_mismatch` and `fork_line_conflict` mean the install targeted another
-template or copy, and on a copy `app apply` moves the Routine to its own head;
+head; `app_mismatch` and `fork_line_conflict` mean the install targeted the wrong
+thing — another template, or Popcorn's own template or another copy — and on
+a copy `app apply` moves the Routine to its own head;
 `bundle_unavailable` means no published version was available; `internal` is a
 platform failure that no edit or publish fixes: report it with `workflow_id`.
 `retry_hint` already follows the code. `install_state` is only `current` or

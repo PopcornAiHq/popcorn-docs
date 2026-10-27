@@ -157,27 +157,37 @@ MCP tool first and the CLI command beside it:
 2. **Read the files.** `list_routine_files`, then `read_routine_file` per
    file. CLI: `popcorn app checkout --channel '#chan'`.
 3. **Copy the template.** `copy_routine_template`, with a name for the copy.
-   CLI: `popcorn app fork`, or `app checkout --fork` to copy and check out in
-   one command. Each version published to the copy is what the CLI calls a
-   *bundle version*.
+   CLI: `popcorn app fork`, then `popcorn app checkout --channel '#chan'`
+   again, because `app publish` refuses a checkout of Popcorn's own version;
+   or `app checkout --fork` to copy and check out in one command. Each
+   version published to the copy is what the CLI calls a *bundle version*.
 4. **Edit, and check.** `create_routine_version` without `confirm`: its dry
    run reports every check publish would fail, each file's diff and the
    reach, and changes nothing. CLI: edit the checkout, then
    `popcorn app validate ./<app>`.
 5. **Publish a version.** `create_routine_version` again, with
-   `confirm=true` and the `plan_id` the dry run gave. CLI:
+   `confirm=true` and the `plan_id` a dry run on the copy gave. CLI:
    `popcorn app publish ./<app> --bump patch -m "what changed" --yes`.
 6. **Confirm the install landed.** `get_routine`, whose `Install:` field says
-   whether it has; `wait_seconds` waits for it. CLI: `popcorn app status`.
+   whether it has; `wait_seconds` waits up to 20 seconds for an install in
+   progress to land. CLI: `popcorn app status`.
 7. **Only if it did not land, retry it.** `install_routine`. CLI:
    `popcorn app apply`.
 
-Over MCP, the copy can wait until the dry run passes: a Routine still on
+Over MCP, the copy can wait until a dry run passes: a Routine still on
 Popcorn's own template can dry-run a change, and needs its own copy only to
-publish it, so steps 3 and 4 swap and the step that cannot be undone comes
-after the check. Each write that takes `confirm` is a dry run until it is
-called again with `confirm=true`, except an `install_routine` that only
-brings a Routine up to its copy's head, which starts at once. `create_routine_version` takes changes, not a tree: each one
+publish it, so the step that cannot be undone comes after the check. That
+dry run holds no plan and shows no reach. After `copy_routine_template`, call
+`create_routine_version` again with the same changes and the new
+`base_version` that `list_routine_files` then shows, and confirm with the
+`plan_id` from that second dry run.
+
+Copying a template, a new version, an install onto another copy and a
+change to a setting are each a dry run until called again with
+`confirm=true`. An `install_routine` with no `copy` on a Routine behind its
+copy, and `create_routine` with no template, start at once; and
+`change_routine` with a `request` starts drafting at once, though it
+installs nothing until confirmed. `create_routine_version` takes changes, not a tree: each one
 creates, deletes, renames or edits one file with text ops, and an edit
 carries the `sha256` it was read at. A file the assistant generated rather
 than typed goes up through `create_routine_file_upload`. The
@@ -186,7 +196,7 @@ than typed goes up through `create_routine_file_upload`. The
 From the CLI, the loop is:
 
 ```bash
-# copy onto this workspace's own line, then check its head out — one command
+# make this workspace's own copy, then check its head out — one command
 popcorn app checkout --channel '#chan' --fork
 # ... edit
 popcorn app validate ./<app>
@@ -229,8 +239,8 @@ what a setting cannot express: a table, a flow, a state machine.
 
 Publishing needs a copy: a publish lands on a copy **this
 workspace owns**, so publishing from a Routine still bound to the shared
-product version (Popcorn's own template, which the CLI calls the *product
-line*) is refused. `app publish` also starts the install that moves
+product version (Popcorn's own template, which the CLI prints as a
+*PRODUCT* version) is refused. `app publish` also starts the install that moves
 your Routine onto the new version, and that install converges on its own —
 `app status` confirms it rather than causing it.
 
@@ -343,7 +353,7 @@ table. The keys with pages of their own:
 | Key | Page |
 |---|---|
 | `tables` | [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) and [column merge policy](https://docs.popcorn.ai/platform/concepts/merge-policy.md); adding one end to end is [adding a table](https://docs.popcorn.ai/platform/guides/adding-a-table.md) |
-| `scalars`, `default_scalars` | [the three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md) |
+| `scalars`, `default_scalars` | [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md) |
 | `schedules` | [schedules in a manifest](https://docs.popcorn.ai/platform/concepts/schedules.md) |
 | `states` | [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); writing one is [authoring a states tier](https://docs.popcorn.ai/platform/guides/states-authoring.md) |
 | `recipe` | the same graph as a root `recipe.yaml` each Routine can replace — the recipe section of [state machines in a bundle](https://docs.popcorn.ai/platform/concepts/state-machine.md); it is written like a `states:` section |
@@ -417,8 +427,8 @@ actually has — its parameters (Routine Settings) and its integrations
 (Connections) — and `--strict` exits non-zero on the three findings that make a
 run fail — a referenced parameter that is not set, a declared integration that
 is not connected, and a connected account whose provider contradicts a
-declaration. The two `unused_*` findings are informational; Routine Settings every flow
-shares legitimately carry keys one flow does not read.
+declaration. The two `unused_*` findings are informational; Routine Settings and
+Connections every flow shares legitimately carry keys one flow does not read.
 
 The **outer** loop is only for a NEW Routine Template, and costs a server deploy plus
 a publish (§2a), so get the inner one clean first:
@@ -531,7 +541,7 @@ publish.
 1. `version:` advances every publish, and `--bump` is the way to do it (§2b).
 2. The manifest keeps `app_type:` and `channel_agent:` (§3).
 3. No flow-written value is declared under `scalars:` —
-   [scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+   [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
 4. Every schedule's `flow:` names a flow the bundle has —
    [schedules](https://docs.popcorn.ai/platform/concepts/schedules.md).
 5. Table changes only add: no column is dropped or renamed, and a column a

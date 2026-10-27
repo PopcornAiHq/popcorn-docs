@@ -20,17 +20,20 @@ and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
 **Action** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
 
-A Routine Template ships its graph in one of two places. The keys, the engine
-and the publish checks are the same for both, so everything after this
-section applies to either:
+A Routine Template ships its graph in one of two places. The keys and the
+engine are the same for both, and so are the graph's publish checks; a recipe
+adds a few checks of its own (§3). Everything after this section applies to
+either:
 
 - **A recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
   at the bundle's root. This is what gives a Routine Steps it can change on
   its own. The template's recipe is in force until a Routine installs a
   revision of its own. Over MCP, an assistant changes a Routine's Steps with
   `change_routine`, which refuses a Routine whose template declares no
-  `recipe:`, and drafts and installs the change by starting the template's
-  own flows named `recipe_build` and `recipe_install`.
+  `recipe:`. It drafts the change by starting the template's own
+  `recipe_build` flow as a dry run, installs it by starting `recipe_build`
+  again for real, and goes back to an earlier revision through the
+  template's `recipe_install` flow.
 - **A `states:` section** in `manifest.yaml`, holding the same keys. Its
   graph is fixed by the template version: every Routine on that version runs
   the same one, and changing it means publishing a new version.
@@ -68,6 +71,7 @@ tables:
       - {name: Decision Note, type: string}
       - {name: Stage, type: string}
       - {name: Hold, type: string}
+      - {name: Tracking, type: string}
       - {name: Status, type: string}
       - {name: CTAs, type: json}
       - {name: Why, type: string}
@@ -99,8 +103,13 @@ machines:
     overlay: true
     states:
       on_hold: {label: On hold, tone: gray}
+  tracking:
+    column: Tracking
+    overlay: true
+    states:
+      not_tracking: {label: Not tracking, tone: gray}
 events:
-  staff: [start_review, approve, decline, reopen, hold, release]
+  staff: [start_review, approve, decline, reopen, hold, release, stop_tracking]
   world: [withdrawn, info_missing, info_received]
 guards:
   has_owner: [{column: Owner, empty: false}]
@@ -152,19 +161,34 @@ transitions:
   - on: world.info_received
     from: blocker.missing_info
     to: blocker.none
+  - on: staff.stop_tracking
+    from: tracking.none
+    to: not_tracking
+    expected: true
+    cta:
+      kind: stop-tracking
+      label: Stop tracking
+      prominence: quiet
+      direct_only: true
+      when: [{shown: true, is: missing_info}]
 ```
 
 As a `states:` section, the same graph is the manifest's `states:` key, with
 everything in `recipe.yaml` indented under it, in place of `recipe:`.
 
-It has three machines. `review` is the funnel, stored in `Stage`. `blocker`
+It has four machines. `review` is the funnel, stored in `Stage`. `blocker`
 is an overlay with no column, so the bundle's own code decides it from the
-row's facts. `hold` is an overlay stored in `Hold`. Publish renders display
-hints onto `Status`, `Stage` and `Hold`. The one on `Status` lists the whole
-vocabulary and marks `missing_info` as a warning:
+row's facts. `hold` is an overlay stored in `Hold`. `tracking` is the one a
+recipe needs once its graph has a work item: `missing_info` warns, so a row
+showing it opens an action item, and a recipe is refused unless that item
+can stop tracking its row (§3). Its button's `when:` keeps Stop tracking to
+the rows showing `missing_info`, which get it as action items anyway.
+Publish renders display hints onto `Status`, `Stage`, `Hold` and `Tracking`.
+The one on `Status` lists the whole vocabulary and marks `missing_info` as a
+warning:
 
 ```text
-status:received,in_review,approved,declined,missing_info,on_hold;warn=missing_info;labels=…;tone=…
+status:received,in_review,approved,declined,missing_info,on_hold,not_tracking;warn=missing_info;labels=…;tone=…
 ```
 
 A row in review, with an owner and nothing blocking it, shows `in_review` and
@@ -440,9 +464,10 @@ set on `worklist:` instead.
 
 ## 3. The publish checks that trip authors
 
-Each check refuses the publish with one message, prefixed `states:`. The
-wording is the engine's, and these are the messages the example's variants
-produce.
+Each check refuses the publish with one message. A check on the graph is
+prefixed `states:`, in a recipe too; a recipe's own checks, last in this
+section, name the block or the file they looked at. The wording is the
+engine's, and these are the messages the example's variants produce.
 
 **Every state but the initial needs an `expected:` edge in.** This is the
 one new graphs hit first. Here `expected: true` was left off
@@ -557,9 +582,6 @@ states: table 'tracker' lacks columns ['Decision'] the states tier writes
 states: predicates read columns ['Owner'] that table 'tracker' does not declare
 ```
 
-A recipe with no `tables:` is refused as `recipe: a tables: section
-declaring the graph's table is required` instead.
-
 The predicate check exists because a missing column reads blank on every
 row, which would quietly make `has_owner` never hold.
 
@@ -572,6 +594,28 @@ states: column 'Stage' carries display hint 'status:received,in_review,approved,
 
 A graph that moves from hand-kept hints onto the tier deletes those
 literals. There is no need to copy the rendered value back in.
+
+**A recipe has checks of its own**, on the bundle around the graph. The
+manifest declares `recipe:` or `states:`, not both; `recipe:` needs
+`recipe.yaml` at the bundle's root, and `recipe.yaml` needs `recipe:`; and
+`recipe:` needs `tables:`, as `states:` does:
+
+```text
+recipe: a bundle declares states: or recipe:, not both
+recipe: the bundle ships no recipe.yaml at its root
+recipe.yaml is present but the manifest declares no recipe: section
+recipe: a tables: section declaring the graph's table is required
+```
+
+**A recipe's action items must be able to stop tracking.** When the graph
+has a work item, it needs a `staff.stop_tracking` edge from `tracking.none`
+to `not_tracking` carrying a `cta` of kind `stop-tracking`, as the example's
+`tracking` machine does. A `states:` section has no such check. Without the
+edge:
+
+```text
+recipe.yaml: the recipe opens action items (missing_info) but declares no staff.stop_tracking transition with a `cta: {kind: stop-tracking}`; every action item must be able to stop tracking its row (e.g. `on: staff.stop_tracking`, `from: tracking.none`, `to: not_tracking`, `cta: {kind: stop-tracking, prominence: quiet, direct_only: true}`)
+```
 
 ## 4. Guards
 
@@ -773,8 +817,10 @@ It does not prove **intent**, which is still yours to check:
 - **Buttons that never show.** A guard on a column nothing writes, or a
   button `when:` that cannot hold, publishes fine and offers nothing.
 
-`feature.state.spec` returns the resolved graph from the version the
-Routine is bound to. It includes a Mermaid diagram per machine, and a
+`feature.state.spec` returns the resolved graph the run judges rows by. For
+a `states:` section that is the version the Routine is bound to; for a
+recipe it is the revision the run pinned, which is the Routine's own once it
+has installed one, and the template's otherwise. It includes a Mermaid diagram per machine, and a
 `spine` of the expected edges alone, which is quick to read against what
 you meant. For the rows themselves, `feature.state.check` holds every row
 to the graph. Each stored value must be a declared state, each mirror must
