@@ -96,7 +96,7 @@ GROUPS = {
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
-# Designed, not built: the product surface, named from the product glossary.
+# Designed, not built: the product surface, named from the glossary.
 # See the module docstring before adding to this. An entry is a
 # "## Proposed tools" intro, then one "### `tool`" section per tool;
 # proposed() drops a section once the server defines that name. Any numbered
