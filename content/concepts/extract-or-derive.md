@@ -67,7 +67,7 @@ checks it.
   (`ExtractSchemaViolation`), so a value contradicting the type you declared
   fails here rather than in whichever later step consumes it.
 
-The shipped `alerttracker` app is built this way: a single producer
+The shipped `alerttracker` Routine Template is built this way: a single producer
 (Alertmanager), every field read by path, and not one model call in it.
 
 ## `foundation.agent.transform` — when the answer must be derived
