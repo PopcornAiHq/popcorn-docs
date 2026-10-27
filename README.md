@@ -57,6 +57,7 @@ python3 scripts/check-links.py       # every advertised URL and page link resolv
 python3 scripts/check-retrieval.py   # every eval question surfaces its concept
 python3 scripts/check-highlight.py   # YAML highlighting never changes a block's text
 python3 scripts/check-layer.py       # product pages use no platform term outside a Platform note
+python3 scripts/check-vocabulary.py  # reports names still used where the product has its own word
 ./scripts/check-public-repo.sh       # no internal references — reads the STAGED tree
 ```
 
