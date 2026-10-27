@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-deployed: 2026-10-26
+updated: 2026-10-26
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the

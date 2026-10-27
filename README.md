@@ -178,7 +178,7 @@ where `DIR` holds `foundation.json` and `feature.json`, each the catalog API's
 here as the docs bot — the GitHub App the CLI sync above uses — and a person
 reviews and merges it like any other.
 
-Each page records only the deploy's date, as `deployed: YYYY-MM-DD` beside
+Each page records only the deploy's date, as `updated: YYYY-MM-DD` beside
 its title — the version's commit hash is from a private repository and is
 never written here. The date moves only when something else on the page does,
 so a deploy that changes neither the catalog nor the tools leaves both pages

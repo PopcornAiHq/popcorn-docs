@@ -17,7 +17,7 @@ A name is allowed:
   are terms of their own, not the name "channel"
 
 Not checked: the glossary, which defines the names, and generated pages
-(those carrying `deployed:` or `version:`), whose text comes from the
+(those carrying `updated:` or `version:`), whose text comes from the
 platform itself.
 
 Some names are everyday English as well — a person's *app*, a *project*, a
@@ -43,7 +43,7 @@ TABLE_HEADING = "## Names you'll see elsewhere"
 ORDINARY = {"app", "project", "record"}
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
-_GENERATED = re.compile(r"^(deployed|version):", re.M)
+_GENERATED = re.compile(r"^(updated|version):", re.M)
 # An entry can head with several terms, as "- **Agent**, **channel agent** —":
 # each is a term of its own, and masks the name it holds.
 _ENTRY = re.compile(
