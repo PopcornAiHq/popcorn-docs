@@ -18,7 +18,7 @@ What a state machine *is* — the tuple, the projection, why a button is an
 edge — is [the state machine](https://docs.popcorn.ai/platform/concepts/state-machine.md),
 and where the two overlap that page is authoritative. In the product, the
 projected status is an item's **Status**, and each staff edge's button is an
-**Action** (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
+**Action** (see the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)).
 
 A Routine Template ships its graph in one of two places. The keys and the
 engine are the same for both, and so are the graph's publish checks; a recipe

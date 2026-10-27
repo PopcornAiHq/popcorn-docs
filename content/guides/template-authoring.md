@@ -20,7 +20,7 @@ state, flows to do work, schedules and webhooks to invoke them. The CLI and
 the API call a Routine a *channel* and its template an *app*, so the commands
 below keep those names; the CLI's `channel templates` command and
 `--template` flag name the template. The
-[product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md) has the product's words.
+[glossary](https://docs.popcorn.ai/product/glossary/glossary.md) has the product's words.
 
 > **Which path you are on decides how fast you can iterate.** A *new*
 > template (a new `app_type`) is not self-serve: the set of installable
@@ -105,7 +105,7 @@ missed:
   behind at publish and reported by `app validate` as `path-not-published`.
 - **A flow's identity is its `name:`, not its filename**, so renaming `name:`
   is one flow leaving and another arriving; see
-  [a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-identity.md).
+  [a flow's identity is its name](https://docs.popcorn.ai/platform/concepts/flow-grammar.md#a-flow-s-identity-is-its-name).
 
 ## 2. How a bundle gets installed
 
@@ -301,7 +301,7 @@ copy the Routine runs (normally the very version it is bound to; the two
 differ only while an install has not landed), so it is the one source that
 cannot be stale. `app checkout --version <id>` reads an earlier version of the
 same line instead, read-only — the way to recover the tree from before a bad
-publish (see `bundle-version`).
+publish (see `versions`).
 When you want to study how a shipped template does something, spend a scratch
 Routine on it rather than looking for a copy in a repo:
 

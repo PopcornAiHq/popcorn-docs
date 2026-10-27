@@ -21,7 +21,7 @@ and [table columns](https://docs.popcorn.ai/platform/concepts/table-columns.md) 
 things in, and the choices you cannot take back afterwards.
 
 The CLI calls a Routine a *channel* and its template an *app*, so the
-commands keep those names (see the [product glossary](https://docs.popcorn.ai/product/glossary/product-glossary.md)).
+commands keep those names (see the [glossary](https://docs.popcorn.ai/product/glossary/glossary.md)).
 This guide runs from the CLI throughout. An assistant over MCP can publish the same
 change with `create_routine_version`, but it is not given the flow-run tools
 that step 7 uses to check the result.
@@ -45,7 +45,7 @@ is enough. A table is a change to what the template is built from, so no
 setting can stand in for it. Adding one gives the Routine a copy of its own,
 which no longer receives the template's improvements. Copying is permanent, and a
 publish reaches every Routine on the copy, not only this one. See
-[fork lines](https://docs.popcorn.ai/platform/concepts/fork-line.md) before copying the template of a
+[copying a template](https://docs.popcorn.ai/platform/concepts/copying-a-template.md) before copying the template of a
 production Routine.
 
 ## 2. Declare the table
@@ -203,7 +203,7 @@ the `handoffs` table before it binds the Routine to the new version, so no
 run on the new version can reach a Routine without the table. The other
 Routines on the copy get the table at their own daily update, apart from the
 ones that take no updates (see
-[publish and apply](https://docs.popcorn.ai/platform/concepts/publish-and-apply.md)).
+[versions](https://docs.popcorn.ai/platform/concepts/versions.md)).
 The publish prints how many Routines will update, but only after the version
 exists.
 
