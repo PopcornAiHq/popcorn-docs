@@ -11,7 +11,6 @@ summary: >
   warning, and a manifest with no app_type clears the Routine's.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
 layer: platform
-product_terms: [Routine Template]
 ---
 
 A Routine Template's `manifest.yaml` is what decides what a Routine holds

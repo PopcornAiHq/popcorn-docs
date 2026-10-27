@@ -11,7 +11,6 @@ summary: >
   as the send mode. Never declare a value a flow writes at runtime.
 concepts: [manifest-keys]
 layer: platform
-product_terms: [Routine Settings]
 ---
 
 Scalars are one source of a Routine's

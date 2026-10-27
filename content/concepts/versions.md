@@ -12,7 +12,6 @@ summary: >
   never mixes code.
 concepts: [copying-a-template, app-bundle, manifest-keys]
 layer: platform
-product_terms: [Routine Template, Routine]
 ---
 
 A Routine runs one version of its template at a time. A change to the

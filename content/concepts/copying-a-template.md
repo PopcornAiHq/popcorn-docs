@@ -11,7 +11,6 @@ summary: >
   or moves a Routine back to Popcorn's version.
 concepts: [customizing-a-routine, versions, app-bundle]
 layer: platform
-product_terms: [customizing a Routine]
 ---
 
 A Routine made from a Routine Template runs Popcorn's version of it, the

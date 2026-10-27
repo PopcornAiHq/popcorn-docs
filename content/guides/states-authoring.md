@@ -10,7 +10,6 @@ summary: >
   error — `no expected edge enters`, a terminal left by staff — and its fix.
 concepts: [state-machine, manifest-keys, app-bundle]
 layer: platform
-product_terms: [Status, Action]
 ---
 
 This guide takes one state graph from design to a published, wired graph.

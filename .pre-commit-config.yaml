@@ -25,9 +25,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-      - id: check-layer
-        name: product pages use no platform term outside a Platform note
-        entry: scripts/check-layer.py
+      - id: check-vocabulary
+        name: every page speaks the product's words
+        entry: scripts/check-vocabulary.py --strict
         language: script
         pass_filenames: false
         always_run: true

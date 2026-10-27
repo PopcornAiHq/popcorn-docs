@@ -16,16 +16,16 @@ A name is allowed:
 * inside a longer glossary entry: "channel agent" and "channel parameters"
   are terms of their own, not the name "channel"
 
-Not checked: the glossary, which defines the names; generated pages
+Not checked: the glossary, which defines the names, and generated pages
 (those carrying `deployed:` or `version:`), whose text comes from the
-platform itself; and Platform notes, which exist to name the other term.
+platform itself.
 
 Some names are everyday English as well — a person's *app*, a *project*, a
 *record* of what happened — and can't be told apart from the platform's word
 in prose, while in code they are allowed anyway. Those are left to review.
 
-Report-only by default: it lists what is left and exits 0. `--strict` exits 1
-when anything is listed.
+CI and the pre-commit hook run it with `--strict`, which exits 1 when
+anything is listed. Without it, it only reports.
 """
 
 from __future__ import annotations
@@ -52,12 +52,12 @@ _ENTRY = re.compile(
     re.M,
 )
 _MORE = re.compile(r"\*\*([^*]+)\*\*")
-_FENCE = re.compile(r"^```.*?^```", re.S | re.M)
-_CODE = re.compile(r"`[^`\n]+`")
+# A fence may be indented inside a list item, and a code span may wrap a line.
+_FENCE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
+_CODE = re.compile(r"`[^`]+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
 # Single-asterisk italics, not `**bold**`: a name in italics is being mentioned.
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
-_NOTE = re.compile(r"^> \*\*Platform note\*\*")
 
 
 def names() -> list[str]:
@@ -95,13 +95,11 @@ def _singular(term: str) -> str:
 
 
 def prose(body: str) -> str:
-    """The body as a reader reads it: no code, no addresses, no Platform notes."""
-    lines, in_note = [], False
-    for line in body.splitlines():
-        in_note = bool(_NOTE.match(line)) or (in_note and line.startswith(">"))
-        lines.append("" if in_note else line)
-    text = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), "\n".join(lines))
-    return _LINK.sub("]", _CODE.sub("", text))
+    """The body as a reader reads it: no code and no addresses."""
+    text = _FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), body)
+    # A wrapped code span keeps its line breaks, so line numbers stay true.
+    text = _CODE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    return _LINK.sub("]", text)
 
 
 def paragraphs(text: str) -> list[tuple[int, str]]:

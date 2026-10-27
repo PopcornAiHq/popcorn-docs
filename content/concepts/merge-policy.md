@@ -12,7 +12,6 @@ summary: >
   change on their next write.
 concepts: [manifest-keys]
 layer: platform
-product_terms: [Column]
 ---
 
 Every Column in a Routine's Tables has a merge policy, which decides what

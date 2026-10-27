@@ -11,7 +11,6 @@ summary: >
   not self-serve. `flow validate` is the authority on a flow.
 concepts: [app-bundle, manifest-keys, flow-grammar, versions, copying-a-template]
 layer: platform
-product_terms: [Routine Template]
 ---
 
 A **Routine Template** is made of an **app bundle**: a directory of YAML

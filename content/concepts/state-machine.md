@@ -12,7 +12,6 @@ summary: >
   Publish proves structure only.
 concepts: [manifest-keys, versions, states-authoring, app-bundle]
 layer: platform
-product_terms: [Status, Action]
 ---
 
 An item's Status, and the Actions it offers, are not one flat field.

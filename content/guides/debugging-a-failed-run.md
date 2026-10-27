@@ -11,7 +11,6 @@ summary: >
   having done nothing, and ones that never start.
 concepts: [versions, flow-grammar, template-authoring]
 layer: platform
-product_terms: [History]
 ---
 
 This guide starts from a flow run that did the wrong thing, or from one you

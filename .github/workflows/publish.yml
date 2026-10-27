@@ -68,8 +68,8 @@ jobs:
       - name: Highlighting never changes a code block's text
         run: scripts/check-highlight.py
 
-      - name: Product pages speak the product's words
-        run: scripts/check-layer.py
+      - name: Every page speaks the product's words
+        run: scripts/check-vocabulary.py --strict
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:

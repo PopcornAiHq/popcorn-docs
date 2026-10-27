@@ -17,7 +17,6 @@ summary: >                     # THE PRODUCT — under 400 characters
   moves every channel on that line, not just the one you edited.
 concepts: [publish, channel-binding]   # other ids, for "see also" and search
 layer: platform                        # product | platform — which layer the page speaks
-product_terms: [customizing a Routine] # platform pages: the product terms it explains; [] for none
 ---
 ```
 

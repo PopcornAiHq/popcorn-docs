@@ -11,7 +11,6 @@ summary: >
   private. `foreach` repeats a step per item, at most five in parallel.
 concepts: [references, conditions, on-error, schedules]
 layer: platform
-product_terms: []
 ---
 
 A flow is how a bundle does work. Nothing in the product names it: a flow

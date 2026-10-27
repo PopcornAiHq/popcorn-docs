@@ -11,7 +11,6 @@ summary: >
   A manifest with a version is what makes it publishable.
 concepts: [versions, manifest-keys, flow-grammar]
 layer: platform
-product_terms: [Routine Template]
 ---
 
 A Routine Template is, underneath, an app bundle: a directory. Installing it

@@ -11,7 +11,6 @@ summary: >
   (a typo in it, say) disappears: skipped, then deleted as undeclared.
 concepts: [manifest-keys, flow-grammar]
 layer: platform
-product_terms: [Trigger]
 ---
 
 A Routine's scheduled Triggers — the ones that run on a clock — are

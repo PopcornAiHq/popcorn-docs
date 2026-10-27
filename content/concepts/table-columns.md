@@ -11,7 +11,6 @@ summary: >
   column whose name has no spaces.
 concepts: [merge-policy, manifest-keys, adding-a-table]
 layer: platform
-product_terms: [Table, Column]
 ---
 
 A Routine's Tables, and each Table's Columns, are declared in its template's

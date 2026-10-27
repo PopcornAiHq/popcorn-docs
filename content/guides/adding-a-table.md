@@ -10,7 +10,6 @@ summary: >
   column the store would reject; a later publish can change a merge policy.
 concepts: [manifest-keys, merge-policy, copying-a-template, versions, app-bundle]
 layer: platform
-product_terms: [Table]
 ---
 
 This guide adds one Table to a Routine Template a Routine already runs, and

@@ -35,6 +35,9 @@ Checks, in the order a writer meets them:
 * no `applies_to:` field. It recorded which readers a page was for and
   nothing read it; `layer` replaced it, and a page that needs the CLI says so
   in its prose
+* no `product_terms:` field. It named the product terms a page written in
+  the platform's words explained; every page is now written in the
+  product's words, so nothing reads it
 """
 
 from __future__ import annotations
@@ -61,6 +64,7 @@ _SOURCE = re.compile(r"^source\s*:", re.M)
 _LAYER = re.compile(r"^layer:\s*(?P<value>.*)$", re.M)
 LAYERS = {"product", "platform"}
 _APPLIES_TO = re.compile(r"^applies_to\s*:", re.M)
+_PRODUCT_TERMS = re.compile(r"^product_terms\s*:", re.M)
 
 
 def check(path: pathlib.Path, ids: set[str]) -> list[str]:
@@ -127,6 +131,11 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
 
     if _APPLIES_TO.search(front):
         problems.append("applies_to: is retired — say in the page's prose when it needs the CLI")
+    if _PRODUCT_TERMS.search(front):
+        problems.append(
+            "product_terms: is retired — every page is written in the product's words, "
+            "so none needs to declare which it explains"
+        )
 
     if _SOURCE.search(front):
         problems.append(
