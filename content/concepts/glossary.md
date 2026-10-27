@@ -157,7 +157,8 @@ Product term: **Routine**, except where an entry says otherwise.
 - **tracker** — An older word for a channel that runs an app, from earlier
   product copy and MCP descriptions ("each channel is a tracker"). Product
   term: Routine. Many apps also name their main table
-  `tracker`, and the state-machine page's "tracker row" means a row of it.
+  `tracker`, and the state-machine page's example runs its machines over a
+  table of that name.
 - **workspace** — The tenant: it owns channels, users and fork lines. Its
   users are its members, each with a workspace role (see *member*).
   `popcorn workspace switch` changes which one the CLI acts on. Product term:
@@ -346,7 +347,7 @@ entry says otherwise.
 - **scalar** — A flat `key → text` value on a channel, always a string on
   the wire (`popcorn table scalar get` and `set`). A manifest declares
   scalars in one of two tiers, and a value a flow writes at runtime belongs
-  in neither. See [The three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+  in neither. See [Scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
   Product term: Routine Settings, for a scalar a person sets, such as a
   switch; a value a flow writes at runtime has none.
 - **merge policy**, **merge key** — A column's merge policy decides what an

@@ -66,4 +66,4 @@ are not changed here; they change in Popcorn. The walkthrough is
 
 > **Platform note** — Many settings are a channel's *scalars* or *channel
 > parameters*, and the prompts and email templates are files the template
-> seeds. See [the three scalar tiers](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).
+> seeds. See [scalar tiers and Routine Settings](https://docs.popcorn.ai/platform/concepts/scalar-tiers.md).

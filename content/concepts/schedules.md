@@ -30,11 +30,11 @@ schedules:
       conversation_id: <channel-conversation-id>
 ```
 
-## Inputs address their own channel
+## Inputs address their own Routine
 
 Schedule `inputs` support two substitutions applied at install:
 `<channel-conversation-id>` and `<workspace-id>`. That is how a portable
-bundle passes its own channel's id into a scheduled flow. The same two work in
+bundle passes its own Routine's id into a scheduled flow. The same two work in
 `triggers:` inputs.
 
 ## One cadence, and a class that routes it
@@ -66,7 +66,7 @@ keep. A renamed flow does the same; see
 
 ## Live schedules can differ from the manifest
 
-A channel's live schedules can differ from its manifest on purpose.
+A Routine's live schedules can differ from its manifest on purpose.
 `popcorn.app_mode: test` compresses them, and the platform offsets a plain
 daily cron away from the top of the hour. `popcorn app status` compares the
 live schedules with the manifest and knows which of those differences the
