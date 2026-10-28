@@ -310,7 +310,7 @@ listed under its entry. **Version** is close behind.
   identified by its `workflow_id` (`popcorn flow runs get <workflow-id>`). A
   run is started by `flow run`, a schedule, a webhook, a message trigger, a
   document, a state machine, an agent or another flow. See
-  [Debugging a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).
+  [Debug a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).
 
 ## Building a template
 

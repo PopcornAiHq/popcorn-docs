@@ -1,0 +1,96 @@
+<svg class="rd" viewBox="0 0 720 440" role="img" aria-labelledby="rd-title rd-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="rd-title">How a Routine works</title>
+  <desc id="rd-desc">Triggers start work in a Routine, which uses Connections and reads References. Its Tables hold its items, and each item moves through Steps and Reviews. An item's Status and Actions say where it stands and move it on, and History records every change.</desc>
+  <style>
+    .rd text { font-family: var(--font); fill: var(--fg); }
+    .rd .t { font-size: 15px; font-weight: 600; }
+    .rd .s { font-size: 12.5px; fill: var(--muted); }
+    .rd .e { font-size: 12px; fill: var(--muted); }
+    .rd .box { fill: var(--card); stroke: var(--edge); stroke-width: 1.5; }
+    .rd .shadow { fill: var(--edge); }
+    .rd .chip { fill: var(--code-bg); stroke: var(--rule); stroke-width: 1.5; }
+    .rd .review { fill: var(--wash); stroke: var(--brand); stroke-width: 1.5; }
+    .rd .line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+    .rd .head { fill: var(--muted); }
+    .rd a:hover .box { stroke: var(--accent); }
+    .rd a:hover .t { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="rd-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+  </defs>
+
+  <!-- What feeds the Routine -->
+  <a href="/use/concepts/triggers.html">
+    <rect class="box" x="2" y="22" width="188" height="72" rx="6"/>
+    <text class="t" x="18" y="50">Triggers</text>
+    <text class="s" x="18" y="72">schedule, message,</text>
+    <text class="s" x="18" y="87">document, webhook</text>
+  </a>
+  <a href="/use/concepts/connections.html">
+    <rect class="box" x="2" y="126" width="188" height="72" rx="6"/>
+    <text class="t" x="18" y="154">Connections</text>
+    <text class="s" x="18" y="176">a mailbox, a calendar</text>
+  </a>
+  <a href="/use/concepts/reference-documents.html">
+    <rect class="box" x="2" y="230" width="188" height="72" rx="6"/>
+    <text class="t" x="18" y="258">References</text>
+    <text class="s" x="18" y="280">a policy, a price list</text>
+  </a>
+
+  <path class="line" d="M190 58 H288" marker-end="url(#rd-arrow)"/>
+  <text class="e" x="239" y="50" text-anchor="middle">start work</text>
+  <path class="line" d="M190 162 H288" marker-end="url(#rd-arrow)"/>
+  <text class="e" x="239" y="154" text-anchor="middle">used by</text>
+  <path class="line" d="M190 266 H288" marker-end="url(#rd-arrow)"/>
+  <text class="e" x="239" y="258" text-anchor="middle">read by</text>
+
+  <!-- The Routine -->
+  <rect class="shadow" x="298" y="8" width="420" height="308" rx="8"/>
+  <rect class="box" x="292" y="2" width="420" height="308" rx="8"/>
+  <a href="/use/concepts/routines.html"><text class="t" x="312" y="34" style="font-size:17px">Routine</text></a>
+  <a href="/use/concepts/tables.html"><text class="s" x="312" y="58">its Tables hold the items it tracks</text></a>
+
+  <g transform="translate(0 26)">
+  <text class="e" x="312" y="128">each item</text>
+  <a href="/use/concepts/steps.html">
+    <rect class="chip" x="312" y="140" width="76" height="38" rx="19"/>
+    <text class="t" x="350" y="164" text-anchor="middle" style="font-size:14px">Step</text>
+  </a>
+  <path class="line" d="M388 159 H414" marker-end="url(#rd-arrow)"/>
+  <a href="/use/concepts/steps.html">
+    <rect class="chip" x="416" y="140" width="76" height="38" rx="19"/>
+    <text class="t" x="454" y="164" text-anchor="middle" style="font-size:14px">Step</text>
+  </a>
+  <path class="line" d="M492 159 H518" marker-end="url(#rd-arrow)"/>
+  <a href="/use/concepts/reviews.html">
+    <rect class="review" x="520" y="140" width="86" height="38" rx="19"/>
+    <text class="t" x="563" y="164" text-anchor="middle" style="font-size:14px">Review</text>
+  </a>
+  <path class="line" d="M606 159 H632" marker-end="url(#rd-arrow)"/>
+  <rect class="chip" x="634" y="140" width="58" height="38" rx="19"/>
+  <text class="t" x="663" y="164" text-anchor="middle" style="font-size:14px">…</text>
+
+  <text class="s" x="402" y="206" text-anchor="middle">asks for what it needs,</text>
+  <text class="s" x="402" y="222" text-anchor="middle">follows up until it has it</text>
+  <text class="s" x="563" y="206" text-anchor="middle">a person</text>
+  <text class="s" x="563" y="222" text-anchor="middle">decides</text>
+  </g>
+
+  <!-- What comes out of it -->
+  <path class="line" d="M420 310 V354" marker-end="url(#rd-arrow)"/>
+  <path class="line" d="M600 310 V354" marker-end="url(#rd-arrow)"/>
+  <a href="/use/concepts/actions-and-status.html">
+    <rect class="box" x="322" y="358" width="196" height="76" rx="6"/>
+    <text class="t" x="338" y="386">Status and Actions</text>
+    <text class="s" x="338" y="407">where an item stands,</text>
+    <text class="s" x="338" y="423">and what moves it on</text>
+  </a>
+  <a href="/use/concepts/history.html">
+    <rect class="box" x="532" y="358" width="180" height="76" rx="6"/>
+    <text class="t" x="548" y="386">History</text>
+    <text class="s" x="548" y="407">every change, who</text>
+    <text class="s" x="548" y="423">made it, and why</text>
+  </a>
+</svg>
