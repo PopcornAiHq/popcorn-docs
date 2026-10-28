@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-updated: 2026-10-27
+updated: 2026-10-28
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -2709,7 +2709,9 @@ On the channel a lead was forwarded TO: which of the answers the
 hand-over carries (`forwarded`, as `forward_lead`'s check built it)
 match the questions of the stage the row is on, as `answers_entry`
 records them (`carry_answers`). Read-only: the stage from the run's
-pinned graph, its questions from its items scalar.
+pinned graph, its questions from its items scalar. A hand-over that
+says `wrong_company`, onto a chase channel, matches across the two
+companies' wording too (`match_answers`).
 
 **Arguments**
 
@@ -2758,6 +2760,7 @@ what it would write. Read-only: refuses by name (`NoRequester`,
 | `target_apps` | list of `chase` / `claimcoordinator3` | no | The apps whose channels the run may forward into, among chase and claimcoordinator3. Chase alone when not given. Default `["chase"]`. |
 | `source_app` | `chase` / `claimcoordinator3` / `claimcoordinator2` | no | The app THIS channel runs, which says how its row is read (`answer_boards`, `source_signings`). Chase and Claim Coordinator 3 read alike. Default `"chase"`. |
 | `entry` | string | no | A later state of B's recipe to start the person on (one of the target's `entries`); empty for B's first stage. Default `""`. |
+| `wrong_company` | boolean | no | The person was here meaning another company: their answers carry onto B's questions about B's company. A row held on Needs routine review for `wrong_company` is one without it. Chase to Chase only: from or to Claim Coordinator 3 it is ignored. Default `false`. |
 
 **Returns**
 
@@ -5865,6 +5868,14 @@ the auth to the bound Google account before the read.
 | `primed` | boolean | True when this call started a new cursor (empty input cursor, or `reset`); it returns no events. |
 | `reset` | boolean | True when the input cursor had expired and a new one was primed: changes since the old cursor are lost, reconcile from a read of your own. |
 
+`GcalAttachment`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `file_id` | string | Drive file id. |
+| `title` | string | File title (capped at 200 chars), e.g. '… - Notes by Gemini' or '… - Transcript'. |
+| `mime_type` | string | The file's MIME type. |
+
 `GcalAttendee`:
 
 | Field | Type | Notes |
@@ -5899,6 +5910,8 @@ the auth to the bound Google account before the read.
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
+| `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
+| `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |
@@ -5930,6 +5943,14 @@ the auth to the bound Google account before the read.
 | `events` | list of GcalEventSummary | Events in the window. |
 | `count` | integer | Number of events returned. |
 
+`GcalAttachment`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `file_id` | string | Drive file id. |
+| `title` | string | File title (capped at 200 chars), e.g. '… - Notes by Gemini' or '… - Transcript'. |
+| `mime_type` | string | The file's MIME type. |
+
 `GcalAttendee`:
 
 | Field | Type | Notes |
@@ -5964,6 +5985,8 @@ the auth to the bound Google account before the read.
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
+| `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
+| `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |
 | `attendees` | list of GcalAttendee | Invited attendees (the first 10 on list and change reads; see attendee_count). |
 | `attendee_count` | integer | How many attendees the event has in all. |
 | `booked_by` | GcalBookedBy, optional | Set when the event was booked through a Google appointment schedule: the booker's name and email from the 'Booked by' block Google writes into the description. |

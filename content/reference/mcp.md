@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-27
+updated: 2026-10-28
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -1395,7 +1395,7 @@ Popcorn reads the file in the background. list_references shows it once it's in,
 
 [read-only]
 
-Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why.
+Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why and the Actions that settle it (take_action takes one on the item's row).
 
 Each Status shows its label (what Popcorn shows) and its stored value. list_rows shows the items at one Status, filtered on the value: filter={"Status": "<value>"}. list_actions shows what can be done with an item and take_action does it.
 
@@ -1457,7 +1457,7 @@ Actions offered now:
 
 Take one Action on one or more of a Routine's items, as a person pressing its button in Popcorn would.
 
-Refused for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started.
+Refused, with the reason, for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started.
 
 | Argument | Type | Notes |
 |---|---|---|
