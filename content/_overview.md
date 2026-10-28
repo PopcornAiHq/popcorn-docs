@@ -1,9 +1,9 @@
 # Overview
 
-Popcorn is a service that uses AI agents to carry out ongoing work, such as
-client intake and delivery coordination. Each piece of that work is a Routine,
-which works through the accounts you already use and from documents such as
-your policies and price lists.
+Popcorn is a service that uses AI agents to carry out pieces of ongoing work
+called Routines. A Routine starts work on its own when something arrives or on
+a schedule, working through the accounts you already use and from documents
+such as your policies and price lists.
 
 ## Start here
 
