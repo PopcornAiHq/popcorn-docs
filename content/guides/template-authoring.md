@@ -1,6 +1,6 @@
 ---
 id: template-authoring
-title: Changing a Routine Template
+title: Change a Routine Template
 order: 1
 group: Getting started
 summary: >
@@ -375,13 +375,13 @@ Three traps are worth carrying into every edit:
 
 A flow's grammar is four concept pages, each answering one question:
 
-- [The shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md) — the file's keys, the five kinds
+- [The shape of a flow](https://docs.popcorn.ai/build/concepts/flow-grammar.md): the file's keys, the five kinds
   of step, blocks, `call_flow` and `foreach`.
-- [References in a flow](https://docs.popcorn.ai/build/concepts/references.md) — the `$` roots, the syntax,
+- [References in a flow](https://docs.popcorn.ai/build/concepts/references.md): the `$` roots, the syntax,
   and why nothing in a reference computes.
-- [Conditions in a flow](https://docs.popcorn.ai/build/concepts/conditions.md) — `when:`'s two rails, and
+- [Conditions in a flow](https://docs.popcorn.ai/build/concepts/conditions.md): `when:`'s two rails, and
   filtering rows instead of gating steps.
-- [Step errors and retries](https://docs.popcorn.ai/build/concepts/on-error.md) — `on_error`, the default of
+- [Step errors and retries](https://docs.popcorn.ai/build/concepts/on-error.md): `on_error`, the default of
   four attempts, and what no policy catches.
 
 Reading fields off a webhook payload is

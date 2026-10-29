@@ -22,7 +22,8 @@ Outputs, under `build/`:
                      then concepts or guides. The glossary and the
                      references have no part, and sit at <kind>/<id>.md
     <part>/<kind>/<id>.html  the same page for a person with a browser
-    index.html       the landing page, every concept with its summary
+    index.html       the Overview, rendered from `content/_overview.md`
+    index.md         that source as written, the Overview's Markdown twin
     404.html         what a missing path is answered with, in the site's own
                      chrome, so a stale link still leaves the reader somewhere
                      they can navigate from
@@ -75,6 +76,8 @@ import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
+OVERVIEW = CONTENT / "_overview.md"
+DIAGRAM = ROOT / "assets" / "routine.svg"
 BUILD = ROOT / "build"
 FONTS = ROOT / "assets" / "fonts"
 SITE = render.SITE
@@ -133,29 +136,23 @@ def parse(path: pathlib.Path) -> dict:
     return meta
 
 
-# The two parts of the site, Using Popcorn first: (frontmatter value, label,
-# who it is for). A page's part is the first segment of its URL and a heading
-# of the sidebar; the pages with no part follow both, under Look it up. Popcorn is used headless, so a user's assistant is the first
-# reader, and Using Popcorn leads.
+# The two parts of the site, Using Popcorn first: (frontmatter value, label).
+# A page's part is the first segment of its URL and a heading of the sidebar;
+# the pages with no part follow both, under Look it up. Popcorn is used
+# headless, so a user's assistant is the first reader, and Using Popcorn leads.
 PARTS = [
-    ("use", "Using Popcorn",
-     "For anyone working with Routines, directly or through an assistant "
-     "connected over MCP: what a Routine does, and what you can ask of it."),
-    ("build", "Building Routine Templates",
-     "For building or customizing the templates Routines are made from: the "
-     "files, flows and tools underneath, with no access to Popcorn's backend."),
+    ("use", "Using Popcorn"),
+    ("build", "Building Routine Templates"),
 ]
 
-# The kinds of page, in the order a part's Overview cards show them:
-# (kind, label, what it is for). The sidebar lists topics, not kinds, so the
-# label is seen on the kind's Overview card, in a page's eyebrow and in
-# search; the blurb is the card's text. A kind not listed here still
-# publishes, after these, under its own name.
+# The kinds of page: (kind, label). The sidebar lists topics, not kinds, so
+# the label is seen in a page's eyebrow and in search. A kind not listed here
+# still publishes, after these, under its own name.
 SECTIONS = [
-    ("concepts", "Concepts", "One idea each, explained in full."),
-    ("guides", "Guides", "Walkthroughs of one task, start to finish."),
-    ("glossary", "Glossary", "Every term, with its synonyms and the collisions worth knowing."),
-    ("reference", "Reference", "Generated from Popcorn itself, never written by hand."),
+    ("concepts", "Concepts"),
+    ("guides", "Guides"),
+    ("glossary", "Glossary"),
+    ("reference", "Reference"),
 ]
 
 # The sections whose pages a generator writes. llms-full.txt names them
@@ -207,18 +204,12 @@ def url(page: dict | None) -> str:
     return f"{SITE}/" if page is None else f"{SITE}{href(page)}"
 
 
-def section_info(section: str) -> tuple[str, str]:
-    for name, label, blurb in SECTIONS:
-        if name == section:
-            return label, blurb
-    return section.title(), ""
+def section_label(section: str) -> str:
+    return dict(SECTIONS).get(section, section.title())
 
 
-def part_info(part: str) -> tuple[str, str]:
-    for name, label, blurb in PARTS:
-        if name == part:
-            return label, blurb
-    return part.title(), ""
+def part_label(part: str) -> str:
+    return dict(PARTS).get(part, part.title())
 
 
 def reading_order(page: dict) -> tuple:
@@ -272,80 +263,50 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     # is None only when the landing page is the one being built.
     out: list = [(None, [("", [("Overview", "/", current is None)])])]
     for part, groups in parts.items():
-        out.append((part_info(part)[0], None))
+        out.append((part_label(part), None))
         out.append(("", list(groups.items())))
     if shared:
-        out.append((LOOK_UP[0], None))
+        out.append((LOOK_UP, None))
         out.append((None, [("", shared)]))
     return render.site_nav(out)
 
 
-# The landing page's heading for the kinds that belong to neither part.
-LOOK_UP = ("Look it up", "Every term, and every command, tool and activity, for either part.")
+# The sidebar's heading for the kinds that belong to neither part.
+LOOK_UP = "Look it up"
 
 
-def anchor(page: dict) -> str:
-    """The landing card a page's eyebrow links back to: its part and kind, or its kind."""
-    part = page.get("part")
-    return f"{part}-{nav_section(page)}" if part else nav_section(page)
+_DIAGRAM_BLOCK = re.compile(r"^```diagram\n.*?^```\n", re.M | re.S)
+
+
+def overview() -> tuple[str, str]:
+    """The Overview's lede and body, from `content/_overview.md`.
+
+    The source opens with `# Overview` and one paragraph, which is the page's
+    summary: styled as one on the site, and the blockquote `llms.txt` opens
+    with, as the llms.txt format asks."""
+    text = OVERVIEW.read_text().split("\n", 1)[1].strip()
+    lede, rest = text.split("\n\n", 1)
+    return " ".join(lede.split()), rest
 
 
 def landing(pages: list[dict]) -> str:
-    """The home page: what Popcorn is, what these pages cover, one way in each.
+    """The home page, rendered from `content/_overview.md`.
 
-    It does not list every page — the sidebar beside it already does. Each
-    kind in a part gets a card that opens its first page in reading order, so
-    the way in follows `order:` rather than being chosen again here. The
-    cards follow SECTIONS, not reading order: a part opens with a guide, but
-    its concepts are still the first card.
+    The page is hand-written rather than assembled from the sidebar's parts
+    and kinds: a first-time reader needs a first action and a picture of a
+    Routine, which no listing of pages gives them. Its source is also served
+    as `/index.md`, so an agent can read it like any other page.
     """
-    first: dict[str, dict[str, dict]] = {}
-    for page in pages:
-        first.setdefault(page.get("part") or "", {}).setdefault(nav_section(page), page)
-    blocks = []
-    for part, sections in first.items():
-        if part:
-            label, blurb = part_info(part)
-        else:
-            label, blurb = LOOK_UP
-        cards = []
-        for section, page in sorted(sections.items(), key=lambda kv: (
-                _KNOWN.index(kv[0]) if kv[0] in _KNOWN else len(_KNOWN))):
-            kind, kind_blurb = section_info(section)
-            cards.append(
-                f'<a class="card" id="{anchor(page)}" href="{href(page)}">'
-                f'<span class="card-label">{kind}</span>'
-                f"<p>{kind_blurb}</p>"
-                f'<span class="card-start">{render.inline(page["title"])} \u2192</span></a>'
-            )
-        blocks.append(
-            f'<h2 id="{part or "look-up"}">{label}</h2>\n<p>{blurb}</p>\n'
-            '<div class="cards">' + "".join(cards) + "</div>\n"
-        )
+    lede, rest = overview()
+    # The ```diagram block is a text drawing, which is what an agent reading
+    # /index.md should get. A person gets the drawing in assets/, inlined
+    # rather than linked so it takes the page's colours in either theme.
+    rest = _DIAGRAM_BLOCK.sub("\x00diagram\x00\n", rest, count=1)
+    figure = f'<figure class="diagram">{DIAGRAM.read_text().strip()}</figure>'
     return render.document(
         "Overview — Popcorn docs",
-        "<h1>Overview</h1>\n"
-        '<p class="summary">Popcorn runs Routines. Each one is a piece of ongoing '
-        "work, such as claims intake or order follow-up, that reads across email, "
-        "messages and files, catches every update and decision, and keeps itself "
-        "current. People talk to its agent like a member of the team.</p>\n"
-        "<p>Many Routines take each item they work on, such as a potential client "
-        "or an order on its way, through a few Steps. The Routine asks for what "
-        "each Step needs, follows up until it has it, and stops for your Review "
-        "where you asked it to.</p>\n"
-        "<p>These pages come in two parts, both in the words you see in Popcorn. "
-        "<strong>Using Popcorn</strong> is for working with Routines; "
-        "<strong>Building Routine Templates</strong> goes underneath, to what a "
-        "template is made of and how to change one. The glossary and the "
-        "references serve both.</p>\n"
-        + "".join(blocks)
-        + "<h2>For agents</h2>\n"
-        "<p>Every page has a Markdown twin at the same path, ending "
-        "<code>.md</code> instead of <code>.html</code>. "
-        '<a href="/llms.txt">/llms.txt</a> lists every page with its summary, '
-        '<a href="/llms-full.txt">/llms-full.txt</a> holds every written page in '
-        "full and names the generated reference pages, and "
-        '<a href="/chunks.json">/chunks.json</a> has one record per page.</p>',
+        f'<h1>Overview</h1>\n<p class="summary">{render.inline(lede)}</p>\n'
+        + render.body(rest).replace("<p>\x00diagram\x00</p>", figure),
         description="How Popcorn Routines work, and how to build the Routine "
         "Templates they are made from.",
         sidebar=sidebar(pages, None),
@@ -389,7 +350,7 @@ def pager(page: dict, pages: list[dict]) -> str:
         nxt = peers[i + 1]
         links.append(f'<a class="next" rel="next" href="{href(nxt)}">'
                      f'<span>Next</span>{render.inline(nxt["title"])}</a>')
-    return f'<nav class="pager" aria-label="{part_info(page["part"])[0] if page.get("part") else LOOK_UP[0]}">' + "".join(links) + "</nav>\n" if links else ""
+    return f'<nav class="pager" aria-label="{part_label(page["part"]) if page.get("part") else LOOK_UP}">' + "".join(links) + "</nav>\n" if links else ""
 
 
 def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
@@ -430,8 +391,8 @@ def version_badge(page: dict) -> str:
 def eyebrow(page: dict) -> str:
     """Where the page sits: its part, its kind, and its group when it has one."""
     part, section = page.get("part"), nav_section(page)
-    kind = f'<a href="/#{anchor(page)}">{section_info(section)[0]}</a>'
-    trail = f'<a href="/#{part}">{part_info(part)[0]}</a> \u203a {kind}' if part else kind
+    kind = section_label(section)
+    trail = f"{part_label(part)} \u203a {kind}" if part else kind
     if page.get("group"):
         trail += f" \u203a {render.inline(page['group'])}"
     return f'<p class="eyebrow">{trail}</p>\n'
@@ -475,7 +436,9 @@ def main() -> int:
     )
 
     search = []
-    index = ["# Popcorn docs", ""]
+    index = ["# Popcorn docs", "", f"> {overview()[0]}", "",
+             "## Overview", f"{SITE}/index.md", "",
+             "What Popcorn is, how a Routine works, and one way into each part. Start here.", ""]
     full = [
         "# Popcorn docs — full text",
         "",
@@ -529,8 +492,8 @@ def main() -> int:
             "title": render.plain(page["title"]),
             "url": href(page),
             "section": (
-                f"{part_info(page['part'])[0]} \u203a {section_info(nav_section(page))[0]}"
-                if page.get("part") else section_info(nav_section(page))[0]
+                f"{part_label(page['part'])} \u203a {section_label(nav_section(page))}"
+                if page.get("part") else section_label(nav_section(page))
             ),
             "summary": render.plain(page["summary"]),
             "headings": render.search_entries(rendered),
@@ -543,6 +506,7 @@ def main() -> int:
     )
     (BUILD / "llms-full.txt").write_text("\n".join(full))
     (BUILD / "index.html").write_text(landing(pages))
+    shutil.copyfile(OVERVIEW, BUILD / "index.md")
     (BUILD / "404.html").write_text(not_found(pages))
     # The fonts are committed rather than generated, and the pages name them
     # by path, so a missing file is a page quietly set in the fallback face.

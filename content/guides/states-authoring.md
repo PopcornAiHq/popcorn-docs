@@ -1,6 +1,6 @@
 ---
 id: states-authoring
-title: Authoring a states tier
+title: Author a states tier
 order: 12
 group: What a bundle holds
 summary: >
