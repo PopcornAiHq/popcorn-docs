@@ -9,6 +9,9 @@ summary: >
   the queue and how a fire is spread. Each install of a new version reconciles
   schedules by (flow, slug), and a schedule whose `flow:` is not in the bundle
   (a typo in it, say) disappears: skipped, then deleted as undeclared.
+lede: >
+  How a template schedules a Routine's work, and what happens to a schedule
+  when a new version installs.
 concepts: [manifest-keys, flow-grammar]
 part: build
 ---

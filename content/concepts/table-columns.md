@@ -9,6 +9,9 @@ summary: >
   `display` is checked only for its kind. Install adds columns and fixes
   attributes but never drops or renames one. A flow can dereference only a
   column whose name has no spaces.
+lede: >
+  How a template declares a Table's columns, and what installing a new version
+  can and can't change about them.
 concepts: [merge-policy, manifest-keys, adding-a-table]
 part: build
 ---

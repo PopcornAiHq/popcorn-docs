@@ -21,7 +21,7 @@ items stand, decide at their Reviews, change their settings and
 start new ones. It does this through Popcorn's hosted MCP server. This guide
 connects one and checks it.
 
-## 1. Add the server
+## Add the server
 
 The server's address is `https://mcp.popcorn.ai/mcp`.
 
@@ -36,7 +36,7 @@ The server's address is `https://mcp.popcorn.ai/mcp`.
 Any other assistant that connects to remote MCP servers with sign-in uses the
 same address.
 
-## 2. Sign in and choose a workspace
+## Sign in and choose a workspace
 
 The assistant opens Popcorn's sign-in. After you sign in, a consent page
 names the assistant and asks you to allow it. If you belong to more than one
@@ -45,7 +45,7 @@ workspace, you choose one there.
 The connection stays bound to that workspace. To use another, disconnect and
 connect again.
 
-## 3. Check it
+## Check it
 
 > "Which Popcorn workspace are you connected to?"
 

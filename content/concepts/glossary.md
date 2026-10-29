@@ -9,6 +9,9 @@ summary: >
   *project*) is ongoing work made from a Routine Template; its Triggers bring
   work in, its Tables hold it, its Status says where each item stands and
   its Actions move it on. A closing table maps the other names.
+lede: >
+  The words Popcorn uses, from running a Routine to building its template, and
+  the other names you'll see for them.
 concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a-template, versions, flow-grammar, scalar-tiers, merge-policy, state-machine]
 ---
 

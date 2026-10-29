@@ -9,6 +9,9 @@ summary: >
   another. A step is exactly one of five things: an activity, a sleep, an
   approval gate, a child flow, or a nested block, whose inner steps are
   private. `foreach` repeats a step per item, at most five in parallel.
+lede: >
+  What a flow file contains: its name, its steps, and the five kinds of step
+  it can run.
 concepts: [references, conditions, on-error, schedules]
 part: build
 ---

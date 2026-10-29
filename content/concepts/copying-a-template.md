@@ -9,6 +9,9 @@ summary: >
   and a change published there reaches every Routine on it by their daily
   update, not only the one you changed. It is one-way: nothing undoes a copy
   or moves a Routine back to Popcorn's version.
+lede: >
+  A copy of a template is your workspace's own. A change to it reaches every
+  Routine on it, and a copy can't be undone.
 concepts: [customizing-a-routine, versions, app-bundle]
 part: build
 ---

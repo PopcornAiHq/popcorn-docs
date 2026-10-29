@@ -9,6 +9,9 @@ summary: >
   unless the Routine changed them. `default_scalars:` write once, only if
   absent — the tier for an operator-owned switch and for `popcorn.*` keys such
   as the send mode. Never declare a value a flow writes at runtime.
+lede: >
+  How a template sets a Routine's settings when it installs, and which values
+  a later update can change.
 concepts: [manifest-keys]
 part: build
 ---

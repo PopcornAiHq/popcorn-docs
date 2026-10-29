@@ -10,6 +10,9 @@ summary: >
   their daily update. `install_routine` (`popcorn app apply`) retries a
   blocked install. A run keeps its version, so a Routine upgraded mid-run
   never mixes code.
+lede: >
+  How a change to a template reaches its Routines: publishing creates a
+  version, and installing brings each Routine up to it.
 concepts: [copying-a-template, app-bundle, manifest-keys]
 part: build
 ---

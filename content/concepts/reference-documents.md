@@ -10,6 +10,9 @@ summary: >
   it is still waiting for, and read_reference returns one's text or a
   download link. People add References in Popcorn; adding some starts work,
   which list_triggers lists.
+lede: >
+  A Reference is a document a Routine works from, such as a policy, a price
+  list or an example of good work.
 concepts: [triggers, customizing-a-routine]
 part: use
 ---
