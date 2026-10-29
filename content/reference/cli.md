@@ -3,7 +3,7 @@ id: cli
 title: CLI
 order: 2
 layout: lookup
-version: 0.63.0
+version: 0.63.1
 summary: >
   Every `popcorn` command, grouped the way `popcorn --help` groups them, with
   its arguments — generated from the CLI's own schema. Global flags, agent
@@ -15,7 +15,7 @@ lede: >
 concepts: [template-authoring, versions, copying-a-template]
 ---
 
-The 87 commands `popcorn` 0.63.0 lists in its help menu, under the
+The 87 commands `popcorn` 0.63.1 lists in its help menu, under the
 menu's own headings. Each is run as `popcorn <command>`; the global flags
 at the end go before the command, as in `popcorn --json app status`.
 
@@ -72,6 +72,7 @@ Edit a message
 | `--channel <value>` |  | Channel name (#general) or UUID — the same argument, spelled the way every command accepts |
 | `<message_id>` | yes | Message UUID |
 | `<content>` | yes | New message content |
+| `--no-mentions` |  | Send @names as plain text; by default each @name that matches a member's username or display name notifies them (@everyone, @here too) |
 
 ### `message get`
 
@@ -150,6 +151,7 @@ Send a message
 | `--file <str>` |  | File path to upload and attach |
 | `--batch` |  | Read NDJSON from stdin: {"conversation": "...", "message": "..."} |
 | `--fail-fast` |  | Stop batch processing on first error |
+| `--no-mentions` |  | Send @names as plain text; by default each @name that matches a member's username or display name notifies them (@everyone, @here too) |
 
 ### `message threads`
 
