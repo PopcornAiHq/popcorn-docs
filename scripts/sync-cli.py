@@ -131,6 +131,8 @@ def page(schema: dict, help_text: str) -> str:
         "  mode, the `--json` envelope, exit codes and error codes follow the",
         "  commands. The CLI installs from its GitHub repository, not PyPI; this page",
         "  describes one release, and `popcorn <command> --help` describes yours.",
+        "lede: >",
+        "  Every command in the popcorn CLI, with its arguments, flags and error codes.",
         "concepts: [template-authoring, versions, copying-a-template]",
         "---",
         "",

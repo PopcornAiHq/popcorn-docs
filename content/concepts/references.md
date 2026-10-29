@@ -9,6 +9,9 @@ summary: >
   negation. A malformed one is a literal string at runtime, and a key the value
   lacks is a hard ReferenceError that on_error cannot catch. Index arrays with
   dots, and keep spaces out of any column a flow dereferences.
+lede: >
+  How a flow reads a value from its inputs, earlier steps or the Routine, and
+  what happens when the value isn't there.
 concepts: [flow-grammar, on-error, table-columns]
 part: build
 ---

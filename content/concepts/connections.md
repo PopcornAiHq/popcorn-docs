@@ -10,6 +10,9 @@ summary: >
   it. With make_connection an assistant makes one after a dry run, from an
   account the person signed in to, or as a webhook. For Google it can hand
   them the sign-in link.
+lede: >
+  A Connection is an account Popcorn uses on a Routine's behalf, such as the
+  mailbox it reads or the calendar it books into.
 concepts: [routines, set-up-a-routine]
 part: use
 ---

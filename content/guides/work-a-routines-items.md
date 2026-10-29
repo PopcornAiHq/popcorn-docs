@@ -10,6 +10,9 @@ summary: >
   list_actions and take one with take_action after a dry run; stop tracking an
   item; correct Rows with update_row; and run a scheduled Trigger now with
   run_trigger.
+lede: >
+  See what is waiting on you in a Routine, make the call, and correct anything
+  that's wrong.
 concepts: [reviews, actions-and-status, tables]
 part: use
 ---
@@ -19,7 +22,7 @@ making the call at their [Review](https://docs.popcorn.ai/use/concepts/reviews.m
 fixing what is wrong on them. The example works `#intake`, a claims intake
 Routine whose main Table holds one Row per potential client.
 
-## 1. Find what is waiting
+## Find what is waiting
 
 > "Who in #intake is waiting for us to review them?"
 
@@ -41,12 +44,12 @@ Tables, and `list_rows` lists a Table's Rows, newest first, and narrows them:
   whatever Column holds the name.
 - `sort` and `columns` to order the Rows and choose what each line shows.
 
-## 2. Read one
+## Read one
 
 > "Show me everything on Dana Reyes."
 
 `get_row` shows the Row in full: every Column, its Status, when it was
-created and last changed, and the revision `update_row` needs in step 5.
+created and last changed, and the revision `update_row` needs under "Fix what is wrong".
 
 > "What has happened with Dana so far?"
 
@@ -54,7 +57,7 @@ created and last changed, and the revision `update_row` needs in step 5.
 who or what made it and why, and the work that made it. See
 [History](https://docs.popcorn.ai/use/concepts/history.md).
 
-## 3. See what it offers
+## See what it offers
 
 > "What can I do with Dana's intake?"
 
@@ -65,7 +68,7 @@ is marked `[in the Popcorn app]`, because a person checks every field of the
 agreement before it goes, so it is taken in Popcorn rather than by the
 assistant.
 
-## 4. Make the call
+## Make the call
 
 > "Dana signed on paper. Mark Dana as already signed."
 
@@ -77,7 +80,7 @@ item and gives a `run_key`; read it back, then call again with
 the `run_key` makes it act once even if the call is repeated. `get_row`
 shows the new Status once it has applied.
 
-## 5. Fix what is wrong
+## Fix what is wrong
 
 - **A wrong value** — `update_row` with the Columns to change and the
   revision from `get_row`. If someone changed the Row in the meantime,
@@ -92,7 +95,7 @@ shows the new Status once it has applied.
 None of these start work by themselves, and none can set a Status: that changes only by an
 Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/use/concepts/tables.md).
 
-## 6. Run the Routine's work now
+## Run the Routine's work now
 
 > "Send #intake's due follow-ups now, don't wait for the next check."
 

@@ -21,7 +21,8 @@ Outputs, under `build/`:
                      path its llms.txt entry advertises: the page's `part`,
                      then concepts or guides. The glossary and the
                      references have no part, and sit at <kind>/<id>.md
-    <part>/<kind>/<id>.html  the same page for a person with a browser
+    <part>/<kind>/<id>.html  the same page for a person with a browser, which
+                     opens with the page's lede where the twin has its summary
     index.html       the Overview, rendered from `content/_overview.md`
     index.md         that source as written, the Overview's Markdown twin
     404.html         what a missing path is answered with, in the site's own
@@ -37,7 +38,7 @@ Outputs, under `build/`:
                      or a search returned it, never by following a link, so a
                      page a search engine has not indexed is out of their reach
     search.json      what the site's own search reads: per page its title, URL,
-                     section, summary and every heading or lookup entry with
+                     section, lede and every heading or lookup entry with
                      its anchor. No bodies — chunks.json carries those, and
                      the browser fetches this whole on a reader's first search
 
@@ -187,6 +188,14 @@ NAV_SECTION = {"glossary": "glossary"}
 
 def nav_section(page: dict) -> str:
     return NAV_SECTION.get(page["id"], page["source_dir"])
+
+
+def lede(page: dict) -> str:
+    """What a person reads under the page's title, in the site's search and
+    in a link preview: the page's `lede` when it has one, its `summary`
+    otherwise. Agents read the summary everywhere, because it is written to
+    be acted on without opening the page."""
+    return page.get("lede") or page["summary"]
 
 
 def page_dir(page: dict) -> str:
@@ -472,11 +481,11 @@ def main() -> int:
                 + f'<div class="title-row"><div class="title"><h1>{render.inline(page["title"])}</h1>'
                 f"{version_badge(page)}</div>"
                 f"{render.page_actions('/' + path)}</div>\n"
-                f'<p class="summary">{render.inline(page["summary"])}</p>\n'
+                f'<p class="summary">{render.inline(lede(page))}</p>\n'
                 f"{render.on_this_page(rendered, lookup=lookup)}"
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
-                description=page["summary"],
+                description=lede(page),
                 sidebar=sidebar(pages, page["id"]),
                 rail=render.rail(
                     contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
@@ -495,7 +504,7 @@ def main() -> int:
                 f"{part_label(page['part'])} \u203a {section_label(nav_section(page))}"
                 if page.get("part") else section_label(nav_section(page))
             ),
-            "summary": render.plain(page["summary"]),
+            "summary": render.plain(lede(page)),
             "headings": render.search_entries(rendered),
         })
 

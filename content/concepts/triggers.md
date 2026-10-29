@@ -9,6 +9,9 @@ summary: >
   it. list_triggers shows each one and whether it is paused; run_trigger runs
   a schedule now, without waiting for its time, for real after a dry run. A
   schedule's cadence is a Routine Setting.
+lede: >
+  A Trigger is how work arrives in a Routine: on a schedule, from a message or
+  document, or from another system.
 concepts: [routine-settings, actions-and-status, work-a-routines-items]
 part: use
 ---

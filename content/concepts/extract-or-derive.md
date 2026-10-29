@@ -9,6 +9,9 @@ summary: >
   model, and fails on a missing path. `foundation.agent.transform` derives what
   the payload does not state, and given junk it invents a plausible object.
   Extract whatever the input states; derive only the rest.
+lede: >
+  When a flow should read fields straight from its input, and when it should
+  have a model work them out.
 concepts: [references, on-error]
 part: build
 ---

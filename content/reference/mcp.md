@@ -9,6 +9,8 @@ summary: >
   people, Routines, their Triggers, Actions, settings and tables, and a
   Routine's app — with their arguments, generated from the server's own
   definitions.
+lede: >
+  Every tool Popcorn's MCP server gives your assistant, with its arguments.
 concepts: [app-bundle, versions, copying-a-template]
 ---
 
