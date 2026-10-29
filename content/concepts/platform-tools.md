@@ -1,7 +1,7 @@
 ---
 id: platform-tools
 title: Platform tools
-order: 9
+order: 19
 group: What a bundle holds
 summary: >
   A bundle's chat agent has only the flows its agent.yaml maps and the
