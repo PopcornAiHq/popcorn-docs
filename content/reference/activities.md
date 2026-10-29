@@ -2760,7 +2760,7 @@ what it would write. Read-only: refuses by name (`NoRequester`,
 | `target_apps` | list of `chase` / `claimcoordinator3` | no | The apps whose channels the run may forward into, among chase and claimcoordinator3. Chase alone when not given. Default `["chase"]`. |
 | `source_app` | `chase` / `claimcoordinator3` / `claimcoordinator2` | no | The app THIS channel runs, which says how its row is read (`answer_boards`, `source_signings`). Chase and Claim Coordinator 3 read alike. Default `"chase"`. |
 | `entry` | string | no | A later state of B's recipe to start the person on (one of the target's `entries`); empty for B's first stage. Default `""`. |
-| `wrong_company` | boolean | no | The person was here meaning another company: their answers carry onto B's questions about B's company. A row held on Needs routine review for `wrong_company` is one without it. Chase to Chase only: from or to Claim Coordinator 3 it is ignored. Default `false`. |
+| `wrong_company` | boolean | no | The person was here meaning another company: their answers carry onto B's questions about B's company. A row held on Needs routine review for `wrong_company` is one without it. Chase or Claim Coordinator 3 on both sides; from a Claim Coordinator 2 routine it is ignored. Default `false`. |
 
 **Returns**
 
@@ -3014,6 +3014,8 @@ No description in the catalog.
 | `events` | list of any, optional | no | Events read off the connected calendar (events, or pages of them). Null when nothing was read: the stored verdict is reported. |
 | `read` | boolean | no | The caller read (or tried to read) the calendar: no `events` then means the read failed. Default `false`. |
 | `lookup_error` | string, optional | no | The error type of a calendar read that failed ($steps.<read>.error.type; null when it did not fail). |
+| `schedule_id` | string | no | The page's schedule_id when it is not in `page` (a link being set): cal.com/<path> reads the page's bookings as Cal.com's. Default `""`. |
+| `others` | list of any | no | The recipe's other booking pages (feature.chase.stage.booking_pages' `pages`, or their titles): bookings that carry one of their titles too are told apart by the longest. |
 | `shared_title` | boolean | no | The page being set replaces another page of the same title (feature.chase.stage.booking_pages' `replaces`): bookings with the title may be the old page's, so other_account warns of that and gives no `refusal`. Default `false`. |
 | `pages` | list of object, optional | no | Several pages at once, as feature.chase.stage.booking_pages lists them (key / stage / title / envelope): each is judged as `page` would be, into `results`; the top-level verdict is the first page's. |
 
@@ -5891,6 +5893,7 @@ the auth to the bound Google account before the read.
 |---|---|---|
 | `name` | string | Booker's name as entered. |
 | `email` | string | Booker's email as entered. |
+| `source` | string | calcom for a booking Cal.com wrote onto the calendar; empty for a Google appointment schedule's. |
 
 `GcalEventSummary`:
 
@@ -5966,6 +5969,7 @@ the auth to the bound Google account before the read.
 |---|---|---|
 | `name` | string | Booker's name as entered. |
 | `email` | string | Booker's email as entered. |
+| `source` | string | calcom for a booking Cal.com wrote onto the calendar; empty for a Google appointment schedule's. |
 
 `GcalEventSummary`:
 
@@ -6170,13 +6174,13 @@ No description in the catalog.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `link` | string | yes | A Google appointment schedule link: the calendar.app.google share link or the booking page URL. |
+| `link` | string | yes | A Google appointment schedule link (the calendar.app.google share link or the booking page URL) or a Cal.com event link (cal.com/<user>/<event>). |
 
 **Returns**
 
 | Field | Type | Notes |
 |---|---|---|
-| `schedule_id` | string | The appointment schedule's id (AcZssZ…), stable across renames. |
+| `schedule_id` | string | The appointment schedule's id (AcZssZ…), stable across renames; for Cal.com, cal.com/<user>/<event>. |
 | `title` | string | The schedule's title, which prefixes the title of every event it books. Empty when the schedule has none. |
 | `booking_url` | string | The booking page the link resolved to. |
 
