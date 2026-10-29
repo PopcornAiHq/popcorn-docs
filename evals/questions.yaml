@@ -511,3 +511,8 @@
   concept: connections
   pass: make_connection connects an account the person has already signed in to, as a dry run first and then confirm=true; it lists their own accounts that can serve, and for a Google account not yet signed in to it may give a sign-in link the person finishes in the browser
   trap: says an assistant can't make a Connection, or asks for the password
+
+- q: Can the chat agent my bundle defines ask the members a question with a card, or set itself a reminder?
+  concept: platform-tools
+  pass: only if its agent.yaml names them under platform_tools (ask_user, set_reminder), which needs chat: true; without that it has only the flows it maps and the channel's memory
+  trap: says an app agent gets every tool the channel agent has, or that a headless agent can name them

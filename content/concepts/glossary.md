@@ -201,7 +201,8 @@ listed under its entry. **Version** is close behind.
   defines for itself under `agents/<name>/` (`agent.yaml`, `prompt.md`,
   `schemas/*.json`), which a flow runs with `foundation.agent.invoke`; with
   `chat: true` in `agent.yaml` it can also serve as the Routine's Agent. See
-  [App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md).
+  [App bundles](https://docs.popcorn.ai/build/concepts/app-bundle.md) and
+  [Platform tools](https://docs.popcorn.ai/build/concepts/platform-tools.md).
 
 ## What it does
 
