@@ -677,17 +677,11 @@ p.badges + p + p { font-size: .9rem; color: var(--muted); }
 ul { margin: 0 0 1.1rem; padding-left: 1.3rem; }
 li { margin-bottom: .4rem; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
-/* The home page's way in, one card per section. The hard offset shadow is
-   popcorn.ai's card treatment, scaled down for a page of text. */
-.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 2.25rem 0 3rem; }
-.card { display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.25rem 1rem;
-  border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--fg);
-  text-decoration: none; box-shadow: 4px 4px 0 var(--edge); transition: transform .12s ease, box-shadow .12s ease; }
-.card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
-.card-label { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-.card p { flex: 1; margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
-.card-start { color: var(--accent); font-weight: 600; font-size: .93rem; }
-@media (max-width: 40rem) { .cards { grid-template-columns: minmax(0, 1fr); } }
+/* The Overview's diagram. It is drawn for a column of text and scrolls
+   sideways rather than shrinking past legibility on a phone. */
+.diagram { margin: 1.5rem 0 1.75rem; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 36rem; height: auto; }
+.diagram a { text-decoration: none; }
 
 /* The frame: a header across the top, then sidebar | page | rail. */
 .site { position: sticky; top: 0; z-index: 10; height: var(--header);
@@ -852,8 +846,6 @@ html:has(.search[open]) { overflow: hidden; }
 .related li { margin-bottom: .4rem; }
 
 .eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.eyebrow a { color: var(--muted); text-decoration: none; }
-.eyebrow a:hover { color: var(--accent); }
 .pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; }
 .pager a { flex: 1 1 0; display: block; padding: .8rem 1rem; border: 1px solid var(--rule);
   border-radius: 6px; text-decoration: none; font-weight: 600; }

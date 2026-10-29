@@ -1,6 +1,6 @@
 ---
 id: change-how-a-routine-behaves
-title: Changing how a Routine behaves
+title: Change how a Routine behaves
 order: 12
 group: How it behaves
 summary: >

@@ -1,6 +1,6 @@
 ---
 id: debugging-a-failed-run
-title: Debugging a failed run
+title: Debug a failed run
 order: 18
 group: How a flow runs
 summary: >

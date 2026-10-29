@@ -1,6 +1,6 @@
 ---
 id: set-up-a-routine
-title: Setting up a Routine
+title: Set up a Routine
 order: 2
 group: Getting started
 summary: >

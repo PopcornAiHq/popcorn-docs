@@ -1,6 +1,6 @@
 ---
 id: connect-your-assistant
-title: Connecting your assistant
+title: Connect your assistant
 order: 1
 group: Getting started
 summary: >

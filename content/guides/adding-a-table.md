@@ -1,6 +1,6 @@
 ---
 id: adding-a-table
-title: Adding a table
+title: Add a table
 order: 11
 group: What a bundle holds
 summary: >
