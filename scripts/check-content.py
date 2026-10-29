@@ -13,6 +13,9 @@ Checks, in the order a writer meets them:
 * `id` is present and equals the filename, because the id is a permanent
   address and a file whose name disagrees with it has two
 * `summary` is present and within the cap
+* `lede`, when present, is a folded block within its own cap, with no code,
+  URL or tool name in it. It is what a person reads under the title, so the
+  details an agent needs belong in the summary instead
 * no unwritten body is left behind a finished-looking summary
 * every id in `concepts:` names a page that exists. The build drops a dangling
   one from "Related" rather than linking a 404, which is right for the site
@@ -53,12 +56,19 @@ import re
 import sys
 
 SUMMARY_MAX = 400
+# A link preview cuts a description off at about this length, and a lede that
+# needs more is doing the summary's job.
+LEDE_MAX = 160
 BODY_MIN_WORDS = 60
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _ID = re.compile(r"^id:\s*(\S+)", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
+_LEDE = re.compile(r"^lede:\s*(?P<value>.*)\n(?P<block>(?:[ \t]{2,}.*\n)*)", re.M)
+# What a person should not meet in a lede: inline code, a bare address, and a
+# snake_case name such as get_workspace, which is a tool's.
+_LEDE_DETAIL = re.compile(r"`|https?://|\b[a-z]+_[a-z_]+\b")
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
@@ -99,6 +109,20 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         ).strip()
         if len(folded) > SUMMARY_MAX:
             problems.append(f"summary is {len(folded)} chars, cap is {SUMMARY_MAX}")
+
+    lede = _LEDE.search(front)
+    if lede and lede.group("value").strip() != ">":
+        problems.append("lede is not a folded block (lede: >)")
+    elif lede:
+        folded = " ".join(
+            line.strip() for line in lede.group("block").splitlines()
+        ).strip()
+        if not folded:
+            problems.append("lede is empty")
+        elif len(folded) > LEDE_MAX:
+            problems.append(f"lede is {len(folded)} chars, cap is {LEDE_MAX}")
+        if detail := _LEDE_DETAIL.search(folded):
+            problems.append(f"lede has '{detail.group()}' in it; code, URLs and tool names go in the summary")
 
     concepts = _CONCEPTS.search(front)
     if concepts:

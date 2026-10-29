@@ -8,6 +8,9 @@ summary: >
   list_routine_templates, create the Routine with create_routine (a dry run
   first), wait for its template to install, have the right person connect each
   account it needs, then check what starts its work with list_triggers.
+lede: >
+  Set up a new Routine from a Routine Template and connect the accounts it
+  needs, so it is ready to start work.
 concepts: [routines, connections, triggers]
 part: use
 ---

@@ -9,6 +9,9 @@ summary: >
   check the connection with get_workspace. The assistant works with your
   permissions, in that workspace, until you disconnect it or sign out of
   Popcorn.
+lede: >
+  Connect your AI assistant to Popcorn so it can work with your Routines,
+  using your own permissions.
 concepts: [routines, connections, reviews]
 part: use
 ---
