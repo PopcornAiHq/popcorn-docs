@@ -9,6 +9,9 @@ summary: >
   get_instructions reads them all at once, each part with where it came from
   and what changes it: update_routine_setting for wording that is a setting,
   change_routine for its Steps, Popcorn for the rest.
+lede: >
+  A Routine's Instructions say in plain language what it should do and how,
+  from the wording of a follow-up to when to ask a person.
 concepts: [routine-settings, customizing-a-routine]
 part: use
 ---

@@ -10,6 +10,8 @@ summary: >
   deployed catalog. Look an activity up here by its wire name, such as
   foundation.store.upsert_rows; `popcorn flow activities` lists alpha and
   deprecated ones too.
+lede: >
+  Every activity a flow step can call, with its arguments and what it returns.
 concepts: [app-bundle, template-authoring]
 ---
 

@@ -9,6 +9,9 @@ summary: >
   validate`, then `app publish` from the workspace's copy of it. Install creates the table,
   and each later install adds to it and never removes. Publish refuses a
   column the store would reject; a later publish can change a merge policy.
+lede: >
+  Add a new Table to your workspace's copy of a Routine Template, write to it
+  from a flow, and publish the change.
 concepts: [manifest-keys, merge-policy, copying-a-template, versions, app-bundle]
 part: build
 ---
@@ -24,13 +27,13 @@ The CLI calls a Routine a *channel* and its template an *app*, so the
 commands keep those names (see the [glossary](https://docs.popcorn.ai/glossary/glossary.md)).
 This guide runs from the CLI throughout. An assistant over MCP can publish the same
 change with `create_routine_version`, but it is not given the flow-run tools
-that step 7 uses to check the result.
+that "Confirm it landed" uses to check the result.
 
 The running example adds a `handoffs` table to the template `#example-intake`
 runs: one row per ticket handed to someone, where a repeat hand-off updates
 the row instead of adding another one.
 
-## 1. Check out a copy
+## Check out a copy
 
 A publish lands on a copy of the template your workspace owns (the CLI calls
 it a *fork line*), so copy it before you edit:
@@ -48,7 +51,7 @@ publish reaches every Routine on the copy, not only this one. See
 [copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md) before copying the template of a
 production Routine.
 
-## 2. Declare the table
+## Declare the table
 
 Add it under `tables:` in `manifest.yaml`. The key is the table's name, which
 is what every flow step passes as `table_name`.
@@ -86,7 +89,7 @@ does no harm.
 
 A table declared with no columns is skipped. Install does not create it.
 
-## 3. Decide what a repeat write does
+## Decide what a repeat write does
 
 This step comes before any flow is written, because the flows are built
 around it and a later change does not rewrite what is already stored.
@@ -109,7 +112,7 @@ but it does not rewrite the values already stored: a row that accumulated
 text under `concat` keeps it until its next write. Choosing now avoids a
 table whose older rows were built under a different rule.
 
-## 4. Write to it from a flow
+## Write to it from a flow
 
 Flows reach the table through the `foundation.store.*` activities, naming it
 by `table_name`:
@@ -167,7 +170,7 @@ merged row, not only the cells the write sent. The store trims whitespace
 from keys, but it does not check that a key names a column: an unknown key
 is stored silently, unless it differs from a declared column only by case.
 
-## 5. Validate it
+## Validate it
 
 ```bash
 popcorn app validate .
@@ -188,10 +191,10 @@ though, and a problem it misses shows up at a later stage:
 
 Without its server checks, `app validate` cannot report the third row: it runs
 the other checks and prints `server checks: skipped` with the reason. `app publish` still refuses such a table
-before any version exists (step 6). Check every `table_name` by eye, because
+before any version exists (see "Publish"). Check every `table_name` by eye, because
 `app validate` only compares columns for tables the manifest declares.
 
-## 6. Publish
+## Publish
 
 ```bash
 popcorn app publish . --bump patch -m "add handoffs table" --yes
@@ -239,7 +242,7 @@ Routine keeps its previous version, but not necessarily its previous tables:
 a table listed before the failing one may already have been created or
 changed. The fix is another publish.
 
-## 7. Confirm it landed
+## Confirm it landed
 
 ```bash
 popcorn app status .

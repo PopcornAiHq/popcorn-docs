@@ -9,6 +9,9 @@ summary: >
   reminders, the wording of its emails and prompts. A setting reaches only its
   own Routine, can be set back, and survives the template's improvements.
   list_routine_settings finds one; update_routine_setting changes it.
+lede: >
+  Routine Settings tune one Routine, such as whether it sends emails or saves
+  them as drafts, without changing what it does.
 concepts: [customizing-a-routine, change-how-a-routine-behaves, triggers]
 part: use
 ---

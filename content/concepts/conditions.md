@@ -9,6 +9,9 @@ summary: >
   parentheses goes to the strict, typed expression rail. Adding a second
   condition can therefore change how the first compares. To select rows, filter
   in the query instead of gating a step.
+lede: >
+  How a flow decides whether a step runs, and why adding a second condition
+  can change how the first one compares.
 concepts: [flow-grammar, references]
 part: build
 ---

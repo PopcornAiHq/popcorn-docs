@@ -10,6 +10,9 @@ summary: >
   `create_routine_version`, or with the CLI's `app checkout`, `validate`,
   `publish` (an agent runs it with `--yes`) and `status`. A new template is
   not self-serve. `flow validate` is the authority on a flow.
+lede: >
+  Change what a Routine Template does: copy it, edit it, publish a new version
+  and confirm it installed.
 concepts: [app-bundle, manifest-keys, flow-grammar, versions, copying-a-template]
 part: build
 ---
@@ -29,10 +32,10 @@ below keep those names; the CLI's `channel templates` command and
 > *changing* a template that already exists is a loop you run yourself — over
 > MCP with `copy_routine_template` and `create_routine_version`, or from the
 > CLI with `popcorn app fork`, `checkout` and `publish` — with no deploy in
-> it. Both paths are §2.
+> it. Both paths are in "How a bundle gets installed".
 
 This guide is the order to do things in. What a bundle may contain is in the
-concept pages it links (§1, §3, §4), and the activities a flow can call come
+concept pages it links ("What a bundle is", "What the manifest declares" and "Writing flows"), and the activities a flow can call come
 from the server, because they would rot here:
 
 ```bash
@@ -77,12 +80,12 @@ as a record: it says so itself, and some of its findings predate the
 > **Do not copy a bundle out of a repo.** The cut-down bundles under the CLI
 > repo's `tests/fixtures/bundles/` exist to exercise `app validate`; none
 > declares a `version:`, so none can publish, and they do not match what the
-> platform ships. **Get bundle source from the server** — see §2b, where
+> platform ships. **Get bundle source from the server** — see "Changing a Routine Template that exists", where
 > `app checkout` hands you the deployed version of a real one.
 
 ---
 
-## 1. What a bundle is
+## What a bundle is
 
 ```
 mytemplate/
@@ -107,13 +110,13 @@ missed:
   is one flow leaving and another arriving; see
   [a flow's identity is its name](https://docs.popcorn.ai/build/concepts/flow-grammar.md#a-flow-s-identity-is-its-name).
 
-## 2. How a bundle gets installed
+## How a bundle gets installed
 
 **Two paths, and which one you are on depends on whether the template
 already exists.** Creating a new one costs a server deploy. *Changing* one is
 a loop you run yourself, from an assistant over MCP or from the CLI.
 
-### 2a. A new Routine Template — not self-serve
+### A new Routine Template — not self-serve
 
 Only the first and last steps are yours. The two in the middle happen on the
 Popcorn side and are not exposed through the CLI or the public API:
@@ -143,7 +146,7 @@ only resolves names the server already carries, so a genuinely new `app_type`
 has to go through that internal path — and `popcorn channel templates` is how
 you check whether it has landed.
 
-### 2b. Changing a Routine Template that exists
+### Changing a Routine Template that exists
 
 A Routine already running a template can be changed with no deploy and no
 hand-off to anyone. An assistant connected to Popcorn over MCP runs the loop
@@ -345,7 +348,7 @@ The CLI cannot diagnose this and does not try. If a template you know shipped is
 missing from the list, that is the first thing to suspect — ask rather than
 debug.
 
-## 3. What the manifest declares
+## What the manifest declares
 
 Every key is optional, and each has its own install semantics:
 [manifest keys and what install does to them](https://docs.popcorn.ai/build/concepts/manifest-keys.md) is the
@@ -371,7 +374,7 @@ Three traps are worth carrying into every edit:
   copy and clears both on each. `app validate` warns (`clears-app-type`);
   treat that warning as an error on a copy.
 
-## 4. Writing flows
+## Writing flows
 
 A flow's grammar is four concept pages, each answering one question:
 
@@ -387,7 +390,7 @@ A flow's grammar is four concept pages, each answering one question:
 Reading fields off a webhook payload is
 [extracting fields or deriving them](https://docs.popcorn.ai/build/concepts/extract-or-derive.md).
 
-## 5. The authoring loop
+## The authoring loop
 
 Three loops, and picking the right one is most of the speed. The **inner**
 loop publishes nothing and runs as often as you like:
@@ -403,7 +406,7 @@ you can reach will do; it never writes. Run from an `app checkout` and it
 takes the Routine from the checkout's baseline, the same way `app publish`
 and `app status` do; pass `--channel <id>` anywhere else.
 
-The **middle** loop is the loop on a copy from §2b, and it is the one to reach
+The **middle** loop is the loop on a copy from "Changing a Routine Template that exists", and it is the one to reach
 for whenever the template already exists. No deploy, no hand-off, seconds per turn:
 
 ```bash
@@ -432,10 +435,10 @@ declaration. The two `unused_*` findings are informational; Routine Settings and
 Connections every flow shares legitimately carry keys one flow does not read.
 
 The **outer** loop is only for a NEW Routine Template, and costs a server deploy plus
-a publish (§2a), so get the inner one clean first:
+a publish (see "A new Routine Template — not self-serve"), so get the inner one clean first:
 
 ```bash
-# ... the app_type is registered, deployed and published (§2a, internal)
+# ... the app_type is registered, deployed and published (see "A new Routine Template — not self-serve"; internal)
 
 popcorn channel templates                            # is my version installable?
 popcorn channel create '#chan' --template mytemplate # note the UUID — see below
@@ -534,13 +537,13 @@ Watch for these when reading results:
   `$exists: true` in the query that produced the rows.
 
 
-## 6. Before you publish
+## Before you publish
 
 Each line is a rule a concept page explains; every one of them has cost a
 publish.
 
-1. `version:` advances every publish, and `--bump` is the way to do it (§2b).
-2. The manifest keeps `app_type:` and `channel_agent:` (§3).
+1. `version:` advances every publish, and `--bump` is the way to do it (see "Changing a Routine Template that exists").
+2. The manifest keeps `app_type:` and `channel_agent:` (see "What the manifest declares").
 3. No flow-written value is declared under `scalars:` —
    [scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md).
 4. Every schedule's `flow:` names a flow the bundle has —

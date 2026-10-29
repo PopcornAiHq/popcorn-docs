@@ -10,6 +10,8 @@ summary: >
   --include-errors` and the steps with `flow runs timeline`, fix, publish,
   and run again once the install lands. Also runs that succeed
   having done nothing, and ones that never start.
+lede: >
+  Find out why a Routine's work went wrong, fix it, and run it again.
 concepts: [versions, flow-grammar, template-authoring]
 part: build
 ---
@@ -52,7 +54,7 @@ the work it did, never by its `workflow_id`, which is how the CLI addresses
 a run. For the activity failures, the full timeline and the inputs to run it
 again, go on.
 
-## 1. Find the run
+## Find the run
 
 A run is addressed by its `workflow_id`. Where you get one depends on what
 started it:
@@ -69,7 +71,7 @@ popcorn flow runs list --channel <channel> --flow <name> --status failed --json
 ```
 
 `--flow` takes the flow's `name:`, which is also what the list prints last on
-each line. `--status` filters by outcome (§2): `failed` is every run whose
+each line. `--status` filters by outcome (see "Read the outcome, not the status"): `failed` is every run whose
 outcome is `failed`, whether it failed, timed out, was terminated or was
 cancelled, and `closed` is every run that finished either way. A
 `ContinuedAsNew` run is in neither, and not in `running` either: its work
@@ -80,7 +82,7 @@ carries `outcome` on every run, beside `trigger_source` (who asked for it:
 `app_user`, `agent`, `message`, `webhook`, … — a scheduled fire has none) and
 `task_queue`.
 
-## 2. Read the outcome, not the status
+## Read the outcome, not the status
 
 Every run carries two fields. `status` is the raw engine status; `outcome` is
 the platform's answer to "has it finished, and did it work". Branch on
@@ -103,10 +105,10 @@ acting on an ending nobody proved.
 timeout, not a failure; the run may yet succeed.
 
 `succeeded` means the run finished without an error. It does not mean the
-flow did its work — §4 is the list of ways it can succeed having done
+flow did its work — "A run that succeeded and did nothing" is the list of ways it can succeed having done
 nothing.
 
-## 3. Read why it failed
+## Read why it failed
 
 ```bash
 popcorn flow runs get <workflow-id> --channel <channel> --include-errors
@@ -156,7 +158,7 @@ The failures you will meet most:
   the flow's top-level `outputs:`: resolved after the last step, it is retried
   by the engine and the run stays `Running` with nothing in flight — cancel it
   and fix the reference. A `$channel.<name>` reference to a parameter the
-  Routine has not set in its Routine Settings fails the same way; `channel-config show` (§4) finds
+  Routine has not set in its Routine Settings fails the same way; `channel-config show` (see "A run that succeeded and did nothing") finds
   those before a run does.
 - **An activity's own error.** The top of the chain is the activity failing,
   with no `type`; its `cause` carries the activity's error type and message.
@@ -171,14 +173,14 @@ The failures you will meet most:
   error it is an authoring bug, and it fails the run at once.
 - **`ChildFlowMissingIntegrations`** — a `call_flow` step with `mode: wait`
   whose child ended without running because its required integrations are not
-  connected (§4). The parent fails rather than read empty outputs.
+  connected (see "A run that succeeded and did nothing"). The parent fails rather than read empty outputs.
 
 `on_error: {policy: skip}` turns a step's failure into a null output and puts
 the error at `$steps.<id>.error`, as `type` and `message`, so a later step
 can still fail by the original error once cleanup has run. `policy: fallback`
 is accepted but runs as `fail`.
 
-## 4. A run that succeeded and did nothing
+## A run that succeeded and did nothing
 
 **A required integration is not connected.** A flow's
 `required_integrations:` is checked when a run starts. When one is not among
@@ -214,7 +216,7 @@ does; so does a `call_flow` step with `mode: detach`. Find the child in
 `flow runs list --flow <child>`. When the parent needs the child's result, a
 `call_flow` step with `mode: wait` fails with it.
 
-## 5. A run that never started
+## A run that never started
 
 **From a schedule.**
 
@@ -276,7 +278,7 @@ trigger report: every schedule, webhook, message trigger, document, state and
 flow that starts this one. An empty report means only a direct run — `flow
 run`, or an agent running it — starts this flow.
 
-## 6. Which version the run ran
+## Which version the run ran
 
 A run reads the Routine's bound version once, when it starts, and keeps it to
 the end. Its `call_flow` children share that version; a run started with
@@ -338,7 +340,7 @@ same version`, `Channel still runs …`, `Fork line moved to …` or `A past
 version …`. Its `--json` carries the same `install` block, but no
 `install_state`.
 
-## 7. Fix it and run it again
+## Fix it and run it again
 
 1. Stop what is still running, if it should not finish:
 
@@ -358,14 +360,14 @@ version …`. Its `--json` carries the same `install` block, but no
 4. Wait until `install.state` is `current` — `Install: CURRENT` from
    `popcorn app status --channel <channel>` — so the next run gets the fix.
    `FAILED`, `SKIPPED`, `LOCKED` or `BEHIND` will not clear by waiting: follow
-   its `Next:` line (§6).
+   its `Next:` line (see "Which version the run ran").
 5. Run it again the way it failed. For a direct run, pass the failed run's
    `inputs` from `flow runs get --json` to
    `popcorn flow run <name> --channel <channel> --inputs '...'` — without
    `--wait` it prints the version at once; then read the run with
    `flow runs get` and check its `version:` is the one you just published.
-   For a scheduled flow, `popcorn schedule trigger <slug> --channel <channel>` (§5). For a webhook flow, `popcorn webhook send <webhook> @payload.json
-   --channel <channel>` with a body that differs from the last one (§5).
+   For a scheduled flow, `popcorn schedule trigger <slug> --channel <channel>` (see "A run that never started"). For a webhook flow, `popcorn webhook send <webhook> @payload.json
+   --channel <channel>` with a body that differs from the last one (see "A run that never started").
 6. Confirm the effect, not the outcome: read the rows the run should have
-   written (`popcorn table rows <table> --channel <channel>`), since §4 is a list of
+   written (`popcorn table rows <table> --channel <channel>`), since "A run that succeeded and did nothing" is a list of
    runs that succeeded without writing any.

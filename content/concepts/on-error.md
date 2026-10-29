@@ -9,6 +9,9 @@ summary: >
   `policy: skip` continues with a null output and the error at
   `$steps.<id>.error`; `fallback` is accepted but runs as `fail`. A missing
   reference fails before the activity runs, so no policy catches it.
+lede: >
+  How a flow retries a failed step, and how to stop a step with side effects
+  from running twice.
 concepts: [flow-grammar, references, debugging-a-failed-run]
 part: build
 ---
