@@ -1,7 +1,7 @@
 ---
 id: routines
 title: Routines and Routine Templates
-order: 1
+order: 3
 group: Routines
 summary: >
   A Routine is one piece of ongoing work Popcorn runs for you, such as claims
@@ -10,6 +10,9 @@ summary: >
   runs, whether the latest install landed, its Connections — starts a new
   one from a template with create_routine, and copies one with
   duplicate_routine.
+lede: >
+  A Routine is a piece of ongoing work Popcorn runs for you, such as claims
+  intake, made from a Routine Template.
 concepts: [customizing-a-routine, connections, set-up-a-routine]
 part: use
 ---

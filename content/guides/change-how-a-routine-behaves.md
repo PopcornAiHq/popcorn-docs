@@ -1,7 +1,8 @@
 ---
 id: change-how-a-routine-behaves
-title: Changing how a Routine behaves
-order: 3
+title: Change how a Routine behaves
+order: 12
+group: How it behaves
 summary: >
   Changing how one Routine behaves: find the Routine Setting that covers it
   with list_routine_settings, read it in full, change it with
@@ -9,6 +10,9 @@ summary: >
   that Routine and can be set back. Otherwise: its Steps, with change_routine
   after reading the proposal; its other Instructions, in Popcorn; or a copy of
   its own.
+lede: >
+  Change how one Routine behaves, starting with the settings that affect it
+  alone.
 concepts: [routine-settings, customizing-a-routine, instructions]
 part: use
 ---
@@ -17,13 +21,13 @@ This guide starts from a request such as "remind people every three days
 instead of every week" and ends with one Routine behaving the new way, and
 every other Routine made from the same template unchanged.
 
-## 1. Say what should change
+## Say what should change
 
 Start from the outcome, in the person's words: *chase five times at most*,
 *send reminders from the claims team*, *run the morning digest at 7*. The
 change belongs to one Routine; note its name.
 
-## 2. Find the setting
+## Find the setting
 
 > "What can I change about how #chase-renewals chases people?"
 
@@ -33,16 +37,16 @@ default. Most "can it do X differently" requests are one of these: a
 reminder interval, a follow-up limit, a sending mode, a schedule's cadence,
 the wording of an email.
 
-If nothing matches, go to step 5.
+If nothing matches, go to "When no setting covers it".
 
-## 3. Read it in full
+## Read it in full
 
 `get_routine_setting` shows the whole value, the template's default, what
 it accepts, its options and the warning each carries, and who may change it.
 A sending mode's warning matters: switching from drafts to sending means
 emails go out without a person reviewing them.
 
-## 4. Change it
+## Change it
 
 > "Stop chasing after five follow-ups on #chase-renewals."
 
@@ -59,7 +63,7 @@ Work already under way keeps the value it started with; the next run uses the
 new one. To undo the change later, set the setting back to the template's
 default.
 
-## 5. When no setting covers it
+## When no setting covers it
 
 Three other kinds of change remain:
 
@@ -69,7 +73,7 @@ Three other kinds of change remain:
   Routine's agent in Popcorn.
 - **Its steps** — another question before the agreement goes out, a review
   before a meeting is booked. Where the template keeps its steps with the
-  Routine, that is `change_routine` (step 6), or the Routine's agent in
+  Routine, that is `change_routine` (see "Change its Steps"), or the Routine's agent in
   Popcorn, and the change stays with this Routine.
 - **What the Routine is built from** — a new Table, a new kind of Trigger, a
   kind of step its template does not offer. That gives the Routine a copy of its own, which
@@ -79,7 +83,7 @@ Three other kinds of change remain:
   itself: see
   [authoring an app bundle](https://docs.popcorn.ai/build/guides/template-authoring.md).
 
-## 6. Change its Steps
+## Change its Steps
 
 > "In #intake, once a claimant signs, ask them to book the interview
 > straight away."

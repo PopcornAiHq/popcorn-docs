@@ -1,7 +1,7 @@
 ---
 id: steps
 title: Steps
-order: 6
+order: 8
 group: What it does
 summary: >
   A Routine's Steps are its work on each item, in order: what each one asks
@@ -10,6 +10,9 @@ summary: >
   Steps, they stay with the Routine; get_routine lists them, and
   change_routine changes them from a description, showing the change before it
   goes in.
+lede: >
+  A Routine's Steps are its work on each item, in order: what each asks for,
+  what finishes it, and how it follows up.
 concepts: [reviews, customizing-a-routine, routine-settings]
 part: use
 ---

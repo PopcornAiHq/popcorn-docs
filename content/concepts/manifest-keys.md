@@ -1,7 +1,7 @@
 ---
 id: manifest-keys
 title: Manifest keys and what install does to them
-order: 3
+order: 5
 group: What a bundle holds
 summary: >
   A Routine Template's manifest decides what install does to a Routine, key by
@@ -9,6 +9,9 @@ summary: >
   leaves them alone, while `schedules: []` deletes every schedule the bundle
   manages. An unknown key, such as the typo `schedule:`, is ignored without a
   warning, and a manifest with no app_type clears the Routine's.
+lede: >
+  What installing a template does to a Routine, key by key, and why leaving a
+  key out differs from leaving it empty.
 concepts: [scalar-tiers, merge-policy, state-machine, app-bundle]
 part: build
 ---

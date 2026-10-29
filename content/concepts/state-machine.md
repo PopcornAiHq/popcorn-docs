@@ -1,7 +1,7 @@
 ---
 id: state-machine
 title: State machines in a bundle
-order: 8
+order: 10
 group: What a bundle holds
 summary: >
   A Routine's Status and Actions come from state machines its template
@@ -10,6 +10,9 @@ summary: >
   value written to the column lasts until the next projection. The graph is
   a manifest `states:` section or a `recipe.yaml` each Routine can replace.
   Publish proves structure only.
+lede: >
+  How a template defines the Status and Actions of a Routine's items, as
+  states and the transitions between them.
 concepts: [manifest-keys, versions, states-authoring, app-bundle]
 part: build
 ---

@@ -1,7 +1,7 @@
 ---
 id: reviews
 title: Reviews
-order: 7
+order: 9
 group: What it does
 summary: >
   A Review is the kind of Step where a person makes the call instead of
@@ -9,6 +9,9 @@ summary: >
   next. Approval is one kind of Review, and its passing outcome. get_status
   lists what is waiting and why; take_action takes a choice, except one that
   opens a form in Popcorn.
+lede: >
+  A Review is where a person, not Popcorn, makes the call: the item waits,
+  says why, and offers a few choices of where it goes next.
 concepts: [steps, actions-and-status, routine-settings]
 part: use
 ---

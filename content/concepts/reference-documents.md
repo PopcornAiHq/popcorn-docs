@@ -1,7 +1,7 @@
 ---
 id: reference-documents
 title: References
-order: 5
+order: 7
 group: How work arrives
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a
@@ -10,6 +10,9 @@ summary: >
   it is still waiting for, and read_reference returns one's text or a
   download link. People add References in Popcorn; adding some starts work,
   which list_triggers lists.
+lede: >
+  A Reference is a document a Routine works from, such as a policy, a price
+  list or an example of good work.
 concepts: [triggers, customizing-a-routine]
 part: use
 ---

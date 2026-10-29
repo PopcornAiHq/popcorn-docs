@@ -6,9 +6,9 @@ the MCP server. A file missing `id` or `summary` fails the build.
 ```yaml
 ---
 id: copying-a-template         # kebab-case, citable; never reused for another page
-title: Copying a template      # a noun phrase, not a sentence
-order: 14                      # reading position within its section
-group: How a version ships     # optional: sidebar group within the section
+title: Copying a template      # a concept's is a noun phrase; a guide's is imperative: Set up a Routine
+order: 2                       # reading position within its part
+group: How a version ships     # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
@@ -16,6 +16,9 @@ summary: >                     # THE PRODUCT — under 400 characters
   A copy of a Routine Template is the workspace's own version series of it.
   Publishing a version to it reaches every Routine on the copy, not just the
   one you edited.
+lede: >                        # optional: what a person reads under the title, under 160 characters
+  A copy of a template is your workspace's own, and its changes reach every
+  Routine on it.
 concepts: [versions, customizing-a-routine]   # other ids, for "see also" and search
 part: build                    # use | build — which half of the site; none on the glossary and references
 ---
@@ -38,6 +41,14 @@ The 400-character cap is not a style preference. Search returns many summaries
 in one response, and the whole response lands in the model's context, so an
 uncapped summary is a cost every caller pays.
 
+**`lede`** is what a person reads under the page's title, in the site's
+search results and in a link preview. Write it for someone deciding whether
+this is the page they want: one or two plain sentences, with no code, no
+address and no tool name, which `check-content.py` refuses. A page without
+one shows its summary there instead. The summary stays what agents read —
+in `search_docs`, `llms.txt` and the page's Markdown twin — because an agent
+acts on the details a lede leaves out.
+
 **`source` is refused.** Listing the backend symbols a page describes in its
 own frontmatter would publish private names in a public repository. The list
 for each page lives in a mapping kept in the private backend repository,
@@ -50,18 +61,23 @@ entry to that mapping, in a backend PR; `scripts/drift.py` reads it from a
 local backend checkout. Omit a page from it when no single symbol owns what
 it describes; do not invent one.
 
-**`order`** is the page's place in its section's reading path, starting at 1:
-the landing page, the previous/next links on every page, and `llms.txt` all
-follow it. Filenames sort alphabetically, which is no reading order at all —
-it once put an advanced guide ahead of the one it builds on. Number by what a
-reader needs first; a page with no `order:` goes after the ordered ones.
+**`order`** is the page's place in its part's reading path, starting at 1.
+A part's concepts and guides are numbered in one sequence, so a guide sits
+beside the concepts it puts to work, and no two pages in a part share a
+number. The sidebar, the previous/next links on every page and `llms.txt` all
+follow it, and each Overview card opens its kind's first page. The glossary
+and the references have no part and are numbered within their kind.
+Filenames sort alphabetically, which is no reading order at all — it once put
+an advanced guide ahead of the one it builds on. Number by what a reader
+needs first; a page with no `order:` goes after the ordered ones.
 Renumbering is cheap, because nothing links to a position.
 
-**`group`** clusters pages under a collapsible heading in the site sidebar,
-inside their section. A group sits where its first page does in reading
-order, so it needs no order of its own. Pages without one sit directly under
-the section. Spell a group identically on every page in it — the label is the
-key.
+**`group`** is the page's topic: a collapsible heading in the site sidebar,
+inside its part, holding concepts and guides alike — the sidebar names
+topics, never kinds. A group sits where its first page does in reading
+order, so it needs no order of its own, and a later page in it is listed
+there too. Pages without one sit directly under the part. Spell a group
+identically on every page in it — the label is the key.
 
 **`layout: lookup`** is for a page read by looking something up in it rather
 than top to bottom — the glossary and the reference pages. Its own entries

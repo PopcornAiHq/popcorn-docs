@@ -1,7 +1,7 @@
 ---
 id: app-bundle
 title: App bundles
-order: 1
+order: 4
 group: What a bundle holds
 summary: >
   A Routine Template is an app bundle: a directory of YAML plus optional code
@@ -9,6 +9,9 @@ summary: >
   Every non-reserved YAML file at the bundle's root is a flow, so a sample
   payload left there installs as one; keep payloads outside the bundle.
   A manifest with a version is what makes it publishable.
+lede: >
+  A Routine Template is an app bundle: a directory of YAML, plus optional
+  code, that gives a Routine its tables, flows, schedules and webhooks.
 concepts: [versions, manifest-keys, flow-grammar]
 part: build
 ---

@@ -1,7 +1,7 @@
 ---
 id: history
 title: History
-order: 12
+order: 15
 group: What people do, and what happened
 summary: >
   A Routine's History is what has happened in it — did the reminder emails go
@@ -10,6 +10,9 @@ summary: >
   turns. list_history shows an assistant one item's, newest first, and
   read_history_entry shows one entry in full. The Routine's conversation is
   read in Popcorn.
+lede: >
+  A Routine's History records what happened in it: each change to its items,
+  who or what made it and why, and the runs behind it.
 concepts: [actions-and-status, triggers, tables]
 part: use
 ---

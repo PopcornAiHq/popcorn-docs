@@ -9,6 +9,9 @@ summary: >
   *project*) is ongoing work made from a Routine Template; its Triggers bring
   work in, its Tables hold it, its Status says where each item stands and
   its Actions move it on. A closing table maps the other names.
+lede: >
+  The words Popcorn uses, from running a Routine to building its template, and
+  the other names you'll see for them.
 concepts: [routines, customizing-a-routine, app-bundle, manifest-keys, copying-a-template, versions, flow-grammar, scalar-tiers, merge-policy, state-machine]
 ---
 
@@ -311,7 +314,7 @@ listed under its entry. **Version** is close behind.
   identified by its `workflow_id` (`popcorn flow runs get <workflow-id>`). A
   run is started by `flow run`, a schedule, a webhook, a message trigger, a
   document, a state machine, an agent or another flow. See
-  [Debugging a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).
+  [Debug a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md).
 
 ## Building a template
 
@@ -365,8 +368,8 @@ listed under its entry. **Version** is close behind.
 - **copy** — A workspace's own series of versions of a Routine Template, with
   one head and a name; the CLI calls it a *fork line* (`kind: fork`,
   `fork_name`). Until a Routine is copied it runs Popcorn's own version, the
-  shared series Popcorn publishes (MCP output calls it the *product line*;
-  the API, `kind: product`). Making a copy
+  shared series Popcorn publishes (MCP output says *Popcorn's*; the API,
+  `kind: product`). Making a copy
   (`copy_routine_template`, `popcorn app fork --name <copy>`) starts it
   byte-identical to the version the Routine runs and moves the Routine onto
   it; a copy is required before a publish, and it is one-way: a Routine on a
@@ -375,7 +378,8 @@ listed under its entry. **Version** is close behind.
   with `copy`) is called *adoption*, and an install in a workspace with
   exactly one copy does it unasked. A workspace may own several copies of one
   template, and two copies can each hold a `1.0.1`. `popcorn app lines`
-  lists them. *Not to be confused with*
+  lists them, and `list_routines` with `copy` lists the Routines on one.
+  *Not to be confused with*
   [copying a Routine](https://docs.popcorn.ai/use/concepts/routines.md)
   (`duplicate_routine`), which makes a second Routine running the same
   template, on the same copy if the first is on one, with its settings and
@@ -440,7 +444,7 @@ where the reader will meet it; this table is where to look one up.
 
 | Name | In the product | Where you'll see it |
 |---|---|---|
-| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses, MCP output (`App: …`) |
+| app | Routine Template | `popcorn app …`, a manifest's `app_type:`, the `app` field on app responses |
 | channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
 | project | Routine | older MCP tools and the web app; *not to be confused with* `feature.state.project`, which recomposes a row's Status |
 | tracker | Routine | older product copy and MCP descriptions; many templates also name their main table `tracker` |
@@ -448,5 +452,6 @@ where the reader will meet it; this table is where to look one up.
 | channel config | a Routine's configuration: Routine Settings, for its parameters; Connections, for its integrations; it also holds the Routine's installed recipe and other sections | `popcorn channel-config`, `$channel.*` in a flow |
 | agent store | a Routine's tables, scalars and files: Tables, for its tables; Routine Settings, for its scalars | some API paths and older pages; flows reach it through `foundation.store.*` |
 | record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
-| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API, `line:` in MCP output |
+| fork line | a copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API |
+| product line | Popcorn's own version of a Routine Template, before a copy | `popcorn app list`, `kind: product` on the API |
 | bundle version | a version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |

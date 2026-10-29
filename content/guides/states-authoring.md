@@ -1,13 +1,17 @@
 ---
 id: states-authoring
-title: Authoring a states tier
-order: 2
+title: Author a states tier
+order: 12
+group: What a bundle holds
 summary: >
   Writing the state graph behind a Routine's Status and Actions, in
   `recipe.yaml` or `states:`: stored, derived and mirrored machines; states, events, transitions and buttons;
   guards; and the flows that fire an edge, which must start its `flow` and
   `then` launches themselves. Every publish check is listed with its exact
   error — `no expected edge enters`, a terminal left by staff — and its fix.
+lede: >
+  Write the states and transitions behind a Routine's Status and Actions, and
+  get them past the publish checks.
 concepts: [state-machine, manifest-keys, app-bundle]
 part: build
 ---
@@ -21,7 +25,7 @@ projected status is an item's **Status**, and each staff edge's button is an
 
 A Routine Template ships its graph in one of two places. The keys and the
 engine are the same for both, and so are the graph's publish checks; a recipe
-adds a few checks of its own (§3). Everything after this section applies to
+adds a few checks of its own (see "The publish checks that trip authors"). Everything after this section applies to
 either:
 
 - **A recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
@@ -180,7 +184,7 @@ is an overlay with no column, so the bundle's own code decides it from the
 row's facts. `hold` is an overlay stored in `Hold`. `tracking` is the one a
 recipe needs once its graph has a work item: `missing_info` warns, so a row
 showing it opens an action item, and a recipe is refused unless that item
-can stop tracking its row (§3). Its button's `when:` keeps Stop tracking to
+can stop tracking its row (see "The publish checks that trip authors"). Its button's `when:` keeps Stop tracking to
 the rows showing `missing_info`, which get it as action items anyway.
 Publish renders display hints onto `Status`, `Stage`, `Hold` and `Tracking`.
 The one on `Status` lists the whole vocabulary and marks `missing_info` as a
@@ -195,7 +199,7 @@ offers Approve, Decline and Put on hold. Put it on hold and it shows `on_hold`.
 Now Approve is still offered but Put on hold is not, because its edge leaves
 only `hold.none`.
 
-## 1. Design the machines
+## Design the machines
 
 **One funnel, then overlays.** The funnel is the milestone that moves
 forward. An overlay is something true *alongside* it: blocked, parked,
@@ -265,7 +269,7 @@ another. Put the entry state first, and keep that order in any tool that
 rewrites YAML: one that sorts keys changes the initial state without a
 word. An overlay's initial state is `none`.
 
-## 2. States, events, transitions and status
+## States, events, transitions and status
 
 ### States
 
@@ -336,7 +340,7 @@ into its state and still draw quietly.
 **`expected:` marks the normal way in, not the likely one.** Every edge is
 legal, and most are shortcuts. A client that draws only the expected edges
 must still show every state, which is why every state but the initial needs
-one (§3). `staff.decline` is `from: open` but `expected: [in_review]`:
+one (see "The publish checks that trip authors"). `staff.decline` is `from: open` but `expected: [in_review]`:
 declining from review is the normal path, and declining an unread request
 is a shortcut.
 
@@ -389,7 +393,7 @@ may carry its own `when:`, judged against the row after the writes.
 `signing-modal`), `prominence` (`primary` or `quiet`), `route`
 (`deterministic`, `agent` or `noop`), `message` and `when`. The `kind` names
 the button, and one kind belongs to one event. `route` defaults to
-`deterministic`: a click runs your `cta_apply` flow directly (§5) and posts
+`deterministic`: a click runs your `cta_apply` flow directly (see "Wire the flows") and posts
 nothing. `message` is the chat line, templated on columns as
 `{Title}` or `{Title|this request}`.
 
@@ -461,7 +465,7 @@ column the reconcile writes: `cause`, `Issue`, `Stage`, `Why`, `ctas`,
 `Status`, `Opened`, `Resolved` and `affected_record_ids`, or the names you
 set on `worklist:` instead.
 
-## 3. The publish checks that trip authors
+## The publish checks that trip authors
 
 Each check refuses the publish with one message. A check on the graph is
 prefixed `states:`, in a recipe too; a recipe's own checks, last in this
@@ -616,7 +620,7 @@ edge:
 recipe.yaml: the recipe opens action items (missing_info) but declares no staff.stop_tracking transition with a `cta: {kind: stop-tracking}`; every action item must be able to stop tracking its row (e.g. `on: staff.stop_tracking`, `from: tracking.none`, `to: not_tracking`, `cta: {kind: stop-tracking, prominence: quiet, direct_only: true}`)
 ```
 
-## 4. Guards
+## Guards
 
 A guard is a named condition a transition lists under `guard:`. It is
 `all:` or `any:` of predicates, and a bare list means `all:`. Each predicate
@@ -676,7 +680,7 @@ cannot name an external guard at all:
 states: guard 'can_approve': predicate names external guard 'budget_ok'; only the bundle can evaluate it — vouch for it instead
 ```
 
-## 5. Wire the flows
+## Wire the flows
 
 The graph does nothing until a flow calls it. There are three places.
 
@@ -797,7 +801,7 @@ That is the rule from the concept, enforced on the transition path: change a
 row's status by firing an event. A plain store write to the column is not
 refused, but the next projection overwrites it.
 
-## 6. Check it
+## Check it
 
 A publish that passes proves **structure**. Every reference resolves, every
 state is reachable and has an expected way in, no funnel state is a dead

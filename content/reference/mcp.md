@@ -3,12 +3,14 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-27
+updated: 2026-10-29
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
   Routine's app — with their arguments, generated from the server's own
   definitions.
+lede: >
+  Every tool Popcorn's MCP server gives your assistant, with its arguments.
 concepts: [app-bundle, versions, copying-a-template]
 ---
 
@@ -139,12 +141,13 @@ This workspace's members only: someone from another workspace who is in a shared
 
 List the Routines you can see in this workspace: the ones you're in (including Routines shared in from another workspace) and the ones you can view without joining (marked [not joined]).
 
-Direct messages are not listed. Each row shows the Routine's name, its Routine Template, your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
+Direct messages are not listed. Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `query` | `str` | Case-insensitive substring of the Routine name. |
 | `template` | `str` | Only Routines made from this Routine Template, by its slug (e.g. "claimcoordinator"). |
+| `copy` | `str` | Only Routines on this workspace's copy of that name: the Routines a new version of the copy reaches. A copy's name is unique per template, so pass template too when two templates have copies of the same name. |
 | `include_archived` | `bool` | Also list archived Routines (marked [archived]). Default `False`. |
 | `sort` | one of `name`, `recent` | "name" (default), or "recent": pinned first, then by last message. |
 | `cursor` | `str` | The next_cursor from the previous page, with the same other arguments. |
@@ -155,9 +158,9 @@ Direct messages are not listed. Each row shows the Routine's name, its Routine T
 → list_routines(template="claimcoordinator")
 
 50 of 137 Routines running claimcoordinator:
-- #claims-central  Claim Coordinator (claimcoordinator)  (id: 2af4…0c)
-- #claims-east  Claim Coordinator (claimcoordinator)  4 unread, 1 mention  (id: be23…ef)  [pinned]  [missing a connection]
-- #claims-north  Claim Coordinator (claimcoordinator)  (id: bd7d…b9)  [not joined]
+- #claims-central  Claim Coordinator (claimcoordinator) · Popcorn's  (id: 2af4…0c)
+- #claims-east  Claim Coordinator (claimcoordinator) · copy "acme"  4 unread, 1 mention  (id: be23…ef)  [pinned]  [missing a connection]
+- #claims-north  Claim Coordinator (claimcoordinator) · Popcorn's  (id: bd7d…b9)  [not joined]
 - … 47 more rows
 next_cursor: eyJ2Ijox…
 ```
@@ -362,7 +365,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 1bf13eb70563).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version f21835b44da4).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
@@ -392,14 +395,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 1bf13eb70563).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version f21835b44da4).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 16 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version 0096e731db97. To go back: change_routine with revert_to="0096e731…".
+Before it: version 20a05588ee6a. To go back: change_routine with revert_to="20a05588…".
 ```
 
 ## Apps
@@ -538,7 +541,7 @@ A new version reaches every Routine on that copy: this Routine installs it now, 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). It installs the new version first. |
-| `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. |
+| `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. Just after copy_routine_template, the Popcorn version the copy was made from works too. |
 | `changes` | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` | `str` | What changed and why, in a sentence or two. |
 | `confirm` | `bool` | true to create the version. Show the user the dry run first. Default `False`. |
@@ -572,7 +575,7 @@ Files:
   -    cron: 0 9 * * 1-5
   +    cron: 0 8 * * 1-5
   ```
-Reach: #intake would install it now. 2 other Routines on this copy will update at their daily check.
+Reach: #intake would install it now. 2 other Routines on this copy will update at their daily check. The Routines on this copy that you can see: list_routines(template="claimcoordinator", copy="acme-intake").
 plan_id: pL4nC0nf1rmByRef9xQ2a7 (lasts 30 minutes)
 
 Call again with `confirm=true` to create version 0.16.1 of copy "acme-intake": pass routine_id and plan_id="pL4nC0nf1rmByRef9xQ2a7" in place of base_version, changes and changelog.
@@ -633,7 +636,7 @@ If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it:
 
 Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in order: each done or not, which are required, and what each one left still needs (a Connection, a document, a booking page, a value).
 
-A step that keeps a value shows what is set. It only reads. A Routine whose template builds its checklist from its Steps says when that hasn't happened yet, and lists the template's own steps meanwhile. A Routine with no checklist says so.
+A step that keeps a value shows what is set. A Routine whose template builds its checklist from its Steps has it built here when it hasn't been yet, as opening its Today tab does; that can take some seconds. If it isn't done in time, the template's own steps are listed meanwhile, and it says so. A Routine with no checklist says so.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1178,13 +1181,13 @@ make_connection makes a Connection from an account the person has already signed
 
 Make one of a Routine's Connections: connect an account you have signed in to, or make the webhook another system posts to.
 
-For an email, calendar or files Connection, call it without account first: it lists your accounts that can serve it, each with whether its sign-in allows everything the Connection needs. Then call it with account, an address or ID from that list: a dry run of what it will connect, what it replaces and what runs after. With confirm=true it connects the account, gives the Routine the access it needs, and runs the template's on_auth_change step if it has one, all in one call. The answer is each Connection made, as list_connections shows it. Only your own accounts can be connected; a teammate connects theirs. Connecting an account to a Connection that has none also connects it to the Routine's other Connections of its provider that have none yet and that its sign-in allows (one Google account serves the inbox, calendar and Drive together); the dry run names each one, and the answer says which were connected. Pass only=true to connect the named Connection alone. Replacing a Connection's account changes no other. A Google sign-in is done from here: when you have no Google account that can serve, or yours is signed out or lacks access, the answer (or the refusal) carries a sign-in link, asking for everything the Routine's unconnected Google Connections need. Pass the link to the person as it is, and nothing else from it: it works once, within minutes, and only for the person who asked, who finishes it signed in to Popcorn in the browser it opens. Once they say they have, call make_connection again (without account, to see the account, then with it). An account of another provider is signed in to in Popcorn; the answer says where. For a webhook Connection, call it without account: a dry run of the webhook it makes, and of the one it replaces if one serves it already, whose address then stops working. With confirm=true it makes the webhook and answers with its address, once. The address is a credential: anyone who has it can post to the Routine. Give it only to whoever sets up the other system; nothing here shows it again. Popcorn's channel agent is never given it, since its answers reach the whole Routine: the answer says [secret] in its place, and the person reads it on the Connection's card in Popcorn. An e-signature Connection isn't made here: its keys are workspace secrets a workspace admin or owner saves in Popcorn, and the refusal names them. Never pass a key or a password to this tool. It takes routine_id, the Routine's ID, as every tool that writes does. Making a Connection needs workspace admin, or membership of the Routine, and an archived Routine can't be changed.
+For an email, calendar, files or documents (Notion) Connection, call it without account first: it lists your accounts that can serve it, each with whether its sign-in allows everything the Connection needs. Then call it with account, an address or ID from that list: a dry run of what it will connect, what it replaces and what runs after. With confirm=true it connects the account, gives the Routine the access it needs, and runs the template's on_auth_change step if it has one, all in one call. The answer is each Connection made, as list_connections shows it. Only your own accounts can be connected; a teammate connects theirs. Connecting an account to a Connection that has none also connects it to the Routine's other Connections of its provider that have none yet and that its sign-in allows (one Google account serves the inbox, calendar and Drive together); the dry run names each one, and the answer says which were connected. Pass only=true to connect the named Connection alone. Replacing a Connection's account changes no other. A Google sign-in is done from here: when you have no Google account that can serve, or yours is signed out or lacks access, the answer (or the refusal) carries a sign-in link, asking for everything the Routine's unconnected Google Connections need. Pass the link to the person as it is, and nothing else from it: it works once, within minutes, and only for the person who asked, who finishes it signed in to Popcorn in the browser it opens. Once they say they have, call make_connection again (without account, to see the account, then with it). An account of another provider is signed in to in Popcorn; the answer says where. For a webhook Connection, call it without account: a dry run of the webhook it makes, and of the one it replaces if one serves it already, whose address then stops working. With confirm=true it makes the webhook and answers with its address, once. The address is a credential: anyone who has it can post to the Routine. Give it only to whoever sets up the other system; nothing here shows it again. Popcorn's channel agent is never given it, since its answers reach the whole Routine: the answer says [secret] in its place, and the person reads it on the Connection's card in Popcorn. An e-signature Connection isn't made here: its keys are workspace secrets a workspace admin or owner saves in Popcorn, and the refusal names them. Never pass a key or a password to this tool. It takes routine_id, the Routine's ID, as every tool that writes does. Making a Connection needs workspace admin, or membership of the Routine, and an archived Routine can't be changed.
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `connection` [required] | `str` | The Connection's id or label, as list_connections shows it. |
-| `account` | `str` | Your account's address or ID, for an email, calendar or files Connection. Omit it to list your accounts. |
+| `account` | `str` | Your account's address or ID, for an email, calendar, files or documents Connection. Omit it to list your accounts. |
 | `confirm` | `bool` | true to make it. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. |
 | `only` | `bool` | true to connect the account to this Connection alone, not to the Routine's other unconnected ones it can serve. Default `False`. |
@@ -1394,7 +1397,7 @@ Popcorn reads the file in the background. list_references shows it once it's in,
 
 [read-only]
 
-Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why.
+Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why and the Actions that settle it (take_action takes one on the item's row).
 
 Each Status shows its label (what Popcorn shows) and its stored value. list_rows shows the items at one Status, filtered on the value: filter={"Status": "<value>"}. list_actions shows what can be done with an item and take_action does it.
 
@@ -1456,7 +1459,7 @@ Actions offered now:
 
 Take one Action on one or more of a Routine's items, as a person pressing its button in Popcorn would.
 
-Refused for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started.
+Refused, with the reason, for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1595,7 +1598,7 @@ A run a person's button started shows as Popcorn, for a person: runs don't recor
 
 Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles, ids and summaries.
 
-Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines and fork lines, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
+Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
 
 | Argument | Type | Notes |
 |---|---|---|
@@ -1648,41 +1651,3 @@ template: a series of versions the workspace owns, which it publishes to.
 Related: customizing-a-routine, versions.
 ```
 
-## Proposed tools
-
-**None of these tools exist yet, and nothing depends on them arriving.** They
-are a design for the tools a person's assistant uses to run Routines, named
-in the [glossary](https://docs.popcorn.ai/glossary/glossary.md)'s
-terms rather than the platform's. They are listed so an author can see what is
-being considered; names and arguments may change before any ships.
-
-The message, flow, run and stored-value tools have already left this
-surface: a Routine's work starts from its Triggers and Actions, a switch is a
-Routine Setting, an item's runs are read with `list_history`, and its
-conversation is read in Popcorn. Changing a Routine Template itself is not
-part of this design.
-
-Three rules run through it:
-
-1. **Ask for the outcome; Popcorn picks the mechanism.** A tool takes what
-   the person wants changed, in product terms, and Popcorn decides which
-   setting, document or step has to change to get it.
-2. **Every write is a dry run until `confirm=true`**, and the dry run says
-   whether the change stays with this Routine or gives it a copy of its own,
-   which stops receiving its template's improvements.
-3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
-   since a write is the worst place to resolve a name to the wrong Routine.
-
-### `update_instructions`
-
-Changes a Routine's Instructions. Takes the change in plain language or as
-an edit to the text `get_instructions` returned. Without `confirm`, shows the
-Instructions as they would read after the change.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `request` | | The change, in the person's words |
-| `edits` | | Or exact edits to the text, in place of `request` |
-| `confirm` | `false` | Apply the previewed change |
-| `reset` | `false` | Return a changed part to the template's |

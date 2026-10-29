@@ -1,7 +1,7 @@
 ---
 id: merge-policy
 title: Column merge policy
-order: 7
+order: 9
 group: What a bundle holds
 summary: >
   A column's merge policy decides what an upsert does to an existing row:
@@ -10,6 +10,9 @@ summary: >
   increment_on_change (a counter that rises when another column makes a
   declared transition). Policies apply only on a merging write; stored values
   change on their next write.
+lede: >
+  What happens to an existing row when a flow writes it again: replace it,
+  append to it, keep the first value, or count changes.
 concepts: [manifest-keys]
 part: build
 ---

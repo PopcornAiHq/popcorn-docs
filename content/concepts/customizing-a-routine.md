@@ -1,7 +1,7 @@
 ---
 id: customizing-a-routine
 title: Customizing a Routine
-order: 2
+order: 4
 group: Routines
 summary: >
   Customizing a Routine changes it alone. Its Routine Settings, Connections,
@@ -9,6 +9,9 @@ summary: >
   with it and survive the template's improvements. A new Table or a kind of
   step the template does not offer gives it a copy of its own, which no
   longer receives those improvements and cannot be undone.
+lede: >
+  What you can change about one Routine without affecting any other, and what
+  takes a copy of its template.
 concepts: [routine-settings, instructions, routines, copying-a-template]
 part: use
 ---

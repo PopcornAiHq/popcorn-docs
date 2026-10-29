@@ -1,7 +1,7 @@
 ---
 id: references
 title: Value references
-order: 10
+order: 14
 group: How a flow runs
 summary: >
   A `$` reference reads a value — `$inputs`, `$steps.<id>.output`, `$channel`,
@@ -9,6 +9,9 @@ summary: >
   negation. A malformed one is a literal string at runtime, and a key the value
   lacks is a hard ReferenceError that on_error cannot catch. Index arrays with
   dots, and keep spaces out of any column a flow dereferences.
+lede: >
+  How a flow reads a value from its inputs, earlier steps or the Routine, and
+  what happens when the value isn't there.
 concepts: [flow-grammar, on-error, table-columns]
 part: build
 ---

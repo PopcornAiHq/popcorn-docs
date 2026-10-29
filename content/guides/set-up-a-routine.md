@@ -1,12 +1,16 @@
 ---
 id: set-up-a-routine
-title: Setting up a Routine
+title: Set up a Routine
 order: 2
+group: Getting started
 summary: >
   Setting up a Routine from a Routine Template: pick a template with
   list_routine_templates, create the Routine with create_routine (a dry run
   first), wait for its template to install, have the right person connect each
   account it needs, then check what starts its work with list_triggers.
+lede: >
+  Set up a new Routine from a Routine Template and connect the accounts it
+  needs, so it is ready to start work.
 concepts: [routines, connections, triggers]
 part: use
 ---
@@ -31,7 +35,7 @@ also suggest Routines from a connected inbox, from the work it finds waiting
 there. Both start from the same template as this guide, so the rest of it
 applies once the Routine exists.
 
-## 1. Pick a template
+## Pick a template
 
 > "What templates could a new Routine here start from?"
 
@@ -39,9 +43,9 @@ applies once the Routine exists.
 start from: each one's name, its slug, what it does, and the Connections it
 needs before it runs. A template the workspace cannot run is not listed. Note
 the slug — `chase` here — and the Connections (Gmail, Google Drive, Google
-Calendar and an intake address), because someone has to make them in step 4.
+Calendar and an intake address), because someone has to make them under "Make its Connections".
 
-## 2. Create the Routine
+## Create the Routine
 
 > "Set up a private #claims-west Routine from the Chase template, with
 > Jordan in it."
@@ -59,7 +63,7 @@ call again with `confirm=true`.
 The response gives the new Routine's ID. Use the ID, not the name, in every
 call that changes it.
 
-## 3. Wait for the template to install
+## Wait for the template to install
 
 The template installs in the background once the Routine exists, usually in
 seconds. `get_routine` with `wait_seconds` (up to 20) waits for it:
@@ -69,7 +73,7 @@ seconds. `get_routine` with `wait_seconds` (up to 20) waits for it:
 Its **Install** field says `installed` when the template has landed. Until
 then the Routine exists but has nothing to run.
 
-## 4. Make its Connections
+## Make its Connections
 
 `get_routine` lists each Connection the Routine needs, as connected or
 **NOT CONNECTED**. A Connection signs in as a person, so the assistant cannot
@@ -80,7 +84,7 @@ uses a missing Connection cannot run.
 When they are done, `get_routine` again: every Connection should read
 connected. See [Connections](https://docs.popcorn.ai/use/concepts/connections.md).
 
-## 5. See what starts its work
+## See what starts its work
 
 > "What sets #claims-west working?"
 

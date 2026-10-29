@@ -294,8 +294,9 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     Each section is (label, groups) and each group is (label, links), where an
     empty group label means the links sit directly under the section. A
-    section labelled None has no heading at all — the home page's link, which
-    belongs to no section.
+    section whose groups are None is only a heading — a part's, or Look it
+    up. One labelled "" holds a part's topics, under that heading; one
+    labelled None is a plain list of links, such as the home page's.
     """
     def link(title: str, href: str, current: bool) -> str:
         attrs = ' aria-current="page"' if current else ""
@@ -303,7 +304,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
 
     out = []
     for label, groups in sections:
-        # A part heading: a label with no links, above the kinds it holds.
+        # A part heading: a label with no links, above the topics it holds.
         if groups is None:
             out.append(f'<p class="nav-part">{html.escape(label, quote=False)}</p>')
             continue
@@ -312,7 +313,7 @@ def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) ->
                 f'<ul class="solo">{"".join(link(*l) for l in links)}</ul>' for _, links in groups
             ))
             continue
-        parts = [f'<p class="nav-section">{html.escape(label, quote=False)}</p>']
+        parts = []
         for group, links in groups:
             items = "".join(link(*l) for l in links)
             if group:
@@ -676,17 +677,11 @@ p.badges + p + p { font-size: .9rem; color: var(--muted); }
 ul { margin: 0 0 1.1rem; padding-left: 1.3rem; }
 li { margin-bottom: .4rem; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
-/* The home page's way in, one card per section. The hard offset shadow is
-   popcorn.ai's card treatment, scaled down for a page of text. */
-.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 2.25rem 0 3rem; }
-.card { display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.25rem 1rem;
-  border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--fg);
-  text-decoration: none; box-shadow: 4px 4px 0 var(--edge); transition: transform .12s ease, box-shadow .12s ease; }
-.card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
-.card-label { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-.card p { flex: 1; margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
-.card-start { color: var(--accent); font-weight: 600; font-size: .93rem; }
-@media (max-width: 40rem) { .cards { grid-template-columns: minmax(0, 1fr); } }
+/* The Overview's diagram. It is drawn for a column of text and scrolls
+   sideways rather than shrinking past legibility on a phone. */
+.diagram { margin: 1.5rem 0 1.75rem; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 36rem; height: auto; }
+.diagram a { text-decoration: none; }
 
 /* The frame: a header across the top, then sidebar | page | rail. */
 .site { position: sticky; top: 0; z-index: 10; height: var(--header);
@@ -728,11 +723,8 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .sidebar a:hover { color: var(--fg); }
 .sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg);
   font-weight: 600; box-shadow: inset 2px 0 0 var(--brand); }
-.nav-section { margin: 1.5rem 0 .35rem .6rem; font-size: .75rem; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--fg); }
-.site-nav > :first-child .nav-section { margin-top: 0; }
 .nav-part { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
-.nav-part + div .nav-section { margin-top: .75rem; }
+.nav-part + div > :first-child { margin-top: .75rem; }
 .solo { margin-top: 1.25rem !important; }
 .site-nav > .solo:first-child { margin-top: 0 !important; }
 .nav-part + .solo { margin-top: .75rem !important; }
@@ -854,8 +846,6 @@ html:has(.search[open]) { overflow: hidden; }
 .related li { margin-bottom: .4rem; }
 
 .eyebrow { margin: 0 0 .35rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.eyebrow a { color: var(--muted); text-decoration: none; }
-.eyebrow a:hover { color: var(--accent); }
 .pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; }
 .pager a { flex: 1 1 0; display: block; padding: .8rem 1rem; border: 1px solid var(--rule);
   border-radius: 6px; text-decoration: none; font-weight: 600; }
@@ -1310,6 +1300,7 @@ def document(
     url: str = "",
     noindex: bool = False,
     lookup: bool = False,
+    own_date: bool = False,
 ) -> str:
     """Wrap rendered content in a standalone page: header, sidebar, page, rail.
 
@@ -1325,6 +1316,11 @@ def document(
 
     ``lookup`` marks a page of entries, the reference pages, where each
     third-level heading starts an entry and is styled as one.
+
+    ``own_date`` marks a page that shows its own date beside its title — a
+    generated reference's `updated:`. Its footer leaves out "Last updated",
+    which is the time of the commit the site was built from and the same on
+    every page, so the page shows one date, not two that can disagree.
     """
     attr = lambda text: html.escape(text, quote=True)
     head = [f'<meta name="description" content="{attr(description)}">'] if description else []
@@ -1372,7 +1368,7 @@ def document(
 {content}
 </main>
 <aside class="rail">{rail}</aside>
-<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{last_updated()}</span>
+<footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{"" if own_date else last_updated()}</span>
 <span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}

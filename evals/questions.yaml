@@ -197,8 +197,8 @@
 
 - q: Is there anything that stops me publishing a change that affects everyone?
   concept: versions
-  pass: no — the guards check permission and validity, none asks about reach; how many channels it reaches is reported only after the version exists
-  trap: claims a confirmation, a dry run, or a staged rollout exists
+  pass: nothing refuses a publish for its reach — the guards check permission and validity — but you can see it first: create_routine_version's dry run says how many other Routines on the copy will update, and popcorn app publish asks before publishing, naming the copy (its count comes only after)
+  trap: claims a check refuses or holds a publish for its reach, or a staged rollout; or says nothing shows the reach before publishing
 
 - q: I published a bad version yesterday. Can I get the files from the version before it?
   concept: versions, copying-a-template

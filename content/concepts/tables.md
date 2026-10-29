@@ -1,7 +1,7 @@
 ---
 id: tables
 title: Tables, Rows and Columns
-order: 10
+order: 13
 group: What it holds
 summary: >
   A Routine's Tables hold its items — claims, orders, contacts — as Rows and
@@ -10,6 +10,9 @@ summary: >
   (create_rows and delete_rows after a dry run, update_row). An added Row
   can be a new item the Routine's work picks up; a Row's Status changes
   only by an Action.
+lede: >
+  A Routine's Tables hold its items, such as claims, orders or contacts, as
+  Rows and Columns.
 concepts: [actions-and-status, work-a-routines-items]
 part: use
 ---

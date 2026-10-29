@@ -1,7 +1,7 @@
 ---
 id: actions-and-status
 title: Actions and Status
-order: 11
+order: 14
 group: What people do, and what happened
 summary: >
   An item's Status says where it stands, such as Waiting on documents, and
@@ -9,6 +9,9 @@ summary: >
   directly. Actions are what a person does to move an item on: approve, send,
   close. list_actions shows the Actions an item offers now; take_action takes
   one, after a dry run, as pressing its button would.
+lede: >
+  An item's Status says where it stands, and its Actions are what a person
+  does to move it on, such as approve, send or close.
 concepts: [tables, work-a-routines-items, triggers]
 part: use
 ---

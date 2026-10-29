@@ -13,12 +13,17 @@ Checks, in the order a writer meets them:
 * `id` is present and equals the filename, because the id is a permanent
   address and a file whose name disagrees with it has two
 * `summary` is present and within the cap
+* `lede`, when present, is a folded block within its own cap, with no code,
+  URL or tool name in it. It is what a person reads under the title, so the
+  details an agent needs belong in the summary instead
 * no unwritten body is left behind a finished-looking summary
 * every id in `concepts:` names a page that exists. The build drops a dangling
   one from "Related" rather than linking a 404, which is right for the site
   and exactly why nobody sees it: the reference just silently stops working
 * `order`, when present, is a whole number from 1 — the build sorts by it, and
   a value it cannot read would crash the build rather than fail here by name
+* no two pages in a part share an `order`. A part's concepts and guides are
+  numbered in one sequence, and a tie would be settled by kind, out of sight
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
 * `updated`, when present, is a real `YYYY-MM-DD` date, on a generated
@@ -51,12 +56,19 @@ import re
 import sys
 
 SUMMARY_MAX = 400
+# A link preview cuts a description off at about this length, and a lede that
+# needs more is doing the summary's job.
+LEDE_MAX = 160
 BODY_MIN_WORDS = 60
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _ID = re.compile(r"^id:\s*(\S+)", re.M)
 _SUMMARY = re.compile(r"^summary:\s*>\n(?P<block>(?:[ \t]{2,}.*\n)+)", re.M)
+_LEDE = re.compile(r"^lede:\s*(?P<value>.*)\n(?P<block>(?:[ \t]{2,}.*\n)*)", re.M)
+# What a person should not meet in a lede: inline code, a bare address, and a
+# snake_case name such as get_workspace, which is a tool's.
+_LEDE_DETAIL = re.compile(r"`|https?://|\b[a-z]+_[a-z_]+\b")
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
@@ -97,6 +109,20 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         ).strip()
         if len(folded) > SUMMARY_MAX:
             problems.append(f"summary is {len(folded)} chars, cap is {SUMMARY_MAX}")
+
+    lede = _LEDE.search(front)
+    if lede and lede.group("value").strip() != ">":
+        problems.append("lede is not a folded block (lede: >)")
+    elif lede:
+        folded = " ".join(
+            line.strip() for line in lede.group("block").splitlines()
+        ).strip()
+        if not folded:
+            problems.append("lede is empty")
+        elif len(folded) > LEDE_MAX:
+            problems.append(f"lede is {len(folded)} chars, cap is {LEDE_MAX}")
+        if detail := _LEDE_DETAIL.search(folded):
+            problems.append(f"lede has '{detail.group()}' in it; code, URLs and tool names go in the summary")
 
     concepts = _CONCEPTS.search(front)
     if concepts:
@@ -165,6 +191,27 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     return problems
 
 
+def shared_orders(files: list[pathlib.Path]) -> dict[pathlib.Path, list[str]]:
+    """Each page whose `order` another page in its part also has, and with whom.
+
+    Pages with no part are numbered within their kind, so they are left out."""
+    seen: dict[tuple[str, str], list[pathlib.Path]] = {}
+    for path in files:
+        doc = _DOC.match(path.read_text())
+        if not doc:
+            continue
+        part, order = _PART.search(doc.group("fm")), _ORDER.search(doc.group("fm"))
+        if part and order:
+            key = (part.group("value").strip(), order.group("value").strip())
+            seen.setdefault(key, []).append(path)
+    out: dict[pathlib.Path, list[str]] = {}
+    for (part, order), paths in seen.items():
+        for path in paths if len(paths) > 1 else []:
+            others = ", ".join(o.stem for o in paths if o != path)
+            out[path] = [f"order {order} is also {others}'s, in part {part}"]
+    return out
+
+
 def main() -> int:
     files = sorted((ROOT / "content").rglob("*.md"))
     files = [f for f in files if not f.name.startswith("_")]
@@ -175,9 +222,10 @@ def main() -> int:
     # A page's id is its filename, which the id check above enforces, so the
     # stems are the ids a `concepts:` entry may name.
     ids = {f.stem for f in files}
+    shared = shared_orders(files)
     failed = 0
     for path in files:
-        problems = check(path, ids)
+        problems = check(path, ids) + shared.get(path, [])
         if problems:
             failed += 1
             print(f"\n✖  {path.relative_to(ROOT)}")
