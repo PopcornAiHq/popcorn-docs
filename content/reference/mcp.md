@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-28
+updated: 2026-10-29
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -636,7 +636,7 @@ If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it:
 
 Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in order: each done or not, which are required, and what each one left still needs (a Connection, a document, a booking page, a value).
 
-A step that keeps a value shows what is set. It only reads. A Routine whose template builds its checklist from its Steps says when that hasn't happened yet, and lists the template's own steps meanwhile. A Routine with no checklist says so.
+A step that keeps a value shows what is set. A Routine whose template builds its checklist from its Steps has it built here when it hasn't been yet, as opening its Today tab does; that can take some seconds. If it isn't done in time, the template's own steps are listed meanwhile, and it says so. A Routine with no checklist says so.
 
 | Argument | Type | Notes |
 |---|---|---|
