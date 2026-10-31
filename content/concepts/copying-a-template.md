@@ -2,99 +2,99 @@
 id: copying-a-template
 title: Copying a template
 order: 2
-group: How a version ships
+group: How a Version ships
 summary: >
-  Customizing a Routine beyond what its settings reach gives it a copy that
-  the workspace owns (`popcorn app fork`). A copy comes before any publish,
-  and a change published there reaches every Routine on it by their daily
-  update, not only the one you changed. It is one-way: nothing undoes a copy
+  Customizing a Routine beyond what its settings reach gives it a Copy that
+  the Workspace owns (`popcorn app fork`). A Copy comes before any Publish,
+  and a change published there reaches every Routine on it by their Daily
+  Update, not only the one you changed. It is one-way: nothing undoes a Copy
   or moves a Routine back to Popcorn's version.
 lede: >
-  A copy of a template is your workspace's own. A change to it reaches every
-  Routine on it, and a copy can't be undone.
+  A Copy of a template is your Workspace's own. A change to it reaches every
+  Routine on it, and a Copy can't be undone.
 concepts: [customizing-a-routine, versions, app-bundle]
 part: build
 ---
 
 A Routine made from a Routine Template runs Popcorn's own version of it,
-which every workspace can install. To change what the
-Routine is built from, the workspace makes a copy of the template (the CLI
-calls it a *fork line*): a series of versions the workspace owns, which it
-publishes to. Which changes need a copy, and which stay with one Routine
+which every Workspace can install. To change what the
+Routine is built from, the Workspace makes a Copy of the template (the CLI
+calls it a *fork line*): a series of Versions the Workspace owns, which it
+publishes to. Which changes need a Copy, and which stay with one Routine
 without one, is in
 [customizing a Routine](https://docs.popcorn.ai/use/concepts/customizing-a-routine.md).
-This page is what a copy costs and how to make one.
+This page is what a Copy costs and how to make one.
 
 ## Making one
 
 | To | Over MCP | With the CLI |
 |---|---|---|
 | copy the template a Routine runs | `copy_routine_template(routine_id, name)` | `popcorn app fork --channel <routine> --name <copy>`, or `popcorn app checkout --channel <routine> --fork=<copy>`, which copies and checks out in one step |
-| move a Routine onto a copy the workspace already has | `install_routine(routine_id, copy=<name>)` | `popcorn app fork --channel <routine> --name <copy>` with the existing copy's name |
-| see what a Routine runs | `get_routine`, whose **Updates from** says Popcorn or this workspace's own copy; `list_routines` says it for every Routine (`· Popcorn's` or `· copy "<name>"`) | `popcorn app list --channel <routine>` |
-| list the Routines on a copy | `list_routines(template=<template>, copy=<name>)`, the ones you can see | |
-| list the workspace's copies | | `popcorn app lines` |
+| move a Routine onto a Copy the Workspace already has | `install_routine(routine_id, copy=<name>)` | `popcorn app fork --channel <routine> --name <copy>` with the existing Copy's name |
+| see what a Routine runs | `get_routine`, whose **Updates from** says Popcorn or this Workspace's own Copy; `list_routines` says it for every Routine (`· Popcorn's` or `· copy "<name>"`) | `popcorn app list --channel <routine>` |
+| list the Routines on a Copy | `list_routines(template=<template>, copy=<name>)`, the ones you can see | |
+| list the Workspace's Copies | | `popcorn app lines` |
 
 `copy_routine_template` is a dry run until it is called again with
-`confirm=true`: the dry run names the version being copied, the new copy,
-and any other copies of the template the workspace already has. It only
-ever starts a new copy; joining an existing one is `install_routine` with
+`confirm=true`: the dry run names the Version being copied, the new Copy,
+and any other Copies of the template the Workspace already has. It only
+ever starts a new Copy; joining an existing one is `install_routine` with
 `copy`, which is a dry run too.
 
-The copy starts byte-identical to the version the Routine runs, and the
+The Copy starts byte-identical to the Version the Routine runs, and the
 Routine moves onto it, so nothing it runs changes at that moment. Copying
-needs a Routine role of `member` or above, or a workspace admin, so a guest
-of the Routine is refused, and so is a copy of an archived Routine;
-publishing to the copy afterwards needs a workspace admin (see
-[versions](https://docs.popcorn.ai/build/concepts/versions.md)).
+needs a Routine Role of `member` or above, or a Workspace admin, so a guest
+of the Routine is refused, and so is a Copy of an archived Routine;
+publishing to the Copy afterwards needs a Workspace admin (see
+[Versions](https://docs.popcorn.ai/build/concepts/versions.md)).
 
-A copy comes first. A publish lands on a copy the workspace owns, so a
-publish based on Popcorn's version is refused. Over MCP, a Routine still on
+A Copy comes first. A Publish lands on a Copy the Workspace owns, so a
+Publish based on Popcorn's version is refused. Over MCP, a Routine still on
 Popcorn's version can dry-run a change with `create_routine_version`, which
-is the way to check an edit before copying, since the copy is the step that
+is the way to check an edit before copying, since the Copy is the step that
 cannot be undone.
 
-## A copy reaches every Routine on it
+## A Copy reaches every Routine on it
 
-A workspace has one copy of a template unless it names more, and **every
-Routine on a copy is brought to the copy's newest version**: the one you
-published from by an install that starts at once, and each of the others by
-its own daily update, within a day. The daily update runs as the workspace,
-not as the person who published, so whether that person is a member of the
+A Workspace has one Copy of a template unless it names more, and **every
+Routine on a Copy is brought to the Copy's newest Version**: the one you
+published from by an Install that starts at once, and each of the others by
+its own Daily Update, within a day. The Daily Update runs as the Workspace,
+not as the person who published, so whether that person is a Member of the
 other Routines does not matter. A change tested on one Routine reaches the
-others on the copy. The exceptions are in
+others on the Copy. The exceptions are in
 [installing](https://docs.popcorn.ai/build/concepts/versions.md#installing):
-the install on the Routine you published from can be blocked, and the daily
-update skips some Routines. `create_routine_version`'s dry run counts the
-other Routines a new version will update, and `list_routines` with
-`template` and `copy` names the Routines on the copy that you can see.
+the Install on the Routine you published from can be blocked, and the Daily
+Update skips some Routines. `create_routine_version`'s dry run counts the
+other Routines a new Version will update, and `list_routines` with
+`template` and `copy` names the Routines on the Copy that you can see.
 
-A Routine already on a copy can never move to another one. So a change
+A Routine already on a Copy can never move to another one. So a change
 meant to reach some Routines and not their siblings needs a second, named
-copy, started from a different Routine that is still on Popcorn's version;
-a second copy can only be started from such a Routine. Once a workspace has
-two copies of a template, a Routine still on Popcorn's version is refused
+Copy, started from a different Routine that is still on Popcorn's version;
+a second Copy can only be started from such a Routine. Once a Workspace has
+two Copies of a template, a Routine still on Popcorn's version is refused
 as ambiguous when it is copied or installed without naming one: the CLI's
-`popcorn app fork` without `--name`, or an install that names no copy. A
-Routine already on a copy is unaffected; an install there catches it up to
-its own copy's head.
+`popcorn app fork` without `--name`, or an Install that names no Copy. A
+Routine already on a Copy is unaffected; an Install there catches it up to
+its own Copy's Head.
 
-## A copy is one-way
+## A Copy is one-way
 
-There is no undoing a copy. A Routine on a copy no longer receives the
+There is no undoing a Copy. A Routine on a Copy no longer receives the
 template's improvements from Popcorn, and it cannot be moved back to
-Popcorn's version or across to another copy: the only move there is, is from
-Popcorn's version onto a copy. An earlier version of the copy can be read
+Popcorn's version or across to another Copy: the only move there is, is from
+Popcorn's version onto a Copy. An earlier Version of the Copy can be read
 back, but a Routine cannot be put back on it; the way back to old content is
-to publish it forward as a new version.
+to publish it forward as a new Version.
 
-A Routine can also join a copy without anyone meaning it to. Installing onto
-a Routine still on Popcorn's version, in a workspace that owns exactly one
-copy of its template, moves it onto that copy, which is how a mistyped
-Routine turns one in use into an edited copy. Over MCP that install is a dry
+A Routine can also join a Copy without anyone meaning it to. Installing onto
+a Routine still on Popcorn's version, in a Workspace that owns exactly one
+Copy of its template, moves it onto that Copy, which is how a mistyped
+Routine turns one in use into an edited Copy. Over MCP that Install is a dry
 run first, and says so.
 
-So copying is a decision about the workspace, not a step in an edit. Check
+So copying is a decision about the Workspace, not a step in an edit. Check
 the Routine's settings first, with `list_routine_settings` (in the CLI,
 `popcorn channel-config params` and `popcorn table scalar`): a setting
 reaches one Routine, can be set back, and survives the template's updates.

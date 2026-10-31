@@ -1,41 +1,41 @@
 ---
 id: adding-a-table
-title: Add a table
+title: Add a Table
 order: 11
-group: What a bundle holds
+group: What a Bundle holds
 summary: >
   Adding a Table to a Routine Template that already exists: declare it under
-  `tables:`, write it from a flow with `foundation.store.*`, run `app
-  validate`, then `app publish` from the workspace's copy of it. Install creates the table,
-  and each later install adds to it and never removes. Publish refuses a
-  column the store would reject; a later publish can change a merge policy.
+  `tables:`, write it from a Flow with `foundation.store.*`, run `app
+  validate`, then `app publish` from the Workspace's Copy of it. Install creates the Table,
+  and each later Install adds to it and never removes. Publish refuses a
+  Column the store would reject; a later Publish can change a Merge Policy.
 lede: >
-  Add a new Table to your workspace's copy of a Routine Template, write to it
-  from a flow, and publish the change.
+  Add a new Table to your Workspace's Copy of a Routine Template, write to it
+  from a Flow, and publish the change.
 concepts: [manifest-keys, merge-policy, copying-a-template, versions, app-bundle]
 part: build
 ---
 
 This guide adds one Table to a Routine Template a Routine already runs, and
-ends with the Table on the Routine and a flow writing Rows to it. The loop
+ends with the Table on the Routine and a Flow writing Rows to it. The loop
 around it (copy, edit, check, publish) is the one in
 [changing a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md),
-and [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) is the column reference. This one is the order to do
+and [Table Columns](https://docs.popcorn.ai/build/concepts/table-columns.md) is the Column reference. This one is the order to do
 things in, and the choices you cannot take back afterwards.
 
 The CLI calls a Routine a *channel* and its template an *app*, so the
 commands keep those names (see the [glossary](https://docs.popcorn.ai/glossary/glossary.md)).
 This guide runs from the CLI throughout. An assistant over MCP can publish the same
-change with `create_routine_version`, but it is not given the flow-run tools
+change with `create_routine_version`, but it is not given the Flow-run tools
 that "Confirm it landed" uses to check the result.
 
-The running example adds a `handoffs` table to the template `#example-intake`
-runs: one row per ticket handed to someone, where a repeat hand-off updates
-the row instead of adding another one.
+The running example adds a `handoffs` Table to the template `#example-intake`
+runs: one Row per ticket handed to someone, where a repeat hand-off updates
+the Row instead of adding another one.
 
-## Check out a copy
+## Check out a Copy
 
-A publish lands on a copy of the template your workspace owns (the CLI calls
+A Publish lands on a Copy of the template your Workspace owns (the CLI calls
 it a *fork line*), so copy it before you edit:
 
 ```bash
@@ -43,18 +43,18 @@ popcorn app checkout --channel '#example-intake' --fork
 cd <app>
 ```
 
-If the Routine is already on a copy, `app checkout --channel '#example-intake'`
-is enough. A table is a change to what the template is built from, so no
-setting can stand in for it. Adding one gives the Routine a copy of its own,
+If the Routine is already on a Copy, `app checkout --channel '#example-intake'`
+is enough. A Table is a change to what the template is built from, so no
+setting can stand in for it. Adding one gives the Routine a Copy of its own,
 which no longer receives the template's improvements. Copying is permanent, and a
-publish reaches every Routine on the copy, not only this one. See
+Publish reaches every Routine on the Copy, not only this one. See
 [copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md) before copying the template of a
 production Routine.
 
-## Declare the table
+## Declare the Table
 
-Add it under `tables:` in `manifest.yaml`. The key is the table's name, which
-is what every flow step passes as `table_name`.
+Add it under `tables:` in `manifest.yaml`. The key is the Table's name, which
+is what every Flow Step passes as `table_name`.
 
 ```yaml
 tables:
@@ -74,31 +74,31 @@ tables:
       on_conflict: merge
 ```
 
-A column needs a `name` and a `type`. [table columns](https://docs.popcorn.ai/build/concepts/table-columns.md) lists the
+A Column needs a `name` and a `type`. [Table Columns](https://docs.popcorn.ai/build/concepts/table-columns.md) lists the
 rest: `format`, which belongs to one type and is checked on every write,
 `display`, `label`, the governance flags, `index` and `unique`.
 
-Choose the names now, because install never renames a column. The `name`
-is the key every row is stored under, so a changed `name` adds a new column
+Choose the names now, because Install never renames a Column. The `name`
+is the key every Row is stored under, so a changed `name` adds a new Column
 next to the old one. A change of case alone adds nothing. The installed
-spelling stays, and a flow that writes the new spelling is refused with a
-"did you mean". A column that any `$` reference reads, such
+spelling stays, and a Flow that writes the new spelling is refused with a
+"did you mean". A Column that any `$` reference reads, such
 as `$row.TicketId` in a `foreach`, needs a name made only of letters, digits
 and underscores that does not start with a digit. `First Seen` is only ever written or filtered on, so its space
 does no harm.
 
-A table declared with no columns is skipped. Install does not create it.
+A Table declared with no Columns is skipped. Install does not create it.
 
 ## Decide what a repeat write does
 
-This step comes before any flow is written, because the flows are built
+This step comes before any Flow is written, because the Flows are built
 around it and a later change does not rewrite what is already stored.
 
-The merge key decides which row a write lands on, and each column's merge
-policy decides what happens to that column on that row. Both are explained
-in [column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md).
-Keep `on_conflict: merge`: `replace` swaps the whole row for the incoming one
-and applies no column policy at all. The example uses three policies:
+The Merge Key decides which Row a write lands on, and each Column's Merge
+Policy decides what happens to that Column on that Row. Both are explained
+in [Column Merge Policy](https://docs.popcorn.ai/build/concepts/merge-policy.md).
+Keep `on_conflict: merge`: `replace` swaps the whole Row for the incoming one
+and applies no Column policy at all. The example uses three policies:
 
 - `First Seen: keep`: the first hand-off's time stays, however often the
   ticket comes back.
@@ -106,15 +106,15 @@ and applies no column policy at all. The example uses three policies:
 - `Reopened: increment_on_change`: counts `done` → `open` transitions of
   `Stage`, and ignores the value the write sends.
 
-**Choose each policy before the first publish.** A later publish can change
-a column's policy (see "Changing the table later" below),
-but it does not rewrite the values already stored: a row that accumulated
+**Choose each policy before the first Publish.** A later Publish can change
+a Column's policy (see "Changing the Table later" below),
+but it does not rewrite the values already stored: a Row that accumulated
 text under `concat` keeps it until its next write. Choosing now avoids a
-table whose older rows were built under a different rule.
+Table whose older Rows were built under a different rule.
 
-## Write to it from a flow
+## Write to it from a Flow
 
-Flows reach the table through the `foundation.store.*` activities, naming it
+Flows reach the Table through the `foundation.store.*` Activities, naming it
 by `table_name`:
 
 ```yaml
@@ -145,30 +145,30 @@ steps:
           Reopened: 0
 ```
 
-The write sends every column on every call. The first write inserts the
-row exactly as sent, so `Reopened` starts at `0`. After that, the
-accumulating policies act only on columns a write carries (see
-[column merge policy](https://docs.popcorn.ai/build/concepts/merge-policy.md)).
+The write sends every Column on every call. The first write inserts the
+Row exactly as sent, so `Reopened` starts at `0`. After that, the
+accumulating policies act only on Columns a write carries (see
+[Column Merge Policy](https://docs.popcorn.ai/build/concepts/merge-policy.md)).
 
-The other activities you will usually need are:
+The other Activities you will usually need are:
 
-- `foundation.store.list_rows`: `filter` selects rows in the database, and
-  each row in `.output.rows` carries `_record_id`.
-- `foundation.store.patch_row`: changes named cells of one row by
-  `record_id`. It is a merging write, so the policies apply: a `concat` cell
-  appends, a `keep` cell that holds a value ignores the patch, and a counter
-  ignores the value it is sent. Pass `expected_rev` (the row's `_rev`) when
-  another writer may have changed the row since you read it.
-- `foundation.store.get_record`: reads one row by id.
+- `foundation.store.list_rows`: `filter` selects Rows in the database, and
+  each Row in `.output.rows` carries `_record_id`.
+- `foundation.store.patch_row`: changes named Cells of one Row by
+  `record_id`. It is a merging write, so the policies apply: a `concat` Cell
+  appends, a `keep` Cell that holds a value ignores the patch, and a counter
+  ignores the value it is sent. Pass `expected_rev` (the Row's `_rev`) when
+  another writer may have changed the Row since you read it.
+- `foundation.store.get_record`: reads one Row by id.
 
 Their arguments are in the
-[activity reference](https://docs.popcorn.ai/reference/activities.md).
+[Activity reference](https://docs.popcorn.ai/reference/activities.md).
 
-The store checks each value against its column's `type`, `format` and
+The store checks each value against its Column's `type`, `format` and
 `required`. On a merging write, including `patch_row`, it checks the whole
-merged row, not only the cells the write sent. The store trims whitespace
-from keys, but it does not check that a key names a column: an unknown key
-is stored silently, unless it differs from a declared column only by case.
+merged Row, not only the Cells the write sent. The store trims whitespace
+from keys, but it does not check that a key names a Column: an unknown key
+is stored silently, unless it differs from a declared Column only by case.
 
 ## Validate it
 
@@ -176,23 +176,23 @@ is stored silently, unless it differs from a declared column only by case.
 popcorn app validate .
 ```
 
-`app validate` reads the manifest and the flows together. Run from a
-checkout of the copy's head, logged in, with a Routine (`--channel`, else the
-checkout's), and with edits since the checkout, it also sends them to the server, which runs the checks
+`app validate` reads the Manifest and the Flows together. Run from a
+Checkout of the Copy's Head, logged in, with a Routine (`--channel`, else the
+Checkout's), and with edits since the Checkout, it also sends them to the server, which runs the checks
 `app publish` runs without publishing anything. It does not check everything,
 though, and a problem it misses shows up at a later stage:
 
 | Mistake | Caught by |
 |---|---|
-| a flow writing a column the table does not declare | `app validate`: `undeclared-column` |
-| a filter on an undeclared column | `app validate`, as a warning: `unknown-filter-column` |
-| an invalid column definition: a merge-key column that is undeclared, not a string or not indexed, `merge: concat` on a column that is not a string, an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing column or its own column, or a `from` equal to its `to`, two column names that differ only by case, two table names that differ only by case, a table or column name containing U+FDD0 or U+FDD1 | `app validate`'s server checks; `app publish` refuses it either way |
-| a `table_name` misspelled in a flow | the run: a write fails the step, while a `list_rows` with `missing_ok: true` reads the missing table as empty |
+| a Flow writing a Column the Table does not declare | `app validate`: `undeclared-column` |
+| a filter on an undeclared Column | `app validate`, as a warning: `unknown-filter-column` |
+| an invalid Column definition: a merge-key Column that is undeclared, not a string or not indexed, `merge: concat` on a Column that is not a string, an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing Column or its own Column, or a `from` equal to its `to`, two Column names that differ only by case, two Table names that differ only by case, a Table or Column name containing U+FDD0 or U+FDD1 | `app validate`'s server checks; `app publish` refuses it either way |
+| a `table_name` misspelled in a Flow | the Run: a write fails the Step, while a `list_rows` with `missing_ok: true` reads the missing Table as empty |
 
 Without its server checks, `app validate` cannot report the third row: it runs
-the other checks and prints `server checks: skipped` with the reason. `app publish` still refuses such a table
-before any version exists (see "Publish"). Check every `table_name` by eye, because
-`app validate` only compares columns for tables the manifest declares.
+the other checks and prints `server checks: skipped` with the reason. `app publish` still refuses such a Table
+before any Version exists (see "Publish"). Check every `table_name` by eye, because
+`app validate` only compares Columns for Tables the Manifest declares.
 
 ## Publish
 
@@ -200,19 +200,19 @@ before any version exists (see "Publish"). Check every `table_name` by eye, beca
 popcorn app publish . --bump patch -m "add handoffs table" --yes
 ```
 
-Publishing needs workspace-admin rights. The publish mints the next version
-of the copy and starts an install on this Routine. That install creates
-the `handoffs` table before it binds the Routine to the new version, so no
-run on the new version can reach a Routine without the table. The other
-Routines on the copy get the table at their own daily update, apart from the
+Publishing needs Workspace-admin rights. The Publish mints the next Version
+of the Copy and starts an Install on this Routine. That Install creates
+the `handoffs` Table before it binds the Routine to the new Version, so no
+Run on the new Version can reach a Routine without the Table. The other
+Routines on the Copy get the Table at their own Daily Update, apart from the
 ones that take no updates (see
-[versions](https://docs.popcorn.ai/build/concepts/versions.md)).
-The publish prints how many Routines will update, but only after the version
+[Versions](https://docs.popcorn.ai/build/concepts/versions.md)).
+The Publish prints how many Routines will update, but only after the Version
 exists.
 
 Publish runs every `tables:` entry through the same validation the store
-applies at install, and refuses the whole publish if any would be rejected.
-Nothing is written: no version is minted, and a `--bump` is not saved to
+applies at Install, and refuses the whole Publish if any would be rejected.
+Nothing is written: no Version is minted, and a `--bump` is not saved to
 `manifest.yaml`, so re-running the same command after the fix is the retry.
 The CLI prints the refusal to stderr and exits 3:
 
@@ -222,25 +222,25 @@ Error: manifest tables: the agent store would refuse these at install, so the bu
   tables.handoffs: column 'Notes': merge='concat' requires a string column, got type 'number'
 ```
 
-Each line names the table and, where there is one, the column. The findings
-for every table come back in one refusal, although the checks that compare
-columns with each other (a `merge_when` reference, duplicate names, the
-merge key) run only once each column of that table is valid on its own. With
+Each line names the Table and, where there is one, the Column. The findings
+for every Table come back in one refusal, although the checks that compare
+Columns with each other (a `merge_when` Reference, duplicate names, the
+Merge Key) run only once each Column of that Table is valid on its own. With
 `--json`, the same text is the `error` field, with `status: 422` and
 `error_code: validation`.
 
-Publish checks the manifest's columns on their own. It cannot see a
-Routine's table, and the install validates the schema it builds by merging
-the manifest with the columns already live there. A combination only that
-Routine has can still fail the install: retyping a column the Routine
+Publish checks the Manifest's Columns on their own. It cannot see a
+Routine's Table, and the Install validates the schema it builds by merging
+the Manifest with the Columns already live there. A combination only that
+Routine has can still fail the Install: retyping a Column the Routine
 already indexes to `boolean` or `json`, for instance, without writing
 `index: false` and `unique: false`, since those keep their installed value
-unless the manifest states one. The reverse fails too: `index: false` on a
-column the Routine's own merge key uses, because a merge key's columns must
-stay indexed. A failed install stops before it binds. The
-Routine keeps its previous version, but not necessarily its previous tables:
-a table listed before the failing one may already have been created or
-changed. The fix is another publish.
+unless the Manifest states one. The reverse fails too: `index: false` on a
+Column the Routine's own Merge Key uses, because a Merge Key's Columns must
+stay indexed. A failed Install stops before it binds. The
+Routine keeps its previous Version, but not necessarily its previous Tables:
+a Table listed before the failing one may already have been created or
+changed. The fix is another Publish.
 
 ## Confirm it landed
 
@@ -249,19 +249,19 @@ popcorn app status .
 popcorn table schema handoffs --channel '#example-intake'
 ```
 
-Inside a checkout, `app status` says either that the Routine runs the copy's
-head, or that it is behind, and then why: an install still running or
-retrying, or one that failed, was skipped or is locked out. A failed install
+Inside a Checkout, `app status` says either that the Routine runs the Copy's
+Head, or that it is behind, and then why: an Install still running or
+retrying, or one that failed, was skipped or is locked out. A failed Install
 shows its error and error code, and a `Next:` line says what moves the Routine on — usually
-`app apply`. In `--json`, from a checkout or from outside one with
+`app apply`. In `--json`, from a Checkout or from outside one with
 `--channel`, branch on `install.state`.
 
-`table schema` prints each column's name and type, and flags `unique`,
+`table schema` prints each Column's name and type, and flags `unique`,
 `required`, `internal`, `pii`, `restricted` and `concat`. To see everything
 else, including the other policies, `format`, `display`, `label` and the
-merge key, add `--json`.
+Merge Key, add `--json`.
 
-Then write a row, write it again, and read it back:
+Then write a Row, write it again, and read it back:
 
 ```bash
 popcorn flow run record_handoff --channel '#example-intake' \
@@ -271,42 +271,42 @@ popcorn flow run record_handoff --channel '#example-intake' \
 popcorn table rows handoffs --channel '#example-intake'
 ```
 
-You should see one row, with both notes in `Notes` and `First Seen` still
-holding the first run's time. Two rows mean the merge key did not match,
+You should see one Row, with both notes in `Notes` and `First Seen` still
+holding the first Run's time. Two Rows mean the Merge Key did not match,
 which a schema check alone cannot show you.
 
-## Changing the table later
+## Changing the Table later
 
-Each later publish reconciles the table toward the manifest, and only ever
+Each later Publish reconciles the Table toward the Manifest, and only ever
 adds to it:
 
-- **Follows the manifest:** new columns are added, and column order is the
-  manifest's. On a column already there, `type`, `format`, `display` and
-  `label` are set to exactly what the manifest says, and removed if the
-  manifest leaves them out.
+- **Follows the Manifest:** new Columns are added, and Column order is the
+  Manifest's. On a Column already there, `type`, `format`, `display` and
+  `label` are set to exactly what the Manifest says, and removed if the
+  Manifest leaves them out.
 - **Changes only when declared:** for `index`, `unique`, `required`, the
-  governance flags and the table's `merge_key`, a value the manifest states
+  governance flags and the Table's `merge_key`, a value the Manifest states
   wins, whether it turns the setting on or off, and a key it leaves out keeps
-  the installed value. Deleting `unique: true` leaves the column unique; to
+  the installed value. Deleting `unique: true` leaves the Column unique; to
   turn it off, write `unique: false`. A declared `merge_key` replaces the
   installed one; `merge_key: null` removes it; leaving `merge_key` out keeps
   it. A bare `merge_key:` with nothing after it is YAML for `null`, so it
-  removes the merge key too.
-- **Merge policy follows a declared `merge:`.** A `merge:` that differs from
+  removes the Merge Key too.
+- **Merge Policy follows a declared `merge:`.** A `merge:` that differs from
   the installed one replaces it, and the old policy's `merge_separator` or
-  `merge_when` is dropped unless the manifest restates one. An omitted
-  `merge:` keeps the installed policy, unless the same publish retypes the
-  column out of what that policy requires (`concat` off `string`,
-  `increment_on_change` off `number`); then the column becomes `replace`.
-- **Never changes:** a column is never removed or renamed. Columns are matched by name, ignoring
-  case and extra whitespace, and a matched column keeps its installed
+  `merge_when` is dropped unless the Manifest restates one. An omitted
+  `merge:` keeps the installed policy, unless the same Publish retypes the
+  Column out of what that policy requires (`concat` off `string`,
+  `increment_on_change` off `number`); then the Column becomes `replace`.
+- **Never changes:** a Column is never removed or renamed. Columns are matched by name, ignoring
+  case and extra whitespace, and a matched Column keeps its installed
   spelling.
-- **Existing rows are not rewritten.** A new `type`, `format`, `required`
-  or merge policy applies to the rows already stored the next time anything
-  merges into them. After `concat` becomes `replace`, a row keeps its
-  accumulated text until its next write replaces it. A merging write or a `patch_row` checks the whole merged row, so it
-  can fail on an old value in a column the write never touched.
+- **Existing Rows are not rewritten.** A new `type`, `format`, `required`
+  or Merge Policy applies to the Rows already stored the next time anything
+  merges into them. After `concat` becomes `replace`, a Row keeps its
+  accumulated text until its next write replaces it. A merging write or a `patch_row` checks the whole merged Row, so it
+  can fail on an old value in a Column the write never touched.
 
-A column you stop declaring stays on the table with its data, after the
-declared ones. Removing a column from the manifest does not remove it from
-the table.
+A Column you stop declaring stays on the Table with its data, after the
+declared ones. Removing a Column from the Manifest does not remove it from
+the Table.

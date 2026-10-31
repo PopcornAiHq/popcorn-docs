@@ -18,8 +18,8 @@ part: use
 
 Routine Settings are the values that tune a Routine without changing what it
 does: switches that turn a behaviour on or off, values such as a reminder
-interval, a follow-up limit or a schedule's cadence, and the prompts and email
-wording its agent uses. They are the first place to look when a Routine
+interval, a follow-up limit or a Schedule's cadence, and the prompts and email
+wording its Agent uses. They are the first place to look when a Routine
 should behave differently.
 
 A setting:
@@ -33,11 +33,11 @@ A claims intake Routine's settings include:
 | Setting | What it decides |
 |---|---|
 | Email sending | *Off*, *Draft* (each email is written for a person to send) or *Send* |
-| Agreement sending | the same three, for sending agreements through the signing provider |
-| Reply matching | whether a reply is matched to its item by the sender's address, or by the email thread (for an inbox several Routines share) |
+| Agreement sending | the same three, for sending agreements through the Signing Provider |
+| Reply matching | whether a reply is matched to its Item by the sender's address, or by the email thread (for an inbox several Routines share) |
 | Save signed agreements to Google Drive | whether each signed agreement is filed in a folder for its client |
 | Booking confirmation | whether someone who books a meeting gets a short note confirming it |
-| Step forward | whether people can move an item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/use/concepts/reviews.md)) |
+| Step forward | whether people can move an Item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/use/concepts/reviews.md)) |
 | Reminder schedule, outreach hours | when follow-ups go out, and the hours emails may be sent in |
 
 The names follow the Routine's own words, so a Routine that sends a retainer
@@ -67,7 +67,7 @@ Secrets, and the Routine's [Instructions](https://docs.popcorn.ai/use/concepts/i
 are not changed here; they change in Popcorn. The walkthrough is
 [changing how a Routine behaves](https://docs.popcorn.ai/use/guides/change-how-a-routine-behaves.md).
 
-In the template, many settings are the Routine's scalars or its
+In the template, many settings are the Routine's Scalars or its
 `channel_parameters:`, and the prompts and email templates are files the template
-seeds; [scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md)
+seeds; [Scalar tiers and Routine Settings](https://docs.popcorn.ai/build/concepts/scalar-tiers.md)
 says which declarations become settings.

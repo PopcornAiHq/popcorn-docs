@@ -8,7 +8,7 @@ summary: >
   mailbox it reads or the calendar it books into. list_connections names
   each one the Routine needs, whose account it uses, and what stops without
   it. With make_connection an assistant makes one after a dry run, from an
-  account the person signed in to, or as a webhook. For Google it can hand
+  account the person signed in to, or as a Webhook. For Google it can hand
   them the sign-in link.
 lede: >
   A Connection is an account Popcorn uses on a Routine's behalf, such as the
@@ -53,7 +53,7 @@ partly idle until someone connects it.
 ## Making one
 
 `make_connection` makes one of a Routine's Connections: it connects an
-account the person has already signed in to, or makes the webhook another
+account the person has already signed in to, or makes the Webhook another
 system posts to. It is a dry run first; called again with `confirm=true`, it
 makes the Connection.
 
@@ -64,7 +64,7 @@ makes the Connection.
   Routine's other Connections that it can serve and that have none yet (one
   Google account serves the inbox, calendar and Drive together);
   `only=true` connects the named one alone.
-- **A webhook.** The dry run says which webhook it replaces, if any, whose
+- **A Webhook.** The dry run says which Webhook it replaces, if any, whose
   address then stops working. The confirm answers with the new address,
   once: it is a credential, since anyone who has it can post to the Routine.
   When the Routine's own Agent makes it, the address isn't shown in the
@@ -77,12 +77,12 @@ theirs. For a Google account not yet signed in to, or one whose sign-in lacks
 access, `make_connection` may hand back a sign-in link to pass on. It works
 once, within minutes, and only for the person who asked, who finishes it in
 Popcorn in the browser. Any other account is signed in to in the Routine's
-settings in Popcorn, and a signing provider's keys are saved there by a
-workspace admin or owner.
+settings in Popcorn, and a Signing Provider's keys are saved there by a
+Workspace admin or owner.
 
-Making a Connection needs workspace admin, or membership of the Routine.
-Replacing a webhook someone else made needs an admin of the Routine or the
-workspace.
+Making a Connection needs Workspace admin, or membership of the Routine.
+Replacing a Webhook someone else made needs an admin of the Routine or the
+Workspace.
 
 ## Connected, but without the access it needs
 

@@ -1,23 +1,23 @@
 ---
 id: schedules
-title: Schedules in a manifest
+title: Schedules in a Manifest
 order: 7
-group: What a bundle holds
+group: What a Bundle holds
 summary: >
-  A Routine's scheduled Triggers are manifest schedules: each names a single
-  flow and either `interval:` or `cron:`, never both, and its `class:` picks
-  the queue and how a fire is spread. Each install of a new version reconciles
-  schedules by (flow, slug), and a schedule whose `flow:` is not in the bundle
+  A Routine's scheduled Triggers are Manifest Schedules: each names a single
+  Flow and either `interval:` or `cron:`, never both, and its `class:` picks
+  the queue and how a fire is spread. Each Install of a new Version reconciles
+  Schedules by (Flow, slug), and a Schedule whose `flow:` is not in the Bundle
   (a typo in it, say) disappears: skipped, then deleted as undeclared.
 lede: >
-  How a template schedules a Routine's work, and what happens to a schedule
-  when a new version installs.
+  How a template schedules a Routine's work, and what happens to a Schedule
+  when a new Version installs.
 concepts: [manifest-keys, flow-grammar]
 part: build
 ---
 
 A Routine's scheduled Triggers — the ones that run on a clock — are
-schedules in its template's manifest. Each names the flow it runs, a
+Schedules in its template's Manifest. Each names the Flow it runs, a
 cadence, and the inputs each fire passes.
 
 ```yaml
@@ -34,17 +34,17 @@ schedules:
 
 ## Inputs address their own Routine
 
-Schedule `inputs` support two substitutions applied at install:
+Schedule `inputs` support two substitutions applied at Install:
 `<channel-conversation-id>` and `<workspace-id>`. That is how a portable
-bundle passes its own Routine's id into a scheduled flow. The same two work in
+Bundle passes its own Routine's id into a scheduled Flow. The same two work in
 `triggers:` inputs.
 
 ## One cadence, and a class that routes it
 
 Each entry names exactly one of `interval:` or `cron:`. `app validate`
 reports one naming both (`schedule-two-triggers`). If it reaches the server,
-the install fails for a new schedule; a schedule that already exists is
-instead skipped and kept exactly as it was, and the install reports it as
+the Install fails for a new Schedule; a Schedule that already exists is
+instead skipped and kept exactly as it was, and the Install reports it as
 skipped. The same rule applies to an unknown `class:`.
 
 `class:` is routing, not decoration: it picks the queue and how the fire time
@@ -52,27 +52,27 @@ is spread — `periodic` (the default) for an interval, `deadline` for a daily
 cron, `window` for deferrable work. Only `deadline` and `window` spread a
 daily cron.
 
-## Install reconciles by (flow, slug)
+## Install reconciles by (Flow, slug)
 
-Install upserts each schedule by (flow, slug), then deletes the name-keyed
-schedules the manifest no longer declares; schedules a member created through
-another surface are never touched. On a version update an unchanged
-`schedules:` section is skipped, only schedules the *old* manifest declared
-and the new one drops are deleted, and a recreated schedule keeps its paused
+Install upserts each Schedule by (Flow, slug), then deletes the name-keyed
+Schedules the Manifest no longer declares; Schedules a Member created through
+another surface are never touched. On a Version update an unchanged
+`schedules:` section is skipped, only Schedules the *old* Manifest declared
+and the new one drops are deleted, and a recreated Schedule keeps its paused
 state and note.
 
-**A schedule whose `flow:` is not in the bundle is skipped — and is then
-deleted as undeclared**, so a typo in `flow:` removes the schedule it meant to
-keep. A renamed flow does the same; see
-[a flow's identity is its name](https://docs.popcorn.ai/build/concepts/flow-grammar.md).
+**A Schedule whose `flow:` is not in the Bundle is skipped — and is then
+deleted as undeclared**, so a typo in `flow:` removes the Schedule it meant to
+keep. A renamed Flow does the same; see
+[a Flow's identity is its name](https://docs.popcorn.ai/build/concepts/flow-grammar.md).
 
-## Live schedules can differ from the manifest
+## Live Schedules can differ from the Manifest
 
-A Routine's live schedules can differ from its manifest on purpose.
+A Routine's live Schedules can differ from its Manifest on purpose.
 `popcorn.app_mode: test` compresses them, and the platform offsets a plain
 daily cron away from the top of the hour. `popcorn app status` compares the
-live schedules with the manifest and knows which of those differences the
+live Schedules with the Manifest and knows which of those differences the
 platform made: it exits non-zero only for an unexplained one, or for a
-schedule paused with nothing saying why. Compare through it rather than by
-reading `schedule list` against the manifest. A paused schedule reports no
+Schedule paused with nothing saying why. Compare through it rather than by
+reading `schedule list` against the Manifest. A paused Schedule reports no
 next fire.
