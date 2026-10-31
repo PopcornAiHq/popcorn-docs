@@ -13,8 +13,9 @@ Every page but the glossary and the references declares a `part`, which cuts
 across concepts and guides.
 
 - **`use`**, Using Popcorn — for a Popcorn user and their assistant, working
-  with Routines. Popcorn is used headless, so this is what an assistant
-  connected over MCP reads first.
+  with Routines. Popcorn is used both in its app and headless, from an
+  assistant connected over MCP, so a page says where a thing is done when the
+  two differ. This is also what that assistant reads first.
 - **`build`**, Building Routine Templates — for someone building or changing
   a Routine Template without access to the backend.
 

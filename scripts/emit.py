@@ -312,13 +312,16 @@ def landing(pages: list[dict]) -> str:
     # rather than linked so it takes the page's colours in either theme.
     rest = _DIAGRAM_BLOCK.sub("\x00diagram\x00\n", rest, count=1)
     figure = f'<figure class="diagram">{DIAGRAM.read_text().strip()}</figure>'
+    rendered = render.body(rest).replace("<p>\x00diagram\x00</p>", figure)
     return render.document(
         "Overview — Popcorn docs",
         f'<h1>Overview</h1>\n<p class="summary">{render.inline(lede)}</p>\n'
-        + render.body(rest).replace("<p>\x00diagram\x00</p>", figure),
+        f"{render.on_this_page(rendered, lookup=False)}"
+        + rendered,
         description="How Popcorn Routines work, and how to build the Routine "
         "Templates they are made from.",
         sidebar=sidebar(pages, None),
+        rail=render.rail(contents=render.toc(rendered)),
         url=url(None),
     )
 
