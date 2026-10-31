@@ -3,7 +3,7 @@ id: activities
 title: Activities
 order: 1
 layout: lookup
-updated: 2026-10-29
+updated: 2026-10-31
 summary: >
   Every foundation and feature activity a flow step can call at release or
   beta status, with its arguments and what it returns — generated from the
@@ -2619,6 +2619,7 @@ lead launches (the bundle's tests hold the two steps together).
 | `launched` | integer |  |
 | `skipped` | map of integer |  |
 | `uncertain` | integer |  |
+| `seeded` | integer |  |
 
 ### `feature.chase.agent_ingest`
 
@@ -3086,11 +3087,11 @@ No description in the catalog.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | yes |  |
-| `rows` | list of object | yes | The tracker's rows, with `_record_id`. |
+| `rows` | list of object, optional | no | The tracker's rows, with `_record_id`. Omitted: the activity reads the whole tracker itself (`channel_rows`), so no row list rides in the flow's history. |
 | `events` | list of any | no | Changed calendar events as feature.gcal.list_changes (or list_events) returns them: events, or pages of events (lists; a skipped page's null is ignored). |
 | `page` | string | no | ONE booking page envelope as stored (JSON), shared by every booking stage; `pages` names a page per stage instead. Default `""`. |
 | `pages` | list of object | no | The recipe's pages as feature.chase.stage.booking_pages lists them (stage / key / title / link); `start` is the page a chase starts from. |
-| `ledger` | list of object | no | The `bookings` ledger's rows, so a change to a folded meeting is kept there. |
+| `ledger` | list of object, optional | no | The `bookings` ledger's rows, so a change to a folded meeting is kept there. Omitted: the activity reads the ledger itself, as it does the tracker. |
 | `watch_start` | boolean | no | Match changes to each row's `Start Event` before the intake: a start meeting cancelled or moved comes back in `start_patches` / `start_returns`, never as an intake. Default `false`. |
 
 **Returns**
@@ -3382,6 +3383,7 @@ together).
 | `launched` | integer |  |
 | `skipped` | map of integer |  |
 | `uncertain` | integer |  |
+| `seeded` | integer |  |
 
 ### `feature.chase.stage.eval`
 
@@ -3781,7 +3783,7 @@ No description in the catalog.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | no | Default `""`. |
-| `rows` | list of object | no | The tracker's rows, with `_record_id`, the stored machine columns, the booking columns and `Agent Intake`. |
+| `rows` | list of object, optional | no | The tracker's rows, with `_record_id`, the stored machine columns, the booking columns and `Agent Intake`. Omitted: the activity reads the whole tracker itself (`channel_rows`), so no row list rides in the flow's history. |
 | `app_mode` | string | no | Default `""`. |
 | `test_day_seconds` | integer | no | Default `60`. |
 | `min_ahead_seconds` | integer | no | Default `60`. |
@@ -4062,7 +4064,7 @@ No description in the catalog.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `conversation_id` | string | no | Default `""`. |
-| `rows` | list of object | no |  |
+| `rows` | list of object, optional | no |  |
 
 **Returns**
 
