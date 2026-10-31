@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-29
+updated: 2026-10-31
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -942,7 +942,7 @@ One row in full: every column, its rev (update_row needs it as expected_rev), wh
 
 Routine: #intake (c7d2…5b) · table: claims
 Row: 88  rev: 4  created 2026-09-01 10:00  updated 2026-09-29 14:05
-State: Status = open · Stage = open
+State: Status = Open (open) · Stage = Open (open)
 - claim_no: 4471
 - claimant: Ortiz
 - amount: 12400
@@ -1447,9 +1447,9 @@ Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a
 → list_actions(routine="#intake", row_id=88)
 
 Routine: #intake (c7d2…5b) · table: claims
-Row 88 · Status: open
+Row 88 · Status: Open (open)
 Actions offered now:
-- Close claim  action: close  moves it to: Closed
+- Close claim  action: close  moves it to: Closed (closed)
 - Ask for documents  action: ask_docs  [in Popcorn]
 ```
 
@@ -1464,11 +1464,11 @@ Refused, with the reason, for an item the Action isn't offered on now. Without c
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `row_ids` [required] | `list[int]` | The items' row IDs in the Routine's main table. |
-| `action` [required] | `str` | The Action, as list_actions names it (its "action"). |
+| `row_ids` | `list[int]` | The items' row IDs in the Routine's main table. Required, but for a confirm with a plan_id. |
+| `action` | `str` | The Action, as list_actions names it (its "action"); its button label names it too. Required, but for a confirm with a plan_id. |
 | `confirm` | `bool` | true to act. Show the user the dry run first. Default `False`. |
 | `run_key` | `str` | The run_key the dry run gave, with confirm=true. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same items and action. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for row_ids, action and the run_key: leave them out and the confirm takes the dry run's, or send them and they must be the same. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Close claim 4471 in #intake.”
 
@@ -1479,7 +1479,7 @@ Routine: #intake (c7d2…5b) · table: claims
 **Dry run.** Nothing was changed.
 
 Take: close on 1 item(s), now.
-- row 88: open → Closed (Close claim)
+- row 88, Close claim: Open (open) → Closed (closed)
 - It runs as the workspace's agent, for you, as the button would: what the Action sends or records is real.
 - run_key: Hc4pW8sN…
 
