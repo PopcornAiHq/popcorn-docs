@@ -24,6 +24,17 @@ Some names are everyday English as well — a person's *app*, a *project*, a
 *record* of what happened — and can't be told apart from the platform's word
 in prose, while in code they are allowed anyway. Those are left to review.
 
+It also lists a glossary term written lowercase in prose. Every term the
+glossary defines is capitalized where it means that concept (`CLAUDE.md`,
+"Glossary terms are capitalized"), but many are everyday words too — a *run*
+of the command, the server's *state* — and only a reader can tell which is
+meant. So only the terms with no ordinary sense are checked: the multi-word
+ones, where "merge policy" can only be the concept, and the few single words
+listed in `CAPITALIZED`. Code and italicised mentions are allowed, as above,
+and so is an interface label in `LABELS`, quoted as the interface spells it.
+The glossary itself is checked down to its names table, whose first column
+holds the other names, lowercase by design.
+
 CI and the pre-commit hook run it with `--strict`, which exits 1 when
 anything is listed. Without it, it only reports.
 """
@@ -42,6 +53,21 @@ TABLE_HEADING = "## Names you'll see elsewhere"
 # Names that are also everyday words; see the module docstring.
 ORDINARY = {"app", "project", "record"}
 
+# Glossary terms that are never ordinary English, so a lowercase use in prose
+# is always a slip. Words that are also everyday English (run, flow, state,
+# copy, item, version…) are left to review; see the module docstring.
+CAPITALIZED = [
+    "Routine Template", "Routine Settings", "Routine Setting", "Workspace Agent",
+    "Workspace Member", "Workspace Role", "Routine Member", "App Bundle",
+    "App Agent", "Booking Page", "Signing Provider", "Daily Update",
+    "State Machine", "Merge Policy", "Merge Policies", "Merge Key",
+    "Release Track", "Message Trigger", "Trigger Report", "Connected Account",
+    "Integration Requirement", "Activity Catalog", "Inbox Scan",
+    "Routine", "Workspace", "Webhook", "Manifest", "Scalar", "Bundle",
+]
+# Interface labels, quoted as the interface spells them, like code.
+LABELS = {"New routine"}
+
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _GENERATED = re.compile(r"^(updated|version):", re.M)
 # An entry can head with several terms, as "- **Agent**, **channel agent** —":
@@ -58,6 +84,7 @@ _FENCE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
 # cannot hide the paragraphs after it.
 _CODE = re.compile(r"`(?:[^`\n]|\n(?![ \t]*\n))+`")
 _LINK = re.compile(r"\]\([^)\s]+\)")
+_LINK_TEXT_URL = re.compile(r"https?://\S+|<[^>\n]+>")
 # Single-asterisk italics, not `**bold**`: a name in italics is being mentioned.
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
 
@@ -122,6 +149,46 @@ def paragraphs(text: str) -> list[tuple[int, str]]:
     return out
 
 
+def _term(term: str) -> re.Pattern[str]:
+    # A wrapped term is still one term, and a filename ("manifest.yaml") or a
+    # hyphenated compound is not prose use of it.
+    words = r"\s+".join(re.escape(w) for w in term.split())
+    return re.compile(r"(?<![\w-])" + words + r"s?(?![\w-]|\.\w)", re.I)
+
+
+def _lowercase(text: str) -> list[str]:
+    """Each term in `text` written with a lowercase word, longest term first."""
+    out = []
+    for term in sorted(CAPITALIZED, key=len, reverse=True):
+        pattern = _term(term)
+        for m in pattern.finditer(text):
+            if any(w[0].islower() for w in m.group(0).split()):
+                out.append(" ".join(m.group(0).split()))
+        text = pattern.sub("", text)
+    return out
+
+
+def _fields(fm: str) -> list[tuple[int, str]]:
+    """The frontmatter fields a reader sees: title, summary and lede."""
+    out = []
+    for m in re.finditer(r"^(title|summary|lede):(.*(?:\n[ \t]+.*)*)", fm, re.M):
+        out.append((0, _ITALIC.sub("", " ".join(prose(m.group(2)).split()))))
+    return out
+
+
+def capitalization(f: pathlib.Path, doc: re.Match[str]) -> list[str]:
+    body = doc.group("body")
+    if f == GLOSSARY:
+        body = body[: body.find(TABLE_HEADING)]
+    for label in LABELS:
+        body = body.replace(f"**{label}**", "")
+    hits = []
+    for lineno, line in _fields(doc.group("fm")) + paragraphs(prose(body)):
+        where = f"paragraph at body line {lineno}" if lineno else "frontmatter"
+        hits += [f"{where}: '{t}' lowercase" for t in _lowercase(_LINK_TEXT_URL.sub("", line))]
+    return hits
+
+
 def main() -> int:
     guarded = [n for n in names() if n not in ORDINARY]
     # A longer entry holding a name ("channel agent") is masked first, so the
@@ -138,12 +205,18 @@ def main() -> int:
     found: dict[str, list[str]] = {}
     checked = 0
     for f in sorted(CONTENT.rglob("*.md")):
-        if f.name.startswith("_") or f == GLOSSARY:
+        if f.name.startswith("_") and f.name != "_overview.md":
             continue
-        doc = _DOC.match(f.read_text())
+        text = f.read_text()
+        # The Overview has no frontmatter; it is prose all the same.
+        doc = _DOC.match(text) or _DOC.match(f"---\n\n---\n{text}")
         if not doc or _GENERATED.search(doc.group("fm")):
             continue
         checked += 1
+        for hit in capitalization(f, doc):
+            found.setdefault(f.stem, []).append(hit)
+        if f == GLOSSARY or f.name.startswith("_"):
+            continue
         for lineno, line in paragraphs(prose(doc.group("body"))):
             for mask in mask_patterns:
                 line = mask.sub("", line)
@@ -159,9 +232,9 @@ def main() -> int:
             print(f"    {hit}")
     mark = "✖ " if total and "--strict" in sys.argv else "• "
     print(
-        f"{mark} {total} use(s) of {len(guarded)} names in {len(found)} of {checked} "
-        "hand-written pages"
-        + ("" if total else " — every page uses the product's words")
+        f"{mark} {total} use(s) of {len(guarded)} names or {len(CAPITALIZED)} lowercase "
+        f"terms in {len(found)} of {checked} hand-written pages"
+        + ("" if total else " — every page uses the product's words, capitalized")
     )
     return 1 if total and "--strict" in sys.argv else 0
 

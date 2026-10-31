@@ -67,3 +67,32 @@ argument, date it.
 
 If a concept needs two summaries, it is two concepts. If it needs none, it is
 a paragraph in a guide.
+
+## Glossary terms are capitalized
+
+Every term `content/concepts/glossary.md` defines is capitalized wherever it
+means that concept — everyday words included: a Workspace, an Item, a Run, a
+Flow, a Merge Policy, the Head of a Copy. A capital tells the reader the word
+is the product's, with a glossary entry behind it, and not the English word.
+The model is Temporal's docs, which capitalize Schedule, Task and Event for
+the same reason.
+
+- **Ordinary English stays lowercase.** "Run the command", "the server's
+  state", "a dry run", "ask for an outcome". Decide by meaning, never by
+  search-and-replace.
+- **Verbs stay lowercase.** Copy, publish, install, apply and check out are
+  capitalized as nouns of the concept — a Copy, the Publish, an Install —
+  and not as the action: "publish the Bundle".
+- **Code is written as code spells it**: `manifest.yaml`, `popcorn app
+  publish`, `call_flow`, `version:`.
+- **Exceptions, each lowercase for a reason:** *active* and *deactivated*
+  are adjectives; *rev* and `call_flow` are identifiers; channel
+  parameters, channel agent and channel integration are the API's names,
+  written as it spells them; *customizing a Routine* is a phrase, not a
+  noun; *Popcorn's version* is the shared series, not a Version; other names
+  in the glossary's closing table are the names being mapped, not the
+  product's word.
+
+`scripts/check-vocabulary.py --strict` flags the terms that have no ordinary
+sense — multi-word ones such as merge policy, and words such as workspace
+and manifest — when written lowercase in prose. The rest are left to review.
