@@ -30,7 +30,7 @@ Review, then the retainer.
 A person can also start a Routine in Popcorn without picking a template.
 **New routine** takes a sentence such as "ask new clients a few questions,
 then send them a retainer", or an example to start from, and the new
-Routine's agent drafts its Steps from it for the person to check. Popcorn can
+Routine's Agent drafts its Steps from it for the person to check. Popcorn can
 also suggest Routines from a connected inbox, from the work it finds waiting
 there. Both start from the same template as this guide, so the rest of it
 applies once the Routine exists.
@@ -39,9 +39,9 @@ applies once the Routine exists.
 
 > "What templates could a new Routine here start from?"
 
-`list_routine_templates` lists the Routine Templates this workspace can
+`list_routine_templates` lists the Routine Templates this Workspace can
 start from: each one's name, its slug, what it does, and the Connections it
-needs before it runs. A template the workspace cannot run is not listed. Note
+needs before it runs. A template the Workspace cannot run is not listed. Note
 the slug — `chase` here — and the Connections (Gmail, Google Drive, Google
 Calendar and an intake address), because someone has to make them under "Make its Connections".
 
@@ -51,14 +51,14 @@ Calendar and an intake address), because someone has to make them under "Make it
 > Jordan in it."
 
 `create_routine` with a `template` is a dry run first. It names the
-version that will install, the members, and the Connections someone sets up
+Version that will install, the Members, and the Connections someone sets up
 before the Routine runs, and changes nothing. Read it back to the person, then
 call again with `confirm=true`.
 
 - **Private or open.** A private Routine is joined only by you and the
-  people you name; one that is not private adds everyone in the workspace.
+  people you name; one that is not private adds everyone in the Workspace.
 - **The name.** Spaces become hyphens, and a name already used in the
-  workspace is refused with the ID of the Routine that has it.
+  Workspace is refused with the ID of the Routine that has it.
 
 The response gives the new Routine's ID. Use the ID, not the name, in every
 call that changes it.
@@ -88,7 +88,7 @@ connected. See [Connections](https://docs.popcorn.ai/use/concepts/connections.md
 
 > "What sets #claims-west working?"
 
-`list_triggers` shows how work arrives: its schedules with their cadence,
+`list_triggers` shows how work arrives: its Schedules with their cadence,
 the messages and documents that start work, and any other system that posts to
 it. A Chase Routine needs its sample email before its first Step can ask
 anything, and its agreement before it can send one; adding them is a
@@ -96,7 +96,7 @@ person's step in Popcorn (see
 [References](https://docs.popcorn.ai/use/concepts/reference-documents.md)).
 
 To see the Routine work without waiting, `run_trigger` runs one of its
-schedules now — a dry run first, because the work is real. See
+Schedules now — a dry run first, because the work is real. See
 [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md).
 
 ## Next

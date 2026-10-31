@@ -1,49 +1,49 @@
 ---
 id: states-authoring
-title: Author a states tier
+title: Author a States tier
 order: 12
-group: What a bundle holds
+group: What a Bundle holds
 summary: >
-  Writing the state graph behind a Routine's Status and Actions, in
-  `recipe.yaml` or `states:`: stored, derived and mirrored machines; states, events, transitions and buttons;
-  guards; and the flows that fire an edge, which must start its `flow` and
-  `then` launches themselves. Every publish check is listed with its exact
+  Writing the State graph behind a Routine's Status and Actions, in
+  `recipe.yaml` or `states:`: stored, derived and mirrored machines; States, Events, Transitions and buttons;
+  Guards; and the Flows that fire an edge, which must start its `flow` and
+  `then` launches themselves. Every Publish check is listed with its exact
   error — `no expected edge enters`, a terminal left by staff — and its fix.
 lede: >
-  Write the states and transitions behind a Routine's Status and Actions, and
-  get them past the publish checks.
+  Write the States and Transitions behind a Routine's Status and Actions, and
+  get them past the Publish checks.
 concepts: [state-machine, manifest-keys, app-bundle]
 part: build
 ---
 
-This guide takes one state graph from design to a published, wired graph.
-What a state machine *is* — the tuple, the projection, why a button is an
-edge — is [the state machine](https://docs.popcorn.ai/build/concepts/state-machine.md),
+This guide takes one State graph from design to a published, wired graph.
+What a State Machine *is* — the tuple, the projection, why a button is an
+edge — is [the State Machine](https://docs.popcorn.ai/build/concepts/state-machine.md),
 and where the two overlap that page is authoritative. In the product, the
-projected status is an item's **Status**, and each staff edge's button is an
+projected Status is an Item's **Status**, and each staff edge's button is an
 **Action** (see the [glossary](https://docs.popcorn.ai/glossary/glossary.md)).
 
 A Routine Template ships its graph in one of two places. The keys and the
-engine are the same for both, and so are the graph's publish checks; a recipe
-adds a few checks of its own (see "The publish checks that trip authors"). Everything after this section applies to
+engine are the same for both, and so are the graph's Publish checks; a Recipe
+adds a few checks of its own (see "The Publish checks that trip authors"). Everything after this section applies to
 either:
 
-- **A recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
-  at the bundle's root. This is what gives a Routine Steps it can change on
-  its own. The template's recipe is in force until a Routine installs a
+- **A Recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
+  at the Bundle's root. This is what gives a Routine Steps it can change on
+  its own. The template's Recipe is in force until a Routine installs a
   revision of its own. Over MCP, an assistant changes a Routine's Steps with
   `change_routine`, which refuses a Routine whose template declares no
   `recipe:`. It drafts the change by starting the template's own
-  `recipe_build` flow as a dry run, installs it by starting `recipe_build`
+  `recipe_build` Flow as a dry run, installs it by starting `recipe_build`
   again for real, and goes back to an earlier revision through the
-  template's `recipe_install` flow.
+  template's `recipe_install` Flow.
 - **A `states:` section** in `manifest.yaml`, holding the same keys. Its
-  graph is fixed by the template version: every Routine on that version runs
-  the same one, and changing it means publishing a new version.
+  graph is fixed by the template Version: every Routine on that Version runs
+  the same one, and changing it means publishing a new Version.
 
-A template declares one or the other, never both. What else a recipe carries,
+A template declares one or the other, never both. What else a Recipe carries,
 and how a Routine's own revision is installed and kept, is in
-[the state machine](https://docs.popcorn.ai/build/concepts/state-machine.md)'s
+[the State Machine](https://docs.popcorn.ai/build/concepts/state-machine.md)'s
 last section.
 
 The loop is the ordinary one from
@@ -51,17 +51,17 @@ The loop is the ordinary one from
 edit the graph, check it, read the error, repeat. One thing is
 different. The CLI's own checks do not look inside the graph, in
 `recipe.yaml` or under `states:`; it is checked only when the server parses
-the bundle. `popcorn app validate`
-sends it there when run logged in from a fork checkout with edits, and
+the Bundle. `popcorn app validate`
+sends it there when run logged in from a fork Checkout with edits, and
 `app publish` (or `create_routine_version`'s dry run) always does. The check
 stops at the first problem, so a new graph usually takes several rounds to
-pass, one error at a time. Run those rounds with `app validate`, which mints no version.
+pass, one error at a time. Run those rounds with `app validate`, which mints no Version.
 
 ## The worked example
 
-A table of requests that someone reviews. Most graph blocks later in this
-guide are changes to it, and every one was parsed by the engine. As a recipe,
-the manifest declares the table and `recipe:`:
+A Table of requests that someone reviews. Most graph blocks later in this
+guide are changes to it, and every one was parsed by the engine. As a Recipe,
+the Manifest declares the Table and `recipe:`:
 
 ```yaml
 # manifest.yaml
@@ -176,16 +176,16 @@ transitions:
       when: [{shown: true, is: missing_info}]
 ```
 
-As a `states:` section, the same graph is the manifest's `states:` key, with
+As a `states:` section, the same graph is the Manifest's `states:` key, with
 everything in `recipe.yaml` indented under it, in place of `recipe:`.
 
-It has four machines. `review` is the funnel, stored in `Stage`. `blocker`
-is an overlay with no column, so the bundle's own code decides it from the
-row's facts. `hold` is an overlay stored in `Hold`. `tracking` is the one a
-recipe needs once its graph has a work item: `missing_info` warns, so a row
-showing it opens an action item, and a recipe is refused unless that item
-can stop tracking its row (see "The publish checks that trip authors"). Its button's `when:` keeps Stop tracking to
-the rows showing `missing_info`, which get it as action items anyway.
+It has four machines. `review` is the Funnel, stored in `Stage`. `blocker`
+is an Overlay with no Column, so the Bundle's own code decides it from the
+Row's facts. `hold` is an Overlay stored in `Hold`. `tracking` is the one a
+Recipe needs once its graph has a work item: `missing_info` warns, so a Row
+showing it opens an action item, and a Recipe is refused unless that item
+can stop tracking its Row (see "The Publish checks that trip authors"). Its button's `when:` keeps Stop tracking to
+the Rows showing `missing_info`, which get it as action items anyway.
 Publish renders display hints onto `Status`, `Stage`, `Hold` and `Tracking`.
 The one on `Status` lists the whole vocabulary and marks `missing_info` as a
 warning:
@@ -194,35 +194,35 @@ warning:
 status:received,in_review,approved,declined,missing_info,on_hold,not_tracking;warn=missing_info;labels=…;tone=…
 ```
 
-A row in review, with an owner and nothing blocking it, shows `in_review` and
+A Row in review, with an owner and nothing blocking it, shows `in_review` and
 offers Approve, Decline and Put on hold. Put it on hold and it shows `on_hold`.
 Now Approve is still offered but Put on hold is not, because its edge leaves
 only `hold.none`.
 
 ## Design the machines
 
-**One funnel, then overlays.** The funnel is the milestone that moves
-forward. An overlay is something true *alongside* it: blocked, parked,
-waiting on a side document. An overlay has an implicit `none` state, and you
-never declare it. Test each candidate state against this: can it hold at the
-same time as a funnel state? If it can, it belongs in an overlay. The first
-machine with no `overlay: true` is the **primary**. When no overlay is
+**One Funnel, then Overlays.** The Funnel is the milestone that moves
+forward. An Overlay is something true *alongside* it: blocked, parked,
+waiting on a side document. An Overlay has an implicit `none` State, and you
+never declare it. Test each candidate State against this: can it hold at the
+same time as a Funnel State? If it can, it belongs in an Overlay. The first
+machine with no `overlay: true` is the **primary**. When no Overlay is
 active, Status shows the primary.
 
 **Declaration order is precedence.** With no `status.compose` rules, Status
-shows the first overlay, in declaration order, that is not `none`. The
-example declares `blocker` before `hold`, so a row that is held *and* missing
+shows the first Overlay, in declaration order, that is not `none`. The
+example declares `blocker` before `hold`, so a Row that is held *and* missing
 information shows the warning, not the parking.
 
 **Where each value comes from:**
 
 | Shape | Declared as | Its value comes from | Moves by |
 |---|---|---|---|
-| stored | `column: Stage` | the column | events: the engine writes the column when an edge lands |
-| derived | no `column` | the bundle's code, handed in per row | the bundle's derivation changing |
-| mirror | `column:` plus `derive: true` | the bundle's code; the engine writes it into the column | the same, recorded in a column clients can read |
+| stored | `column: Stage` | the Column | Events: the engine writes the Column when an edge lands |
+| derived | no `column` | the Bundle's code, handed in per Row | the Bundle's derivation changing |
+| mirror | `column:` plus `derive: true` | the Bundle's code; the engine writes it into the Column | the same, recorded in a Column clients can read |
 
-A derived value reaches the engine as `machines`, keyed by each row's id (its
+A derived value reaches the engine as `machines`, keyed by each Row's id (its
 `record_id`) as a string. That input goes to `feature.state.project`,
 `feature.state.transition` and `feature.state.check`:
 
@@ -230,12 +230,12 @@ A derived value reaches the engine as `machines`, keyed by each row's id (its
 machines: {"12": {blocker: missing_info}, "13": {blocker: none}}
 ```
 
-A block can also carry the value on its own row patch. In a
+A block can also carry the value on its own Row patch. In a
 `patch_rows … project_states: true` write from `foundation.code.execute`,
 each patch carries `states: {machines: {blocker: missing_info}}` for its own
-row. A machine you leave out reads as its column, or as its initial state. A
-stored machine cannot be supplied: its value is its column, and a caller that
-could hand one in could make an illegal edge legal. The step fails with
+Row. A machine you leave out reads as its Column, or as its initial State. A
+stored machine cannot be supplied: its value is its Column, and a caller that
+could hand one in could make an illegal edge legal. The Step fails with
 `MachinesInvalid`:
 
 ```text
@@ -243,7 +243,7 @@ machines: stored machines ['review'] are read from their columns, not supplied
 ```
 
 A mirror suits a value that is computed but must still be readable as a
-column, for filtering or for a client:
+Column, for filtering or for a client:
 
 ```yaml
 machines:
@@ -255,54 +255,54 @@ machines:
       paid: {label: Paid, tone: green, terminal: true}
 ```
 
-A mirror's column belongs to the projection, the same as `Status`. A bundle
+A mirror's Column belongs to the projection, the same as `Status`. A Bundle
 patch that writes it is refused.
 
-**A derived machine still needs edges.** The graph checks walk transitions,
+**A derived machine still needs edges.** The graph checks walk Transitions,
 so `blocker` declares `world.info_missing` and `world.info_received` even
-though nothing fires them. The bundle simply starts supplying
+though nothing fires them. The Bundle simply starts supplying
 `missing_info`. The edges say how the value moves, and they are what a
 rendered graph draws.
 
-**The initial state is the first one declared** unless `initial:` names
-another. Put the entry state first, and keep that order in any tool that
-rewrites YAML: one that sorts keys changes the initial state without a
-word. An overlay's initial state is `none`.
+**The initial State is the first one declared** unless `initial:` names
+another. Put the entry State first, and keep that order in any tool that
+rewrites YAML: one that sorts keys changes the initial State without a
+word. An Overlay's initial State is `none`.
 
-## States, events, transitions and status
+## States, Events, Transitions and Status
 
 ### States
 
 | Key | Meaning |
 |---|---|
-| `label` | the chip text; the state name humanised when absent |
+| `label` | the chip text; the State name humanised when absent |
 | `tone` | `green`, `red`, `gray` or `black` |
-| `warn` | the chip is a warning, and a row showing it is a work item |
-| `terminal` | `true`: only a `system` event may leave it. `reopenable`: an ending that a later event may undo |
-| `stored_as` | the column value when it is not the state name |
-| `why` | the default Why prose while a row shows this state |
+| `warn` | the chip is a warning, and a Row showing it is a work item |
+| `terminal` | `true`: only a `system` Event may leave it. `reopenable`: an ending that a later Event may undo |
+| `stored_as` | the Column value when it is not the State name |
+| `why` | the default Why prose while a Row shows this State |
 | `work_item` | overrides `warn` for the worklist: `true` opens an item without warning, `false` warns without one |
-| `detail` | `{column, values, labels, tone}`: a qualifier column for this state — one state, many reasons — that an edge landing here may stamp |
+| `detail` | `{column, values, labels, tone}`: a qualifier Column for this State — one State, many reasons — that an edge landing here may stamp |
 
 State names may not contain `,`, `;` or `|`, and labels may not contain `;`,
 `:` or `|`. Hints are built from both, and those characters are the hint's
-separators. `groups:` names sets of states. `from:` and the predicates accept
-a group wherever they accept a state.
+separators. `groups:` names sets of States. `from:` and the predicates accept
+a group wherever they accept a State.
 
 ### Events
 
-`events:` maps a **family** to its event names. Two family names mean
+`events:` maps a **family** to its Event names. Two family names mean
 something to the platform:
 
-- `staff` events are people's decisions. Only a `staff` edge may carry a
+- `staff` Events are people's decisions. Only a `staff` edge may carry a
   `cta:`, so these are the buttons.
-- `system` events are the only ones allowed to leave a `terminal: true`
-  state. Keep them for corrections the bundle's own machinery makes, such as
-  a failed step that has to move a finished row, never for a decision.
+- `system` Events are the only ones allowed to leave a `terminal: true`
+  State. Keep them for corrections the Bundle's own machinery makes, such as
+  a failed Step that has to move a finished Row, never for a decision.
 
 Every other family name is yours; `world` and `agent` are the usual ones. A
-transition names its event as `family.event`. `feature.state.transition`
-also accepts the bare event name when only one family has it, which is how
+Transition names its Event as `family.event`. `feature.state.transition`
+also accepts the bare Event name when only one family has it, which is how
 a button's `action` arrives. A bare `on:` key is safe. YAML reads it as the
 boolean `true`, and the parser turns it back.
 
@@ -311,41 +311,41 @@ boolean `true`, and the parser turns it back.
 | Key | Meaning |
 |---|---|
 | `on` | `family.event` |
-| `from` | a state, a group, a list of them, or `*`; qualify as `hold.none` when the name is ambiguous |
-| `to` | one state; several, when a flow or a written value decides; or `same` |
-| `expected` | `true`, or the list of `from` states it is the normal move out of |
-| `writes` | column → literal, written when the edge lands |
-| `payload_writes` | column → payload key, from the event's `payload` |
-| `also` | other machine → state, moved at the same time |
-| `when` | predicates on the row and the tuple; all must hold |
-| `guard` | named guards; all must hold |
+| `from` | a State, a group, a list of them, or `*`; qualify as `hold.none` when the name is ambiguous |
+| `to` | one State; several, when a Flow or a written value decides; or `same` |
+| `expected` | `true`, or the list of `from` States it is the normal move out of |
+| `writes` | Column → literal, written when the edge lands |
+| `payload_writes` | Column → payload key, from the Event's `payload` |
+| `also` | other machine → State, moved at the same time |
+| `when` | predicates on the Row and the tuple; all must hold |
+| `guard` | named Guards; all must hold |
 | `cta` | the button, on `staff` edges only |
-| `flow` | a bundle flow that *is* the edge; the edge writes nothing itself |
-| `then` | bundle flows to launch per row after the writes land |
-| `effects` | names of bundle-side work, echoed back per applied row |
-| `detail` / `detail_from` | the landing state's detail value, literal or read from that payload key; mutually exclusive, and the landing state must declare `detail:` |
-| `importance` | 1–10, how loudly a client draws the edge, on one scale across every machine; display only. An int, or a map of source state to rank with an optional `default` |
+| `flow` | a Bundle Flow that *is* the edge; the edge writes nothing itself |
+| `then` | Bundle Flows to launch per Row after the writes land |
+| `effects` | names of Bundle-side work, echoed back per applied Row |
+| `detail` / `detail_from` | the landing State's detail value, literal or read from that payload key; mutually exclusive, and the landing State must declare `detail:` |
+| `importance` | 1–10, how loudly a client draws the edge, on one scale across every machine; display only. An int, or a map of source State to rank with an optional `default` |
 | `description` | free text |
 
 The machine is inferred. A qualified reference (`hold.none`) names it;
 otherwise it is the one machine that owns every `from` reference. If that
-is ambiguous, publish says `cannot infer its machine … set machine:`, and a
+is ambiguous, Publish says `cannot infer its machine … set machine:`, and a
 `machine:` key settles it.
 
 **`importance:` is all or nothing.** A spec ranks every edge or none. With
 none, an expected edge draws at 6 and the rest at 3. Rank rarity with
 `importance`, not by dropping `expected`: a rare failure can be the one way
-into its state and still draw quietly.
+into its State and still draw quietly.
 
 **`expected:` marks the normal way in, not the likely one.** Every edge is
 legal, and most are shortcuts. A client that draws only the expected edges
-must still show every state, which is why every state but the initial needs
-one (see "The publish checks that trip authors"). `staff.decline` is `from: open` but `expected: [in_review]`:
+must still show every State, which is why every State but the initial needs
+one (see "The Publish checks that trip authors"). `staff.decline` is `from: open` but `expected: [in_review]`:
 declining from review is the normal path, and declining an unread request
 is a shortcut.
 
 **`to: same`** records something without moving the machine: a nudge, a
-snooze. It may write other columns, but not its own machine's.
+snooze. It may write other Columns, but not its own machine's.
 
 ```yaml
 - on: staff.nudge
@@ -357,12 +357,12 @@ snooze. It may write other columns, but not its own machine's.
 
 A `same` edge counts as neither a way in nor a way out, so it cannot
 satisfy the reachability, expected or exit checks. This one also needs
-`nudge` added to `events.staff` and a `Nudged At` column.
+`nudge` added to `events.staff` and a `Nudged At` Column.
 
-**`flow:` and `then:`** hand work to the bundle. A flow edge is legal like
+**`flow:` and `then:`** hand work to the Bundle. A Flow edge is legal like
 any other, but `feature.state.transition` writes nothing for it and returns
-the flow to launch. The flow's own writes move the row, which is how a
-staff edge can land on more than one state. From a separate graph, a
+the Flow to launch. The Flow's own writes move the Row, which is how a
+staff edge can land on more than one State. From a separate graph, a
 `document` machine whose `sent` is terminal:
 
 ```yaml
@@ -384,7 +384,7 @@ staff edge can land on more than one state. From a separate graph, a
 
 A `then` input is a literal or one of `$payload.<key>`, `$row.<Column>`
 (read after the writes), `$record_id` or `$conversation_id`. A `then` entry
-may carry its own `when:`, judged against the row after the writes.
+may carry its own `when:`, judged against the Row after the writes.
 
 ### The button
 
@@ -392,20 +392,20 @@ may carry its own `when:`, judged against the row after the writes.
 (`button`, the default, `input`, `contact-picker`, `contact-form` or
 `signing-modal`), `prominence` (`primary` or `quiet`), `route`
 (`deterministic`, `agent` or `noop`), `message` and `when`. The `kind` names
-the button, and one kind belongs to one event. `route` defaults to
-`deterministic`: a click runs your `cta_apply` flow directly (see "Wire the flows") and posts
-nothing. `message` is the chat line, templated on columns as
+the button, and one kind belongs to one Event. `route` defaults to
+`deterministic`: a click runs your `cta_apply` Flow directly (see "Wire the Flows") and posts
+nothing. `message` is the chat line, templated on Columns as
 `{Title}` or `{Title|this request}`.
 
 **Choose `ui` and `route` knowing who presses the button.** The Popcorn client
 draws every one. An assistant over MCP can take only an Action that the press
 completes: `route: deterministic` with `ui: button`. `list_actions` shows the
 others marked "in the Popcorn app", and `take_action` refuses them. Both the
-client and `take_action` start the flow by the literal name `cta_apply`, so a
-bundle with buttons must ship a flow by that name.
+client and `take_action` start the Flow by the literal name `cta_apply`, so a
+Bundle with buttons must ship a Flow by that name.
 
 A button's `when` can offer *less* than the edge allows. Approve is legal
-while a row is on hold, but a held card should not invite it:
+while a Row is on hold, but a held card should not invite it:
 
 ```yaml
 - on: staff.approve
@@ -420,8 +420,8 @@ while a row is on hold, but a held card should not invite it:
     when: [{machine: hold, is: none}]
 ```
 
-Held, the row now offers Decline and Release. An event with more than one
-legal edge for a row is not offered at all, because the click would be
+Held, the Row now offers Decline and Release. An Event with more than one
+legal edge for a Row is not offered at all, because the click would be
 refused as `Ambiguous`.
 
 ### Status
@@ -431,16 +431,16 @@ refused as `Ambiguous`.
 | `column` | `Status` | the projected chip |
 | `ctas_column` | `CTAs` | the offered buttons; `null` for none |
 | `why_column` | `Why` | the reason prose; `null` for none |
-| `sub` | none | a machine column a client shows under the chip |
+| `sub` | none | a machine Column a client shows under the chip |
 | `compose` | none | precedence rules, first match wins |
-| `row_ctas` | `all` | `unless_warn` leaves a warning row's buttons to its worklist item |
-| `worklist` | none | an action-item table the projection keeps |
+| `row_ctas` | `all` | `unless_warn` leaves a warning Row's buttons to its worklist item |
+| `worklist` | none | an action-item Table the projection keeps |
 
-The defaults are columns too. A section with no `status:` key still needs
-`Status`, `CTAs` and `Why` declared on the table.
+The defaults are Columns too. A section with no `status:` key still needs
+`Status`, `CTAs` and `Why` declared on the Table.
 
-`compose` overrides the overlay fall-through. A rule's `show:` names a
-machine, meaning its current state, or a literal state, and a rule may carry
+`compose` overrides the Overlay fall-through. A rule's `show:` names a
+machine, meaning its current State, or a literal State, and a rule may carry
 its own `why`.
 To let a decided request show its decision even while a stale blocker is
 still derived:
@@ -459,20 +459,20 @@ With no unconditional rule, anything the rules do not match falls through as
 before. With one, every machine no rule shows drops out of the Status
 vocabulary and its hint.
 
-`worklist: {table: issues, key: cause}` keeps one open row per `tracker` row
-whose shown status is a work item. The worklist table must declare every
-column the reconcile writes: `cause`, `Issue`, `Stage`, `Why`, `ctas`,
+`worklist: {table: issues, key: cause}` keeps one open Row per `tracker` Row
+whose shown Status is a work item. The worklist Table must declare every
+Column the reconcile writes: `cause`, `Issue`, `Stage`, `Why`, `ctas`,
 `Status`, `Opened`, `Resolved` and `affected_record_ids`, or the names you
 set on `worklist:` instead.
 
-## The publish checks that trip authors
+## The Publish checks that trip authors
 
-Each check refuses the publish with one message. A check on the graph is
-prefixed `states:`, in a recipe too; a recipe's own checks, last in this
+Each check refuses the Publish with one message. A check on the graph is
+prefixed `states:`, in a Recipe too; a Recipe's own checks, last in this
 section, name the block or the file they looked at. The wording is the
 engine's, and these are the messages the example's variants produce.
 
-**Every state but the initial needs an `expected:` edge in.** This is the
+**Every State but the initial needs an `expected:` edge in.** This is the
 one new graphs hit first. Here `expected: true` was left off
 `staff.start_review`:
 
@@ -480,27 +480,27 @@ one new graphs hit first. Here `expected: true` was left off
 states: 'review': no expected edge enters ['in_review']; mark the edge that is the normal way in with expected: (an `also:` needs a when: [{machine: review, …}] naming where it leaves)
 ```
 
-Mark the edge that is the state's normal way in. An `also:` counts only
-when its transition's `when:` names the machine and state it leaves from;
+Mark the edge that is the State's normal way in. An `also:` counts only
+when its Transition's `when:` names the machine and State it leaves from;
 otherwise its source is unknown and no spine can draw it.
 
-**Every state must be reachable** from the initial state, through edges or
-through `also:`. A state nothing enters is dead, or its world event is
+**Every State must be reachable** from the initial State, through edges or
+through `also:`. A State nothing enters is dead, or its world Event is
 missing:
 
 ```text
 states: 'review': no edge reaches ['escalated']; a state nothing enters is either dead or missing its world event
 ```
 
-**A funnel state with no way out must be terminal.** Overlays are exempt,
-because an overlay may simply stay set until it clears. Here `approved`
+**A Funnel State with no way out must be terminal.** Overlays are exempt,
+because an Overlay may simply stay set until it clears. Here `approved`
 lost its `terminal: true`:
 
 ```text
 states: review.approved has no way out and is not terminal
 ```
 
-**Only `system` leaves a `terminal: true` state.** Letting `staff.reopen`
+**Only `system` leaves a `terminal: true` State.** Letting `staff.reopen`
 leave `approved` as well as `declined`:
 
 ```text
@@ -510,9 +510,9 @@ states: review.approved is terminal but ['staff.reopen'] leave it
 If people should be able to undo the ending, declare it
 `terminal: reopenable`, as `declined` is. Another machine's edge that
 moves this machine through `also:` needs a `when:` that rules the terminal
-state out.
+State out.
 
-**No two machines share a state name.** Status holds their union, so a
+**No two machines share a State name.** Status holds their union, so a
 value must name its machine on its own:
 
 ```text
@@ -521,8 +521,8 @@ states: state 'received' is declared by both 'review' and 'blocker'; the Status 
 
 **Staff edges do something, and land somewhere definite.** A button that
 moves only a derived machine would be undone by the next derivation, so it
-must write a fact, launch a flow, or declare an effect. A staff edge lands
-on one state unless a `flow:` decides. And only a `staff` edge carries a
+must write a fact, launch a Flow, or declare an effect. A staff edge lands
+on one State unless a `flow:` decides. And only a `staff` edge carries a
 button:
 
 ```text
@@ -531,14 +531,14 @@ states: staff edge 'staff.decline' must land on one state unless a flow decides 
 states: 'world.info_missing' carries a cta but is not a staff event
 ```
 
-**One `cta.kind`, one event.** Two edges may share a kind only when they
-fire on the same event:
+**One `cta.kind`, one Event.** Two edges may share a kind only when they
+fire on the same Event:
 
 ```text
 states: cta kind 'approve' is used by both 'staff.approve' and 'staff.reopen'
 ```
 
-**A `same` edge does not write its own column**, because the row would move
+**A `same` edge does not write its own Column**, because the Row would move
 while the edge claims it does not:
 
 ```text
@@ -546,14 +546,14 @@ states: 'staff.snooze' is a `same` edge but writes its own column 'Stage'; say w
 ```
 
 **`importance:` ranks every edge or none**, and a map must cover every
-`from:` state or carry `default:`:
+`from:` State or carry `default:`:
 
 ```text
 states: importance ranks every edge or none; unranked: ['staff.reopen']
 states: transition on 'staff.decline' ranks no importance from ['received']; name them or add default:
 ```
 
-**A detail stamp needs a landing state that declares one:**
+**A detail stamp needs a landing State that declares one:**
 
 ```text
 states: transition on 'staff.decline' stamps a detail but its landing state declares none
@@ -565,19 +565,19 @@ states: transition on 'staff.decline' stamps a detail but its landing state decl
 states: transition on 'staff.decline': also names its own machine 'review'; that is what to: is for
 ```
 
-**Transition flows must be in the bundle.** Every `flow:` and `then:` has to
-name a flow the bundle installs. Otherwise the row would move and then
+**Transition Flows must be in the Bundle.** Every `flow:` and `then:` has to
+name a Flow the Bundle installs. Otherwise the Row would move and then
 launch nothing:
 
 ```text
 states: transitions name flows ['notify_requester'] that this bundle does not install (flows: ['cta_apply'])
 ```
 
-**The graph needs `tables:`**, and the table it names must declare every
-column the tier reads or writes. That means the status, CTAs and Why
-columns, every stored machine column, every `writes` and `payload_writes`
-column, and every column a predicate reads. Otherwise the tier would write
-columns the table lacks, or read blanks:
+**The graph needs `tables:`**, and the Table it names must declare every
+Column the tier reads or writes. That means the Status, CTAs and Why
+Columns, every stored machine Column, every `writes` and `payload_writes`
+Column, and every Column a predicate reads. Otherwise the tier would write
+Columns the Table lacks, or read blanks:
 
 ```text
 states: a tables: section declaring its table is required
@@ -585,11 +585,11 @@ states: table 'tracker' lacks columns ['Decision'] the states tier writes
 states: predicates read columns ['Owner'] that table 'tracker' does not declare
 ```
 
-The predicate check exists because a missing column reads blank on every
-row, which would quietly make `has_owner` never hold.
+The predicate check exists because a missing Column reads blank on every
+Row, which would quietly make `has_owner` never hold.
 
 **Drop hand-written `display:` hints.** The tier renders them from the
-spec. A column that already carries a different one fails:
+spec. A Column that already carries a different one fails:
 
 ```text
 states: column 'Stage' carries display hint 'status:received,in_review,approved,declined' but the states tier renders 'status:received,in_review,approved,declined;labels=received:Received|in_review:In review|approved:Approved|declined:Declined;tone=approved:green|declined:gray'; drop the literal or change the spec
@@ -598,9 +598,9 @@ states: column 'Stage' carries display hint 'status:received,in_review,approved,
 A graph that moves from hand-kept hints onto the tier deletes those
 literals. There is no need to copy the rendered value back in.
 
-**A recipe has checks of its own**, on the bundle around the graph. The
-manifest declares `recipe:` or `states:`, not both; `recipe:` needs
-`recipe.yaml` at the bundle's root, and `recipe.yaml` needs `recipe:`; and
+**A Recipe has checks of its own**, on the Bundle around the graph. The
+Manifest declares `recipe:` or `states:`, not both; `recipe:` needs
+`recipe.yaml` at the Bundle's root, and `recipe.yaml` needs `recipe:`; and
 `recipe:` needs `tables:`, as `states:` does:
 
 ```text
@@ -610,7 +610,7 @@ recipe.yaml is present but the manifest declares no recipe: section
 recipe: a tables: section declaring the graph's table is required
 ```
 
-**A recipe's action items must be able to stop tracking.** When the graph
+**A Recipe's action items must be able to stop tracking.** When the graph
 has a work item, it needs a `staff.stop_tracking` edge from `tracking.none`
 to `not_tracking` carrying a `cta` of kind `stop-tracking`, as the example's
 `tracking` machine does. A `states:` section has no such check. Without the
@@ -622,14 +622,14 @@ recipe.yaml: the recipe opens action items (missing_info) but declares no staff.
 
 ## Guards
 
-A guard is a named condition a transition lists under `guard:`. It is
+A Guard is a named condition a Transition lists under `guard:`. It is
 `all:` or `any:` of predicates, and a bare list means `all:`. Each predicate
 names exactly one subject and one operator:
 
 | Subject | Operators |
 |---|---|
 | `column: X` | `empty: true` or `false`, `equals:`, `in:`, `not_in:` (case-insensitive) |
-| `machine: M` | `is:`, `in:`, `not_in:` (states or groups), `group:` |
+| `machine: M` | `is:`, `in:`, `not_in:` (States or groups), `group:` |
 | `guard: G` | none; add `holds: false` to negate |
 | `shown: true` | `is:`, `in:`, `not_in:` against the displayed Status |
 
@@ -644,19 +644,19 @@ guards:
       - {machine: review, is: approved}
 ```
 
-A guard may build on another guard, but not on itself through a cycle. A
-guard can carry `code:` and `message:`, and a refusal it causes reports
+A Guard may build on another Guard, but not on itself through a cycle. A
+Guard can carry `code:` and `message:`, and a refusal it causes reports
 them, so a client can key its copy on the code. Without them, a refusal
 reads `staff.approve is not legal here: guard has_owner refused`.
 
-**`shown:` belongs only on a button's `when:`.** What a row displays may
+**`shown:` belongs only on a button's `when:`.** What a Row displays may
 decide what a person is offered. It may not decide what is legal:
 
 ```text
 states: guard 'shows_hold': a shown predicate belongs on a cta's when: only what a row displays decides what a person is offered
 ```
 
-**External guards** are rules only the bundle's code can answer: a budget
+**External Guards** are rules only the Bundle's code can answer: a budget
 lookup, a document check. Declare one so the graph still shows it:
 
 ```yaml
@@ -666,29 +666,29 @@ guards:
 ```
 
 List it under `guard:` like any other. The platform never evaluates it. The
-caller **vouches** for it per row, by passing
+caller **vouches** for it per Row, by passing
 `guards: {"12": [budget_ok]}` to `feature.state.transition` or
-`feature.state.project`. An edge behind an external guard that was not
-vouched for is refused for that row (`external guard budget_ok was not
-vouched for`), and a row's buttons leave it out. A result that relied on a
-vouched guard carries `delegated: true`. Vouching for a guard the platform
+`feature.state.project`. An edge behind an external Guard that was not
+vouched for is refused for that Row (`external guard budget_ok was not
+vouched for`), and a Row's buttons leave it out. A result that relied on a
+vouched Guard carries `delegated: true`. Vouching for a Guard the platform
 evaluates itself fails with
 `guards: ['has_owner'] are not external guards of this graph`. A predicate
-cannot name an external guard at all:
+cannot name an external Guard at all:
 
 ```text
 states: guard 'can_approve': predicate names external guard 'budget_ok'; only the bundle can evaluate it — vouch for it instead
 ```
 
-## Wire the flows
+## Wire the Flows
 
-The graph does nothing until a flow calls it. There are three places.
+The graph does nothing until a Flow calls it. There are three places.
 
-**Buttons.** A deterministic button starts the bundle flow named
-`cta_apply` with `action`, `record_ids` and `payload`. That flow fires the
-event through `feature.state.transition`. The activity does **not** start
-the flows that `flow:` edges and `then:` entries name. It returns them as
-`launches`, and the flow must start them:
+**Buttons.** A deterministic button starts the Bundle Flow named
+`cta_apply` with `action`, `record_ids` and `payload`. That Flow fires the
+Event through `feature.state.transition`. The Activity does **not** start
+the Flows that `flow:` edges and `then:` entries name. It returns them as
+`launches`, and the Flow must start them:
 
 ```yaml
 name: cta_apply
@@ -740,14 +740,14 @@ outputs:
   results: $steps.apply.output.results
 ```
 
-The `derive` step exists because this graph has a derived machine. The
-transition recomposes Status after the edge lands, and a `blocker` left out
+The `derive` Step exists because this graph has a derived machine. The
+Transition recomposes Status after the edge lands, and a `blocker` left out
 of `machines` reads as `none`, so a click would clear a warning the facts
-still support. A graph whose machines are all stored skips that step and
+still support. A graph whose machines are all stored skips that Step and
 passes no `machines`.
 
-**Events from the world.** A webhook, schedule or turn that learns
-something fires the event the same way. `payload` feeds `payload_writes`:
+**Events from the world.** A Webhook, Schedule or turn that learns
+something fires the Event the same way. `payload` feeds `payload_writes`:
 
 ```yaml
 - id: land
@@ -758,8 +758,8 @@ something fires the event the same way. `payload` feeds `payload_writes`:
     payload: { note: $inputs.note }
 ```
 
-**The sweep.** `feature.state.project` recomposes rows from their tuple.
-With no `record_ids` it projects every row and reconciles the whole
+**The sweep.** `feature.state.project` recomposes Rows from their tuple.
+With no `record_ids` it projects every Row and reconciles the whole
 worklist. A tick usually ends with it, so the derived machines follow the
 facts:
 
@@ -779,54 +779,54 @@ facts:
     results: warn
 ```
 
-**What an applied edge writes**, in one patch at the row's read-time
+**What an applied edge writes**, in one patch at the Row's read-time
 revision:
 
 - the edge's `writes` and `payload_writes`
-- the landing state's value in its machine's column, and each `also` machine's
+- the landing State's value in its machine's Column, and each `also` machine's
 - the `detail` stamp
 - the recomposed `Status`, `CTAs`, `Why`, mirrors and policy
 
-A row that changed since it was read comes back `refused` with `StaleRev`,
+A Row that changed since it was read comes back `refused` with `StaleRev`,
 and nothing overwrites it. Each applied edge also records a change on the
-row: `cta_applied` for a staff event, `state_transition` for any other,
-with the old and new Status. The bundle's own `writes` input may not touch
-the projection columns:
+Row: `cta_applied` for a staff Event, `state_transition` for any other,
+with the old and new Status. The Bundle's own `writes` input may not touch
+the projection Columns:
 
 ```text
 writes for record 12 touch projection columns ['Status']; the engine writes them from the tuple
 ```
 
-That is the rule from the concept, enforced on the transition path: change a
-row's status by firing an event. A plain store write to the column is not
+That is the rule from the concept, enforced on the Transition path: change a
+Row's Status by firing an Event. A plain store write to the Column is not
 refused, but the next projection overwrites it.
 
 ## Check it
 
-A publish that passes proves **structure**. Every reference resolves, every
-state is reachable and has an expected way in, no funnel state is a dead
-end, terminals hold, and the table declares what the tier touches.
+A Publish that passes proves **structure**. Every reference resolves, every
+State is reachable and has an expected way in, no Funnel State is a dead
+end, terminals hold, and the Table declares what the tier touches.
 
 It does not prove **intent**, which is still yours to check:
 
-- **States no event fires in practice.** `world.info_missing` passes the
-  checks whether or not any flow ever fires it. Search the bundle's flows
-  for each non-staff event name, and for a derived machine, check that the
-  code actually produces every state.
+- **States no Event fires in practice.** `world.info_missing` passes the
+  checks whether or not any Flow ever fires it. Search the Bundle's Flows
+  for each non-staff Event name, and for a derived machine, check that the
+  code actually produces every State.
 - **Terminals reached too early.** A `from: open` that should have been
   `from: in_review` publishes fine and lets a request be approved unread.
-  Read each terminal's incoming edges as a list of every way a row can end
+  Read each terminal's incoming edges as a list of every way a Row can end
   there.
-- **Buttons that never show.** A guard on a column nothing writes, or a
+- **Buttons that never show.** A Guard on a Column nothing writes, or a
   button `when:` that cannot hold, publishes fine and offers nothing.
 
-`feature.state.spec` returns the resolved graph the run judges rows by. For
-a `states:` section that is the version the Routine is bound to; for a
-recipe it is the revision the run pinned, which is the Routine's own once it
+`feature.state.spec` returns the resolved graph the Run judges Rows by. For
+a `states:` section that is the Version the Routine is bound to; for a
+Recipe it is the revision the Run pinned, which is the Routine's own once it
 has installed one, and the template's otherwise. It includes a Mermaid diagram per machine, and a
 `spine` of the expected edges alone, which is quick to read against what
-you meant. For the rows themselves, `feature.state.check` holds every row
-to the graph. Each stored value must be a declared state, each mirror must
-agree with the value the bundle supplies, and each Status must be what its
-tuple composes to. With `fail_step: true`, any offender fails the step as
-`StatesOutsideGraph`, which makes it a test flow's assertion.
+you meant. For the Rows themselves, `feature.state.check` holds every Row
+to the graph. Each stored value must be a declared State, each mirror must
+agree with the value the Bundle supplies, and each Status must be what its
+tuple composes to. With `fail_step: true`, any offender fails the Step as
+`StatesOutsideGraph`, which makes it a test Flow's assertion.

@@ -8,16 +8,16 @@ the MCP server. A file missing `id` or `summary` fails the build.
 id: copying-a-template         # kebab-case, citable; never reused for another page
 title: Copying a template      # a concept's is a noun phrase; a guide's is imperative: Set up a Routine
 order: 2                       # reading position within its part
-group: How a version ships     # optional: sidebar topic within the part
+group: How a Version ships     # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
 summary: >                     # THE PRODUCT — under 400 characters
-  A copy of a Routine Template is the workspace's own version series of it.
-  Publishing a version to it reaches every Routine on the copy, not just the
+  A Copy of a Routine Template is the Workspace's own Version series of it.
+  Publishing a Version to it reaches every Routine on the Copy, not just the
   one you edited.
 lede: >                        # optional: what a person reads under the title, under 160 characters
-  A copy of a template is your workspace's own, and its changes reach every
+  A Copy of a template is your Workspace's own, and its changes reach every
   Routine on it.
 concepts: [versions, customizing-a-routine]   # other ids, for "see also" and search
 part: build                    # use | build — which half of the site; none on the glossary and references

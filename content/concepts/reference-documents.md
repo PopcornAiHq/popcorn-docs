@@ -6,7 +6,7 @@ group: How work arrives
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. It informs the Routine and is not one
-  of its items. list_references names the ones a Routine has and the ones
+  of its Items. list_references names the ones a Routine has and the ones
   it is still waiting for, and read_reference returns one's text or a
   download link. People add References in Popcorn; adding some starts work,
   which list_triggers lists.
@@ -20,16 +20,16 @@ part: use
 A **Reference** is a document a Routine works from: the agreement it sends
 for signature, the sample email a Step's questions and wording come from,
 the policy it checks claims against, an example of a good reply. A Reference informs the Routine. It is not one of the
-items the Routine tracks, which live in its
+Items the Routine tracks, which live in its
 [Tables](https://docs.popcorn.ai/use/concepts/tables.md).
 
 A Routine's template says which References it expects, and the Routine works
 without one it is still waiting for until someone adds it. A Reference belongs
 to its Routine: adding or replacing one changes that Routine only, and survives
 the template's improvements. The References a template expects are its
-manifest's `documents:` key, where a document that starts work names the flow
+Manifest's `documents:` key, where a document that starts work names the Flow
 it starts (see
-[manifest keys](https://docs.popcorn.ai/build/concepts/manifest-keys.md)).
+[Manifest keys](https://docs.popcorn.ai/build/concepts/manifest-keys.md)).
 
 ## Where they live today
 
@@ -90,12 +90,12 @@ one with why:
 In the templates Popcorn ships today, every Reference is one of these, so
 in practice a person still adds them in Popcorn.
 
-The same people can add a Reference as in Popcorn: a workspace admin, or a
-member of the Routine who isn't a guest.
+The same people can add a Reference as in Popcorn: a Workspace admin, or a
+Member of the Routine who isn't a guest.
 
-## On a workspace that guards personal data
+## On a Workspace that guards personal data
 
 A Reference is free text, which no Column marking can vouch for. So on a
-workspace that guards personal data, `list_references` leaves out file
+Workspace that guards personal data, `list_references` leaves out file
 names, and `read_reference` returns neither the text nor a link: it says
 when the Reference was added and by whom, and that Popcorn shows it.

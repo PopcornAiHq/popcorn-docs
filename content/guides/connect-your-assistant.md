@@ -5,9 +5,9 @@ order: 1
 group: Getting started
 summary: >
   Connecting an assistant to Popcorn: add the hosted MCP server at
-  https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose a workspace, then
+  https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose a Workspace, then
   check the connection with get_workspace. The assistant works with your
-  permissions, in that workspace, until you disconnect it or sign out of
+  permissions, in that Workspace, until you disconnect it or sign out of
   Popcorn.
 lede: >
   Connect your AI assistant to Popcorn so it can work with your Routines,
@@ -17,7 +17,7 @@ part: use
 ---
 
 An assistant connected to Popcorn can find your Routines, see where their
-items stand, decide at their Reviews, change their settings and
+Items stand, decide at their Reviews, change their settings and
 start new ones. It does this through Popcorn's hosted MCP server. This guide
 connects one and checks it.
 
@@ -36,21 +36,21 @@ The server's address is `https://mcp.popcorn.ai/mcp`.
 Any other assistant that connects to remote MCP servers with sign-in uses the
 same address.
 
-## Sign in and choose a workspace
+## Sign in and choose a Workspace
 
 The assistant opens Popcorn's sign-in. After you sign in, a consent page
 names the assistant and asks you to allow it. If you belong to more than one
-workspace, you choose one there.
+Workspace, you choose one there.
 
-The connection stays bound to that workspace. To use another, disconnect and
+The connection stays bound to that Workspace. To use another, disconnect and
 connect again.
 
 ## Check it
 
-> "Which Popcorn workspace are you connected to?"
+> "Which Popcorn Workspace are you connected to?"
 
 The assistant calls `get_workspace`. Every response from the server also
-starts with the workspace's name, so the assistant always knows where it is
+starts with the Workspace's name, so the assistant always knows where it is
 working.
 
 ## Whose permissions it uses
@@ -71,10 +71,10 @@ Some things are done in Popcorn itself, not through an assistant:
 - **A Connection**, such as the mailbox a Routine sends from,
   because it signs in as you. An assistant can say which
   [Connections](https://docs.popcorn.ai/use/concepts/connections.md) a Routine is missing.
-- **Reading or posting a Routine's messages**, and seeing its runs.
+- **Reading or posting a Routine's messages**, and seeing its Runs.
 - **Changing a Routine's [Steps](https://docs.popcorn.ai/use/concepts/steps.md) or
   [Instructions](https://docs.popcorn.ai/use/concepts/instructions.md)**, by telling its
-  agent.
+  Agent.
 - **Choices that open a form**, such as sending an agreement whose fields a
   person checks first.
 

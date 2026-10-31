@@ -2,7 +2,7 @@
 
 Popcorn is a service that uses AI agents to carry out pieces of ongoing work
 called Routines. A Routine starts work on its own when something arrives or on
-a schedule, working through the accounts you already use and from documents
+a Schedule, working through the accounts you already use and from documents
 such as your policies and price lists.
 
 ## Start here
@@ -22,10 +22,10 @@ claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
 ## How a Routine works
 
 A [Routine](https://docs.popcorn.ai/use/concepts/routines.md) is created from
-a Routine Template, which defines its [Tables](https://docs.popcorn.ai/use/concepts/tables.md) for tracking items,
+a Routine Template, which defines its [Tables](https://docs.popcorn.ai/use/concepts/tables.md) for tracking Items,
 [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md) for starting work,
 and a [Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md)
-showing where each item stands.
+showing where each Item stands.
 
 ```diagram
 Triggers ──── start work ───▶ ┌─ Routine ───────────────────────┐
@@ -46,11 +46,11 @@ a policy, a price list        └───────────────�
 The Routine reaches your accounts through
 [Connections](https://docs.popcorn.ai/use/concepts/connections.md) and works
 from [References](https://docs.popcorn.ai/use/concepts/reference-documents.md).
-Many Routines take each item through a few
+Many Routines take each Item through a few
 [Steps](https://docs.popcorn.ai/use/concepts/steps.md): the Routine asks for
 what each one needs, follows up until it has it, and stops at a
 [Review](https://docs.popcorn.ai/use/concepts/reviews.md) wherever a person
-on your team should decide. Each item's
+on your team should decide. Each Item's
 [Actions](https://docs.popcorn.ai/use/concepts/actions-and-status.md) move it
 on, and [History](https://docs.popcorn.ai/use/concepts/history.md) records who
 changed what, and why.
@@ -69,7 +69,7 @@ example:
 - a broker keeping application checklists and client documents in order
 
 It does not fit one-off work. A Routine does the same work again for every
-item it tracks, so a single question or task is one for your assistant on its
+Item it tracks, so a single question or task is one for your assistant on its
 own. Nor does it fit work no Routine Template covers yet: you can set up a
 Routine from a template and change one, but a new template is not self-serve.
 
@@ -80,22 +80,22 @@ what would happen and asks before it goes ahead.
 
 | Ask your assistant | What it does | Read |
 |---|---|---|
-| "What's waiting on me?" | lists the items at a Review, and why | [Review what needs you](https://docs.popcorn.ai/use/guides/work-a-routines-items.md) |
+| "What's waiting on me?" | lists the Items at a Review, and why | [Review what needs you](https://docs.popcorn.ai/use/guides/work-a-routines-items.md) |
 | "Approve that claim." | takes the Action, as its button would | [Actions and Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md) |
 | "Write the follow-ups as drafts so I can check them." | changes one Routine Setting | [Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md) |
 | "Also ask for photos of the damage." | proposes a change to the Steps | [Steps](https://docs.popcorn.ai/use/concepts/steps.md) |
-| "Why was this order closed?" | reads the item's History | [History](https://docs.popcorn.ai/use/concepts/history.md) |
+| "Why was this order closed?" | reads the Item's History | [History](https://docs.popcorn.ai/use/concepts/history.md) |
 | "Run the morning check now." | runs a scheduled Trigger early | [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md) |
 
 ## Building Routine Templates
 
 A Routine is made from a Routine Template: a directory of YAML that gives it
-its Tables, flows and schedules. When a Routine needs something no setting
-reaches, your workspace takes a copy of its template and changes that.
+its Tables, Flows and Schedules. When a Routine needs something no setting
+reaches, your Workspace takes a Copy of its template and changes that.
 
-- [Change a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md): copy, edit, publish, confirm the install
-- [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md): what a copy costs, and why it is one-way
-- [Debug a failed run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md): from a Routine's History to the step that failed
+- [Change a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md): copy, edit, publish, confirm the Install
+- [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md): what a Copy costs, and why it is one-way
+- [Debug a failed Run](https://docs.popcorn.ai/build/guides/debugging-a-failed-run.md): from a Routine's History to the Step that failed
 
 ## Look it up
 

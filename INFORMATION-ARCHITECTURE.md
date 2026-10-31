@@ -36,12 +36,14 @@ the MCP tools already speak to them in the product's words:
 page uses the same words.
 
 - **A name with a product word is written the product way**, and the other
-  name is given once, in italics, where the reader will meet it: "a copy of
+  name is given once, in italics, where the reader will meet it: "a Copy of
   the template (the CLI calls it a *fork line*)". A Routine is not a
   channel, and a Routine Template is not an app, in prose on any page.
-- **A file-level term with no product word is used as it is:** `manifest`,
-  flow, activity, `call_flow`, merge policy. The reader types these, and a
-  page that renamed them would send the reader to translate it back.
+- **A file-level term with no product word is not renamed:** Manifest,
+  Flow, Activity, `call_flow`, Merge Policy. The reader types these, and a
+  page that renamed them would send the reader to translate it back. In
+  prose they are capitalized like every other glossary term; spelled as
+  code (`manifest`, `call_flow`) they stay code.
 - **Code keeps its spelling.** A command, key or field is quoted exactly
   (`popcorn app fork`, `channel_parameters:`), whatever the prose around it
   calls the thing.
