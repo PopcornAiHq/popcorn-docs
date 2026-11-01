@@ -3,7 +3,7 @@ id: mcp
 title: MCP
 order: 3
 layout: lookup
-updated: 2026-10-31
+updated: 2026-11-01
 summary: >
   The tools the hosted Popcorn MCP server gives a person's assistant —
   people, Routines, their Triggers, Actions, settings and tables, and a
@@ -1640,7 +1640,7 @@ A page too long to return whole (the activity and MCP references) comes back as 
 → read_doc(doc_id="copying-a-template")
 
 # Copying a template (id: copying-a-template)
-https://docs.popcorn.ai/build….md
+https://docs.popcorn.ai/copying-a-template.md
 
 Customizing a Routine beyond what its settings reach gives it a copy that the workspace owns (`popcorn app fork`). A copy comes before any publish, and a change published there reaches every Routine on it by their daily update, not only the one you changed. It is one-way: nothing undoes a copy or moves a Routine back to Popcorn's version.
 
