@@ -1,5 +1,5 @@
 <svg class="rd" viewBox="0 0 720 440" role="img" aria-labelledby="rd-title rd-desc" xmlns="http://www.w3.org/2000/svg">
-  <title id="rd-title">How a Routine works</title>
+  <title id="rd-title">Anatomy of a Routine</title>
   <desc id="rd-desc">Triggers start work in a Routine, which uses Connections and reads References. Its Tables hold its Items, and each Item moves through Steps and Reviews. An Item's Status and Actions say where it stands and move it on, and History records every change.</desc>
   <style>
     .rd text { font-family: var(--font); fill: var(--fg); }

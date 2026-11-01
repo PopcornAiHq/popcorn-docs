@@ -450,7 +450,8 @@ def main() -> int:
     search = []
     index = ["# Popcorn docs", "", f"> {overview()[0]}", "",
              "## Overview", f"{SITE}/index.md", "",
-             "What Popcorn is, how a Routine works, and one way into each part. Start here.", ""]
+             "What Popcorn is, how to connect an assistant over MCP, what a Routine is made of, "
+             "what to ask your assistant and one way into each part. Start here.", ""]
     full = [
         "# Popcorn docs — full text",
         "",
