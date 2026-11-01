@@ -81,11 +81,29 @@ def aws(*args: str) -> str:
     return done.stdout
 
 
+# HTML files CloudFront asks for by name: the root object and the error page.
+NAMED_HTML = {"index.html", "404.html"}
+
+
+def key_for(rel: str) -> str:
+    """The bucket key a build file is served from.
+
+    A page's HTML goes up under its bare id, so a person's address is
+    `/steps` rather than `/steps.html`. The key has no extension to guess a
+    type from, which costs nothing here: every upload names its content type
+    from the build file's suffix anyway.
+    """
+    if rel.endswith(".html") and rel not in NAMED_HTML:
+        return rel[: -len(".html")]
+    return rel
+
+
 def local_files() -> dict[str, pathlib.Path]:
+    """Bucket key → build file."""
     if not BUILD.is_dir():
         sys.exit("✖  build/ missing — run scripts/emit.py first")
     return {
-        str(p.relative_to(BUILD)): p
+        key_for(str(p.relative_to(BUILD))): p
         for p in sorted(BUILD.rglob("*"))
         if p.is_file()
     }

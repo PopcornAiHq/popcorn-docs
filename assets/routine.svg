@@ -22,18 +22,18 @@
   </defs>
 
   <!-- What feeds the Routine -->
-  <a href="/triggers.html">
+  <a href="/triggers">
     <rect class="box" x="2" y="22" width="188" height="72" rx="6"/>
     <text class="t" x="18" y="50">Triggers</text>
     <text class="s" x="18" y="72">schedule, message,</text>
     <text class="s" x="18" y="87">document, webhook</text>
   </a>
-  <a href="/connections.html">
+  <a href="/connections">
     <rect class="box" x="2" y="126" width="188" height="72" rx="6"/>
     <text class="t" x="18" y="154">Connections</text>
     <text class="s" x="18" y="176">a mailbox, a calendar</text>
   </a>
-  <a href="/reference-documents.html">
+  <a href="/reference-documents">
     <rect class="box" x="2" y="230" width="188" height="72" rx="6"/>
     <text class="t" x="18" y="258">References</text>
     <text class="s" x="18" y="280">a policy, a price list</text>
@@ -49,22 +49,22 @@
   <!-- The Routine -->
   <rect class="shadow" x="298" y="8" width="420" height="308" rx="8"/>
   <rect class="box" x="292" y="2" width="420" height="308" rx="8"/>
-  <a href="/routines.html"><text class="t" x="312" y="34" style="font-size:17px">Routine</text></a>
-  <a href="/tables.html"><text class="s" x="312" y="58">its Tables hold the Items it tracks</text></a>
+  <a href="/routines"><text class="t" x="312" y="34" style="font-size:17px">Routine</text></a>
+  <a href="/tables"><text class="s" x="312" y="58">its Tables hold the Items it tracks</text></a>
 
   <g transform="translate(0 26)">
   <text class="e" x="312" y="128">each Item</text>
-  <a href="/steps.html">
+  <a href="/steps">
     <rect class="chip" x="312" y="140" width="76" height="38" rx="19"/>
     <text class="t" x="350" y="164" text-anchor="middle" style="font-size:14px">Step</text>
   </a>
   <path class="line" d="M388 159 H414" marker-end="url(#rd-arrow)"/>
-  <a href="/steps.html">
+  <a href="/steps">
     <rect class="chip" x="416" y="140" width="76" height="38" rx="19"/>
     <text class="t" x="454" y="164" text-anchor="middle" style="font-size:14px">Step</text>
   </a>
   <path class="line" d="M492 159 H518" marker-end="url(#rd-arrow)"/>
-  <a href="/reviews.html">
+  <a href="/reviews">
     <rect class="review" x="520" y="140" width="86" height="38" rx="19"/>
     <text class="t" x="563" y="164" text-anchor="middle" style="font-size:14px">Review</text>
   </a>
@@ -81,13 +81,13 @@
   <!-- What comes out of it -->
   <path class="line" d="M420 310 V354" marker-end="url(#rd-arrow)"/>
   <path class="line" d="M600 310 V354" marker-end="url(#rd-arrow)"/>
-  <a href="/actions-and-status.html">
+  <a href="/actions-and-status">
     <rect class="box" x="322" y="358" width="196" height="76" rx="6"/>
     <text class="t" x="338" y="386">Status and Actions</text>
     <text class="s" x="338" y="407">where an Item stands,</text>
     <text class="s" x="338" y="423">and what moves it on</text>
   </a>
-  <a href="/history.html">
+  <a href="/history">
     <rect class="box" x="532" y="358" width="180" height="76" rx="6"/>
     <text class="t" x="548" y="386">History</text>
     <text class="s" x="548" y="407">every change, who</text>
