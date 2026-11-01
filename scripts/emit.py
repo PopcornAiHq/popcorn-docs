@@ -520,6 +520,7 @@ def main() -> int:
                 ),
                 url=url(page),
                 lookup=lookup,
+                kind=kind(page),
                 own_date=bool(page.get("updated")),
             )
         )

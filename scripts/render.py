@@ -634,6 +634,14 @@ h2 code, h3 code, h4 code { font-size: .95em; background: none; padding: 0; }
    the example that closes the one before it. */
 .lookup-page h3 { font-size: 1.3rem; margin-top: 2.75rem; padding-top: 1.75rem; border-top: 1px solid var(--rule); }
 .lookup-page h2 + h3 { margin-top: 0; padding-top: 0; border-top: 0; }
+/* The glossary is read as a dictionary, not scanned for API names: a large
+   letter over each run of terms, each term a plain heading with no rule
+   between, and its index in the body face rather than code. */
+[data-kind="glossary"] .lookup-page h2 { font-size: 1.9rem; margin-top: 3.5rem; }
+[data-kind="glossary"] .lookup-page h3 { font-size: 1.2rem; margin-top: 2.25rem; padding-top: 0; border-top: 0; }
+[data-kind="glossary"] .lookup-page h2 + h3 { margin-top: 1.25rem; }
+[data-kind="glossary"] .lookup summary,
+[data-kind="glossary"] .lookup li a { font-family: inherit; font-size: .85rem; }
 .code-text pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 /* A code block and its copy button. The button sits over the block's top
    corner rather than beside it, so revealing it moves nothing. */
@@ -1314,6 +1322,7 @@ def document(
     url: str = "",
     noindex: bool = False,
     lookup: bool = False,
+    kind: str = "",
     own_date: bool = False,
 ) -> str:
     """Wrap rendered content in a standalone page: header, sidebar, page, rail.
@@ -1367,7 +1376,7 @@ def document(
   <style>{_CSS}</style>
   <script>{_THEME_EARLY}</script>
 </head>
-<body>
+<body{f' data-kind="{kind}"' if kind else ''}>
 <a class="skip" href="#content">Skip to content</a>
 <header class="site"><div class="bar">
 <button class="menu" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">\u2630</button>

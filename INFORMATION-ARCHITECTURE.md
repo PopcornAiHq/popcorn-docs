@@ -51,9 +51,9 @@ page uses the same words.
   (`popcorn app fork`, `channel_parameters:`), whatever the prose around it
   calls the thing.
 
-The glossary's table "Names you'll see elsewhere" pairs each name the CLI,
-the API and older copy use with the product's word. `scripts/check-vocabulary.py
---strict` reads it and fails a hand-written page that uses one of those names
+The glossary gives each name the CLI, the API and older copy use an entry of
+its own, opening "Another name for" and the product's word.
+`scripts/check-vocabulary.py --strict` reads those entries and fails a hand-written page that uses one of those names
 in prose; the everyday words among them (*app*, *project*, *record*) are left
 to review.
 
