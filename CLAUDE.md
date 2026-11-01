@@ -95,7 +95,8 @@ the same reason.
 
 The glossary's entries are alphabetical, under a heading for their first
 letter, like a printed one: a new entry goes in its place, not at the end of
-a topic.
+a topic. Each is a `###` heading naming the term, its definition as plain
+paragraphs, and a closing "Learn more:" line linking the page about it.
 
 `scripts/check-vocabulary.py --strict` flags the terms that have no ordinary
 sense — multi-word ones such as merge policy, and words such as workspace

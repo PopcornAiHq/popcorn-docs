@@ -49,7 +49,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 GLOSSARY = CONTENT / "glossary" / "glossary.md"
-# How an entry for another name opens, after its headword and dash.
+# How an entry for another name opens, under its heading.
 ALIAS = "Another name for "
 
 # Names that are also everyday words; see the module docstring.
@@ -72,14 +72,11 @@ LABELS = {"New routine"}
 
 _DOC = re.compile(r"^---\n(?P<fm>.*?)\n---\n(?P<body>.*)$", re.S)
 _GENERATED = re.compile(r"^(updated|version):", re.M)
-# An entry can head with several terms, as "- **Agent**, **channel agent** —":
+# An entry can head with several terms, as "### Agent, channel agent, App Agent":
 # each is a term of its own, and masks the name it holds.
-_ENTRY = re.compile(
-    r"^- \*\*(?P<term>[^*]+)\*\*(?:\s*\(short: \*\*(?P<short>[^*]+)\*\*\))?"
-    r"(?P<more>(?:, \*\*[^*]+\*\*)*)",
-    re.M,
-)
-_MORE = re.compile(r"\*\*([^*]+)\*\*")
+_ENTRY = re.compile(r"^### (?P<head>.+)$", re.M)
+# "App Bundle (short: Bundle)": the short form is a term as well.
+_SHORT = re.compile(r"\s*\(short: ([^)]+)\)")
 # A fence may be indented inside a list item, and a code span may wrap a line.
 _FENCE = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.S | re.M)
 # A span may wrap a line but not cross a blank one, so a stray backtick
@@ -91,7 +88,7 @@ _LINK_TEXT_URL = re.compile(r"https?://\S+|<[^>\n]+>")
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
 
 
-_ALIAS = re.compile(r"^- \*\*(?P<name>[^*]+)\*\* — " + re.escape(ALIAS), re.M)
+_ALIAS = re.compile(r"^### (?P<name>.+)\n\n" + re.escape(ALIAS), re.M)
 
 
 def names() -> list[str]:
@@ -105,9 +102,9 @@ def names() -> list[str]:
 def entries() -> set[str]:
     out = set()
     for m in _ENTRY.finditer(GLOSSARY.read_text()):
-        for name in (m.group("term"), m.group("short"), *_MORE.findall(m.group("more") or "")):
-            if name:
-                out.add(name.strip().strip("`").lower())
+        head = m.group("head")
+        for name in [*_SHORT.findall(head), *_SHORT.sub("", head).split(", ")]:
+            out.add(name.strip().strip("`").lower())
     return out
 
 
@@ -176,7 +173,7 @@ def _fields(fm: str) -> list[tuple[int, str]]:
 def capitalization(f: pathlib.Path, doc: re.Match[str]) -> list[str]:
     body = doc.group("body")
     if f == GLOSSARY:
-        body = _ALIAS.sub("- ", body)
+        body = _ALIAS.sub("", body)
     for label in LABELS:
         body = body.replace(f"**{label}**", "")
     hits = []
