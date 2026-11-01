@@ -1,8 +1,8 @@
 ---
 id: steps
 title: Steps
-order: 8
-group: What it does
+order: 7
+group: How a Routine works
 summary: >
   A Routine's Steps are its work on each Item, in order: what each one asks
   for by email, what finishes it, and how it follows up when no reply comes. A

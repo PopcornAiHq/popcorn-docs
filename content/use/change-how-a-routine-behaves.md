@@ -1,8 +1,8 @@
 ---
 id: change-how-a-routine-behaves
 title: Change how a Routine behaves
-order: 12
-group: How it behaves
+order: 13
+group: Changing a Routine
 summary: >
   Changing how one Routine behaves: find the Routine Setting that covers it
   with list_routine_settings, read it in full, change it with

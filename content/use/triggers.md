@@ -1,8 +1,8 @@
 ---
 id: triggers
 title: Triggers
-order: 5
-group: How work arrives
+order: 4
+group: How a Routine works
 summary: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message
   posted in it, from a document added to it, or from another system posting to

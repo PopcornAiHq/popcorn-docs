@@ -1,8 +1,8 @@
 ---
 id: connections
 title: Connections
-order: 6
-group: How work arrives
+order: 5
+group: How a Routine works
 summary: >
   A Connection is an account Popcorn uses on a Routine's behalf, such as the
   mailbox it reads or the calendar it books into. list_connections names

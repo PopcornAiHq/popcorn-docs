@@ -1,8 +1,8 @@
 ---
 id: work-a-routines-items
 title: Review what needs you
-order: 16
-group: What people do, and what happened
+order: 9
+group: Day to day
 summary: >
   Reviewing what needs you: see what is waiting and why with get_status; find
   the claims or other Items at a Review, or still open, with list_rows,
