@@ -151,12 +151,13 @@ PARTS = [
 ]
 
 # The kinds of page that serve both parts and belong to neither: (directory,
-# label). They are looked up rather than read through, are listed once after
-# both parts, and say their kind in their eyebrow and in search. Every other
-# page is simply a page of its part.
+# label). They are looked up rather than read through, have the Reference tab
+# to themselves with one sidebar section per kind, in this order, and say their
+# kind in their eyebrow and in search. Every other page is simply a page of its
+# part.
 SHARED = [
-    ("glossary", "Glossary"),
     ("reference", "Reference"),
+    ("glossary", "Glossary"),
 ]
 
 # The kinds whose pages a generator writes. llms-full.txt names them without
@@ -225,7 +226,7 @@ def reading_order(page: dict) -> tuple:
     beside the pages about what it puts to work. Filenames sort
     alphabetically, which put an advanced task ahead of the one it builds
     on. A page with no `order:` goes after the ordered ones in its part; the
-    glossary comes before the references.
+    references come before the glossary.
     """
     part = page.get("part")
     place = _PARTS + _SHARED
@@ -248,37 +249,57 @@ def by_topic(pages: list[dict]) -> list[dict]:
     return [page for group in topics.values() for page in group]
 
 
-def sidebar(pages: list[dict], current: str | None) -> str:
-    """The site sidebar: each part's `group:`s, then Look it up.
+# The header's tabs: each part, then the lookups both parts share. Shorter
+# than the parts' own names, which the eyebrow above each title still uses.
+TABS = [("use", "Using Popcorn"), ("build", "Building Templates"), ("", "Reference")]
 
-    A part lists topics: a group holds every page about one, whether it
-    explains a thing or walks through a task. Pages without a group sit
-    directly under their part.
-    """
-    parts: dict[str, dict[str, list]] = {}
-    # The glossary and the references serve both parts, so they are listed
-    # once, after them, under one heading rather than one each.
-    shared: list = []
-    for page in by_topic(pages):
-        link = (render.inline(page["title"]), href(page), page["id"] == current)
-        if not page.get("part"):
-            shared.append(link)
-            continue
-        parts.setdefault(page["part"], {}).setdefault(page.get("group", ""), []).append(link)
-    # The home page leads the sidebar, current when no page is — `current`
-    # is None only when the landing page is the one being built.
-    out: list = [(None, [("", [("Overview", "/", current is None)])])]
-    for part, groups in parts.items():
-        out.append((part_label(part), None))
-        out.append(("", list(groups.items())))
-    if shared:
-        out.append((LOOK_UP, None))
-        out.append((None, [("", shared)]))
-    return render.site_nav(out)
-
-
-# The sidebar's heading for the kinds that belong to neither part.
+# What the pager is labelled on the Reference tab's pages, which belong to no
+# part.
 LOOK_UP = "Look it up"
+
+# The group the Overview leads, at the top of the first tab.
+GETTING_STARTED = "Getting started"
+
+
+def tab_of(page: dict | None) -> str:
+    """The tab a page sits under: its part, or "" for the shared kinds. The
+    Overview, None here, opens the first part."""
+    return _PARTS[0] if page is None else page.get("part") or ""
+
+
+def tabs(pages: list[dict], current: str | None) -> list[render.Link]:
+    """The header's tabs, each linking to the first page under it. The 404
+    page, `current` "", sits under no tab."""
+    page = next((p for p in pages if p["id"] == current), None)
+    active = None if current == "" else tab_of(page)
+    first = {}
+    for p in by_topic(pages):
+        first.setdefault(tab_of(p), href(p))
+    first[_PARTS[0]] = "/"
+    return [(label, first[key], key == active) for key, label in TABS if key in first]
+
+
+def sidebar(pages: list[dict], current: str | None) -> str:
+    """The site sidebar: the current tab's `group:`s, each under its heading.
+
+    A group holds every page about one topic, whether it explains a thing or
+    walks through a task; pages without one are listed with no heading. On
+    the Reference tab each shared kind is its own section instead. The
+    Overview leads the first part's Getting started, which is where the 404
+    page, under no tab, starts a reader again.
+    """
+    page = next((p for p in pages if p["id"] == current), None)
+    tab = tab_of(page)
+    groups: dict[str, list] = {}
+    for p in by_topic(pages):
+        if tab_of(p) != tab:
+            continue
+        link = (render.inline(p["title"]), href(p), p["id"] == current)
+        groups.setdefault(p.get("group", "") if tab else place_label(p), []).append(link)
+    if tab == _PARTS[0]:
+        home = ("Overview", "/", current is None)
+        groups = {GETTING_STARTED: [home] + groups.pop(GETTING_STARTED, []), **groups}
+    return render.site_nav(list(groups.items()), tabs(pages, current))
 
 
 _DIAGRAM_BLOCK = re.compile(r"^```diagram\n.*?^```\n", re.M | re.S)
@@ -318,6 +339,7 @@ def landing(pages: list[dict]) -> str:
         description="How Popcorn Routines work, and how to build the Routine "
         "Templates they are made from.",
         sidebar=sidebar(pages, None),
+        tabs=tabs(pages, None),
         rail=render.rail(contents=render.toc(rendered)),
         url=url(None),
     )
@@ -342,6 +364,7 @@ def not_found(pages: list[dict]) -> str:
         # Not the landing page, and not any section's: "" matches no page id,
         # and the Overview link is current only for None.
         sidebar=sidebar(pages, ""),
+        tabs=tabs(pages, ""),
         noindex=True,
     )
 
@@ -490,6 +513,7 @@ def main() -> int:
                 f"{pager(page, pages)}",
                 description=lede(page),
                 sidebar=sidebar(pages, page["id"]),
+                tabs=tabs(pages, page["id"]),
                 rail=render.rail(
                     contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
                     related=[] if lookup else related(page, by_id),

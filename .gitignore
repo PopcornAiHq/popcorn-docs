@@ -4,7 +4,7 @@ __pycache__/
 # Emitted by scripts/emit.py from content/. Not committed: a build artifact in
 # the tree is a second copy of the corpus that can disagree with the source,
 # and CI rebuilds it on every run anyway.
-build/
+/build/
 
 # Git worktrees (.worktrees/<feature>, branch shaun/<feature>)
 .worktrees/

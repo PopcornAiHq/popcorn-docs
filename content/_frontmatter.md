@@ -8,7 +8,7 @@ the MCP server. A file missing `id` or `summary` fails the build.
 id: copying-a-template         # kebab-case, citable; never reused for another page
 title: Copying a template      # a page about one thing is a noun phrase; a task is imperative: Set up a Routine
 order: 2                       # reading position within its part
-group: How a Version ships     # optional: sidebar topic within the part
+group: Making a change        # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
@@ -70,11 +70,12 @@ at all — it once put an advanced task ahead of the one it builds on. Number by
 needs first; a page with no `order:` goes after the ordered ones.
 Renumbering is cheap, because nothing links to a position.
 
-**`group`** is the page's topic: a collapsible heading in the site sidebar,
-inside its part, holding every page about that topic. A group sits where its first page does in reading
-order, so it needs no order of its own, and a later page in it is listed
-there too. Pages without one sit directly under the part. Spell a group
-identically on every page in it — the label is the key.
+**`group`** is the page's topic: a heading in the site sidebar, under its
+part's tab, holding every page about that topic. A group sits where its first
+page does in reading order, so it needs no order of its own, and a later page
+in it is listed there too. Pages without one are listed with no heading.
+Spell a group identically on every page in it — the label is the
+key. The Overview leads the group `Getting started` in `use`.
 
 **`layout: lookup`** is for a page read by looking something up in it rather
 than top to bottom — the glossary and the reference pages. Its own entries
@@ -115,8 +116,8 @@ nothing a reader has linked to.
   its template's manifest").
 
 The glossary and the reference pages serve both halves, so they sit in
-`content/glossary/` and `content/reference/` and are listed once, after
-both, in the sidebar. Every page, in either half, is written in the product's
+`content/glossary/` and `content/reference/` and have the header's third
+tab, Reference, to themselves. Every page, in either half, is written in the product's
 words: file-level terms the reader types (`manifest`, flow, activity) stay,
 and a name the CLI or the API uses where the product has its own word is given
 once, in italics, as the other name — "a copy of the template (the CLI calls it

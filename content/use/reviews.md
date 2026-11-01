@@ -1,8 +1,8 @@
 ---
 id: reviews
 title: Reviews
-order: 9
-group: What it does
+order: 10
+group: Day to day
 summary: >
   A Review is the kind of Step where a person makes the call instead of
   Popcorn: the Item waits, says why, and gives a few choices of where it goes

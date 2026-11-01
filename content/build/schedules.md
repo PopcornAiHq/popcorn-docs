@@ -1,7 +1,7 @@
 ---
 id: schedules
 title: Schedules in a Manifest
-order: 7
+order: 6
 group: What a Bundle holds
 summary: >
   A Routine's scheduled Triggers are Manifest Schedules: each names a single

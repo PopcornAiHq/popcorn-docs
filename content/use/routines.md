@@ -2,7 +2,7 @@
 id: routines
 title: Routines and Routine Templates
 order: 3
-group: Routines
+group: How a Routine works
 summary: >
   A Routine is one piece of ongoing work Popcorn runs for you, such as claims
   intake, made from a Routine Template. An assistant finds Routines with

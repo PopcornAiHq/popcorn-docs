@@ -1,8 +1,8 @@
 ---
 id: history
 title: History
-order: 15
-group: What people do, and what happened
+order: 12
+group: Day to day
 summary: >
   A Routine's History is what has happened in it — did the reminder emails go
   out, why was this claim closed: changes to its Items with who or what made

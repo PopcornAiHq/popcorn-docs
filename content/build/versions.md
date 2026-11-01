@@ -2,7 +2,7 @@
 id: versions
 title: Versions: publishing and installing
 order: 3
-group: How a Version ships
+group: Making a change
 summary: >
   A change reaches a Routine in two steps: publishing mints an immutable
   Version of a Routine Template on its Copy, and installing brings each

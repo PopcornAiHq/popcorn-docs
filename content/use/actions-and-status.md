@@ -1,8 +1,8 @@
 ---
 id: actions-and-status
 title: Actions and Status
-order: 14
-group: What people do, and what happened
+order: 11
+group: Day to day
 summary: >
   An Item's Status says where it stands, such as Waiting on documents, and
   Popcorn works it out from what has happened, so it is never written

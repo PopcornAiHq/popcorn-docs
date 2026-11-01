@@ -1,8 +1,8 @@
 ---
 id: tables
 title: Tables, Rows and Columns
-order: 13
-group: What it holds
+order: 8
+group: How a Routine works
 summary: >
   A Routine's Tables hold its Items — claims, orders, contacts — as Rows and
   Columns. An assistant lists and reads them (list_tables, get_table,

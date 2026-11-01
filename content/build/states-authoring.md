@@ -2,7 +2,7 @@
 id: states-authoring
 title: Author a States tier
 order: 12
-group: What a Bundle holds
+group: Tables and Status
 summary: >
   Writing the State graph behind a Routine's Status and Actions, in
   `recipe.yaml` or `states:`: stored, derived and mirrored machines; States, Events, Transitions and buttons;
