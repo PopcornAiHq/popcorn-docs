@@ -1,6 +1,6 @@
 <svg class="rd" viewBox="0 0 720 440" role="img" aria-labelledby="rd-title rd-desc" xmlns="http://www.w3.org/2000/svg">
-  <title id="rd-title">How a Routine works</title>
-  <desc id="rd-desc">Triggers start work in a Routine, which uses Connections and reads References. Its Tables hold its items, and each item moves through Steps and Reviews. An item's Status and Actions say where it stands and move it on, and History records every change.</desc>
+  <title id="rd-title">Anatomy of a Routine</title>
+  <desc id="rd-desc">Triggers start work in a Routine, which uses Connections and reads References. Its Tables hold its Items, and each Item moves through Steps and Reviews. An Item's Status and Actions say where it stands and move it on, and History records every change.</desc>
   <style>
     .rd text { font-family: var(--font); fill: var(--fg); }
     .rd .t { font-size: 15px; font-weight: 600; }
@@ -50,10 +50,10 @@
   <rect class="shadow" x="298" y="8" width="420" height="308" rx="8"/>
   <rect class="box" x="292" y="2" width="420" height="308" rx="8"/>
   <a href="/use/concepts/routines.html"><text class="t" x="312" y="34" style="font-size:17px">Routine</text></a>
-  <a href="/use/concepts/tables.html"><text class="s" x="312" y="58">its Tables hold the items it tracks</text></a>
+  <a href="/use/concepts/tables.html"><text class="s" x="312" y="58">its Tables hold the Items it tracks</text></a>
 
   <g transform="translate(0 26)">
-  <text class="e" x="312" y="128">each item</text>
+  <text class="e" x="312" y="128">each Item</text>
   <a href="/use/concepts/steps.html">
     <rect class="chip" x="312" y="140" width="76" height="38" rx="19"/>
     <text class="t" x="350" y="164" text-anchor="middle" style="font-size:14px">Step</text>
@@ -84,7 +84,7 @@
   <a href="/use/concepts/actions-and-status.html">
     <rect class="box" x="322" y="358" width="196" height="76" rx="6"/>
     <text class="t" x="338" y="386">Status and Actions</text>
-    <text class="s" x="338" y="407">where an item stands,</text>
+    <text class="s" x="338" y="407">where an Item stands,</text>
     <text class="s" x="338" y="423">and what moves it on</text>
   </a>
   <a href="/use/concepts/history.html">

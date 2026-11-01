@@ -96,3 +96,15 @@ the same reason.
 `scripts/check-vocabulary.py --strict` flags the terms that have no ordinary
 sense — multi-word ones such as merge policy, and words such as workspace
 and manifest — when written lowercase in prose. The rest are left to review.
+
+## A term's first use links to its concept page
+
+The first time a page's body uses a glossary term, the term links to its
+concept page — the page about that term, such as Steps for a Step or Actions
+and Status for an Action. A term with no concept page of its own stays plain
+text; it does not link to its glossary entry, which only restates the
+definition the reader is about to meet in context.
+
+Titles, headings, frontmatter, a page's opening summary paragraph, code and
+link text are exempt, and a page never links to itself. Later uses may link
+again where it helps, but need not.

@@ -1,14 +1,14 @@
 # Overview
 
-Popcorn is a service that uses AI agents to carry out pieces of ongoing work
-called Routines. A Routine starts work on its own when something arrives or on
-a Schedule, working through the accounts you already use and from documents
-such as your policies and price lists.
+Popcorn is a service that lets you create, configure and run Routines. A
+Routine connects to your accounts and works on your behalf, stopping whenever a
+human decision is needed.
 
-## Start here
+## Getting started with MCP
 
-To use Popcorn from your own AI assistant, connect it to Popcorn's MCP server
-at `https://mcp.popcorn.ai/mcp`.
+To use Popcorn from your own AI assistant, [connect it to Popcorn's MCP
+server](https://docs.popcorn.ai/use/guides/connect-your-assistant.md) at
+`https://mcp.popcorn.ai/mcp`.
 
 In Claude Code:
 
@@ -16,22 +16,25 @@ In Claude Code:
 claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
 ```
 
-1. [Connect your assistant](https://docs.popcorn.ai/use/guides/connect-your-assistant.md): add the server in any client, sign in, and check the connection
-2. [Set up a Routine](https://docs.popcorn.ai/use/guides/set-up-a-routine.md): pick a template, create the Routine, and connect the accounts it needs
+Next, [set up a
+Routine](https://docs.popcorn.ai/use/guides/set-up-a-routine.md) and connect
+the accounts it needs.
 
-## How a Routine works
+## Anatomy of a Routine
 
-A [Routine](https://docs.popcorn.ai/use/concepts/routines.md) is created from
-a Routine Template, which defines its [Tables](https://docs.popcorn.ai/use/concepts/tables.md) for tracking Items,
+A [Routine](https://docs.popcorn.ai/use/concepts/routines.md) is created from a
+Routine Template, which defines
+[Tables](https://docs.popcorn.ai/use/concepts/tables.md) for tracking Items,
 [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md) for starting work,
-and a [Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md)
-showing where each Item stands.
+and [Actions](https://docs.popcorn.ai/use/concepts/actions-and-status.md) for
+updating an Item's Status. An Item is one thing the Routine tracks, such as a
+potential client for a law firm or a purchase order waiting on a vendor.
 
 ```diagram
 Triggers ──── start work ───▶ ┌─ Routine ───────────────────────┐
-schedule, message,            │ its Tables hold the items       │
+schedule, message,            │ its Tables hold the Items       │
 document, webhook             │                                 │
-                              │ item ─▶ Step ─▶ Review ─▶ …     │
+                              │ Item ─▶ Step ─▶ Review ─▶ …     │
 Connections ── used by ─────▶ │         asks,   a person        │
 a mailbox, a calendar         │         follows decides         │
                               │         up                      │
@@ -43,55 +46,31 @@ a policy, a price list        └───────────────�
                               Actions           every change
 ```
 
-The Routine reaches your accounts through
-[Connections](https://docs.popcorn.ai/use/concepts/connections.md) and works
-from [References](https://docs.popcorn.ai/use/concepts/reference-documents.md).
-Many Routines take each Item through a few
-[Steps](https://docs.popcorn.ai/use/concepts/steps.md): the Routine asks for
-what each one needs, follows up until it has it, and stops at a
-[Review](https://docs.popcorn.ai/use/concepts/reviews.md) wherever a person
-on your team should decide. Each Item's
-[Actions](https://docs.popcorn.ai/use/concepts/actions-and-status.md) move it
-on, and [History](https://docs.popcorn.ai/use/concepts/history.md) records who
-changed what, and why.
+Through [Connections](https://docs.popcorn.ai/use/concepts/connections.md) and
+[References](https://docs.popcorn.ai/use/concepts/reference-documents.md), a
+Routine moves each Item through a series of
+[Steps](https://docs.popcorn.ai/use/concepts/steps.md), stopping for a
+[Review](https://docs.popcorn.ai/use/concepts/reviews.md) whenever a person is
+needed, logging each change to its
+[History](https://docs.popcorn.ai/use/concepts/history.md).
 
-## When Popcorn fits
+## Using Routines
 
-Popcorn fits work that repeats for every client and runs through people
-outside your team. Each new client, claimant or order needs answers,
-documents, a booking or a signature, gathered over days, with follow-ups until
-they arrive and someone on your team deciding at the points that matter. For
-example:
+Work with Routines by asking your AI assistant in your own words.
 
-- a law firm gathering case details and documents before the first consultation
-- an accountant collecting client organizers and chasing missing paperwork
-- a contractor turning new inquiries into clear job details and estimate requests
-- a broker keeping application checklists and client documents in order
-
-It does not fit one-off work. A Routine does the same work again for every
-Item it tracks, so a single question or task is one for your assistant on its
-own. Nor does it fit work no Routine Template covers yet: you can set up a
-Routine from a template and change one, but a new template is not self-serve.
-
-## What you can ask
-
-Anything that changes a Routine is a dry run first: the assistant shows you
-what would happen and asks before it goes ahead.
-
-| Ask your assistant | What it does | Read |
-|---|---|---|
-| "What's waiting on me?" | lists the Items at a Review, and why | [Review what needs you](https://docs.popcorn.ai/use/guides/work-a-routines-items.md) |
-| "Approve that claim." | takes the Action, as its button would | [Actions and Status](https://docs.popcorn.ai/use/concepts/actions-and-status.md) |
-| "Write the follow-ups as drafts so I can check them." | changes one Routine Setting | [Routine Settings](https://docs.popcorn.ai/use/concepts/routine-settings.md) |
-| "Also ask for photos of the damage." | proposes a change to the Steps | [Steps](https://docs.popcorn.ai/use/concepts/steps.md) |
-| "Why was this order closed?" | reads the Item's History | [History](https://docs.popcorn.ai/use/concepts/history.md) |
-| "Run the morning check now." | runs a scheduled Trigger early | [Triggers](https://docs.popcorn.ai/use/concepts/triggers.md) |
+| You want to | Ask your assistant |
+|---|---|
+| [See what needs you](https://docs.popcorn.ai/use/guides/work-a-routines-items.md) | "What's waiting on me?" |
+| [Make a decision](https://docs.popcorn.ai/use/concepts/actions-and-status.md) | "Mark the new client's agreement as already signed." |
+| [Add a Step](https://docs.popcorn.ai/use/concepts/steps.md) | "Check with me before their consultation is booked." |
+| [Update a Routine Setting](https://docs.popcorn.ai/use/concepts/routine-settings.md) | "Write the follow-ups as drafts so I can check them." |
+| [Find out why something happened](https://docs.popcorn.ai/use/concepts/history.md) | "Why was this order closed?" |
+| [Run scheduled work early](https://docs.popcorn.ai/use/concepts/triggers.md) | "Send today's follow-ups now." |
 
 ## Building Routine Templates
 
-A Routine is made from a Routine Template: a directory of YAML that gives it
-its Tables, Flows and Schedules. When a Routine needs something no setting
-reaches, your Workspace takes a Copy of its template and changes that.
+Most Routines can be configured through their Routine Settings. For advanced
+use cases, you can copy a Routine Template and modify it.
 
 - [Change a Routine Template](https://docs.popcorn.ai/build/guides/template-authoring.md): copy, edit, publish, confirm the Install
 - [Copying a template](https://docs.popcorn.ai/build/concepts/copying-a-template.md): what a Copy costs, and why it is one-way
@@ -99,7 +78,7 @@ reaches, your Workspace takes a Copy of its template and changes that.
 
 ## Look it up
 
-- [Glossary](https://docs.popcorn.ai/glossary/glossary.md): every term, and the other names the CLI and API use
+- [Glossary](https://docs.popcorn.ai/glossary/glossary.md): comprehensive list of Popcorn terms
 - [MCP](https://docs.popcorn.ai/reference/mcp.md), [CLI](https://docs.popcorn.ai/reference/cli.md) and [Activities](https://docs.popcorn.ai/reference/activities.md): generated from Popcorn itself
 
 ## For agents

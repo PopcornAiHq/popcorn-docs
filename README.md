@@ -12,7 +12,7 @@ browser. The agent-facing files sit at the root.
 
 | Path | For |
 |---|---|
-| `/` | the Overview — what Popcorn is, how a Routine works, when it fits, and one way into each part |
+| `/` | the Overview — what Popcorn is, connecting an assistant, the parts of a Routine, what to ask and one way into each part |
 | `/index.md` | the Overview as Markdown; its source is `content/_overview.md` |
 | `/llms.txt` | the index: every title, URL and summary, cheap enough to fetch whole |
 | `/llms-full.txt` | every written page in full; the generated reference pages by title, summary and URL |

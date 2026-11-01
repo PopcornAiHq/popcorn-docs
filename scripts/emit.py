@@ -312,13 +312,16 @@ def landing(pages: list[dict]) -> str:
     # rather than linked so it takes the page's colours in either theme.
     rest = _DIAGRAM_BLOCK.sub("\x00diagram\x00\n", rest, count=1)
     figure = f'<figure class="diagram">{DIAGRAM.read_text().strip()}</figure>'
+    rendered = render.body(rest).replace("<p>\x00diagram\x00</p>", figure)
     return render.document(
         "Overview — Popcorn docs",
         f'<h1>Overview</h1>\n<p class="summary">{render.inline(lede)}</p>\n'
-        + render.body(rest).replace("<p>\x00diagram\x00</p>", figure),
+        f"{render.on_this_page(rendered, lookup=False)}"
+        + rendered,
         description="How Popcorn Routines work, and how to build the Routine "
         "Templates they are made from.",
         sidebar=sidebar(pages, None),
+        rail=render.rail(contents=render.toc(rendered)),
         url=url(None),
     )
 
@@ -447,7 +450,8 @@ def main() -> int:
     search = []
     index = ["# Popcorn docs", "", f"> {overview()[0]}", "",
              "## Overview", f"{SITE}/index.md", "",
-             "What Popcorn is, how a Routine works, and one way into each part. Start here.", ""]
+             "What Popcorn is, how to connect an assistant over MCP, what a Routine is made of, "
+             "what to ask your assistant and one way into each part. Start here.", ""]
     full = [
         "# Popcorn docs — full text",
         "",
