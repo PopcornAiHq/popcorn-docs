@@ -17,11 +17,11 @@ Outputs, under `build/`:
                      title, summary and URL but not its body: those pages are
                      looked up one entry at a time, and inlined they would
                      outweigh everything written by hand
-    <part>/<kind>/<id>.md  the plain-Markdown twin of each page, at the
-                     path its llms.txt entry advertises: the page's `part`,
-                     then concepts or guides. The glossary and the
-                     references have no part, and sit at <kind>/<id>.md
-    <part>/<kind>/<id>.html  the same page for a person with a browser, which
+    <id>.md          the plain-Markdown twin of each page, at the path its
+                     llms.txt entry advertises. Every page sits at the site's
+                     root, whatever its part, so a page that moves between
+                     parts keeps its address
+    <id>.html        the same page for a person with a browser, which
                      opens with the page's lede where the twin has its summary
     index.html       the Overview, rendered from `content/_overview.md`
     index.md         that source as written, the Overview's Markdown twin
@@ -49,11 +49,11 @@ what it pays for is prose. The reference pages stay in `chunks.json` and at
 their own URLs, which is where an agent that needs one argument name should
 get it.
 
-Pages are written under their section, mirroring the URL in the index, so
-that the link an agent follows is the file that was emitted. They were once
-flattened into a single `md/` directory while the index advertised
-`<section>/<id>`, and every link in the index 404ed. `check-links.py` is
-what now holds the two together.
+Pages are written at the path the index names, so that the link an agent
+follows is the file that was emitted. They were once flattened into a
+single `md/` directory while the index advertised `<section>/<id>`, and
+every link in the index 404ed. `check-links.py` is what now holds the two
+together.
 
 The `.md` suffix is load-bearing: it is what makes S3 serve the page as
 text/markdown without the upload having to name a content type per object.
@@ -131,63 +131,54 @@ def parse(path: pathlib.Path) -> dict:
     if "order" in meta:
         meta["order"] = int(meta["order"])
     meta["body"] = doc.group("body").strip()
-    # The content directory the page lives in. Its URL is no longer that
-    # directory: see `page_dir`.
+    # The content directory the page lives in: its part, or for a page that
+    # serves both parts, its kind. A page's URL never includes it; see `href`.
     meta["source_dir"] = path.parent.name
+    if meta["source_dir"] in _PARTS:
+        meta["part"] = meta["source_dir"]
     return meta
 
 
-# The two parts of the site, Using Popcorn first: (frontmatter value, label).
-# A page's part is the first segment of its URL and a heading of the sidebar;
-# the pages with no part follow both, under Look it up. Popcorn is used
+# The two parts of the site, Using Popcorn first: (directory, label). A
+# page's part is the content directory it is written in and a heading of the
+# sidebar; the pages with no part follow both, under Look it up. Popcorn is used
 # headless, so a user's assistant is the first reader, and Using Popcorn leads.
 PARTS = [
     ("use", "Using Popcorn"),
     ("build", "Building Routine Templates"),
 ]
 
-# The kinds of page: (kind, label). The sidebar lists topics, not kinds, so
-# the label is seen in a page's eyebrow and in search. A kind not listed here
-# still publishes, after these, under its own name.
-SECTIONS = [
-    ("concepts", "Concepts"),
-    ("guides", "Guides"),
+# The kinds of page that serve both parts and belong to neither: (directory,
+# label). They are looked up rather than read through, are listed once after
+# both parts, and say their kind in their eyebrow and in search. Every other
+# page is simply a page of its part.
+SHARED = [
     ("glossary", "Glossary"),
     ("reference", "Reference"),
 ]
 
-# The sections whose pages a generator writes. llms-full.txt names them
-# without inlining them; see the module docstring.
+# The kinds whose pages a generator writes. llms-full.txt names them without
+# inlining them; see the module docstring.
 GENERATED = {"reference"}
 
-_KNOWN = [name for name, *_ in SECTIONS]
 _PARTS = [name for name, *_ in PARTS]
+_SHARED = [name for name, *_ in SHARED]
 
-# Kinds that serve both parts and belong to neither. Their pages have no
-# `part:`, sit at /<kind>/<id>, and are listed once, after both parts.
-SHARED = {"glossary", "reference"}
 
-def check_part(page: dict) -> None:
-    """Stop the build, naming the page, when its `part` does not fit its kind.
+def check_place(page: dict) -> None:
+    """Stop the build, naming the page, when it is not in a known directory.
 
     check-content.py reports the same with the rest of the contract; this is
-    for a build run on its own, which would otherwise fail on a KeyError or
-    put a shared page under one part."""
-    part, kind = page.get("part"), nav_section(page)
-    if kind in SHARED and part:
-        sys.exit(f"✖  {page['id']}: a {kind} page has no part:, but this one says '{part}'")
-    if kind not in SHARED and part not in _PARTS:
-        sys.exit(f"✖  {page['id']}: part: must be one of {', '.join(_PARTS)}, not {part!r}")
+    for a build run on its own, which would otherwise publish a page under
+    no part and no kind."""
+    if page["source_dir"] not in _PARTS + _SHARED:
+        sys.exit(f"✖  {page['id']}: content/{page['source_dir']}/ is not a part "
+                 f"({', '.join(_PARTS)}) or a shared kind ({', '.join(_SHARED)})")
 
 
-# Pages listed under a kind other than their directory's. The glossary lives
-# in content/concepts/ but is looked up rather than read through. An id never
-# changes meaning, which is what makes naming one here safe.
-NAV_SECTION = {"glossary": "glossary"}
-
-
-def nav_section(page: dict) -> str:
-    return NAV_SECTION.get(page["id"], page["source_dir"])
+def kind(page: dict) -> str:
+    """`glossary` or `reference` for the pages both parts share, `page` otherwise."""
+    return page["source_dir"] if page["source_dir"] in _SHARED else "page"
 
 
 def lede(page: dict) -> str:
@@ -198,14 +189,10 @@ def lede(page: dict) -> str:
     return page.get("lede") or page["summary"]
 
 
-def page_dir(page: dict) -> str:
-    """The page's directory on the site: its part, when it has one, then its kind."""
-    part = page.get("part")
-    return f"{part}/{nav_section(page)}" if part else nav_section(page)
-
-
 def href(page: dict, suffix: str = ".html") -> str:
-    return f"/{page_dir(page)}/{page['id']}{suffix}"
+    """A page's path on the site: its id, at the root. Ids are unique across
+    the site, so the part a page sits in needn't be part of its address."""
+    return f"/{page['id']}{suffix}"
 
 
 def url(page: dict | None) -> str:
@@ -213,8 +200,11 @@ def url(page: dict | None) -> str:
     return f"{SITE}/" if page is None else f"{SITE}{href(page)}"
 
 
-def section_label(section: str) -> str:
-    return dict(SECTIONS).get(section, section.title())
+def place_label(page: dict) -> str:
+    """Where the page sits, as its eyebrow and the site's search name it."""
+    if page.get("part"):
+        return part_label(page["part"])
+    return dict(SHARED).get(page["source_dir"], page["source_dir"].title())
 
 
 def part_label(part: str) -> str:
@@ -224,17 +214,17 @@ def part_label(part: str) -> str:
 def reading_order(page: dict) -> tuple:
     """Part first, then the page's `order:`, then its kind, then its title.
 
-    `order:` numbers a part's pages in one sequence, concepts and guides
-    together, so a guide sits beside the concepts it puts to work. Filenames
-    sort alphabetically, which put an advanced guide ahead of the one it
-    builds on. A page with no `order:` goes after the ordered ones in its part.
+    `order:` numbers a part's pages in one sequence, so a task page sits
+    beside the pages about what it puts to work. Filenames sort
+    alphabetically, which put an advanced task ahead of the one it builds
+    on. A page with no `order:` goes after the ordered ones in its part; the
+    glossary comes before the references.
     """
     part = page.get("part")
-    part_rank = _PARTS.index(part) if part in _PARTS else len(_PARTS)
-    section = nav_section(page)
-    rank = _KNOWN.index(section) if section in _KNOWN else len(_KNOWN)
+    place = _PARTS + _SHARED
+    rank = place.index(page["source_dir"]) if page["source_dir"] in place else len(place)
     order = page.get("order")
-    return (part_rank, order is None, order or 0, rank, section, page["title"].lower())
+    return (rank, order is None, order or 0, page["title"].lower())
 
 
 def by_topic(pages: list[dict]) -> list[dict]:
@@ -254,8 +244,8 @@ def by_topic(pages: list[dict]) -> list[dict]:
 def sidebar(pages: list[dict], current: str | None) -> str:
     """The site sidebar: each part's `group:`s, then Look it up.
 
-    A part lists topics, not kinds: a group holds concepts and guides alike,
-    so neither heading repeats under both parts. Pages without a group sit
+    A part lists topics: a group holds every page about one, whether it
+    explains a thing or walks through a task. Pages without a group sit
     directly under their part.
     """
     parts: dict[str, dict[str, list]] = {}
@@ -401,10 +391,8 @@ def version_badge(page: dict) -> str:
 
 
 def eyebrow(page: dict) -> str:
-    """Where the page sits: its part, its kind, and its group when it has one."""
-    part, section = page.get("part"), nav_section(page)
-    kind = section_label(section)
-    trail = f"{part_label(part)} \u203a {kind}" if part else kind
+    """Where the page sits: its part or kind, and its group when it has one."""
+    trail = place_label(page)
     if page.get("group"):
         trail += f" \u203a {render.inline(page['group'])}"
     return f'<p class="eyebrow">{trail}</p>\n'
@@ -419,7 +407,7 @@ def main() -> int:
         print("✖  no content", file=sys.stderr)
         return 1
     for page in pages:
-        check_part(page)
+        check_place(page)
 
     # Rebuild from empty. Without this a page that was renamed or deleted in
     # `content/` keeps its old file here, and the publish is a sync rather than
@@ -432,17 +420,16 @@ def main() -> int:
     # `path` in chunks.json is the page's Markdown twin, relative to the site,
     # and is what a reader should fetch: the docs tools in Popcorn find a page
     # by it. `kind` says what sort of page it is (`glossary` and `reference`
-    # are looked up rather than read). `section` is the page's directory on
-    # the site, kept while readers that build `<section>/<id>.md` remain;
-    # nothing else should rely on a page's URL having a directory.
+    # are looked up rather than read). `section` is the page's part, or its
+    # kind for a page with none; it is not a directory on the site.
     chunks = [
         {
             k: v
             for k, v in {
                 **page,
                 "path": href(page, ".md").lstrip("/"),
-                "kind": nav_section(page),
-                "section": page_dir(page),
+                "kind": kind(page),
+                "section": page["source_dir"],
             }.items()
             if k != "source_dir"
         }
@@ -509,10 +496,7 @@ def main() -> int:
         search.append({
             "title": render.plain(page["title"]),
             "url": href(page),
-            "section": (
-                f"{part_label(page['part'])} \u203a {section_label(nav_section(page))}"
-                if page.get("part") else section_label(nav_section(page))
-            ),
+            "section": place_label(page),
             "summary": render.plain(lede(page)),
             "headings": render.search_entries(rendered),
         })
@@ -547,10 +531,9 @@ def main() -> int:
     )
 
     size = (BUILD / "llms.txt").stat().st_size
-    sections = ", ".join(sorted({f"{page_dir(p)}/" for p in pages}))
     print(f"✔  {len(pages)} pages → chunks.json, llms.txt ({size:,}B), "
           f"llms-full.txt, search.json ({(BUILD / 'search.json').stat().st_size:,}B), "
-          f"index.html, 404.html, robots.txt, sitemap.xml, fonts/, {sections}(.md + .html)")
+          f"index.html, 404.html, robots.txt, sitemap.xml, fonts/, <id>.md + .html")
     return 0
 
 

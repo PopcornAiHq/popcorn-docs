@@ -155,7 +155,7 @@ def _tier(page: dict) -> int:
     a word up. A reference page is reached by naming an entry, which `_score`
     already rewards, so on a plain tie the page of prose answers better.
     """
-    if page.get("part") == "use" or page.get("section") == "glossary":
+    if page.get("part") == "use" or page.get("kind") == "glossary":
         return 2
     return 1 if page.get("part") == "build" else 0
 

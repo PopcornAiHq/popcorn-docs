@@ -6,7 +6,7 @@ the MCP server. A file missing `id` or `summary` fails the build.
 ```yaml
 ---
 id: copying-a-template         # kebab-case, citable; never reused for another page
-title: Copying a template      # a concept's is a noun phrase; a guide's is imperative: Set up a Routine
+title: Copying a template      # a page about one thing is a noun phrase; a task is imperative: Set up a Routine
 order: 2                       # reading position within its part
 group: How a Version ships     # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
@@ -20,7 +20,6 @@ lede: >                        # optional: what a person reads under the title, 
   A Copy of a template is your Workspace's own, and its changes reach every
   Routine on it.
 concepts: [versions, customizing-a-routine]   # other ids, for "see also" and search
-part: build                    # use | build — which half of the site; none on the glossary and references
 ---
 ```
 
@@ -62,19 +61,17 @@ local backend checkout. Omit a page from it when no single symbol owns what
 it describes; do not invent one.
 
 **`order`** is the page's place in its part's reading path, starting at 1.
-A part's concepts and guides are numbered in one sequence, so a guide sits
-beside the concepts it puts to work, and no two pages in a part share a
+A part's pages are numbered in one sequence, so a task sits beside the
+pages about what it puts to work, and no two pages in a part share a
 number. The sidebar, the previous/next links on every page and `llms.txt` all
-follow it, and each Overview card opens its kind's first page. The glossary
-and the references have no part and are numbered within their kind.
-Filenames sort alphabetically, which is no reading order at all — it once put
-an advanced guide ahead of the one it builds on. Number by what a reader
+follow it. The glossary and the references have no part and are numbered
+within their kind. Filenames sort alphabetically, which is no reading order
+at all — it once put an advanced task ahead of the one it builds on. Number by what a reader
 needs first; a page with no `order:` goes after the ordered ones.
 Renumbering is cheap, because nothing links to a position.
 
 **`group`** is the page's topic: a collapsible heading in the site sidebar,
-inside its part, holding concepts and guides alike — the sidebar names
-topics, never kinds. A group sits where its first page does in reading
+inside its part, holding every page about that topic. A group sits where its first page does in reading
 order, so it needs no order of its own, and a later page in it is listed
 there too. Pages without one sit directly under the part. Spell a group
 identically on every page in it — the label is the key.
@@ -105,8 +102,10 @@ line, since it does not know which deploy it read. A page has `version` or
 refuses `updated:` on one: git knows when a hand-written page changed. The
 field's old names, `deployed:` and `platform:`, are refused.
 
-**`part`** says which half of the site the page is in, and it is required on
-every page but the glossary and the reference pages.
+**The part is the directory**, not a field: a page is written in
+`content/use/` or `content/build/`, which says which half of the site it is
+in. Its URL is `/<id>` either way, so moving a page between parts changes
+nothing a reader has linked to.
 
 - `use` — Using Popcorn: for a Popcorn user and their assistant, working with
   Routines, their Triggers, Actions, Status and Routine Settings.
@@ -115,18 +114,18 @@ every page but the glossary and the reference pages.
   idea before the mechanism ("A Routine's scheduled Triggers are schedules in
   its template's manifest").
 
-The glossary and the reference pages serve both halves, so they carry no
-`part:`, sit at `/glossary/…` and `/reference/…`, and are listed once, after
+The glossary and the reference pages serve both halves, so they sit in
+`content/glossary/` and `content/reference/` and are listed once, after
 both, in the sidebar. Every page, in either half, is written in the product's
 words: file-level terms the reader types (`manifest`, flow, activity) stay,
 and a name the CLI or the API uses where the product has its own word is given
 once, in italics, as the other name — "a copy of the template (the CLI calls it
-a *fork line*)". The [glossary](https://docs.popcorn.ai/glossary/glossary.md)
+a *fork line*)". The [glossary](https://docs.popcorn.ai/glossary.md)
 pairs each such name with the product's word in its table "Names you'll see
 elsewhere", and `scripts/check-vocabulary.py --strict` fails a page that uses
 one in prose. `INFORMATION-ARCHITECTURE.md` has the rule in full.
 
-The field describes the page, not its reader: someone building a template
+The part describes the page, not its reader: someone building a template
 reads both halves. A page that needs the CLI says so in its first paragraph.
-Three retired fields are refused: `layer:` (the old name of `part:`),
-`product_terms:` and `applies_to:`.
+Four retired fields are refused: `part:` (the directory says it now),
+its older name `layer:`, `product_terms:` and `applies_to:`.
