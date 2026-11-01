@@ -89,9 +89,9 @@ the same reason.
   are adjectives; *rev* and `call_flow` are identifiers; channel
   parameters, channel agent and channel integration are the API's names,
   written as it spells them; *customizing a Routine* is a phrase, not a
-  noun; *Popcorn's version* is the shared series, not a Version; other names
-  in the glossary's closing table are the names being mapped, not the
-  product's word.
+  noun; *Popcorn's version* is the shared series, not a Version; the
+  glossary's "Another name for" entries are headed by the names being
+  mapped, not the product's word.
 
 The glossary's entries are alphabetical, under a heading for their first
 letter, like a printed one: a new entry goes in its place, not at the end of

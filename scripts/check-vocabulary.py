@@ -3,9 +3,10 @@
 
 Every page is written in the product's words (`INFORMATION-ARCHITECTURE.md`,
 "One vocabulary"). The CLI, the API and older copy still call
-some things by other names, and the glossary's table "Names you'll
-see elsewhere" pairs each with the product's word. This script reads that
-table and lists each prose use of one of its names on a hand-written page.
+some things by other names, and the glossary gives each one an entry of its
+own that opens "Another name for" and the product's word. This script reads
+those entries and lists each prose use of one of their names on a
+hand-written page.
 
 A name is allowed:
 
@@ -32,8 +33,8 @@ meant. So only the terms with no ordinary sense are checked: the multi-word
 ones, where "merge policy" can only be the concept, and the few single words
 listed in `CAPITALIZED`. Code and italicised mentions are allowed, as above,
 and so is an interface label in `LABELS`, quoted as the interface spells it.
-The glossary itself is checked down to its names table, whose first column
-holds the other names, lowercase by design.
+The glossary itself is checked too, except the headwords of its "Another
+name for" entries, which are the other names, lowercase by design.
 
 CI and the pre-commit hook run it with `--strict`, which exits 1 when
 anything is listed. Without it, it only reports.
@@ -48,7 +49,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 GLOSSARY = CONTENT / "glossary" / "glossary.md"
-TABLE_HEADING = "## Names you'll see elsewhere"
+# How an entry for another name opens, after its headword and dash.
+ALIAS = "Another name for "
 
 # Names that are also everyday words; see the module docstring.
 ORDINARY = {"app", "project", "record"}
@@ -89,19 +91,14 @@ _LINK_TEXT_URL = re.compile(r"https?://\S+|<[^>\n]+>")
 _ITALIC = re.compile(r"(?<![*\w])\*(?!\*)[^*\n]+?(?<!\*)\*(?![*\w])")
 
 
+_ALIAS = re.compile(r"^- \*\*(?P<name>[^*]+)\*\* — " + re.escape(ALIAS), re.M)
+
+
 def names() -> list[str]:
-    """The first column of the glossary's names table."""
-    text = GLOSSARY.read_text()
-    start = text.find(TABLE_HEADING)
-    if start < 0:
-        sys.exit(f"✖  {GLOSSARY.relative_to(ROOT)} has no '{TABLE_HEADING}' section")
-    out = []
-    for line in text[start:].splitlines()[1:]:
-        if line.startswith("## "):
-            break
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if line.startswith("|") and cells[0] not in ("Name", "") and not cells[0].startswith("-"):
-            out.append(cells[0].lower())
+    """The headwords of the glossary's "Another name for" entries."""
+    out = [m.group("name").lower() for m in _ALIAS.finditer(GLOSSARY.read_text())]
+    if not out:
+        sys.exit(f"✖  {GLOSSARY.relative_to(ROOT)} has no entry opening '{ALIAS}'")
     return out
 
 
@@ -179,7 +176,7 @@ def _fields(fm: str) -> list[tuple[int, str]]:
 def capitalization(f: pathlib.Path, doc: re.Match[str]) -> list[str]:
     body = doc.group("body")
     if f == GLOSSARY:
-        body = body[: body.find(TABLE_HEADING)]
+        body = _ALIAS.sub("- ", body)
     for label in LABELS:
         body = body.replace(f"**{label}**", "")
     hits = []

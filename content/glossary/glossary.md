@@ -8,7 +8,8 @@ summary: >
   building its template. A Routine (the CLI and API say *channel*; once a
   *project*) is ongoing work made from a Routine Template; its Triggers bring
   work in, its Tables hold it, its Status says where each Item stands and
-  its Actions move it on. A closing table maps the other names.
+  its Actions move it on. Other names the CLI and the API use have entries
+  of their own.
 lede: >
   The words Popcorn uses, from running a Routine to building its template, and
   the other names you'll see for them.
@@ -23,10 +24,10 @@ building a Routine Template; the files a template is made of keep their own
 names (`manifest`, flow, activity), because those are what a template author
 types.
 
-Each entry gives the term first, then the other names it goes by, then what
-it is most often confused with, then the page that explains it. The CLI, the
-API and older copy still call some things by other names; the table at the
-end, *Names you'll see elsewhere*, maps each to the word used here.
+Each entry gives the term first, then the other names it goes by, then what it
+is most often confused with, then the page that explains it. The CLI, the API
+and older copy still call some things by other names, and each of those has an
+entry of its own, starting "Another name for", that gives the word used here.
 
 Two words need a qualifier whenever they mean something other than the
 product's sense: **Trigger** and **Integration**. Each has several meanings,
@@ -64,6 +65,11 @@ listed under its entry. **Version** is close behind.
   `chat: true` in `agent.yaml` it can also serve as the Routine's Agent. See
   [App Bundles](https://docs.popcorn.ai/app-bundle.md) and
   [Platform tools](https://docs.popcorn.ai/platform-tools.md).
+- **agent store** — Another name for a Routine's Tables, Scalars and files: its
+  Tables, and its Routine Settings for the Scalars. You'll see it in some API
+  paths and older pages; Flows reach it through `foundation.store.*`.
+- **app** — Another name for a Routine Template, in `popcorn app …`, a
+  Manifest's `app_type:` and the `app` field on app responses.
 - **App Bundle** (short: **Bundle**) — The files of one Version of a Routine
   Template: `manifest.yaml`, the Flow YAML files at the root, `AGENT.md`,
   `README.md`, `strings.yaml`, and the `prompts/`, `templates/`, `code/` and
@@ -98,6 +104,8 @@ listed under its entry. **Version** is close behind.
   every Routine in its Workspace. The API that people sign in to refuses a
   request made as a Bot. *Not to be confused with* a Routine's Agent (see
   *Agent*).
+- **bundle version** — Another name for a Version of a Routine Template:
+  `version_id` on the CLI and the API, and `popcorn app checkout --version`.
 
 ## C
 
@@ -109,6 +117,12 @@ listed under its entry. **Version** is close behind.
   Routine's Version afresh and cannot be waited on; its key is `flow_name:`.
   See [Versions](https://docs.popcorn.ai/versions.md).
 - **Cell** — One Row's value in one Column.
+- **channel** — Another name for a Routine, in the CLI and the API, a `#name`,
+  and `conversation_id` on the wire.
+- **channel config** — Another name for a Routine's configuration: its Routine
+  Settings, for its parameters; its Connections, for its Integrations; and
+  other sections, such as its installed Recipe. You'll see it in `popcorn
+  channel-config` and `$channel.*` in a Flow.
 - **channel parameters** — Typed values in a Routine's configuration, read in
   a Flow as `$channel.<name>`; the prompts and templates a Bundle seeds are
   folded into them, as `$channel.prompts.<name>` and
@@ -120,6 +134,8 @@ listed under its entry. **Version** is close behind.
   confused with* Scalars, which are not in `$channel.*`. They are Routine
   Settings. See
   [Scalar tiers and Routine Settings](https://docs.popcorn.ai/scalar-tiers.md).
+- **channel template** — Another name for a Routine Template, in `popcorn
+  channel templates` and `popcorn channel create --template`.
 - **Checkout** — A CLI operation, not a server one. `popcorn app checkout`
   writes a Version's files to disk with a `.popcorn-app.json` baseline that
   records the template, the Version it came from and the Routine's ID. It
@@ -205,6 +221,8 @@ listed under its entry. **Version** is close behind.
   confused with* a workflow: the Webhook mode `trigger_workflow` starts a
   Flow. See
   [The shape of a Flow](https://docs.popcorn.ai/flow-grammar.md).
+- **fork line** — Another name for a Copy of a Routine Template, in `popcorn
+  app fork`, `popcorn app lines` and `kind: fork` on the API.
 
 ## H
 
@@ -275,6 +293,11 @@ listed under its entry. **Version** is close behind.
 
 ## P
 
+- **product line** — Another name for Popcorn's own version of a Routine
+  Template, before a Copy: `popcorn app list`, and `kind: product` on the API.
+- **project** — Another name for a Routine, in older MCP tools and the web app.
+  *Not to be confused with* `feature.state.project`, which recomposes a Row's
+  Status.
 - **Publish** — Minting the next Version on a Copy, with
   `create_routine_version` or `popcorn app publish`. It needs a Workspace
   admin, starts an Install on the Routine it names, and reaches every other
@@ -290,6 +313,8 @@ listed under its entry. **Version** is close behind.
   own, which runs pinned per Run and survives the template's updates.
   Formerly **process** (`process:`, `process.yaml`). See
   [State Machines in a Bundle](https://docs.popcorn.ai/state-machine.md).
+- **record** — Another name for a Row, on the wire (`records`, `record_id`) and
+  in `foundation.store.get_record`.
 - **Reference** — A document a Routine works from: a policy, a price list, a
   form to fill, an example of good work. A Reference informs the Routine; it
   is not one of the Items the Routine tracks. *Not to be confused with* a
@@ -414,6 +439,8 @@ listed under its entry. **Version** is close behind.
   keeps its installed value. `popcorn table schema <name>` prints one. See
   [Tables](https://docs.popcorn.ai/tables.md) and
   [Table Columns](https://docs.popcorn.ai/table-columns.md).
+- **tracker** — Another name for a Routine, in older product copy and MCP
+  descriptions; many templates also name their main Table `tracker`.
 - **Trigger** — How work arrives in a Routine: on a Schedule, from a message
   in the Routine, from a document added to it, from a booking made through
   its calendar link, or from another system posting to it. A Routine can have
@@ -456,23 +483,3 @@ listed under its entry. **Version** is close behind.
   assistant connected to Popcorn works in one Workspace at a time. Its people
   are its Members, each with a Workspace Role (see *Member*).
   `popcorn workspace switch` changes which one the CLI acts on.
-
-## Names you'll see elsewhere
-
-The CLI, the API and older copy call some things by a name the product
-doesn't use. Pages say the product's word and give the other name once,
-where the reader will meet it; this table is where to look one up.
-
-| Name | In the product | Where you'll see it |
-|---|---|---|
-| app | Routine Template | `popcorn app …`, a Manifest's `app_type:`, the `app` field on app responses |
-| channel | Routine | the CLI and the API, a `#name`, `conversation_id` on the wire |
-| project | Routine | older MCP tools and the web app; *not to be confused with* `feature.state.project`, which recomposes a Row's Status |
-| tracker | Routine | older product copy and MCP descriptions; many templates also name their main Table `tracker` |
-| channel template | Routine Template | `popcorn channel templates`, `popcorn channel create --template` |
-| channel config | a Routine's configuration: Routine Settings, for its parameters; Connections, for its Integrations; it also holds the Routine's installed Recipe and other sections | `popcorn channel-config`, `$channel.*` in a Flow |
-| agent store | a Routine's Tables, Scalars and files: Tables, for its Tables; Routine Settings, for its Scalars | some API paths and older pages; Flows reach it through `foundation.store.*` |
-| record | Row | the wire (`records`, `record_id`), `foundation.store.get_record` |
-| fork line | a Copy of a Routine Template | `popcorn app fork`, `popcorn app lines`, `kind: fork` on the API |
-| product line | Popcorn's own version of a Routine Template, before a Copy | `popcorn app list`, `kind: product` on the API |
-| bundle version | a Version of a Routine Template | `version_id` on the CLI and the API, `popcorn app checkout --version` |

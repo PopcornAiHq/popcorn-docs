@@ -122,9 +122,9 @@ words: file-level terms the reader types (`manifest`, flow, activity) stay,
 and a name the CLI or the API uses where the product has its own word is given
 once, in italics, as the other name — "a copy of the template (the CLI calls it
 a *fork line*)". The [glossary](https://docs.popcorn.ai/glossary.md)
-pairs each such name with the product's word in its table "Names you'll see
-elsewhere", and `scripts/check-vocabulary.py --strict` fails a page that uses
-one in prose. `INFORMATION-ARCHITECTURE.md` has the rule in full.
+gives each such name an entry of its own, opening "Another name for" and the
+product's word, and `scripts/check-vocabulary.py --strict` fails a page that
+uses one in prose. `INFORMATION-ARCHITECTURE.md` has the rule in full.
 
 The part describes the page, not its reader: someone building a template
 reads both halves. A page that needs the CLI says so in its first paragraph.
