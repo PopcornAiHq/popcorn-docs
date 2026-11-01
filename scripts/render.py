@@ -291,42 +291,40 @@ def search_entries(rendered: str) -> list[list[str]]:
 Link = tuple[str, str, bool]
 
 
-def site_nav(sections: list[tuple[str | None, list[tuple[str, list[Link]]]]]) -> str:
-    """The left column: the whole site, in reading order.
+def site_nav(groups: list[tuple[str, list[Link]]], tabs: list[Link] = ()) -> str:
+    """The left column: one tab's pages, in reading order.
 
-    Each section is (label, groups) and each group is (label, links), where an
-    empty group label means the links sit directly under the section. A
-    section whose groups are None is only a heading — a part's, or Look it
-    up. One labelled "" holds a part's topics, under that heading; one
-    labelled None is a plain list of links, such as the home page's.
+    Each group is (heading, links); a heading of "" means its links sit at
+    the top with none. The tabs are repeated at the top of the list for the
+    narrow layout, where the header has no room for them and the sidebar is
+    the menu.
     """
     def link(title: str, href: str, current: bool) -> str:
         attrs = ' aria-current="page"' if current else ""
         return f'<li><a href="{href}"{attrs}>{title}</a></li>'
 
     out = []
-    for label, groups in sections:
-        # A part heading: a label with no links, above the topics it holds.
-        if groups is None:
-            out.append(f'<p class="nav-part">{html.escape(label, quote=False)}</p>')
-            continue
-        if label is None:
-            out.append("".join(
-                f'<ul class="solo">{"".join(link(*l) for l in links)}</ul>' for _, links in groups
-            ))
-            continue
-        parts = []
-        for group, links in groups:
-            items = "".join(link(*l) for l in links)
-            if group:
-                parts.append(
-                    f"<details open><summary>{html.escape(group, quote=False)}</summary>"
-                    f"<ul>{items}</ul></details>"
-                )
-            else:
-                parts.append(f"<ul>{items}</ul>")
-        out.append("<div>" + "".join(parts) + "</div>")
+    if tabs:
+        out.append('<ul class="nav-tabs">' + "".join(
+            f"<li>{_tab(*t)}</li>" for t in tabs) + "</ul>")
+    for heading, links in groups:
+        if heading:
+            out.append(f'<p class="nav-group">{html.escape(heading, quote=False)}</p>')
+        out.append(f"<ul>{''.join(link(*l) for l in links)}</ul>")
     return '<nav class="site-nav" aria-label="Docs">' + "".join(out) + "</nav>"
+
+
+def _tab(title: str, href: str, current: bool) -> str:
+    attrs = ' aria-current="true"' if current else ""
+    return f'<a href="{href}"{attrs}>{html.escape(title, quote=False)}</a>'
+
+
+def tab_bar(tabs: list[Link]) -> str:
+    """The header's second row: the site's halves and its lookups, one tab each."""
+    if not tabs:
+        return ""
+    items = "".join(_tab(*t) for t in tabs)
+    return f'<div class="tabrow"><nav class="tabs" aria-label="Sections">{items}</nav></div>'
 
 
 def rail(*, contents: str = "", related: list[Link] = ()) -> str:
@@ -594,7 +592,7 @@ main:focus { outline: none; }
   --hl-key: #1a3de8; --hl-string: #2e6b1f; --hl-literal: #b3470c; --hl-comment: #6e695f; --hl-anchor: #8a2f9e;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --header: 3.25rem;
+  --header: 6.1rem;
   /* The header's contents span exactly the columns below them, so both read
      their width from here; each breakpoint redefines it with the grid. */
   --frame: calc(15rem + 44rem + 13rem + 2 * 3rem + 2 * 1.25rem);
@@ -721,18 +719,26 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .sidebar, .rail { padding-right: .75rem; }
 .sidebar ul, .rail ul, .rail ol { list-style: none; margin: 0; padding: 0; }
 .sidebar li, .rail li { margin: 0; }
-.sidebar a { display: block; padding: .3rem .6rem; border-radius: 5px; color: var(--muted); text-decoration: none; }
-.sidebar a:hover { color: var(--fg); }
-.sidebar a[aria-current="page"], .sidebar a.current { color: var(--accent); background: var(--code-bg);
-  font-weight: 600; box-shadow: inset 2px 0 0 var(--brand); }
-.nav-part { margin: 2rem 0 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; font-weight: 700; color: var(--fg); }
-.nav-part + div > :first-child { margin-top: .75rem; }
-.solo { margin-top: 1.25rem !important; }
-.site-nav > .solo:first-child { margin-top: 0 !important; }
-.nav-part + .solo { margin-top: .75rem !important; }
-.sidebar details { margin: .2rem 0 .4rem; }
-.sidebar summary { padding: .3rem .6rem; cursor: pointer; color: var(--fg); font-weight: 500; list-style-position: inside; }
-.sidebar details ul { padding-left: .8rem; }
+.sidebar a { display: block; padding: .42rem .75rem; border-radius: 8px; text-decoration: none;
+  color: color-mix(in srgb, var(--fg) 80%, var(--bg)); }
+.sidebar a:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 5%, transparent); }
+/* The current page: the brand's bar down its left edge and bold text, no
+   fill, so it reads as a place in the list rather than a button. */
+.sidebar a[aria-current="page"] { color: var(--fg); font-weight: 600; border-radius: 0 8px 8px 0;
+  box-shadow: inset 2px 0 0 var(--brand); }
+.nav-group { margin: 1.9rem 0 .4rem .75rem; font-weight: 600; color: var(--fg); }
+.site-nav > .nav-group:first-child, .nav-tabs + .nav-group { margin-top: 0; }
+.nav-tabs { display: none; }
+/* The header's second row. The tab underline sits on the header's own rule. */
+.site { display: flex; flex-direction: column; }
+.site .bar { height: 3.25rem; flex: none; width: 100%; box-sizing: border-box; }
+.tabrow { display: flex; height: calc(var(--header) - 3.25rem); max-width: var(--frame); width: 100%;
+  margin: 0 auto; padding: 0 1.25rem; box-sizing: border-box; }
+.tabs { display: flex; gap: 1.9rem; margin-left: .6rem; }
+.tabs a { display: flex; align-items: center; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  color: var(--muted); }
+.tabs a:hover { color: var(--fg); }
+.tabs a[aria-current] { color: var(--fg); font-weight: 600; border-bottom-color: var(--fg); }
 .filter { display: block; width: 100%; margin: 0 0 1rem; box-sizing: border-box; padding: .45rem .6rem; font: inherit; color: var(--fg);
   background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; }
 /* The display rule above would otherwise override `hidden`, showing a filter
@@ -876,6 +882,11 @@ blockquote p:last-child { margin-bottom: 0; }
    Only with JavaScript, which is what opens it; without, it stays in the
    flow above the page, where it is at least reachable. */
 @media (max-width: 52rem) {
+  /* No room for the tab row: the tabs move to the top of the menu. */
+  :root { --header: 3.25rem; }
+  .tabrow { display: none; }
+  .sidebar .nav-tabs { display: block; margin: 0 0 1.4rem; padding-bottom: .9rem; border-bottom: 1px solid var(--rule); }
+  .nav-tabs a[aria-current] { color: var(--fg); font-weight: 600; }
   .bar { padding: 0 1rem; }
   .site .brand { padding-left: 0; }
   .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 1rem; }
@@ -1298,6 +1309,7 @@ def document(
     *,
     description: str = "",
     sidebar: str = "",
+    tabs: list[Link] = (),
     rail: str = "",
     url: str = "",
     noindex: bool = False,
@@ -1363,7 +1375,7 @@ def document(
 <button class="search-open" type="button" aria-label="Search the docs" aria-keyshortcuts="Meta+K Control+K /" hidden>{_ICON_SEARCH}<span>Search</span><kbd>\u2318K</kbd></button>
 <nav><a href="/llms.txt">llms.txt</a>
 <button class="theme" type="button" hidden></button>
-</nav></div></header>
+</nav></div>{tab_bar(tabs)}</header>
 <div class="layout">
 <aside class="sidebar" id="sidebar">{sidebar}</aside>
 <main id="content" tabindex="-1"{' class="lookup-page"' if lookup else ""}>
