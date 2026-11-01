@@ -20,6 +20,11 @@ The orphan rule applies only to the Markdown pages. An `.html` twin is
 reached from `index.html`, never from `llms.txt`, so requiring an entry for
 it would be requiring the wrong thing.
 
+Links are checked against the addresses the site serves, not the file
+names: a page's HTML is written to `<id>.html` but published as `/<id>`
+(`publish.key_for`), so a link to `/steps.html` is a dead link even though
+the file exists.
+
 It runs offline against `build/`, not against the live site. A network check
 would also catch a publish that never uploaded, but it cannot run before the
 first deploy and it fails for reasons that have nothing to do with the commit
@@ -31,6 +36,8 @@ from __future__ import annotations
 import pathlib
 import re
 import sys
+
+from publish import key_for
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
@@ -85,18 +92,19 @@ def main() -> int:
         return 1
 
     files = emitted()
+    served = {key_for(f) for f in files}
     pages = {f for f in files if f.endswith(".md") and f not in INDEX_FILES}
 
     dead = [u for u in urls if u not in files]
     orphans = sorted(pages - set(urls))
     links = hrefs()
-    broken = [(src, t) for src, t in links if t not in files]
+    broken = [(src, t) for src, t in links if t not in served]
     # The sitemap is what a search engine indexes, so a dead entry there is a
     # dead search result.
     sitemap = BUILD / "sitemap.xml"
     for loc in _LOC.findall(sitemap.read_text()) if sitemap.exists() else []:
         target = loc[len(SITE):].lstrip("/") or "index.html"
-        if target not in files:
+        if target not in served:
             broken.append(("sitemap.xml", target))
 
     for path in dead:
@@ -104,7 +112,7 @@ def main() -> int:
     for path in orphans:
         print(f"✖  build/{path} was emitted but nothing links to it", file=sys.stderr)
     for src, target in broken:
-        print(f"✖  {src} links to /{target}, which was not emitted", file=sys.stderr)
+        print(f"✖  {src} links to /{target}, which the site does not serve", file=sys.stderr)
     if dead or orphans or broken:
         return 1
 

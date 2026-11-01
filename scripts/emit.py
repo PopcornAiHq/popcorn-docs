@@ -22,7 +22,9 @@ Outputs, under `build/`:
                      root, whatever its part, so a page that moves between
                      parts keeps its address
     <id>.html        the same page for a person with a browser, which
-                     opens with the page's lede where the twin has its summary
+                     opens with the page's lede where the twin has its summary.
+                     It is served at `/<id>`, with no extension: `publish.py`
+                     uploads it under the bare id
     index.html       the Overview, rendered from `content/_overview.md`
     index.md         that source as written, the Overview's Markdown twin
     404.html         what a missing path is answered with, in the site's own
@@ -60,9 +62,9 @@ text/markdown without the upload having to name a content type per object.
 
 The HTML twin sits beside the Markdown one rather than replacing it, and
 `llms.txt` keeps pointing at the `.md`. An agent asking for a page should get
-prose, not a document it has to strip tags out of first; a person following
-the same path in a browser gets the `.html`. Neither has to content-negotiate
-and neither URL moves when the other changes.
+prose, not a document it has to strip tags out of first; a person gets the
+HTML at the same address without the suffix, `/steps` beside `/steps.md`.
+Neither has to content-negotiate and neither URL moves when the other changes.
 """
 
 from __future__ import annotations
@@ -189,9 +191,14 @@ def lede(page: dict) -> str:
     return page.get("lede") or page["summary"]
 
 
-def href(page: dict, suffix: str = ".html") -> str:
+def href(page: dict, suffix: str = "") -> str:
     """A page's path on the site: its id, at the root. Ids are unique across
-    the site, so the part a page sits in needn't be part of its address."""
+    the site, so the part a page sits in needn't be part of its address.
+
+    The HTML page has no extension — `/steps`, the address a person types or
+    shares — and is written to `<id>.html` only because a file needs one;
+    `publish.py` uploads it under the bare id. The Markdown twin keeps its
+    `.md`, because that suffix is what an agent and `llms.txt` name."""
     return f"/{page['id']}{suffix}"
 
 

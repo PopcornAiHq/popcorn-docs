@@ -83,8 +83,8 @@ use cases, you can copy a Routine Template and modify it.
 
 ## For agents
 
-Every page has a Markdown twin at the same path, ending `.md` instead of
-`.html`; this one is [/index.md](https://docs.popcorn.ai/index.md).
+Every page has a Markdown twin at the same address with `.md` added; this
+one is [/index.md](https://docs.popcorn.ai/index.md).
 [/llms.txt](https://docs.popcorn.ai/llms.txt) lists every page with its
 summary, [/llms-full.txt](https://docs.popcorn.ai/llms-full.txt) holds every
 written page in full, and [/chunks.json](https://docs.popcorn.ai/chunks.json)

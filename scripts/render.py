@@ -81,15 +81,17 @@ def _href(url: str) -> str:
     """Where a link in a page body should go in the HTML rendering.
 
     A person reading the HTML should land on the HTML twin, not the Markdown
-    one, so a link to this site's `.md` becomes the root-relative `.html` at
-    the same path. Root-relative, so it also works on a local build — and
+    one, so a link to this site's `.md` becomes the root-relative path without
+    it, where the HTML is served. Root-relative, so it also works on a local build — and
     `check-links.py`, which skips absolute URLs, checks it. Anything else,
     including a `.md` on another host, is left as written.
     """
     page = _PAGE.match(url)
     if not page:
         return url
-    return page.group("path") + ".html" + (page.group("frag") or "")
+    # The Overview's twin is /index.md, and its HTML is the site root.
+    path = "/" if page.group("path") == "/index" else page.group("path")
+    return path + (page.group("frag") or "")
 
 
 def inline(text: str) -> str:

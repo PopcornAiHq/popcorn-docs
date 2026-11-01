@@ -19,7 +19,7 @@ browser. The agent-facing files sit at the root.
 | `/chunks.json` | one record per page — what the MCP server reads |
 | `/search.json` | titles, headings and entry names per page — what the site's search reads |
 | `/<id>.md` | one page as Markdown — `/tables.md`, `/copying-a-template.md`, `/glossary.md`, `/cli.md`. Every page sits at the root, whatever its part, so a page keeps its address if it moves |
-| `/<id>.html` | the same page for a person |
+| `/<id>` | the same page for a person — `/tables`. Built as `<id>.html` and uploaded under the bare id |
 
 ## Layout
 
@@ -70,8 +70,11 @@ also the pre-commit hook, and it scans what is staged, so a fix it has not seen
 yet needs a `git add` before it passes. To see the site, serve the build:
 
 ```bash
-python3 -m http.server -d build 8000   # http://localhost:8000
+python3 scripts/serve.py   # http://localhost:8000
 ```
+
+It serves `/<id>` from `<id>.html`, as the published site does; a plain
+`python3 -m http.server` answers every page link with 404.
 
 CI runs the same six on every push and pull request; the content and leak
 checks are required to merge.

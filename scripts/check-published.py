@@ -78,14 +78,16 @@ def fetch(url: str) -> tuple[int, str, bytes]:
         return 0, f"unreachable: {e}", b""
 
 
-def check(url: str, failures: list[str]) -> bytes:
+def check(url: str, failures: list[str], expected: str | None = None) -> bytes:
+    """Fetch `url` and record what is wrong with it. The expected type comes
+    from the URL's suffix; a page's HTML has none, so its caller names it."""
     status, ctype, body = fetch(url)
     if status != 200:
         failures.append(f"{url} → {status or ctype}")
         return b""
 
     suffix = "." + url.rsplit(".", 1)[-1] if "." in url.rsplit("/", 1)[-1] else ""
-    expected = EXPECTED_TYPE.get(suffix)
+    expected = expected or EXPECTED_TYPE.get(suffix)
     if expected and not ctype.lower().startswith(expected):
         failures.append(f"{url} → served as {ctype!r}, expected {expected}")
     elif ctype.startswith(NEEDS_CHARSET) and "charset=utf-8" not in ctype.lower():
@@ -129,9 +131,11 @@ def main() -> int:
 
     for url in urls:
         check(url, failures)
-        # Each concept has an HTML twin a person follows from the index.
-        if url.endswith(".md"):
-            check(url[: -len(".md")] + ".html", failures)
+        # Each concept has an HTML twin a person follows from the index, at
+        # the same address without the suffix. The Overview's is the root,
+        # which was checked above.
+        if url.endswith(".md") and not url.endswith("/index.md"):
+            check(url[: -len(".md")], failures, expected="text/html")
 
     for f in failures:
         print(f"✖  {f}", file=sys.stderr)
