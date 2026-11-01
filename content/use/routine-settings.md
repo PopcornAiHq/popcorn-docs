@@ -2,7 +2,7 @@
 id: routine-settings
 title: Routine Settings
 order: 14
-group: Changing a Routine
+group: Customizing a Routine
 summary: >
   Routine Settings tune one Routine without changing what it does: whether
   Popcorn sends its emails or writes them as drafts to check, the days between

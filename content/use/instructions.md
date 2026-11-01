@@ -2,7 +2,7 @@
 id: instructions
 title: Instructions
 order: 15
-group: Changing a Routine
+group: Customizing a Routine
 summary: >
   A Routine's Instructions say in plain language what it should do and how:
   how to word a follow-up, when to ask a person first, what each Step asks.

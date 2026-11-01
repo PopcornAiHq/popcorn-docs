@@ -2,7 +2,7 @@
 id: customizing-a-routine
 title: Customizing a Routine
 order: 16
-group: Changing a Routine
+group: Customizing a Routine
 summary: >
   Customizing a Routine changes it alone. Its Routine Settings, Connections,
   Instructions, References and, where its template allows, its Steps stay

@@ -1,8 +1,8 @@
 ---
 id: merge-policy
 title: Column Merge Policy
-order: 9
-group: What a Bundle holds
+order: 11
+group: Tables and Status
 summary: >
   A Column's Merge Policy decides what an upsert does to an existing Row:
   replace (the default, last-write-wins), concat (append to a string), keep

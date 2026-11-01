@@ -8,7 +8,7 @@ the MCP server. A file missing `id` or `summary` fails the build.
 id: copying-a-template         # kebab-case, citable; never reused for another page
 title: Copying a template      # a page about one thing is a noun phrase; a task is imperative: Set up a Routine
 order: 2                       # reading position within its part
-group: How a Version ships     # optional: sidebar topic within the part
+group: Making a change        # optional: sidebar topic within the part
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it

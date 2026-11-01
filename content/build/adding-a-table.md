@@ -1,8 +1,8 @@
 ---
 id: adding-a-table
 title: Add a Table
-order: 11
-group: What a Bundle holds
+order: 9
+group: Tables and Status
 summary: >
   Adding a Table to a Routine Template that already exists: declare it under
   `tables:`, write it from a Flow with `foundation.store.*`, run `app

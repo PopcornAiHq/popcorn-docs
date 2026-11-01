@@ -1,8 +1,8 @@
 ---
 id: state-machine
 title: State Machines in a Bundle
-order: 10
-group: What a Bundle holds
+order: 13
+group: Tables and Status
 summary: >
   A Routine's Status and Actions come from State Machines its template
   declares — States, Transitions, and the button on each edge — which the

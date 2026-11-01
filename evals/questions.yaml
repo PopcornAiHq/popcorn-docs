@@ -116,7 +116,7 @@
   trap: blames a client bug or a failed migration
 
 - q: I renamed a table column in the manifest and the old values are gone from the new one.
-  concept: manifest-keys, merge-policy
+  concept: table-columns, manifest-keys, merge-policy
   pass: the reconcile is additive and never renames — it added a column and orphaned the old one, data intact in the old
   trap: says the data was migrated, or offers a backfill as though the rename worked
 

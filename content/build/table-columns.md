@@ -1,8 +1,8 @@
 ---
 id: table-columns
 title: Table Columns
-order: 8
-group: What a Bundle holds
+order: 10
+group: Tables and Status
 summary: >
   A Routine's Tables and Columns are declared in its template: a Column has a
   name and one of five types; `format` is checked on every write, while
