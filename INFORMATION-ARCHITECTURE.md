@@ -1,16 +1,17 @@
 # Information architecture
 
-Written before there is anything to reorganise, because the failure mode is
-that "concepts", "guides" and "reference" blur by the thirtieth page and
-nobody can say which one a new file belongs in.
+There is one kind of hand-written page. A split into concepts and guides
+blurs: a page about a thing grows the steps for reading and changing it, a
+guide repeats them, and a writer cannot say which a new page is. So the only
+choice a writer makes is a page's part.
 
 Each section below states its audience, what belongs in it, and the one test
 that decides a borderline case.
 
 ## Two parts, across every section
 
-Every page but the glossary and the references declares a `part`, which cuts
-across concepts and guides.
+Every page but the glossary and the references is in a part, and its
+directory says which: `content/use/` or `content/build/`.
 
 - **`use`**, Using Popcorn — for a Popcorn user and their assistant, working
   with Routines. Popcorn is used both in its app and headless, from an
@@ -57,46 +58,41 @@ to review.
 
 ## Ids
 
-A page's id is the last part of its URL and the handle everything else names
-it by. It never changes meaning and is never reused for another page. When
+A page's id is its URL, `/<id>`, and the handle everything else names it by.
+Neither its part nor anything else about it is in the address, so a page that
+moves between parts keeps it. It never changes meaning and is never reused for another page. When
 pages are merged, the ids of the ones absorbed are retired: removed from every
 `concepts:` list, eval question, generator and link that named them, in this
 repository and in the ones that link it. Old addresses are not redirected.
 
-## `content/concepts/`
+## Pages: `content/use/` and `content/build/`
 
-**Audience:** an agent answering a question mid-task, and a person who has hit
-something surprising.
+**Audience:** an agent answering a question mid-task, and a person who has
+hit something surprising or has something to do.
 
-**Contains:** one addressable idea per file. Platform vocabulary — the things
-that are true before any bundle exists.
+**Contains:** one page per question. Most pages are about one thing, such as
+a Step, a Routine Setting or a Merge Policy: what it is, then how to read it
+and change it. Some pages are a task that crosses several things, start to
+finish, such as setting up a Routine or debugging a failed Run.
 
-**The test:** *would this still be true if every app were deleted?* A fork line
-would. What `retained` means would not — that belongs to the app that declares
-it.
+**The test:** *is this about one thing, or a task across several?* About one
+thing, it goes on that thing's page, including how to change it. A task gets
+its own page only when it crosses several things, and links to each one's
+page rather than repeating it. When a task page and a thing's page overlap,
+the thing's page is authoritative.
 
-**Shape:** frontmatter with a `summary` under 400 characters, then a body of a
-few hundred words. The summary is the answer; the body is the explanation. A
-concept whose body is three times its summary is probably two concepts.
+**Shape:** frontmatter with a `summary` under 400 characters, then the body.
+The summary is the answer; the body is the explanation. A page whose body is
+three times its summary is probably two pages. A task page is ordered, with
+the commands, and its title is imperative ("Set up a Routine"); a page about
+one thing has a noun phrase for a title ("Steps").
 
-**The one exception is `glossary`**: one short entry per term, each naming its
-synonyms and collisions and linking to the concept that explains it. It is
-where a new term is defined first. An entry that grows past three sentences is
-a concept waiting to be written, and the glossary should link to it instead.
+## `content/glossary/`
 
-## `content/guides/`
-
-**Audience:** someone doing a task from start to finish, usually once.
-
-**Contains:** task-shaped walkthroughs — the fork → edit → publish loop, the
-debug loop after a failed run, adding a table.
-
-**The test:** *does it have a first step and a last step?* If it has neither,
-it is a concept.
-
-**Shape:** ordered, with the commands. Guides may repeat a concept's content
-inline; they may not contradict it, and where they overlap the concept is
-authoritative.
+One short entry per term, each naming its synonyms and collisions and
+linking to the page that explains it. It is where a new term is defined
+first. An entry that grows past three sentences is a page waiting to be
+written, and the glossary should link to it instead.
 
 ## `content/reference/`
 

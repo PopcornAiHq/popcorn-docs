@@ -47,7 +47,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
-GLOSSARY = CONTENT / "concepts" / "glossary.md"
+GLOSSARY = CONTENT / "glossary" / "glossary.md"
 TABLE_HEADING = "## Names you'll see elsewhere"
 
 # Names that are also everyday words; see the module docstring.

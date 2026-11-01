@@ -65,12 +65,12 @@ argument, date it.
 
 ## Every page answers one question
 
-If a concept needs two summaries, it is two concepts. If it needs none, it is
-a paragraph in a guide.
+If a page needs two summaries, it is two pages. If it needs none, it is a
+paragraph in another page.
 
 ## Glossary terms are capitalized
 
-Every term `content/concepts/glossary.md` defines is capitalized wherever it
+Every term `content/glossary/glossary.md` defines is capitalized wherever it
 means that concept — everyday words included: a Workspace, an Item, a Run, a
 Flow, a Merge Policy, the Head of a Copy. A capital tells the reader the word
 is the product's, with a glossary entry behind it, and not the English word.

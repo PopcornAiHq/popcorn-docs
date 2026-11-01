@@ -22,8 +22,8 @@ Checks, in the order a writer meets them:
   and exactly why nobody sees it: the reference just silently stops working
 * `order`, when present, is a whole number from 1 — the build sorts by it, and
   a value it cannot read would crash the build rather than fail here by name
-* no two pages in a part share an `order`. A part's concepts and guides are
-  numbered in one sequence, and a tie would be settled by kind, out of sight
+* no two pages in a part share an `order`. A part's pages are numbered in
+  one sequence, and a tie would be settled by title, out of sight
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
 * `updated`, when present, is a real `YYYY-MM-DD` date, on a generated
@@ -35,11 +35,13 @@ Checks, in the order a writer meets them:
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
   stops one page at a time bringing the field back
-* `part` is `use` or `build`: which half of the site the page is in, Using
-  Popcorn or Building Routine Templates. The sidebar, the page's address and
-  search all read it, so a page without one would belong to neither. The
-  glossary and the reference pages serve both parts and carry none. The
-  field's old name, `layer:`, is refused
+* the page is in `content/use/` or `content/build/`, which is its part:
+  Using Popcorn or Building Routine Templates. The sidebar and search read
+  it, so a page in any other directory would belong to neither. The
+  glossary and the reference pages serve both parts, in `content/glossary/`
+  and `content/reference/`. A `part:` field is refused, because the
+  directory says it and a field could only disagree; so is its old name,
+  `layer:`
 * no `applies_to:` field. It recorded which readers a page was for and
   nothing read it; a page that needs the CLI says so
   in its prose
@@ -78,8 +80,9 @@ _DEPLOYED = re.compile(r"^deployed\s*:", re.M)
 _OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
-_PART = re.compile(r"^part\s*:\s*(?P<value>.*)$", re.M)
+_PART = re.compile(r"^part\s*:", re.M)
 PARTS = {"use", "build"}
+SHARED = {"glossary", "reference"}
 _LAYER = re.compile(r"^layer\s*:", re.M)
 _APPLIES_TO = re.compile(r"^applies_to\s*:", re.M)
 _PRODUCT_TERMS = re.compile(r"^product_terms\s*:", re.M)
@@ -159,16 +162,14 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         problems.append("deployed: and platform: are old names of the date field; write updated:")
 
     # The glossary and the references serve both parts; every other page is in one.
-    shared = path.parent.name == "reference" or (ident is not None and ident.group(1) == "glossary")
-    part = _PART.search(front)
-    if _LAYER.search(front):
-        problems.append("layer: is renamed part: — use for using Popcorn, build for building templates")
-    elif shared and part:
-        problems.append("part: is for a page in one part; the glossary and the references have none")
-    elif not shared and not part:
-        problems.append(f"no part — every page but the glossary and the references is one of {sorted(PARTS)}")
-    elif part and part.group("value").strip() not in PARTS:
-        problems.append(f"part '{part.group('value').strip()}' is not one of {sorted(PARTS)}")
+    # A page's part is its directory; the glossary and the references serve both.
+    if path.parent.name not in PARTS | SHARED:
+        problems.append(
+            f"content/{path.parent.name}/ is not a part ({', '.join(sorted(PARTS))}) "
+            f"or a shared kind ({', '.join(sorted(SHARED))}); move the page into one"
+        )
+    if _PART.search(front) or _LAYER.search(front):
+        problems.append("part: (or layer:) is refused — a page's part is the directory it is in")
 
     if _APPLIES_TO.search(front):
         problems.append("applies_to: is retired — say in the page's prose when it needs the CLI")
@@ -194,15 +195,16 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
 def shared_orders(files: list[pathlib.Path]) -> dict[pathlib.Path, list[str]]:
     """Each page whose `order` another page in its part also has, and with whom.
 
-    Pages with no part are numbered within their kind, so they are left out."""
+    A page's part is its directory. Pages with no part are numbered within
+    their kind, so they are left out."""
     seen: dict[tuple[str, str], list[pathlib.Path]] = {}
     for path in files:
         doc = _DOC.match(path.read_text())
         if not doc:
             continue
-        part, order = _PART.search(doc.group("fm")), _ORDER.search(doc.group("fm"))
-        if part and order:
-            key = (part.group("value").strip(), order.group("value").strip())
+        part, order = path.parent.name, _ORDER.search(doc.group("fm"))
+        if part in PARTS and order:
+            key = (part, order.group("value").strip())
             seen.setdefault(key, []).append(path)
     out: dict[pathlib.Path, list[str]] = {}
     for (part, order), paths in seen.items():
