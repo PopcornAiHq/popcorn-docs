@@ -429,14 +429,19 @@ def main() -> int:
         shutil.rmtree(BUILD)
     BUILD.mkdir(parents=True)
 
-    # `section` in chunks.json is the page's directory on the site, so a
-    # reader that builds `<section>/<id>.md` from it lands on the page —
-    # which is how the channel agents' docs tool finds one.
+    # `path` in chunks.json is the page's Markdown twin, relative to the site,
+    # and is what a reader should fetch: the docs tools in Popcorn find a page
+    # by it. `kind` says what sort of page it is (`glossary` and `reference`
+    # are looked up rather than read). `section` is the page's directory on
+    # the site, kept while readers that build `<section>/<id>.md` remain;
+    # nothing else should rely on a page's URL having a directory.
     chunks = [
         {
             k: v
             for k, v in {
                 **page,
+                "path": href(page, ".md").lstrip("/"),
+                "kind": nav_section(page),
                 "section": page_dir(page),
             }.items()
             if k != "source_dir"
