@@ -151,12 +151,13 @@ PARTS = [
 ]
 
 # The kinds of page that serve both parts and belong to neither: (directory,
-# label). They are looked up rather than read through, are listed once after
-# both parts, and say their kind in their eyebrow and in search. Every other
-# page is simply a page of its part.
+# label). They are looked up rather than read through, have the Reference tab
+# to themselves with one sidebar section per kind, in this order, and say their
+# kind in their eyebrow and in search. Every other page is simply a page of its
+# part.
 SHARED = [
-    ("glossary", "Glossary"),
     ("reference", "Reference"),
+    ("glossary", "Glossary"),
 ]
 
 # The kinds whose pages a generator writes. llms-full.txt names them without
@@ -225,7 +226,7 @@ def reading_order(page: dict) -> tuple:
     beside the pages about what it puts to work. Filenames sort
     alphabetically, which put an advanced task ahead of the one it builds
     on. A page with no `order:` goes after the ordered ones in its part; the
-    glossary comes before the references.
+    references come before the glossary.
     """
     part = page.get("part")
     place = _PARTS + _SHARED
@@ -252,7 +253,8 @@ def by_topic(pages: list[dict]) -> list[dict]:
 # than the parts' own names, which the eyebrow above each title still uses.
 TABS = [("use", "Using Popcorn"), ("build", "Building Templates"), ("", "Reference")]
 
-# The sidebar heading over the glossary and the references.
+# What the pager is labelled on the Reference tab's pages, which belong to no
+# part.
 LOOK_UP = "Look it up"
 
 # The group the Overview leads, at the top of the first tab.
@@ -281,7 +283,8 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     """The site sidebar: the current tab's `group:`s, each under its heading.
 
     A group holds every page about one topic, whether it explains a thing or
-    walks through a task; pages without one are listed with no heading. The
+    walks through a task; pages without one are listed with no heading. On
+    the Reference tab each shared kind is its own section instead. The
     Overview leads the first part's Getting started, which is where the 404
     page, under no tab, starts a reader again.
     """
@@ -292,7 +295,7 @@ def sidebar(pages: list[dict], current: str | None) -> str:
         if tab_of(p) != tab:
             continue
         link = (render.inline(p["title"]), href(p), p["id"] == current)
-        groups.setdefault(p.get("group", "") if tab else LOOK_UP, []).append(link)
+        groups.setdefault(p.get("group", "") if tab else place_label(p), []).append(link)
     if tab == _PARTS[0]:
         home = ("Overview", "/", current is None)
         groups = {GETTING_STARTED: [home] + groups.pop(GETTING_STARTED, []), **groups}

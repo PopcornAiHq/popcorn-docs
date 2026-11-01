@@ -21,7 +21,8 @@ directory says which: `content/use/` or `content/build/`.
   a Routine Template without access to the backend.
 
 The glossary and the reference pages serve both parts, so they have none.
-They are listed once, after both, and sit at `/glossary/` and `/reference/`.
+They have the Reference tab to themselves, and are written in `content/glossary/`
+and `content/reference/`.
 
 **The test:** *would a Popcorn user who never builds a template need this?*
 Then it is `use`.
