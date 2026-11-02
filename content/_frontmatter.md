@@ -116,16 +116,18 @@ refuses `updated:` on one: git knows when a hand-written page changed. The
 field's old names, `deployed:` and `platform:`, are refused.
 
 **The part is the directory**, not a field: a page is written in
-`content/use/` or `content/build/`, which says which half of the site it is
-in. Its URL is `/<id>` either way, so moving a page between parts changes
-nothing a reader has linked to.
+`content/using-popcorn/` or `content/building-templates/`, which says which
+half of the site it is in. Its URL is `/<id>` either way, so moving a page
+between parts changes nothing a reader has linked to. Each part also has a
+short name, which search and the docs tools' `part` argument use:
 
-- `use` — Using Popcorn: for a Popcorn user and their assistant, working with
-  Routines, their Triggers, Actions, Status and Routine Settings.
-- `build` — Building Routine Templates: for someone building or changing a
-  template, its files, flows, copies and versions. It opens with the product
-  idea before the mechanism ("A Routine's scheduled Triggers are schedules in
-  its template's manifest").
+- `use` (`content/using-popcorn/`) — Using Popcorn: for a Popcorn user and
+  their assistant, working with Routines, their Triggers, Actions, Status and
+  Routine Settings.
+- `build` (`content/building-templates/`) — Building Routine Templates: for
+  someone building or changing a template, its files, flows, copies and
+  versions. It opens with the product idea before the mechanism ("A
+  Routine's scheduled Triggers are schedules in its template's manifest").
 
 The glossary and the reference pages serve both halves, so they sit in
 `content/glossary/` and `content/reference/` and have the header's third

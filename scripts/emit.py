@@ -133,21 +133,24 @@ def parse(path: pathlib.Path) -> dict:
     if "order" in meta:
         meta["order"] = int(meta["order"])
     meta["body"] = doc.group("body").strip()
-    # The content directory the page lives in: its part, or for a page that
-    # serves both parts, its kind. A page's URL never includes it; see `href`.
-    meta["source_dir"] = path.parent.name
-    if meta["source_dir"] in _PARTS:
-        meta["part"] = meta["source_dir"]
+    # The page's part, or for a page that serves both parts, its kind: read
+    # from the content directory it lives in. A page's URL never includes
+    # either; see `href`.
+    meta["section"] = SECTIONS.get(path.parent.name)
+    meta["directory"] = path.parent.name
+    if meta["section"] in _PARTS:
+        meta["part"] = meta["section"]
     return meta
 
 
-# The two parts of the site, Using Popcorn first: (directory, label). A
+# The two parts of the site, Using Popcorn first: (part, label, directory). A
 # page's part is the content directory it is written in and a heading of the
-# sidebar; the pages with no part follow both, under Look it up. Popcorn is used
+# sidebar. The part's short name is what chunks.json and the docs tools'
+# `part` argument say, so a directory can be renamed without changing them; the pages with no part follow both, under Look it up. Popcorn is used
 # headless, so a user's assistant is the first reader, and Using Popcorn leads.
 PARTS = [
-    ("use", "Using Popcorn"),
-    ("build", "Building Routine Templates"),
+    ("use", "Using Popcorn", "using-popcorn"),
+    ("build", "Building Routine Templates", "building-templates"),
 ]
 
 # The kinds of page that serve both parts and belong to neither: (directory,
@@ -166,6 +169,10 @@ GENERATED = {"reference"}
 
 _PARTS = [name for name, *_ in PARTS]
 _SHARED = [name for name, *_ in SHARED]
+# Content directory → section: a part's directory gives its short name, and
+# a shared kind's directory is its name. Nothing else is a section, so a page
+# left in a part's old directory is refused rather than built under its name.
+SECTIONS = {directory: name for name, _, directory in PARTS} | {k: k for k in _SHARED}
 
 
 def check_place(page: dict) -> None:
@@ -174,14 +181,14 @@ def check_place(page: dict) -> None:
     check-content.py reports the same with the rest of the contract; this is
     for a build run on its own, which would otherwise publish a page under
     no part and no kind."""
-    if page["source_dir"] not in _PARTS + _SHARED:
-        sys.exit(f"✖  {page['id']}: content/{page['source_dir']}/ is not a part "
-                 f"({', '.join(_PARTS)}) or a shared kind ({', '.join(_SHARED)})")
+    if page["section"] is None:
+        sys.exit(f"✖  {page['id']}: content/{page['directory']}/ is not a part "
+                 f"({', '.join(d for *_, d in PARTS)}) or a shared kind ({', '.join(_SHARED)})")
 
 
 def kind(page: dict) -> str:
     """`glossary` or `reference` for the pages both parts share, `page` otherwise."""
-    return page["source_dir"] if page["source_dir"] in _SHARED else "page"
+    return page["section"] if page["section"] in _SHARED else "page"
 
 
 def lede(page: dict) -> str:
@@ -212,11 +219,11 @@ def place_label(page: dict) -> str:
     """Where the page sits, as its eyebrow and the site's search name it."""
     if page.get("part"):
         return part_label(page["part"])
-    return dict(SHARED).get(page["source_dir"], page["source_dir"].title())
+    return dict(SHARED).get(page["section"], page["section"].title())
 
 
 def part_label(part: str) -> str:
-    return dict(PARTS).get(part, part.title())
+    return {name: label for name, label, _ in PARTS}.get(part, part.title())
 
 
 def reading_order(page: dict) -> tuple:
@@ -230,7 +237,7 @@ def reading_order(page: dict) -> tuple:
     """
     part = page.get("part")
     place = _PARTS + _SHARED
-    rank = place.index(page["source_dir"]) if page["source_dir"] in place else len(place)
+    rank = place.index(page["section"]) if page["section"] in place else len(place)
     order = page.get("order")
     return (rank, order is None, order or 0, page["title"].lower())
 
@@ -246,7 +253,7 @@ def by_topic(pages: list[dict]) -> list[dict]:
     for page in pages:
         # A shared page has no part, so its kind keeps the glossary apart from
         # the references, whose groups (the CLI's) sit among them.
-        key = (page.get("part") or page["source_dir"], page.get("group", ""))
+        key = (page.get("part") or page["section"], page.get("group", ""))
         topics.setdefault(key, []).append(page)
     return [page for group in topics.values() for page in group]
 
@@ -484,14 +491,9 @@ def main() -> int:
     # kind for a page with none; it is not a directory on the site.
     chunks = [
         {
-            k: v
-            for k, v in {
-                **page,
-                "path": href(page, ".md").lstrip("/"),
-                "kind": kind(page),
-                "section": page["source_dir"],
-            }.items()
-            if k != "source_dir"
+            **{k: v for k, v in page.items() if k != "directory"},
+            "path": href(page, ".md").lstrip("/"),
+            "kind": kind(page),
         }
         for page in pages
     ]
@@ -515,7 +517,7 @@ def main() -> int:
     for page in pages:
         path = href(page, ".md").lstrip("/")
         index += [f"## {page['title']}", f"{SITE}/{path}", "", page["summary"], ""]
-        if page["source_dir"] in GENERATED:
+        if page["section"] in GENERATED:
             full += [f"# {page['title']}", "", page["summary"], "", f"Full reference: {SITE}/{path}", ""]
         else:
             full += [f"# {page['title']}", "", page["summary"], "", page["body"], ""]

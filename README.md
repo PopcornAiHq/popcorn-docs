@@ -25,12 +25,12 @@ browser. The agent-facing files sit at the root.
 
 ```
 content/
-├── _frontmatter.md   the contract every page's frontmatter follows
-├── _overview.md      the Overview, the home page — prose, outside the page contract
-├── use/              Using Popcorn — for a Popcorn user and their assistant
-├── build/            Building Routine Templates — for someone changing a template
-├── glossary/         the glossary, shared by both parts
-└── reference/        GENERATED — the Activities, CLI and MCP references
+├── _frontmatter.md     the contract every page's frontmatter follows
+├── _overview.md        the Overview, the home page — prose, outside the page contract
+├── using-popcorn/      Using Popcorn — for a Popcorn user and their assistant
+├── building-templates/ Building Routine Templates — for someone changing a template
+├── glossary/           the glossary, shared by both parts
+└── reference/          GENERATED — the Activities, CLI and MCP references
 evals/
 └── questions.yaml    the validation set for the page summaries
 assets/fonts/         the self-hosted typefaces and their licences, copied into build/
