@@ -87,11 +87,12 @@ Popcorn's version onto a Copy. An earlier Version of the Copy can be read
 back, but a Routine cannot be put back on it; the way back to old content is
 to publish it forward as a new Version.
 
-A Routine can also join a Copy without anyone meaning it to. Installing onto
-a Routine still on Popcorn's version, in a Workspace that owns exactly one
-Copy of its template, moves it onto that Copy, which is how a mistyped
-Routine turns one in use into an edited Copy. Over MCP that Install is a dry
-run first, and says so.
+> [!WARNING] Joining a Copy by accident
+> A Routine can also join a Copy without anyone meaning it to. Installing
+> onto a Routine still on Popcorn's version, in a Workspace that owns
+> exactly one Copy of its template, moves it onto that Copy, which is how a
+> mistyped Routine turns one in use into an edited Copy. Over MCP that
+> Install is a dry run first, and says so.
 
 So copying is a decision about the Workspace, not a step in an edit. Check
 the Routine's settings first, with `list_routine_settings` (in the CLI,

@@ -78,8 +78,8 @@ an assistant shows along the way — goes in a callout, not in the prose:
 > Most assistants show the tool calls they make: look for `get_workspace`.
 ```
 
-The kinds are GitHub's five, each with its own colour, from information to
-risk:
+The kinds are GitHub's five, each with its own colour and icon, from
+information to risk:
 
 | Kind | For |
 |---|---|

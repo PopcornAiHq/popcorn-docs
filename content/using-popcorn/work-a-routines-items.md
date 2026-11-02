@@ -88,8 +88,10 @@ shows the new Status once it has applied.
   matches an existing one merges into it rather than adding a duplicate. An
   added Item is picked up by the Routine's next Run, which may send it an
   email, and the dry run says so.
-- **A duplicate** — `delete_rows`, after its dry run. A deleted Row cannot
-  be restored with these tools.
+- **A duplicate** — `delete_rows`, after its dry run.
+
+> [!CAUTION] Deleting is permanent
+> A deleted Row cannot be restored with these tools.
 
 None of these start work by themselves, and none can set a Status: that changes only by an
 Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/tables.md).

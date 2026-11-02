@@ -51,6 +51,26 @@ _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
 # fine without. The Markdown twin keeps the marker, which reads as plain text.
 # Text after the marker is the callout's own title, as Obsidian takes it
 # (`[!TIP] Where to look`); GitHub then shows a plain quote.
+# One icon per kind, so a callout's kind is not told by colour alone: GitHub's
+# shapes, drawn on a 16-unit grid in the callout's colour.
+_CALLOUT_ICONS = {
+    "note": '<circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4"/><circle cx="8" cy="4.8" r=".4"/>',
+    "tip": '<path d="M5.6 10.6a4.2 4.2 0 1 1 4.8 0c-.5.4-.8.9-.8 1.5v.4H6.4v-.4c0-.6-.3-1.1-.8-1.5z"/><path d="M6.6 14.5h2.8"/>',
+    "important": '<path d="M2.5 3h11v8H8.2L5 13.6V11H2.5z"/><path d="M8 5.2v2.6"/><circle cx="8" cy="9.6" r=".4"/>',
+    "warning": '<path d="M8 2.2l6.3 11.3H1.7z"/><path d="M8 6.4v3.2"/><circle cx="8" cy="11.5" r=".4"/>',
+    "caution": '<path class="solid" d="M5.4 1.8h5.2l3.6 3.6v5.2l-3.6 3.6H5.4l-3.6-3.6V5.4z"/><path class="knockout" d="M8 5v3.6"/><circle class="knockout" cx="8" cy="10.9" r=".4"/>',
+}
+
+
+def _callout_label(kind: str, title: str | None) -> str:
+    """The callout's label: its icon, then its own title or its kind's name.
+    A titled callout says its kind to a screen reader, which the icon can't."""
+    icon = (f'<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" '
+            f'stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">{_CALLOUT_ICONS[kind]}</svg>')
+    text = f'<span class="sr-only">{kind.title()}: </span>{inline(title)}' if title else kind.title()
+    return f'<p class="callout-label">{icon}{text}</p>'
+
+
 _CALLOUT = re.compile(
     r"^\[!(?P<kind>NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s+(?P<title>.+?))?\s*$"
 )
@@ -515,9 +535,8 @@ def body(md: str, *, terms: bool = False) -> str:
             callout = _CALLOUT.match(inner[0])
             if callout:
                 kind = callout.group("kind").lower()
-                label = inline(callout.group("title")) if callout.group("title") else kind.title()
                 out.append(
-                    f'<aside class="callout {kind}"><p class="callout-label">{label}</p>'
+                    f'<aside class="callout {kind}">{_callout_label(kind, callout.group("title"))}'
                     f"{body(chr(10).join(inner[1:]))}</aside>"
                 )
                 continue
@@ -945,7 +964,14 @@ blockquote p:last-child { margin-bottom: 0; }
 .callout.caution { --c: var(--caution); color: var(--fg); }
 .callout p:last-child { margin-bottom: 0; }
 .callout code { background: color-mix(in srgb, var(--c) 12%, var(--bg)); }
-.callout-label { margin: 0 0 .25rem; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--c); }
+.callout-label { display: flex; align-items: center; gap: .4rem; margin: 0 0 .25rem; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--c); }
+.callout-label svg { width: 1rem; height: 1rem; flex: none; }
+.callout-label circle[r=".4"] { fill: currentColor; }
+/* Caution's octagon is filled, so the strongest kind doesn't read as Note's
+   outlined circle at this size. */
+.callout-label .solid { fill: currentColor; }
+.callout-label .knockout { stroke: var(--bg); fill: var(--bg); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
    follow the page instead. */

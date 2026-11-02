@@ -60,10 +60,11 @@ another surface are never touched. On a Version update an unchanged
 and the new one drops are deleted, and a recreated Schedule keeps its paused
 state and note.
 
-**A Schedule whose `flow:` is not in the Bundle is skipped — and is then
-deleted as undeclared**, so a typo in `flow:` removes the Schedule it meant to
-keep. A renamed Flow does the same; see
-[a Flow's identity is its name](https://docs.popcorn.ai/flow-grammar.md).
+> [!WARNING] A typo deletes the Schedule
+> A Schedule whose `flow:` is not in the Bundle is skipped, then deleted as
+> undeclared, so a typo in `flow:` removes the Schedule it meant to keep. A
+> renamed Flow does the same; see
+> [a Flow's identity is its name](https://docs.popcorn.ai/flow-grammar.md).
 
 ## Live Schedules can differ from the Manifest
 

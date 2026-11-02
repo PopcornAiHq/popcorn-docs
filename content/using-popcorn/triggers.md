@@ -61,9 +61,12 @@ like a password.
 runs with on schedule. Its next scheduled Run still happens. The work is real
 — posts, emails and changes to Items happen as they would on schedule — so
 the first call is a dry run that says what will run, and only the call with
-`confirm=true` starts it. Each confirmed call starts a Run: one that timed out
-may still have started, so check before sending it again. How the Run ended
-is shown in Popcorn, with the Routine's work.
+`confirm=true` starts it. How the Run ended is shown in Popcorn, with the
+Routine's work.
+
+> [!WARNING] A timeout may still have run
+> Each confirmed call starts a Run: one that timed out may still have
+> started, so check before sending it again.
 
 Only Schedules can be run this way. A message, document or another system
 starts work by happening.

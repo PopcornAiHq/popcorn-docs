@@ -49,8 +49,10 @@ Workspace, and a Column holding a credential is never shown or written.
 - `update_row` changes some Columns of one Row. It needs the Row's revision
   from `get_row`: if the Row changed since, nothing is written and the
   response shows it as it is now.
-- `delete_rows` deletes Rows by ID, after a dry run. A deleted Row cannot be
-  restored with these tools.
+- `delete_rows` deletes Rows by ID, after a dry run.
+
+> [!CAUTION] Deleting is permanent
+> A deleted Row cannot be restored with these tools.
 
 Writing a Row starts nothing by itself. On the Table a Routine's Statuses
 run on, though, an added Row is a new Item: it starts at its first Status,
