@@ -296,18 +296,25 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     tab = tab_of(page)
     groups: dict[str, list] = {}
     # A page with a `parent:` is listed under that page instead of beside it,
-    # and only while the reader is on the parent or one of its children, the
-    # way the Temporal docs open "Command reference" when you are in it.
-    focus = {current, page.get("parent")} if page else {current}
+    # and only while the reader is on the parent or anywhere beneath it, the
+    # way the Temporal docs open "Command reference" when you are in it. A
+    # child can be a parent too, so the Activity Catalog opens to its tiers
+    # and a tier to its domains.
+    by_id = {p["id"]: p for p in pages}
+    focus = set()
+    at = page
+    while at:
+        focus.add(at["id"])
+        at = by_id.get(at.get("parent", ""))
     children: dict[str, list] = {}
     for p in by_topic(pages):
         if tab_of(p) != tab:
             continue
-        link = [render.inline(p["title"]), href(p), p["id"] == current]
+        link = [render.inline(p["title"]), href(p), p["id"] == current,
+                children.setdefault(p["id"], []), p["id"] in focus]
         if p.get("parent"):
             children.setdefault(p["parent"], []).append(link)
             continue
-        link += [children.setdefault(p["id"], []), p["id"] in focus]
         groups.setdefault(p.get("group", "") if tab else p.get("group") or place_label(p), []).append(link)
     if tab == _PARTS[0]:
         home = ("Overview", "/", current is None)

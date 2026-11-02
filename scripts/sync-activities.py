@@ -3,10 +3,12 @@
 
 The reference is laid out like the CLI's: `activities.md` is the landing
 page — what an Activity is, how a Flow Step calls one, the tiers and
-statuses, the arguments every Activity takes, and how to list them — and
-each published tier gets a page of its own, `activities-<tier>.md`, with
-every Activity in it under its domain. All of them sit in the Reference
-tab's Activities section.
+statuses, the arguments every Activity takes, and how to list them. Under it,
+three levels: the Activity Catalog (`activities-catalog.md`) indexes the
+tiers, each published tier's page (`activities-<tier>.md`) indexes its
+domains, and each domain has a page (`activities-<tier>-<domain>.md`) with
+its activities. The sidebar nests them in that order. All of them sit in the
+Reference tab's Activities section.
 
 The activity reference is generated, never hand-written: the catalog derives
 every activity's arguments from the model the activity accepts at runtime, so
@@ -270,23 +272,63 @@ def domain(a: dict) -> str:
     return a["name"].rsplit(".", 1)[0]
 
 
+def domain_slug(name: str) -> str:
+    """A domain's page id: `foundation.store` → `activities-foundation-store`."""
+    return "activities-" + name.replace(".", "-")
+
+
 def tier_page(tier: str, acts: list[dict], order: int) -> str:
+    """A tier's index: one entry per domain, linking its page. The domain
+    pages are its children in the sidebar, as it is the catalog's."""
     title, summary, lede = TIER_PAGES[tier]
     out = header(id=slug(tier), title=title, order=order, summary=summary, lede=lede,
                  concepts=["activities", "flow-grammar"], lookup=True, parent=CATALOG)
     out += [
-        f"The {len(acts)} `{tier}` activities at `release` or `beta` status, by",
-        "domain. `beta` ones are marked. Each also takes the optional",
-        "`integration_id` and `integration_name` arguments, which the",
+        f"The {len(acts)} `{tier}` activities at `release` or `beta` status, a page for",
+        "each domain. Each activity also takes the optional `integration_id` and",
+        "`integration_name` arguments, which the",
         "[Activities](https://docs.popcorn.ai/activities.md) page explains with the",
         "rest of what every activity shares.",
         "",
     ]
-    category = None
+    for name, in_domain in domains(acts).items():
+        out.append(f"- **[`{name}`](https://docs.popcorn.ai/{domain_slug(name)}.md)** — "
+                   f"{len(in_domain)} {'activity' if len(in_domain) == 1 else 'activities'}")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def domains(acts: list[dict]) -> dict[str, list[dict]]:
+    """The activities by domain, in catalog order."""
+    out: dict[str, list[dict]] = {}
     for a in acts:
-        if domain(a) != category:
-            category = domain(a)
-            out += [f"## {category}", ""]
+        out.setdefault(domain(a), []).append(a)
+    return out
+
+
+def domain_page(name: str, tier: str, acts: list[dict], order: int) -> str:
+    """One domain's activities, each with the Step that calls it, its
+    arguments and what it returns."""
+    out = header(
+        id=domain_slug(name),
+        title=name,
+        order=order,
+        # The domain is in the title already; said again here it would count
+        # twice for any question sharing its word ("email", "channel").
+        summary="One domain's activities, each with the Step that calls it, its "
+                "arguments and what it returns.",
+        lede=f"The {name} activities, with how a Step calls each and its arguments.",
+        concepts=["activities", "flow-grammar"],
+        lookup=True,
+        parent=slug(tier),
+    )
+    out += [
+        f"The `{name}` activities at `release` or `beta` status; `beta` ones are",
+        "marked. Each also takes the optional `integration_id` and",
+        "`integration_name` arguments, which the",
+        "[Activities](https://docs.popcorn.ai/activities.md) page explains.",
+        "",
+    ]
+    for a in acts:
         out += activity(a)
     return "\n".join(out).rstrip() + "\n"
 
@@ -401,10 +443,19 @@ def catalog_page(acts: list[dict]) -> str:
 def pages(acts: list[dict]) -> dict[pathlib.Path, str]:
     """Every Activity page, freshly generated without an `updated:` line, by path."""
     out = {PAGE: landing(acts), REFERENCE / f"{CATALOG}.md": catalog_page(acts)}
-    for n, tier in enumerate(TIERS, 2):
+    order = ORDER + 2
+    for tier in TIERS:
         tier_acts = [a for a in acts if a["tier"] == tier]
-        if tier_acts:
-            out[REFERENCE / f"{slug(tier)}.md"] = tier_page(tier, tier_acts, ORDER + n)
+        if not tier_acts:
+            continue
+        out[REFERENCE / f"{slug(tier)}.md"] = tier_page(tier, tier_acts, order)
+        order += 1
+    # The domain pages follow every tier page, so each tier's index comes
+    # before the pages under it in reading order.
+    for tier in TIERS:
+        for name, in_domain in domains([a for a in acts if a["tier"] == tier]).items():
+            out[REFERENCE / f"{domain_slug(name)}.md"] = domain_page(name, tier, in_domain, order)
+            order += 1
     return out
 
 

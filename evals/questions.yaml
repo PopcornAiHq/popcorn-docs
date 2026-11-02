@@ -303,7 +303,7 @@
   trap: blames permissions, or an empty message history
 
 - q: What arguments does foundation.store.upsert_rows take?
-  concept: activities-foundation
+  concept: activities-foundation-store
   pass: conversation_id and table_name, and exactly one of rows or rows_file_key; merge_on updates a match instead of duplicating it, on_conflict is replace by default or merge to keep omitted columns, and change_kind and change_action name the write in the audit log
   trap: invents arguments such as table or records, or says rows and rows_file_key may both be given
 
