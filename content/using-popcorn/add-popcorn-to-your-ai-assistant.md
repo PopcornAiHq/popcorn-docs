@@ -1,6 +1,6 @@
 ---
-id: connect-your-assistant
-title: Connect your assistant
+id: add-popcorn-to-your-ai-assistant
+title: Add Popcorn to your AI assistant
 order: 1
 group: Getting started
 summary: >
@@ -10,8 +10,8 @@ summary: >
   permissions, in that Workspace, until you disconnect it or sign out of
   Popcorn.
 lede: >
-  Connect your AI assistant to Popcorn so it can work with your Routines,
-  using your own permissions.
+  Connect your AI assistant to Popcorn so it can work with your Routines on
+  your behalf.
 concepts: [routines, connections, reviews]
 ---
 
