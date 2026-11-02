@@ -45,6 +45,6 @@ Set:
 Before it: version 20a05588ee6a. To go back: change_routine with revert_to="20a05588…".
 ```
 
-The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool
+The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
 shares: the Workspace a call runs in, dry runs and `confirm=true`,
 `routine` and `routine_id`, and paging with `next_cursor`.

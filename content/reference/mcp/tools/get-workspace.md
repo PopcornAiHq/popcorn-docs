@@ -31,6 +31,6 @@ Your role: member
 This connection is bound to this workspace. To use a different one, the user reconnects Popcorn.
 ```
 
-The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool
+The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
 shares: the Workspace a call runs in, dry runs and `confirm=true`,
 `routine` and `routine_id`, and paging with `next_cursor`.

@@ -7,7 +7,7 @@ human decision is needed.
 ## Getting started with MCP
 
 To use Popcorn from your own AI assistant, [add Popcorn's MCP
-server](https://docs.popcorn.ai/add-the-popcorn-mcp-server.md) at
+server](https://docs.popcorn.ai/add-the-mcp-server.md) at
 `https://mcp.popcorn.ai/mcp`.
 
 In Claude Code:
