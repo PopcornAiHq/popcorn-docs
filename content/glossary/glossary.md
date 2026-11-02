@@ -503,7 +503,8 @@ the template's improvements unless it has been changed into a Copy of its own
 templates is fixed by Popcorn: changing an existing one, through a Copy, is
 self-serve, and adding a new one is not.
 
-Learn more: [App Bundles](https://docs.popcorn.ai/app-bundle.md)
+Learn more: [Routines and Routine Templates](https://docs.popcorn.ai/routines.md)
+and [App Bundles](https://docs.popcorn.ai/app-bundle.md)
 
 ### Row
 

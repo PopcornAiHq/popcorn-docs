@@ -80,7 +80,7 @@ Three other kinds of change remain:
   [customizing a Routine](https://docs.popcorn.ai/customizing-a-routine.md)
   before agreeing to it. Making that change is building on the template
   itself: see
-  [authoring an App Bundle](https://docs.popcorn.ai/template-authoring.md).
+  [changing a Routine Template](https://docs.popcorn.ai/template-authoring.md).
 
 ## Change its Steps
 
