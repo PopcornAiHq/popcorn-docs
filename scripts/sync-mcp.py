@@ -6,8 +6,9 @@ arguments, as the server itself declares them: the name and signature of each
 function registered with `@mcp.tool`, its docstring, and its annotations.
 They are two pages: `mcp.md` says what the server is, how to connect to it,
 the conventions every tool shares and the tools still proposed, and
-`mcp-tools.md` lists every tool A to Z, each with its signature, arguments
-and example. Both sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
+`mcp-tools.md` lists every tool A to Z, one line each, and each tool has a
+page of its own under it (`mcp-get-status.md`) with its signature, arguments
+and example. All sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
 reference — the definitions are what the server serves, and a hand-kept list
 is a second source that can only drift from them.
 
@@ -355,16 +356,27 @@ def worked(example: dict) -> list[str]:
     return out + ["```", ""]
 
 
-def access(h: dict[str, bool]) -> str:
-    """The tool's access hints as badges, which the renderer colours."""
+def access(tool: dict) -> str:
+    """The tool's access hints as badges, which the renderer colours, and
+    `[dry run]` on a tool that takes `confirm`: it only previews until called
+    again with `confirm=true`, the convention an assistant most often misses."""
+    h = tool["hints"]
     if h.get("readOnlyHint"):
-        return "[read-only]"
-    words = ["writes"]
-    if h.get("destructiveHint"):
-        words.append("destructive")
-    if h.get("idempotentHint"):
-        words.append("idempotent")
+        words = ["read-only"]
+    else:
+        words = ["writes"]
+        if h.get("destructiveHint"):
+            words.append("destructive")
+        if h.get("idempotentHint"):
+            words.append("idempotent")
+    if any(a["name"] == "confirm" for a in tool["args"]):
+        words.append("dry run")
     return " ".join(f"[{w}]" for w in words)
+
+
+def tool_id(name: str) -> str:
+    """A tool's page id: `get_status` → `mcp-get-status`."""
+    return "mcp-" + name.replace("_", "-")
 
 
 def lead(summary: str) -> tuple[str, str]:
@@ -397,7 +409,7 @@ def signature(tool: dict) -> str:
 
 
 def header(*, id: str, title: str, order: int, summary: str, lede: str,
-           concepts: list[str], lookup: bool) -> list[str]:
+           concepts: list[str], lookup: bool, parent: str = "") -> list[str]:
     wrapped = lambda text: textwrap.wrap(text, 76, break_on_hyphens=False)
     return [
         "---",
@@ -405,25 +417,42 @@ def header(*, id: str, title: str, order: int, summary: str, lede: str,
         f"title: {title}",
         f"order: {order}",
         "group: MCP",
+        *([f"parent: {parent}"] if parent else []),
         *(["layout: lookup"] if lookup else []),
         "summary: >",
         *(f"  {line}" for line in wrapped(summary)),
-        "lede: >",
-        *(f"  {line}" for line in wrapped(lede)),
+        *(["lede: >", *(f"  {line}" for line in wrapped(lede))] if lede else []),
         f"concepts: [{', '.join(concepts)}]",
         "---",
         "",
     ]
 
 
-def tool_section(tool: dict, shown: dict[str, dict]) -> list[str]:
+def tool_page(tool: dict, shown: dict[str, dict], order: int) -> str:
+    """One tool: its badges, what it does, the call, its arguments and, where
+    the server has one, a worked example. The summary is the tool's own first
+    sentence, which is what an assistant searching for it should read."""
     first, rest = lead(tool["summary"])
-    out = [f"### `{tool['name']}`", "", access(tool["hints"]), "", cell(first), ""]
+    summary = cell(first)
+    if len(summary) > 380:
+        summary = summary[:377].rsplit(" ", 1)[0] + "…"
+    out = header(
+        id=tool_id(tool["name"]),
+        title=tool["name"],
+        order=order,
+        summary=summary,
+        lede="",
+        concepts=["mcp"],
+        lookup=False,
+        parent="mcp-tools",
+    )
+    # The first sentence is the summary, which the page shows under its
+    # title; the call comes next, as a usage line does, then the rest.
+    out += [access(tool), "", "```", signature(tool), "```", ""]
     if rest:
         out += [cell(rest), ""]
-    out += ["```", signature(tool), "```", ""]
     if tool["args"]:
-        out += ["| Argument | Type | Notes |", "|---|---|---|"]
+        out += ["## Arguments", "", "| Argument | Type | Notes |", "|---|---|---|"]
         for a in tool["args"]:
             note = cell(a["text"])
             # A docstring often states its own default; say it once.
@@ -434,44 +463,44 @@ def tool_section(tool: dict, shown: dict[str, dict]) -> list[str]:
         out.append("")
     if tool["name"] in shown:
         out += worked(shown[tool["name"]])
-    return out
+    out += [
+        "The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool",
+        "shares: the Workspace a call runs in, dry runs and `confirm=true`,",
+        "`routine` and `routine_id`, and paging with `next_cursor`.",
+    ]
+    return "\n".join(out).rstrip() + "\n"
 
 
-def tools_page(found: list[dict], shown: dict[str, dict]) -> str:
-    """Every tool, A–Z under a heading for its first letter, like the glossary.
-
-    Alphabetical rather than by area: an assistant or a person arrives with a
-    tool's name, and a grouping of the server's tools is a second taxonomy to
-    keep in step with the server's modules for no reader's benefit.
-    """
-    # No tool names and no word every reference page shares, such as the
-    # server's name: the tools are this page's entries, which search matches
-    # by name, and a word on most pages stops telling pages apart.
+def tools_page(found: list[dict], order: int) -> str:
+    """Every tool A to Z under a heading for its first letter, one line each:
+    its badges and what it does, linking its page. The tool pages are this
+    page's children in the sidebar."""
     out = header(
         id="mcp-tools",
         title="Tools",
-        order=ORDER + 1,
-        summary="Every tool the hosted server offers, A to Z, each with its call "
-                "signature, access hints, arguments and, where there is one, a worked "
-                "example.",
-        lede="Every tool on the server, A to Z, with how to call each and its arguments.",
+        order=order,
+        summary="Every tool the hosted server offers, A to Z, each with whether it reads "
+                "or writes and what it does, linking its own page.",
+        lede="Every tool on the server, A to Z, each linking its own page.",
         concepts=["mcp"],
         lookup=True,
     )
+    reads = sum(1 for t in found if t["hints"].get("readOnlyHint"))
     out += [
-        f"The {len(found)} tools the hosted server offers, A to Z. The",
-        "[MCP server](https://docs.popcorn.ai/mcp.md) page says how to",
-        "connect, and what every tool shares: the Workspace a call runs in, dry runs",
-        "and `confirm=true`, `routine` and `routine_id`, and paging with",
-        "`next_cursor`.",
+        f"The {len(found)} tools the hosted server offers, A to Z: {reads} only read, and the",
+        f"other {len(found) - reads} write. A tool marked [dry run] only previews until it is",
+        "called again with `confirm=true`. Each tool's page has its call, its arguments",
+        "and, for many, a worked example.",
         "",
     ]
     letter = None
     for tool in sorted(found, key=lambda t: t["name"]):
         if tool["name"][0].upper() != letter:
             letter = tool["name"][0].upper()
-            out += [f"## {letter}", ""]
-        out += tool_section(tool, shown)
+            out += ["", f"## {letter}", ""]
+        first, _ = lead(tool["summary"])
+        out.append(f"- **[`{tool['name']}`](https://docs.popcorn.ai/{tool_id(tool['name'])}.md)** — "
+                   f"{access(tool)} {cell(first)}")
     return "\n".join(out).rstrip() + "\n"
 
 
@@ -555,8 +584,8 @@ def landing(found: list[dict]) -> str:
         "",
         "## Tool reference",
         "",
-        f"[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all {len(found)} tools A to Z, each with its",
-        "call signature, arguments and access hints.",
+        f"[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all {len(found)} tools A to Z, each linking a",
+        "page of its own with its call, arguments and access hints.",
     ]
     out.append("")
     return "\n".join(out) + "\n" + proposed({t["name"] for t in found})
@@ -564,7 +593,9 @@ def landing(found: list[dict]) -> str:
 
 def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     """Every MCP page, by the path it is written to, without `updated:`."""
-    out = {PAGE: landing(found), REFERENCE / "mcp-tools.md": tools_page(found, shown)}
+    out = {PAGE: landing(found), REFERENCE / "mcp-tools.md": tools_page(found, ORDER + 1)}
+    for n, tool in enumerate(sorted(found, key=lambda t: t["name"]), 2):
+        out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n)
     return out
 
 

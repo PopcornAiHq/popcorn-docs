@@ -64,8 +64,9 @@ _TERM = re.compile(r"^\*\*([^*]+)\*\*")
 # The generated MCP reference writes them, for a tool's access hints and for
 # a required argument.
 _BADGES = {"read-only": "safe", "writes": "write", "destructive": "danger",
-           "idempotent": "plain", "required": "plain"}
+           "idempotent": "plain", "required": "plain", "dry run": "confirm"}
 _BADGE = re.compile(r"\[(" + "|".join(map(re.escape, _BADGES)) + r")\](?!\()")
+_EXAMPLE = re.compile(r"^\*\*Example\*\* — (.+)$")
 _BADGE_LINE = re.compile(r"^(?:\s*" + _BADGE.pattern + r")+\s*$")
 
 SITE = "https://docs.popcorn.ai"
@@ -422,6 +423,22 @@ def body(md: str, *, terms: bool = False) -> str:
             i += 1
             continue
 
+        # A worked example: a line opening "**Example** —" and the code block
+        # under it become one closed <details>, the line its summary. The
+        # Markdown an agent reads keeps both as written.
+        example = _EXAMPLE.match(line)
+        if example and i + 2 < len(lines) and not lines[i + 1].strip() and _FENCE.match(lines[i + 2]):
+            lang = lines[i + 2].strip()[3:].strip().lower()
+            i += 3
+            code = []
+            while i < len(lines) and not _FENCE.match(lines[i]):
+                code.append(lines[i])
+                i += 1
+            i += 1  # closing fence
+            out.append(f'<details class="example"><summary>{inline(example.group(1))}</summary>'
+                       f"{code_block(chr(10).join(code), lang)}</details>")
+            continue
+
         if _FENCE.match(line):
             lang = line.strip()[3:].strip().lower()
             i += 1
@@ -676,6 +693,12 @@ th { font-weight: 600; }
 .badge.write { color: var(--accent); }
 .badge.danger { color: var(--hl-literal); }
 .badge.plain { color: var(--muted); }
+.badge.confirm { color: var(--brand); }
+details.example { margin: 0 0 1.4rem; border: 1px solid var(--rule); border-radius: 8px; }
+details.example > summary { padding: .55rem .85rem; cursor: pointer; color: var(--muted); }
+details.example > summary::before { content: "Example: "; color: var(--fg); font-weight: 600; }
+details.example[open] > summary { border-bottom: 1px solid var(--rule); }
+details.example pre { margin: 0; border-radius: 0 0 8px 8px; }
 p.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
 /* After an entry's badges: its first paragraph is the lead, and the one
    after that is detail, set smaller so the leads are what a scan reads. */

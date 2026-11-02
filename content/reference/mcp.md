@@ -79,6 +79,6 @@ its first characters, and a long listing keeps its first rows.
 
 ## Tool reference
 
-[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all 43 tools A to Z, each with its
-call signature, arguments and access hints.
+[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all 43 tools A to Z, each linking a
+page of its own with its call, arguments and access hints.
 

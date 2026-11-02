@@ -119,6 +119,15 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
     # often a word that is also a concept's name (a CLI page titled
     # "channel"), so its title and summary count half a written page's.
     weight = 1 if _is_list(page) else 2
+    # A page that is one entry of a list (an MCP tool's page) is named by its
+    # title, as an entry is. Named in full, `add_reference` is what the query
+    # asks for and its title counts as a written page's; otherwise it counts
+    # nothing, so the tool is not an answer to every "reference".
+    if _is_entry(page):
+        if _terms(page["title"]) <= terms:
+            weight = 2
+        else:
+            ident = ident - _terms(page["title"]) - _terms(page["id"])
     return (
         4 * weight * len(terms & ident)
         + 2 * weight * len(terms & summary)
@@ -131,7 +140,17 @@ PARTS = ("use", "build")
 
 
 def _is_list(page: dict) -> bool:
-    return page.get("kind") == "reference" and page.get("layout") == "lookup"
+    """A reference page read for one of its entries: a list laid out for
+    lookup, or a page that is itself one entry of a list (an MCP tool's page,
+    under Tools)."""
+    return page.get("kind") == "reference" and (
+        page.get("layout") == "lookup" or bool(page.get("parent")))
+
+
+def _is_entry(page: dict) -> bool:
+    """A reference page that is itself one entry of a list: it has a parent
+    and no entries of its own."""
+    return page.get("kind") == "reference" and bool(page.get("parent")) and page.get("layout") != "lookup"
 
 
 def query_terms(pages: list[dict], query: str) -> set[str]:
