@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Regenerate `content/reference/mcp.md` from the MCP server's tool definitions.
+"""Regenerate the MCP pages in `content/reference/` from the server's tool definitions.
 
-The page lists the tools the hosted Popcorn MCP server exposes, each with its
+The pages list the tools the hosted Popcorn MCP server exposes, each with its
 arguments, as the server itself declares them: the name and signature of each
-function registered with `@mcp.tool`, its docstring, and its annotations. It
-is generated, never hand-written, for the same reason as the activity
+function registered with `@mcp.tool`, its docstring, and its annotations.
+They are two pages: `mcp.md` says what the server is, how to connect to it,
+the conventions every tool shares and the tools still proposed, and
+`mcp-tools.md` lists every tool A to Z, each with its signature, arguments
+and example. Both sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
 reference — the definitions are what the server serves, and a hand-kept list
 is a second source that can only drift from them.
 
@@ -15,8 +18,8 @@ and exits 0. It reads the source with `ast` and imports nothing, so it needs
 none of the backend's dependencies. Check the checkout is on current main
 before running: the page describes whatever that checkout defines.
 
-    python3 scripts/sync-mcp.py            # read the checkout, write the page
-    python3 scripts/sync-mcp.py --check    # exit 1 if the page is stale
+    python3 scripts/sync-mcp.py            # read the checkout, write the pages
+    python3 scripts/sync-mcp.py --check    # exit 1 if any page is stale
     python3 scripts/sync-mcp.py --platform-version V
 
 After each prod deploy the backend's deploy pipeline runs the last form
@@ -54,11 +57,16 @@ import os
 import pathlib
 import re
 import sys
+import textwrap
 
 import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PAGE = ROOT / "content" / "reference" / "mcp.md"
+REFERENCE = ROOT / "content" / "reference"
+PAGE = REFERENCE / "mcp.md"
+# Where the MCP pages sit among the reference pages: the landing page, then
+# the tools.
+ORDER = 300
 DEFAULT_BACKEND = pathlib.Path.home() / "popcorn" / "backend"
 TOOLS_DIR = ("services", "mcp", "tools")
 EXAMPLES_DIR = ("services", "mcp", "examples")
@@ -69,31 +77,6 @@ _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
 # an "e.g." mid-sentence does not end it.
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 
-# The page's sections, in reading order, by the tool module each one covers.
-# The server already files its tools by area, one module per area, so the
-# grouping is the server's; this only names it. A module missing here stops
-# the sync, so a new area gets a heading rather than going unlisted.
-GROUPS = {
-    "context": "Workspace and people",
-    "details": "Routines",
-    "new_project": "Routines",
-    "routine_change": "Routines",
-    "messages": "Messages",
-    "search_messages": "Messages",
-    "app_bundle": "Apps",
-    "flows": "Flows",
-    "setup": "Setup",  # A Routine's setup checklist and what each step still needs.
-    "settings": "Routine settings",
-    "instructions": "Instructions",
-    "agent_store": "Tables",
-    "triggers": "Triggers",
-    "connections": "Connections",
-    "references": "References",
-    "status": "Status",
-    "actions": "Actions",
-    "history": "History",
-    "docs": "Docs",  # search_docs and read_doc, over docs.popcorn.ai.
-}
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
@@ -289,17 +272,11 @@ def hidden(root: pathlib.Path) -> set[str]:
 
 
 def tools(root: pathlib.Path) -> list[dict]:
-    """Every tool a person's assistant gets, in page order: by module as
-    `GROUPS` orders them, then in the order its module defines them, which
-    keeps a listing beside the reads it leads to. Two modules under one
-    heading follow one another. A module whose tools are all hidden gets no
-    section."""
+    """Every tool a person's assistant gets, by name."""
     skip = hidden(root)
     found = []
     for path in sorted(root.joinpath(*TOOLS_DIR).glob("*.py")):
         source = path.read_text()
-        if "@mcp.tool" in source and path.stem not in GROUPS:
-            sys.exit(f"✖  tool module {path.stem!r} has no section in GROUPS — name its area")
         for node in ast.walk(ast.parse(source)):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
@@ -324,10 +301,9 @@ def tools(root: pathlib.Path) -> list[dict]:
                     else ast.unparse(default).strip("'\""),
                     "text": described.get(param.arg, ""),
                 })
-            found.append({"name": node.name, "summary": summary, "group": GROUPS[path.stem],
-                          "at": (list(GROUPS).index(path.stem), node.lineno),
+            found.append({"name": node.name, "summary": summary,
                           "hints": hints(decorator), "args": args})
-    return sorted(found, key=lambda t: t["at"])
+    return sorted(found, key=lambda t: t["name"])
 
 
 def examples(root: pathlib.Path, names: set[str]) -> dict[str, dict]:
@@ -401,23 +377,121 @@ def cell(text: str) -> str:
     return " ".join(str(text).split()).replace("|", "\\|")
 
 
-def page(found: list[dict], shown: dict[str, dict]) -> str:
-    out = [
+def signature(tool: dict) -> str:
+    """The call as an assistant writes it: required arguments by name, the rest
+    with their defaults."""
+    parts = []
+    for a in tool["args"]:
+        if a["required"]:
+            parts.append(a["name"])
+        else:
+            default = a["default"]
+            # The parsed default has lost its quotes, so a number or a boolean
+            # is written bare and anything else as the string it was.
+            if default is None:
+                default = "None"
+            elif not re.fullmatch(r"-?\d+(\.\d+)?|True|False", default):
+                default = json.dumps(default)
+            parts.append(f"{a['name']}={default}")
+    return f"{tool['name']}({', '.join(parts)})"
+
+
+def header(*, id: str, title: str, order: int, summary: str, lede: str,
+           concepts: list[str], lookup: bool) -> list[str]:
+    wrapped = lambda text: textwrap.wrap(text, 76, break_on_hyphens=False)
+    return [
         "---",
-        "id: mcp",
-        "title: MCP",
-        "order: 3",
-        "layout: lookup",
+        f"id: {id}",
+        f"title: {title}",
+        f"order: {order}",
+        "group: MCP",
+        *(["layout: lookup"] if lookup else []),
         "summary: >",
-        "  The tools the hosted Popcorn MCP server gives a person's assistant —",
-        "  people, Routines, their Triggers, Actions, settings and tables, and a",
-        "  Routine's app — with their arguments, generated from the server's own",
-        "  definitions.",
+        *(f"  {line}" for line in wrapped(summary)),
         "lede: >",
-        "  Every tool Popcorn's MCP server gives your assistant, with its arguments.",
-        "concepts: [app-bundle, versions, copying-a-template]",
+        *(f"  {line}" for line in wrapped(lede)),
+        f"concepts: [{', '.join(concepts)}]",
         "---",
         "",
+    ]
+
+
+def tool_section(tool: dict, shown: dict[str, dict]) -> list[str]:
+    first, rest = lead(tool["summary"])
+    out = [f"### `{tool['name']}`", "", access(tool["hints"]), "", cell(first), ""]
+    if rest:
+        out += [cell(rest), ""]
+    out += ["```", signature(tool), "```", ""]
+    if tool["args"]:
+        out += ["| Argument | Type | Notes |", "|---|---|---|"]
+        for a in tool["args"]:
+            note = cell(a["text"])
+            # A docstring often states its own default; say it once.
+            if a["default"] is not None and "default" not in note.lower():
+                note = f"{note} Default `{a['default']}`.".strip()
+            name = f"`{a['name']}`" + (" [required]" if a["required"] else "")
+            out.append(f"| {name} | {a['type']} | {note} |")
+        out.append("")
+    if tool["name"] in shown:
+        out += worked(shown[tool["name"]])
+    return out
+
+
+def tools_page(found: list[dict], shown: dict[str, dict]) -> str:
+    """Every tool, A–Z under a heading for its first letter, like the glossary.
+
+    Alphabetical rather than by area: an assistant or a person arrives with a
+    tool's name, and a grouping of the server's tools is a second taxonomy to
+    keep in step with the server's modules for no reader's benefit.
+    """
+    # No tool names and no word every reference page shares, such as the
+    # server's name: the tools are this page's entries, which search matches
+    # by name, and a word on most pages stops telling pages apart.
+    out = header(
+        id="mcp-tools",
+        title="Tools",
+        order=ORDER + 1,
+        summary="Every tool the hosted server offers, A to Z, each with its call "
+                "signature, access hints, arguments and, where there is one, a worked "
+                "example.",
+        lede="Every tool on the server, A to Z, with how to call each and its arguments.",
+        concepts=["mcp"],
+        lookup=True,
+    )
+    out += [
+        f"The {len(found)} tools the hosted server offers, A to Z. The",
+        "[MCP server](https://docs.popcorn.ai/mcp.md) page says how to",
+        "connect, and what every tool shares: the Workspace a call runs in, dry runs",
+        "and `confirm=true`, `routine` and `routine_id`, and paging with",
+        "`next_cursor`.",
+        "",
+    ]
+    letter = None
+    for tool in sorted(found, key=lambda t: t["name"]):
+        if tool["name"][0].upper() != letter:
+            letter = tool["name"][0].upper()
+            out += [f"## {letter}", ""]
+        out += tool_section(tool, shown)
+    return "\n".join(out).rstrip() + "\n"
+
+
+def landing(found: list[dict]) -> str:
+    out = header(
+        id="mcp",
+        # Not "Popcorn MCP server": search weighs a title word heavily, and
+        # "popcorn" is in most questions.
+        title="MCP server",
+        order=ORDER,
+        summary="The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a "
+                "person's assistant tools for their Routines. This page says how to "
+                "connect and what every tool shares: the Workspace a call runs in, dry "
+                "runs and `confirm=true`, `routine` and `routine_id`, and paging. The "
+                "tools themselves are listed A to Z on their own page.",
+        lede="Connect your assistant to Popcorn's MCP server, and learn what every tool shares.",
+        concepts=["connect-your-assistant", "app-bundle", "versions", "copying-a-template"],
+        lookup=False,
+    )
+    out += [
         f"The hosted MCP server gives a person's assistant {len(found)} tools. With them it",
         "can find people and Routines, list the Routine Templates a new Routine can",
         "be made from, create a Routine (optionally from a template), see whether a",
@@ -434,6 +508,21 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "Template's code is what they call an app (an app bundle); the `#name` and",
         "the IDs are the same.",
         "",
+        "## Connect",
+        "",
+        "The server's address is `https://mcp.popcorn.ai/mcp`. In Claude Code:",
+        "",
+        "```",
+        "claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp",
+        "```",
+        "",
+        "The assistant opens Popcorn's sign-in; after you sign in and allow it, you",
+        "choose a Workspace if you belong to more than one. The connection stays",
+        "bound to that Workspace. [Connect your assistant](https://docs.popcorn.ai/connect-your-assistant.md)",
+        "has the steps for other assistants and how to check the connection.",
+        "",
+        "## What every tool shares",
+        "",
         "Every call runs as the person who connected the server, with that person's",
         "permissions, in the one workspace the connection is bound to; every",
         "response starts with that workspace's name. To use another workspace,",
@@ -448,7 +537,7 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "install that brings a Routine to its own line's head starts at once, and",
         "so does creating a Routine with no template.",
         "",
-        "This page is generated from the server's tool definitions by",
+        "These pages are generated from the server's tool definitions by",
         "`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a",
         "date beside the title is the day of the deploy that last changed it. The",
         "badges under each tool are the access hints the server declares to the",
@@ -464,29 +553,19 @@ def page(found: list[dict], shown: dict[str, dict]) -> str:
         "every response opens with. IDs are shortened, as `8c1f…e2`, a cursor keeps",
         "its first characters, and a long listing keeps its first rows.",
         "",
+        "## Tool reference",
+        "",
+        f"[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all {len(found)} tools A to Z, each with its",
+        "call signature, arguments and access hints.",
     ]
-    group = None
-    for tool in found:
-        if tool["group"] != group:
-            group = tool["group"]
-            out += [f"## {group}", ""]
-        first, rest = lead(tool["summary"])
-        out += [f"### `{tool['name']}`", "", access(tool["hints"]), "", cell(first), ""]
-        if rest:
-            out += [cell(rest), ""]
-        if tool["args"]:
-            out += ["| Argument | Type | Notes |", "|---|---|---|"]
-            for a in tool["args"]:
-                note = cell(a["text"])
-                # A docstring often states its own default; say it once.
-                if a["default"] is not None and "default" not in note.lower():
-                    note = f"{note} Default `{a['default']}`.".strip()
-                name = f"`{a['name']}`" + (" [required]" if a["required"] else "")
-                out.append(f"| {name} | {a['type']} | {note} |")
-            out.append("")
-        if tool["name"] in shown:
-            out += worked(shown[tool["name"]])
+    out.append("")
     return "\n".join(out) + "\n" + proposed({t["name"] for t in found})
+
+
+def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
+    """Every MCP page, by the path it is written to, without `updated:`."""
+    out = {PAGE: landing(found), REFERENCE / "mcp-tools.md": tools_page(found, shown)}
+    return out
 
 
 def main() -> int:
@@ -504,20 +583,28 @@ def main() -> int:
     if not found:
         sys.exit("✖  no @mcp.tool definitions found — has the server moved in the checkout?")
 
-    current = PAGE.read_text() if PAGE.exists() else ""
     shown = examples(root, {t["name"] for t in found})
-    text = platform_version.stamp(page(found, shown), current, args.platform)
+    wanted = {
+        path: platform_version.stamp(text, path.read_text() if path.exists() else "", args.platform)
+        for path, text in pages(found, shown).items()
+    }
+    stale = [p for p in REFERENCE.glob("mcp-*.md") if p not in wanted]
+    changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
-        if text != current:
-            print(f"✖  {PAGE.relative_to(ROOT)} is stale — run scripts/sync-mcp.py", file=sys.stderr)
+        for p in changed + stale:
+            print(f"✖  {p.relative_to(ROOT)} is stale — run scripts/sync-mcp.py", file=sys.stderr)
+        if changed or stale:
             return 1
-        print(f"✔  {PAGE.relative_to(ROOT)} matches the server's tool definitions")
+        print(f"✔  the {len(wanted)} MCP pages match the server's tool definitions")
         return 0
-    if text == current:
-        print(f"✔  {PAGE.relative_to(ROOT)} already matches — nothing to write")
+    if not changed and not stale:
+        print(f"✔  the {len(wanted)} MCP pages already match — nothing to write")
         return 0
-    PAGE.write_text(text)
-    print(f"✔  wrote {PAGE.relative_to(ROOT)}: {len(found)} tools. "
+    for p in changed:
+        p.write_text(wanted[p])
+    for p in stale:
+        p.unlink()
+    print(f"✔  wrote {len(changed)} and removed {len(stale)} of the MCP pages ({len(found)} tools). "
           "Review the diff, then run the leak guard before committing.")
     return 0
 
