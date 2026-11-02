@@ -1,7 +1,7 @@
 ---
 id: cli-table
 title: table
-order: 213
+order: 209
 group: CLI
 parent: cli-command-reference
 layout: lookup

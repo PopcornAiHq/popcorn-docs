@@ -1,7 +1,7 @@
 ---
 id: cli-app
 title: app
-order: 203
+order: 202
 group: CLI
 parent: cli-command-reference
 layout: lookup

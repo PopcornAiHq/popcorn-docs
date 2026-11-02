@@ -1,7 +1,7 @@
 ---
 id: cli-channel-config
 title: channel-config
-order: 206
+order: 205
 group: CLI
 parent: cli-command-reference
 layout: lookup

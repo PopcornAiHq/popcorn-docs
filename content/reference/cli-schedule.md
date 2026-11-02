@@ -1,7 +1,7 @@
 ---
 id: cli-schedule
 title: schedule
-order: 212
+order: 208
 group: CLI
 parent: cli-command-reference
 layout: lookup

@@ -7,8 +7,8 @@ signing in, and what every command shares (global flags, agent mode, the
 `--json` envelope, exit and error codes) — `cli-command-reference.md` indexes every
 command A to Z, and each top-level command gets a page of its own,
 `cli-<command>.md`, with every subcommand under it: what it does, a Usage
-line, and its arguments. A command with no subcommands and no arguments has
-nothing more than a line to show, so those share `cli-other.md`. All of them sit in the Reference
+line, and its arguments. A command with no subcommands is a single entry, so
+those share `cli-other.md`. All of them sit in the Reference
 tab's CLI section. They are generated, never hand-written, because the CLI
 already describes itself two ways and a third copy would only disagree with
 them:
@@ -57,8 +57,8 @@ REPO = "https://github.com/PopcornAiHq/popcorn-cli.git"
 # The command index, and the parent of every command's page. Not `cli-commands`,
 # which is the page of the CLI's own `commands` command.
 INDEX = "cli-command-reference"
-# Where the commands with nothing to show beyond a line and a Usage block go:
-# no subcommands and no arguments. A page each would be a stub.
+# Where the commands with no subcommands go. Each is one entry, so a page each
+# would be a page holding one Usage line, and several would be stubs.
 OTHER = "cli-other"
 
 _HEADING = re.compile(r"^(?P<name>[A-Z][^:]*):$")
@@ -143,8 +143,8 @@ def slug(command: str) -> str:
 
 
 def bare(top: dict) -> bool:
-    """A command with no subcommands and no arguments, listed on OTHER."""
-    return not top.get("subcommands") and not top.get("arguments")
+    """A command with no subcommands, listed on OTHER."""
+    return not top.get("subcommands")
 
 
 def href_of(top: dict) -> str:
@@ -361,21 +361,21 @@ def commands_page(tops: list[tuple[dict, list[tuple[str, dict]]]], version: str)
 
 
 def other_page(tops: list[dict], order: int, version: str) -> str:
-    """The commands that take no subcommands and no arguments, one entry each."""
+    """The commands that have no subcommands, one entry each."""
     out = header(
         id=OTHER,
         title="Other commands",
         order=order,
         version=version,
-        summary="The CLI's commands that take no subcommands and no arguments, each "
-                "with what it does and its Usage line.",
-        lede="The commands that take no arguments, with what each does.",
+        summary="The CLI's commands that have no subcommands, each with what it does, "
+                "its Usage line and its arguments.",
+        lede="The commands that have no subcommands, with how to run each and its arguments.",
         concepts=["cli"],
         lookup=True,
         parent=INDEX,
     )
     out += [
-        f"The commands in `popcorn` {version} that take no subcommands and no arguments.",
+        f"The commands in `popcorn` {version} that have no subcommands.",
         "Global flags still go before them, as in `popcorn --json whoami`; the",
         "[CLI overview](https://docs.popcorn.ai/cli.md) page lists them.",
         "",
@@ -384,7 +384,9 @@ def other_page(tops: list[dict], order: int, version: str) -> str:
         out += [f"### `{top['name']}`", ""]
         if top.get("description"):
             out += [cell(top["description"]), ""]
-        out += ["```", usage(top["name"], []), "```", ""]
+        args = top.get("arguments") or []
+        out += ["```", usage(top["name"], args), "```", ""]
+        out += table(args)
     return "\n".join(out).rstrip() + "\n"
 
 

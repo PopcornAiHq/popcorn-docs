@@ -1,7 +1,7 @@
 ---
 id: cli-workspace
 title: workspace
-order: 216
+order: 211
 group: CLI
 parent: cli-command-reference
 layout: lookup

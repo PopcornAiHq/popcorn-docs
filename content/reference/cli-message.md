@@ -1,7 +1,7 @@
 ---
 id: cli-message
 title: message
-order: 211
+order: 207
 group: CLI
 parent: cli-command-reference
 layout: lookup

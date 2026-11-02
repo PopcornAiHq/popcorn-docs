@@ -1,7 +1,7 @@
 ---
 id: cli-auth
 title: auth
-order: 204
+order: 203
 group: CLI
 parent: cli-command-reference
 layout: lookup
