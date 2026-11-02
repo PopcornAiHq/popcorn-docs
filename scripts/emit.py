@@ -528,14 +528,14 @@ def main() -> int:
                 f"{version_badge(page)}</div>"
                 f"{render.page_actions('/' + path)}</div>\n"
                 f'<p class="summary">{render.inline(lede(page))}</p>\n'
-                f"{render.on_this_page(rendered, lookup=lookup)}"
+                f"{render.on_this_page(rendered, lookup=lookup, title=render.plain(page['title']))}"
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
                 description=lede(page),
                 sidebar=sidebar(pages, page["id"]),
                 tabs=tabs(pages, page["id"]),
                 rail=render.rail(
-                    contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
+                    contents=render.lookup_index(rendered, render.plain(page["title"])) if lookup else render.toc(rendered),
                     related=[] if lookup else related(page, by_id),
                 ),
                 url=url(page),

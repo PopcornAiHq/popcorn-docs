@@ -187,7 +187,7 @@ _ENTRY = re.compile(
 )
 
 
-def _lookup_entries(rendered: str) -> str:
+def _lookup_entries(rendered: str, title: str = "") -> str:
     """A lookup page's entries and the filter over them.
 
     Built from the rendered page rather than the Markdown, so an entry is
@@ -195,7 +195,8 @@ def _lookup_entries(rendered: str) -> str:
     the groups; third-level headings and glossary terms are the entries. An
     entry that repeats its group's name as a prefix — `foundation.agent.invoke`
     under `foundation.agent` — is listed by the part that differs, which is
-    what fits in the rail.
+    what fits in the rail. With no group heading the page's title stands in,
+    so a domain's page lists `claim_row` rather than `foundation.store.claim_row`.
     """
     groups: list[tuple[str, str, list[tuple[str, str, str]]]] = []
     for m in _ENTRY.finditer(rendered):
@@ -206,7 +207,7 @@ def _lookup_entries(rendered: str) -> str:
         name = _TAG.sub("", m.group("html") or m.group("term"))
         if not groups:
             groups.append(("", "", []))
-        prefix = groups[-1][1] + "."
+        prefix = (groups[-1][1] or title) + "."
         label = name[len(prefix):] if name.startswith(prefix) else name
         groups[-1][2].append((anchor, name, label))
 
@@ -231,17 +232,17 @@ def _lookup_entries(rendered: str) -> str:
     )
 
 
-def lookup_index(rendered: str) -> str:
+def lookup_index(rendered: str, title: str = "") -> str:
     """"On this page" for a lookup page: every entry, filterable.
 
     It takes the rail's place for the contents list, and the site sidebar
     stays on the left, so a reader looking a term up can still see where the
     page sits and leave it in one click.
     """
-    return '<p class="rail-title">On this page</p>' + _lookup_entries(rendered)
+    return '<p class="rail-title">On this page</p>' + _lookup_entries(rendered, title)
 
 
-def on_this_page(rendered: str, *, lookup: bool) -> str:
+def on_this_page(rendered: str, *, lookup: bool, title: str = "") -> str:
     """The rail's contents list again, collapsed above the page's text.
 
     Below the width that fits a rail, the rail's list is hidden and only its
@@ -258,7 +259,7 @@ def on_this_page(rendered: str, *, lookup: bool) -> str:
     A native <details>, so it opens without JavaScript and starts collapsed:
     the text is what the reader came for, and the list is one tap away.
     """
-    contents = _lookup_entries(rendered) if lookup else _toc_nav(rendered, 2, "")
+    contents = _lookup_entries(rendered, title) if lookup else _toc_nav(rendered, 2, "")
     if not contents:
         return ""
     return (
