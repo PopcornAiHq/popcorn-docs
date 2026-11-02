@@ -96,6 +96,39 @@ to a few words. A plain `>` quote stays what it is everywhere else:
 something a person says to their assistant. Anything a reader must do is a
 step, never a callout.
 
+## Tabs are for one choice, made once
+
+When the same step differs by what the reader uses, such as their
+assistant, give each a tab instead of a list of alternatives:
+
+````
+=== "Claude Code"
+
+    ```bash
+    claude mcp add …
+    ```
+
+=== "ChatGPT"
+
+    See OpenAI's help.
+````
+
+A tab's content is indented four spaces. Sets with the same labels switch
+together, and the site remembers the choice on the next page, so label the
+same choice the same way everywhere. Without its script the page, like the
+Markdown an agent reads, shows every tab under its label. Keep anything that
+applies to every choice outside the tabs.
+
+## A code block names its file
+
+A block that is the whole or part of a file gets its file name as a title:
+
+````
+```yaml title="manifest.yaml"
+````
+
+A command or a fragment that isn't one file has no title.
+
 ## Glossary terms are capitalized
 
 Every term `content/glossary/glossary.md` defines is capitalized wherever it

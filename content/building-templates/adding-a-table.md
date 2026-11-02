@@ -58,7 +58,7 @@ which no longer receives the template's improvements.
 Add it under `tables:` in `manifest.yaml`. The key is the Table's name, which
 is what every Flow Step passes as `table_name`.
 
-```yaml
+```yaml title="manifest.yaml"
 tables:
   handoffs:
     columns:
@@ -119,7 +119,7 @@ Table whose older Rows were built under a different rule.
 Flows reach the Table through the `foundation.store.*` Activities, naming it
 by `table_name`:
 
-```yaml
+```yaml title="record_handoff.yaml"
 name: record_handoff
 version: 1
 description: One row per ticket handed off; a repeat merges into it.

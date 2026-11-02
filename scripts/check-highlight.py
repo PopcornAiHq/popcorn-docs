@@ -25,7 +25,7 @@ import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 _TAG = re.compile(r"<[^>]+>")
-_OPEN = re.compile(r"^```(?P<lang>\S*)\s*$")
+_OPEN = re.compile(r"^```(?P<info>.*)$")
 
 AWKWARD = """\
 key: <not-a-tag> & "quoted <b>" # comment with </code>
@@ -70,7 +70,9 @@ def yaml_blocks() -> list[tuple[pathlib.Path, str]]:
                 code.append(lines[i])
                 i += 1
             i += 1
-            if m.group("lang").lower() in highlight.LANGUAGES:
+            # The info string may carry a title after the language.
+            info = render._INFO.match(m.group("info").strip())
+            if info and (info.group("lang") or "").lower() in highlight.LANGUAGES:
                 out.append((path, "\n".join(code)))
     return out
 
