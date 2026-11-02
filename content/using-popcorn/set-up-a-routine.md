@@ -1,38 +1,39 @@
 ---
 id: set-up-a-routine
-title: Set up a Routine
+title: Set up your first Routine
 order: 2
 group: Getting started
 summary: >
   Setting up a Routine from a Routine Template: pick a template with
   list_routine_templates, create the Routine with create_routine (a dry run
-  first), wait for its template to install, have the right person connect each
-  account it needs, then check what starts its work with list_triggers.
+  first), wait for its template to install, make its Connections with
+  make_connection, add its References with add_reference, check what's left
+  with get_setup, then see what starts its work with list_triggers.
 lede: >
-  Set up a new Routine from a Routine Template and connect the accounts it
-  needs, so it is ready to start work.
+  Ask your AI assistant to set up a Routine from a template, connect what it
+  needs and check it's ready to run.
 concepts: [routines, connections, triggers]
 ---
 
 This guide starts from "we need a Routine for this" and ends with a Routine
-whose Connections are made and whose work is ready to start. Every step is
-something a person can ask their assistant for, and the assistant does it
-through the Popcorn MCP server; one step needs the person themselves.
+whose [Connections](https://docs.popcorn.ai/connections.md) are made and
+whose work is ready to start. Every step is something a person can ask their
+assistant for, and the assistant does it through the Popcorn MCP server. A
+person still signs in to their own accounts, and a few things are done in
+Popcorn; the assistant's answer says which.
 
 The example sets up a private Routine for western-region claims, called
 `#claims-west`, from the Chase template, whose
 [Steps](https://docs.popcorn.ai/steps.md) start as a claims intake: questions, a
 Review, then the retainer.
 
-## Or describe it in Popcorn
-
-A person can also start a Routine in Popcorn without picking a template.
-**New routine** takes a sentence such as "ask new clients a few questions,
-then send them a retainer", or an example to start from, and the new
-Routine's Agent drafts its Steps from it for the person to check. Popcorn can
-also suggest Routines from a connected inbox, from the work it finds waiting
-there. Both start from the same template as this guide, so the rest of it
-applies once the Routine exists.
+> [!TIP] Or describe it in Popcorn
+> **New routine** in Popcorn takes a sentence such as "ask new clients a few
+> questions, then send them a retainer", or an example to start from, and the
+> new Routine's Agent drafts its Steps from it for the person to check.
+> Popcorn can also suggest Routines from a connected inbox. Both create the
+> Routine from the Chase template, so this guide applies from "Wait for the
+> template to install".
 
 ## Pick a template
 
@@ -41,8 +42,8 @@ applies once the Routine exists.
 `list_routine_templates` lists the Routine Templates this Workspace can
 start from: each one's name, its slug, what it does, and the Connections it
 needs before it runs. A template the Workspace cannot run is not listed. Note
-the slug — `chase` here — and the Connections (Gmail, Google Drive, Google
-Calendar and an intake address), because someone has to make them under "Make its Connections".
+the slug — `chase` here — and the Connections: Gmail, Google Calendar, Google
+Drive, an intake Webhook and E-signature.
 
 ## Create the Routine
 
@@ -59,29 +60,60 @@ call again with `confirm=true`.
 - **The name.** Spaces become hyphens, and a name already used in the
   Workspace is refused with the ID of the Routine that has it.
 
-The response gives the new Routine's ID. Use the ID, not the name, in every
-call that changes it.
+> [!TIP] Use its ID
+> The response gives the new Routine's ID. Use the ID, not the name, in every
+> call that changes it.
 
 ## Wait for the template to install
 
-The template installs in the background once the Routine exists, usually in
-seconds. `get_routine` with `wait_seconds` (up to 20) waits for it:
-
 > "Is #claims-west ready?"
 
-Its **Install** field says `installed` when the template has landed. Until
-then the Routine exists but has nothing to run.
+The template installs in the background once the Routine exists, usually in
+seconds. `get_routine` with `wait_seconds` (up to 20) waits for it. Its
+**Install** field says `installed` when the template has landed. Until then
+the Routine exists but has nothing to run.
 
 ## Make its Connections
 
-`get_routine` lists each Connection the Routine needs, as connected or
-**NOT CONNECTED**. A Connection signs in as a person, so the assistant cannot
-make one: the person who owns the account connects it in the Routine's
-settings in Popcorn, in a browser. Tell them which ones, and why — work that
-uses a missing Connection cannot run.
+> "Connect my Google account to #claims-west."
 
-When they are done, `get_routine` again: every Connection should read
-connected. See [Connections](https://docs.popcorn.ai/connections.md).
+`list_connections` shows each Connection the Routine needs, whose account it
+uses, and what stops while it is missing. `make_connection` makes one, a dry
+run first, then with `confirm=true`:
+
+- **An account.** It lists the person's own accounts that can serve the
+  Connection. One Google account fills Gmail, Google Calendar and Google
+  Drive together. A Connection signs in as a person, so only their own
+  accounts can be connected, and a teammate connects theirs. For a Google
+  account not yet signed in to, it hands back a sign-in link to pass on.
+- **The intake Webhook.** It makes the Webhook and answers with its address,
+  once. The address is a credential: give it only to whoever sets up the
+  system that posts to it.
+- **E-signature.** Not made here: a Workspace admin or owner saves its
+  Signing Provider's keys in Popcorn.
+
+> [!WARNING] A missing Connection stops work
+> Work that uses a missing Connection cannot run. Some hold the whole
+> Routine back, and Popcorn shows it as not ready.
+
+## Add its References
+
+> "Add our intake questions to #claims-west."
+
+A Chase Routine needs its sample email before its first Step can ask
+anything, and its agreement before it can send one. `add_reference` adds a
+Reference from text or an uploaded file, a dry run first; one picked from
+Google Drive is picked in Popcorn instead. See
+[References](https://docs.popcorn.ai/reference-documents.md).
+
+## Check what's left
+
+> "What's left to set up on #claims-west?"
+
+`get_setup` reads the Routine's setup checklist: each step done or left,
+which are required, and what each one left needs, such as a Connection or a
+value set in the Routine's Today tab. When nothing required is left, the
+Routine is ready.
 
 ## See what starts its work
 
@@ -89,10 +121,7 @@ connected. See [Connections](https://docs.popcorn.ai/connections.md).
 
 `list_triggers` shows how work arrives: its Schedules with their cadence,
 the messages and documents that start work, and any other system that posts to
-it. A Chase Routine needs its sample email before its first Step can ask
-anything, and its agreement before it can send one; adding them is a
-person's step in Popcorn (see
-[References](https://docs.popcorn.ai/reference-documents.md)).
+it.
 
 To see the Routine work without waiting, `run_trigger` runs one of its
 Schedules now — a dry run first, because the work is real. See
