@@ -81,11 +81,12 @@ A Publish is refused when:
   refusal names each Table and Column
 - the Version or its content already exists (below)
 
-A Manifest with **no** `app_type:` is not refused: Publish treats it as the
-Copy's own template. Every Install of that Version then clears `app_type`
-and `channel_agent` on each Routine it reaches, which is every Routine on the
-Copy. Keep both keys in every Version, and treat `app validate`'s
-`clears-app-type` warning as an error.
+> [!WARNING] Keep `app_type:`
+> A Manifest with no `app_type:` is not refused: Publish treats it as the
+> Copy's own template. Every Install of that Version then clears `app_type`
+> and `channel_agent` on each Routine it reaches, which is every Routine on
+> the Copy. Keep both keys in every Version, and treat `app validate`'s
+> `clears-app-type` warning as an error.
 
 Every one of those checks asks *is this allowed and well-formed*. None asks
 **did you mean to do this to every Routine on the Copy**, and none refuses a

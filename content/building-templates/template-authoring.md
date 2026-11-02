@@ -24,7 +24,8 @@ below keep those names; the CLI's `channel templates` command and
 `--template` flag name the template. The
 [glossary](https://docs.popcorn.ai/glossary.md) has the product's words.
 
-> **Which path you are on decides how fast you can iterate.** A *new*
+> [!IMPORTANT] New or changed template
+> Which path you are on decides how fast you can iterate. A *new*
 > template (a new `app_type`) is not self-serve: the set of installable
 > templates is fixed on the server, and adding to it takes an internal change
 > plus a deploy that no CLI command and no public endpoint can perform. But
@@ -76,10 +77,11 @@ of that template, and is behind most of the rules the concept pages state. Read 
 as a record: it says so itself, and some of its findings predate the
 [Merge Policies](https://docs.popcorn.ai/merge-policy.md).
 
-> **Do not copy a Bundle out of a repo.** The cut-down Bundles under the CLI
-> repo's `tests/fixtures/bundles/` exist to exercise `app validate`; none
-> declares a `version:`, so none can publish, and they do not match what the
-> platform ships. **Get Bundle source from the server** — see "Changing a Routine Template that exists", where
+> [!WARNING] Don't copy a Bundle from a repo
+> The cut-down Bundles under the CLI repo's `tests/fixtures/bundles/` exist
+> to exercise `app validate`; none declares a `version:`, so none can
+> publish, and they do not match what the platform ships. Get Bundle source
+> from the server — see "Changing a Routine Template that exists", where
 > `app checkout` hands you the deployed Version of a real one.
 
 ---
@@ -316,9 +318,12 @@ popcorn app checkout --channel '#scratch' --fork   # ... or to edit it
 
 Reading needs no Copy — a Checkout taken without one records `"kind": "product"` and
 publishing from it is refused, which is the point. Copy when you intend to
-edit, and note what that costs: a Copy is permanent and cannot be
-deleted, so make one in a Workspace you do not mind accumulating one in.
-`popcorn app lines` is how you see what has accumulated.
+edit.
+
+> [!CAUTION] Copies can't be deleted
+> A Copy is permanent and cannot be deleted, so make one in a Workspace you
+> do not mind accumulating one in. `popcorn app lines` is how you see what
+> has accumulated.
 
 Three things about this loop that are easy to get wrong:
 

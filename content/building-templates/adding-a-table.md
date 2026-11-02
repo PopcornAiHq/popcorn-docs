@@ -45,10 +45,13 @@ cd <app>
 If the Routine is already on a Copy, `app checkout --channel '#example-intake'`
 is enough. A Table is a change to what the template is built from, so no
 setting can stand in for it. Adding one gives the Routine a Copy of its own,
-which no longer receives the template's improvements. Copying is permanent, and a
-Publish reaches every Routine on the Copy, not only this one. See
-[copying a template](https://docs.popcorn.ai/copying-a-template.md) before copying the template of a
-production Routine.
+which no longer receives the template's improvements.
+
+> [!CAUTION] A Copy is permanent
+> Copying is permanent, and a Publish reaches every Routine on the Copy, not
+> only this one. See
+> [copying a template](https://docs.popcorn.ai/copying-a-template.md) before
+> copying the template of a production Routine.
 
 ## Declare the Table
 

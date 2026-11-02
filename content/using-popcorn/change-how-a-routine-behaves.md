@@ -42,8 +42,10 @@ If nothing matches, go to "When no setting covers it".
 
 `get_routine_setting` shows the whole value, the template's default, what
 it accepts, its options and the warning each carries, and who may change it.
-A sending mode's warning matters: switching from drafts to sending means
-emails go out without a person reviewing them.
+
+> [!WARNING] Drafts to sending
+> Switching a sending mode from drafts to sending means emails go out
+> without a person reviewing them.
 
 ## Change it
 

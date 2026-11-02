@@ -46,7 +46,7 @@ Ask your assistant:
 
 It should name the Workspace you chose.
 
-> [!TIP]
+> [!TIP] Where to look
 > Most assistants show the tool calls they make, sometimes inside their
 > reasoning or a details view. Look for Popcorn's `get_workspace`.
 
