@@ -69,17 +69,18 @@ Work with Routines by asking your AI assistant in your own words.
 
 ## Building Routine Templates
 
-Most Routines can be configured through their Routine Settings. For advanced
-use cases, you can copy a Routine Template and modify it.
-
-- [Change a Routine Template](https://docs.popcorn.ai/template-authoring.md): copy, edit, publish, confirm the Install
-- [Copying a template](https://docs.popcorn.ai/copying-a-template.md): what a Copy costs, and why it is one-way
-- [Debug a failed Run](https://docs.popcorn.ai/debugging-a-failed-run.md): from a Routine's History to the Step that failed
+Most Routines can be configured through their [Routine
+Settings](https://docs.popcorn.ai/routine-settings.md). For advanced use cases,
+you can [copy and modify a Routine
+Template](https://docs.popcorn.ai/template-authoring.md).
 
 ## Look it up
 
-- [Glossary](https://docs.popcorn.ai/glossary.md): comprehensive list of Popcorn terms
-- [MCP](https://docs.popcorn.ai/mcp.md), [CLI](https://docs.popcorn.ai/cli.md) and [Activities](https://docs.popcorn.ai/activities.md): generated from Popcorn itself
+- [Activities](https://docs.popcorn.ai/activities.md): the operations a
+  [Flow](https://docs.popcorn.ai/flow-grammar.md) Step can call
+- [CLI](https://docs.popcorn.ai/cli.md): every `popcorn` command
+- [MCP](https://docs.popcorn.ai/mcp.md): the tools your assistant gets
+- [Glossary](https://docs.popcorn.ai/glossary.md): every Popcorn term
 
 ## For agents
 

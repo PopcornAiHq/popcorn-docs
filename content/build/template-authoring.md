@@ -359,7 +359,7 @@ table. The keys with pages of their own:
 | `scalars`, `default_scalars` | [Scalar tiers and Routine Settings](https://docs.popcorn.ai/scalar-tiers.md) |
 | `schedules` | [Schedules in a Manifest](https://docs.popcorn.ai/schedules.md) |
 | `states` | [State Machines in a Bundle](https://docs.popcorn.ai/state-machine.md); writing one is [authoring a States tier](https://docs.popcorn.ai/states-authoring.md) |
-| `recipe` | the same graph as a root `recipe.yaml` each Routine can replace — the Recipe section of [State Machines in a Bundle](https://docs.popcorn.ai/state-machine.md); it is written like a `states:` section |
+| `recipe` | the same graph as a root `recipe.yaml` each Routine can replace — see [the Recipe](https://docs.popcorn.ai/state-machine.md#the-recipe-a-graph-each-routine-can-replace); it is written like a `states:` section |
 
 Three traps are worth carrying into every edit:
 

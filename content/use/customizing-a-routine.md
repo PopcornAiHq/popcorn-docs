@@ -66,5 +66,5 @@ A Copy of its own is the Workspace's own series of Versions of the template
 (the CLI calls it a *fork line*), and a change reaches it by publishing a new
 Version. [Copying a template](https://docs.popcorn.ai/copying-a-template.md)
 says what a Copy costs and how to make one, and
-[authoring an App Bundle](https://docs.popcorn.ai/template-authoring.md)
+[changing a Routine Template](https://docs.popcorn.ai/template-authoring.md)
 how to make the change itself.

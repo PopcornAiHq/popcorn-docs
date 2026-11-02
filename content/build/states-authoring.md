@@ -42,8 +42,7 @@ either:
 
 A template declares one or the other, never both. What else a Recipe carries,
 and how a Routine's own revision is installed and kept, is in
-[the State Machine](https://docs.popcorn.ai/state-machine.md)'s
-last section.
+[the Recipe](https://docs.popcorn.ai/state-machine.md#the-recipe-a-graph-each-routine-can-replace).
 
 The loop is the ordinary one from
 [changing a Routine Template](https://docs.popcorn.ai/template-authoring.md):
