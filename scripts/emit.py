@@ -244,7 +244,9 @@ def by_topic(pages: list[dict]) -> list[dict]:
     """
     topics: dict[tuple, list[dict]] = {}
     for page in pages:
-        key = (page.get("part") or "", page.get("group", "") if page.get("part") else "")
+        # A shared page has no part, so its kind keeps the glossary apart from
+        # the references, whose groups (the CLI's) sit among them.
+        key = (page.get("part") or page["source_dir"], page.get("group", ""))
         topics.setdefault(key, []).append(page)
     return [page for group in topics.values() for page in group]
 
@@ -283,19 +285,30 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     """The site sidebar: the current tab's `group:`s, each under its heading.
 
     A group holds every page about one topic, whether it explains a thing or
-    walks through a task; pages without one are listed with no heading. On
-    the Reference tab each shared kind is its own section instead. The
+    walks through a task; pages without one are listed with no heading, and
+    a page with a `parent:` is listed under its parent when in focus. On
+    the Reference tab a page's group, such as the CLI's, is its section, and
+    a page without one sits under its kind. The
     Overview leads the first part's Getting started, which is where the 404
     page, under no tab, starts a reader again.
     """
     page = next((p for p in pages if p["id"] == current), None)
     tab = tab_of(page)
     groups: dict[str, list] = {}
+    # A page with a `parent:` is listed under that page instead of beside it,
+    # and only while the reader is on the parent or one of its children, the
+    # way the Temporal docs open "Command reference" when you are in it.
+    focus = {current, page.get("parent")} if page else {current}
+    children: dict[str, list] = {}
     for p in by_topic(pages):
         if tab_of(p) != tab:
             continue
-        link = (render.inline(p["title"]), href(p), p["id"] == current)
-        groups.setdefault(p.get("group", "") if tab else place_label(p), []).append(link)
+        link = [render.inline(p["title"]), href(p), p["id"] == current]
+        if p.get("parent"):
+            children.setdefault(p["parent"], []).append(link)
+            continue
+        link += [children.setdefault(p["id"], []), p["id"] in focus]
+        groups.setdefault(p.get("group", "") if tab else p.get("group") or place_label(p), []).append(link)
     if tab == _PARTS[0]:
         home = ("Overview", "/", current is None)
         groups = {GETTING_STARTED: [home] + groups.pop(GETTING_STARTED, []), **groups}

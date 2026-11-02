@@ -299,9 +299,15 @@ def site_nav(groups: list[tuple[str, list[Link]]], tabs: list[Link] = ()) -> str
     narrow layout, where the header has no room for them and the sidebar is
     the menu.
     """
-    def link(title: str, href: str, current: bool) -> str:
+    def link(title: str, href: str, current: bool, kids: list = (), open_: bool = False) -> str:
         attrs = ' aria-current="page"' if current else ""
-        return f'<li><a href="{href}"{attrs}>{title}</a></li>'
+        if not kids:
+            return f'<li><a href="{href}"{attrs}>{title}</a></li>'
+        # The children are listed only while open: the parent is the way in.
+        state = "open" if open_ else "closed"
+        nested = f'<ul class="nav-children">{"".join(link(*k) for k in kids)}</ul>' if open_ else ""
+        return (f'<li class="nav-parent {state}"><a href="{href}"{attrs}>{title}'
+                f'<span class="caret" aria-hidden="true">{_ICON_CARET}</span></a>{nested}</li>')
 
     out = []
     if tabs:
@@ -729,6 +735,10 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .nav-group { margin: 1.9rem 0 .4rem .75rem; font-weight: 600; color: var(--fg); }
 .site-nav > .nav-group:first-child, .nav-tabs + .nav-group { margin-top: 0; }
 .nav-tabs { display: none; }
+.nav-parent > a { display: flex; align-items: center; justify-content: space-between; }
+.nav-parent .caret { display: flex; color: var(--muted); transform: rotate(-90deg); transition: transform .15s; }
+.nav-parent.open > a .caret { transform: none; }
+.nav-children { margin: .1rem 0 .3rem .9rem !important; padding-left: .2rem !important; }
 /* The header's second row. The tab underline sits on the header's own rule. */
 .site { display: flex; flex-direction: column; }
 .site .bar { height: 3.25rem; flex: none; width: 100%; box-sizing: border-box; }
