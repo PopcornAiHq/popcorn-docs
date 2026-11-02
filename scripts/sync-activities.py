@@ -432,11 +432,15 @@ def catalog_page(acts: list[dict]) -> str:
         "platform you are signed in to.",
         "",
     ]
-    # One entry per tier, so the page is a list like the pages under it.
+    # One entry per tier, so the page is a list like the pages under it. The
+    # tier's page lists its domains; repeating them here would make this page
+    # a second index of the same thing.
     for tier in TIERS:
-        domains = ", ".join(f"`{d}`" for d in dict.fromkeys(domain(a) for a in acts if a["tier"] == tier))
-        if domains:
-            out.append(f"- **[{TIER_PAGES[tier][0]}](https://docs.popcorn.ai/{slug(tier)}.md)** — {domains}")
+        count = sum(1 for a in acts if a["tier"] == tier)
+        if count:
+            title, _, lede = TIER_PAGES[tier]
+            out.append(f"- **[{title}](https://docs.popcorn.ai/{slug(tier)}.md)** — "
+                       f"{lede.rstrip('.')} ({count} activities).")
     return "\n".join(out).rstrip() + "\n"
 
 
