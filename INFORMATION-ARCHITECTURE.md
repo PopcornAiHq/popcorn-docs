@@ -11,7 +11,9 @@ that decides a borderline case.
 ## Two parts, across every section
 
 Every page but the glossary and the references is in a part, and its
-directory says which: `content/use/` or `content/build/`.
+directory says which: `content/using-popcorn/` or `content/building-templates/`.
+Each part also has a short name, `use` or `build`, which is what search,
+`chunks.json` and the docs tools' `part` argument say.
 
 - **`use`**, Using Popcorn — for a Popcorn user and their assistant, working
   with Routines. Popcorn is used both in its app and headless, from an
@@ -66,7 +68,7 @@ pages are merged, the ids of the ones absorbed are retired: removed from every
 `concepts:` list, eval question, generator and link that named them, in this
 repository and in the ones that link it. Old addresses are not redirected.
 
-## Pages: `content/use/` and `content/build/`
+## Pages: `content/using-popcorn/` and `content/building-templates/`
 
 **Audience:** an agent answering a question mid-task, and a person who has
 hit something surprising or has something to do.

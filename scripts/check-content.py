@@ -35,8 +35,8 @@ Checks, in the order a writer meets them:
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
   stops one page at a time bringing the field back
-* the page is in `content/use/` or `content/build/`, which is its part:
-  Using Popcorn or Building Routine Templates. The sidebar and search read
+* the page is in `content/using-popcorn/` or `content/building-templates/`,
+  which is its part: Using Popcorn or Building Routine Templates. The sidebar and search read
   it, so a page in any other directory would belong to neither. The
   glossary and the reference pages serve both parts, in `content/glossary/`
   and `content/reference/`. A `part:` field is refused, because the
@@ -81,7 +81,8 @@ _OLD_PLATFORM = re.compile(r"^platform\s*:", re.M)
 _CONCEPTS = re.compile(r"^concepts:\s*\[(?P<ids>[^\]]*)\]", re.M)
 _SOURCE = re.compile(r"^source\s*:", re.M)
 _PART = re.compile(r"^part\s*:", re.M)
-PARTS = {"use", "build"}
+# The parts' directories; emit.py maps each to the part's short name.
+PARTS = {"using-popcorn", "building-templates"}
 SHARED = {"glossary", "reference"}
 _LAYER = re.compile(r"^layer\s*:", re.M)
 _APPLIES_TO = re.compile(r"^applies_to\s*:", re.M)
