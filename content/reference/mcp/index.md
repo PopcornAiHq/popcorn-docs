@@ -1,19 +1,18 @@
 ---
 id: mcp
-title: MCP server
+title: MCP server overview
 order: 300
 group: MCP
 updated: 2026-11-01
 summary: >
   The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a
-  person's assistant tools for their Routines. This page says how to connect
+  person's assistant tools for their Routines. This page says what they cover
   and what every tool shares: the Workspace a call runs in, dry runs and
-  `confirm=true`, `routine` and `routine_id`, and paging. The tools themselves
-  are listed A to Z on their own page.
+  `confirm=true`, `routine` and `routine_id`, and paging. Adding the server to
+  an assistant has its own page, and the tools are listed A to Z on theirs.
 lede: >
-  Connect your assistant to Popcorn's MCP server, and learn what every tool
-  shares.
-concepts: [connect-your-assistant, app-bundle, versions, copying-a-template]
+  What Popcorn's MCP server gives your assistant, and what every tool shares.
+concepts: [add-the-mcp-server, app-bundle, versions, copying-a-template]
 ---
 
 The hosted MCP server gives a person's assistant 43 tools. With them it
@@ -32,18 +31,12 @@ A Routine is what the CLI and the API call a channel, and its Routine
 Template's code is what they call an app (an app bundle); the `#name` and
 the IDs are the same.
 
-## Connect
+## Get started
 
-The server's address is `https://mcp.popcorn.ai/mcp`. In Claude Code:
-
-```
-claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
-```
-
-The assistant opens Popcorn's sign-in; after you sign in and allow it, you
-choose a Workspace if you belong to more than one. The connection stays
-bound to that Workspace. [Connect your assistant](https://docs.popcorn.ai/connect-your-assistant.md)
-has the steps for other assistants and how to check the connection.
+The server's address is `https://mcp.popcorn.ai/mcp`. [Add the MCP
+server](https://docs.popcorn.ai/add-the-mcp-server.md) has the steps for
+Claude, Claude Code and other assistants, signing in and choosing a
+Workspace, and checking the connection.
 
 ## What every tool shares
 

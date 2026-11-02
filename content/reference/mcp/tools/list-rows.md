@@ -43,6 +43,6 @@ Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] p
 - row 88  claim_no: 4471  claimant: Ortiz  amount: 12400  Status: open  Stage: open  (updated 2026-09-29 14:05)
 ```
 
-The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool
+The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
 shares: the Workspace a call runs in, dry runs and `confirm=true`,
 `routine` and `routine_id`, and paging with `next_cursor`.

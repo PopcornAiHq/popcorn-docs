@@ -51,6 +51,6 @@ Changed chase_max_followups on #chase-renewals: 10 → 5.
 Runs already under way keep the value they started with.
 ```
 
-The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool
+The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
 shares: the Workspace a call runs in, dry runs and `confirm=true`,
 `routine` and `routine_id`, and paging with `next_cursor`.

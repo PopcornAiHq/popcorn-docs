@@ -47,6 +47,13 @@ import highlight
 _FENCE = re.compile(r"^```")
 _RULE = re.compile(r"^-{3,}\s*$")
 _QUOTE = re.compile(r"^>\s?(?P<text>.*)$")
+# GitHub's alert syntax, a quote opening `[!TIP]`: an aside the page reads
+# fine without. The Markdown twin keeps the marker, which reads as plain text.
+# Text after the marker is the callout's own title, as Obsidian takes it
+# (`[!TIP] Where to look`); GitHub then shows a plain quote.
+_CALLOUT = re.compile(
+    r"^\[!(?P<kind>NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s+(?P<title>.+?))?\s*$"
+)
 # A list item may be indented up to three spaces, as Markdown allows; four is
 # where an indented code block begins.
 _ORDERED = re.compile(r"^ {0,3}\d+\.\s+(?P<text>.+)$")
@@ -505,6 +512,15 @@ def body(md: str, *, terms: bool = False) -> str:
             while i < len(lines) and _QUOTE.match(lines[i]):
                 inner.append(_QUOTE.match(lines[i]).group("text"))
                 i += 1
+            callout = _CALLOUT.match(inner[0])
+            if callout:
+                kind = callout.group("kind").lower()
+                label = inline(callout.group("title")) if callout.group("title") else kind.title()
+                out.append(
+                    f'<aside class="callout {kind}"><p class="callout-label">{label}</p>'
+                    f"{body(chr(10).join(inner[1:]))}</aside>"
+                )
+                continue
             out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
             continue
 
@@ -588,6 +604,7 @@ _DARK = """
     --bg: #151412; --fg: #f2eee6; --muted: #a29d93; --rule: #2f2c28;
     --accent: #8ea1ff; --brand: #f26522; --code-bg: #1f1d1a; --wash: #3a2f14; --card: #1c1a18; --edge: #57524a;
     --hl-key: #9fb0ff; --hl-string: #9ccc8a; --hl-literal: #f0a36b; --hl-comment: #8c867c; --hl-anchor: #d6a4e8;
+    --note: #8ea1ff; --tip: #7fcf95; --important: #c7a3ff; --warning: #e3b341; --caution: #ff7b72;
     color-scheme: dark;
 """
 
@@ -618,6 +635,9 @@ main:focus { outline: none; }
   --bg: #fffdf8; --fg: #1a1a1e; --muted: #6b6760; --rule: #e9e3d6;
   --accent: #1a3de8; --brand: #f26522; --code-bg: #fbf6e8; --wash: #fef3c7; --card: #ffffff; --edge: #1a1a1e;
   --hl-key: #1a3de8; --hl-string: #2e6b1f; --hl-literal: #b3470c; --hl-comment: #6e695f; --hl-anchor: #8a2f9e;
+  /* The callouts' colours, by GitHub's roles for its alert types: blue, green,
+     purple, amber, red, from information to risk; the dark palette lightens them. */
+  --note: #1a3de8; --tip: #1f7a3f; --important: #7a3fd1; --warning: #8a5a00; --caution: #b42d24;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --header: 6.1rem;
@@ -914,6 +934,18 @@ h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1
 li:target { background: var(--wash); border-radius: 4px; box-shadow: 0 0 0 .4rem var(--wash); }
 blockquote { margin: 0 0 1.4rem; padding: .2rem 0 .2rem 1.1rem; border-left: 3px solid var(--brand); color: var(--fg); }
 blockquote p:last-child { margin-bottom: 0; }
+/* An aside: tinted and bordered in its kind's colour, never the left rule a
+   quote (something to say to an assistant) has. A note or tip is set back in
+   muted text; the three a reader must not miss keep the body's ink. */
+.callout { --c: var(--note); margin: 0 0 1.4rem; padding: .75rem 1rem; border-radius: 6px; font-size: .94em;
+  background: color-mix(in srgb, var(--c) 6%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 30%, var(--bg)); color: var(--muted); }
+.callout.tip { --c: var(--tip); }
+.callout.important { --c: var(--important); color: var(--fg); }
+.callout.warning { --c: var(--warning); color: var(--fg); }
+.callout.caution { --c: var(--caution); color: var(--fg); }
+.callout p:last-child { margin-bottom: 0; }
+.callout code { background: color-mix(in srgb, var(--c) 12%, var(--bg)); }
+.callout-label { margin: 0 0 .25rem; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--c); }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
    follow the page instead. */

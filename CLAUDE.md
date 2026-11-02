@@ -68,6 +68,34 @@ argument, date it.
 If a page needs two summaries, it is two pages. If it needs none, it is a
 paragraph in another page.
 
+## Asides are callouts
+
+A sentence the page reads fine without — where to look, a shortcut, what
+an assistant shows along the way — goes in a callout, not in the prose:
+
+```
+> [!TIP]
+> Most assistants show the tool calls they make: look for `get_workspace`.
+```
+
+The kinds are GitHub's five, each with its own colour, from information to
+risk:
+
+| Kind | For |
+|---|---|
+| `[!NOTE]` | a limit or behaviour worth knowing even when skimming |
+| `[!TIP]` | a shortcut, or where to look |
+| `[!IMPORTANT]` | what a reader needs to reach their goal and could miss |
+| `[!WARNING]` | what goes wrong if it's ignored, such as a Publish reaching every Routine |
+| `[!CAUTION]` | what can't be undone, such as a Copy or deleted rows |
+
+Pick the mildest kind that is true: a Caution on something harmless teaches
+readers to skip the ones that aren't. Text after the marker is the label
+instead of the kind's name (`> [!NOTE] One Workspace at a time`); keep it
+to a few words. A plain `>` quote stays what it is everywhere else:
+something a person says to their assistant. Anything a reader must do is a
+step, never a callout.
+
 ## Glossary terms are capitalized
 
 Every term `content/glossary/glossary.md` defines is capitalized wherever it

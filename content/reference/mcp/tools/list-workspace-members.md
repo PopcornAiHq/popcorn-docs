@@ -37,6 +37,6 @@ This workspace's members only: someone from another workspace who is in a shared
 - Sam Lee  @slee  sam@acme.example  admin  (id: 7a41…d2)
 ```
 
-The [MCP server](https://docs.popcorn.ai/mcp.md) page has what every tool
+The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
 shares: the Workspace a call runs in, dry runs and `confirm=true`,
 `routine` and `routine_id`, and paging with `next_cursor`.
