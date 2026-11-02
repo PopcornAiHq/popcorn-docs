@@ -19,14 +19,24 @@ concepts: [mcp, routines, set-up-a-routine]
 
 Popcorn MCP server: `https://mcp.popcorn.ai/mcp`
 
-- **Claude Code**: run
-  `claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp`,
-  then run `/mcp` in Claude Code and choose **popcorn** to sign in.
-- **Claude Cowork**: add a custom connector with that address. See
-  [Claude's help](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
-  for details.
-- **ChatGPT**: see [OpenAI's help](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
-  for details.
+=== "Claude Code"
+
+    ```bash
+    claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
+    ```
+
+    Then run `/mcp` in Claude Code and choose **popcorn** to sign in.
+
+=== "Claude Cowork"
+
+    Add a custom connector with that address. See
+    [Claude's help](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
+    for details.
+
+=== "ChatGPT"
+
+    See [OpenAI's help](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
+    for details.
 
 ## Sign in and choose a Workspace
 

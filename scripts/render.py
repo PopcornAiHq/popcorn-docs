@@ -94,6 +94,12 @@ _BADGES = {"read-only": "safe", "writes": "write", "destructive": "danger",
            "idempotent": "plain", "required": "plain", "dry run": "confirm"}
 _BADGE = re.compile(r"\[(" + "|".join(map(re.escape, _BADGES)) + r")\](?!\()")
 _EXAMPLE = re.compile(r"^\*\*Example\*\* — (.+)$")
+# Content tabs, in MkDocs Material's syntax: a `=== "Label"` line, then the
+# panel indented four spaces. Consecutive ones are one set; the Markdown an
+# agent reads keeps every panel, labelled.
+_TAB = re.compile(r'^===\s+"(?P<label>[^"]+)"\s*$')
+# A fence's info string: the language, then an optional `title="file.yaml"`.
+_INFO = re.compile(r'^(?P<lang>[\w-]*)(?:\s+title="(?P<title>[^"]*)")?\s*$')
 _BADGE_LINE = re.compile(r"^(?:\s*" + _BADGE.pattern + r")+\s*$")
 
 SITE = "https://docs.popcorn.ai"
@@ -416,7 +422,7 @@ _COPY_CODE = (
 )
 
 
-def code_block(code: str, lang: str = "") -> str:
+def code_block(code: str, lang: str = "", title: str = "") -> str:
     """One code block, with its copy button beside it.
 
     The wrapper is what the button is positioned against. The <pre> itself
@@ -432,7 +438,9 @@ def code_block(code: str, lang: str = "") -> str:
     # message), not code whose indentation carries meaning, so it wraps
     # instead of scrolling sideways.
     wrap = " code-text" if lang == "text" else ""
-    return f'<div class="code{wrap}"><pre>{inner}</pre>{_COPY_CODE}</div>'
+    head = f'<div class="code-title">{html.escape(title)}</div>' if title else ""
+    titled = " titled" if title else ""
+    return f'<div class="code{wrap}{titled}">{head}<pre>{inner}</pre>{_COPY_CODE}</div>'
 
 
 def body(md: str, *, terms: bool = False) -> str:
@@ -471,14 +479,38 @@ def body(md: str, *, terms: bool = False) -> str:
             continue
 
         if _FENCE.match(line):
-            lang = line.strip()[3:].strip().lower()
+            info = _INFO.match(line.strip()[3:].strip()) or _INFO.match("")
+            lang, title = (info.group("lang") or "").lower(), info.group("title") or ""
             i += 1
             code = []
             while i < len(lines) and not _FENCE.match(lines[i]):
                 code.append(lines[i])
                 i += 1
             i += 1  # closing fence
-            out.append(code_block(chr(10).join(code), lang))
+            out.append(code_block(chr(10).join(code), lang, title))
+            continue
+
+        if _TAB.match(line):
+            tabs: list[tuple[str, str]] = []
+            while i < len(lines) and _TAB.match(lines[i]):
+                label = _TAB.match(lines[i]).group("label")
+                i += 1
+                panel = []
+                while i < len(lines) and (lines[i].startswith("    ") or not lines[i].strip()):
+                    panel.append(lines[i][4:])
+                    i += 1
+                tabs.append((label, body(chr(10).join(panel).strip(chr(10)))))
+                while i < len(lines) and not lines[i].strip() and i + 1 < len(lines) and _TAB.match(lines[i + 1]):
+                    i += 1
+            group = html.escape("|".join(label for label, _ in tabs))
+            buttons = "".join(
+                f'<button type="button" role="tab" aria-selected="{"true" if n == 0 else "false"}">{inline(label)}</button>'
+                for n, (label, _) in enumerate(tabs))
+            panels = "".join(
+                f'<div class="tabpanel" role="tabpanel"{"" if n == 0 else " data-off"}>'
+                f'<p class="tabpanel-label">{inline(label)}</p>{content}</div>'
+                for n, (label, content) in enumerate(tabs))
+            out.append(f'<div class="tabset" data-group="{group}"><div class="tablist" role="tablist" hidden>{buttons}</div>{panels}</div>')
             continue
 
         # An indented block is code too. Tables and lists are matched first,
@@ -945,6 +977,24 @@ html:has(.search[open]) { overflow: hidden; }
   border-radius: 6px; text-decoration: none; font-weight: 600; }
 .pager a:hover { border-color: var(--accent); }
 .pager a.next { text-align: right; margin-left: auto; }
+
+/* Content tabs. Without the script every panel shows, under its own label. */
+.tabset { margin: 0 0 1.4rem; border: 1px solid var(--rule); border-radius: 6px; }
+.tablist { display: flex; gap: .25rem; padding: 0 .5rem; border-bottom: 1px solid var(--rule); overflow-x: auto; }
+.tablist button { font: inherit; font-size: .88rem; font-weight: 500; color: var(--muted); background: none; border: 0;
+  border-bottom: 2px solid transparent; padding: .6rem .6rem .5rem; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
+.tablist button:hover { color: var(--fg); }
+.tablist button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--brand); }
+.tabpanel { padding: .9rem 1rem .1rem; }
+.tabpanel-label { font-weight: 600; margin-bottom: .4rem; }
+.tabset.js .tabpanel-label { display: none; }
+.tabset.js .tabpanel[data-off] { display: none; }
+
+/* A code block's file name, above it. */
+.code-title { font-family: var(--mono); font-size: .78rem; color: var(--muted); background: var(--code-bg);
+  border-bottom: 1px solid var(--rule); border-radius: 6px 6px 0 0; padding: .45rem 1rem; }
+.code.titled pre { border-top-left-radius: 0; border-top-right-radius: 0; margin-top: 0; }
+.code.titled .code-copy { top: 2.3rem; }
 .pager span { display: block; font-size: .78rem; font-weight: 400; color: var(--muted);
   text-transform: uppercase; letter-spacing: .06em; margin-bottom: .15rem; }
 .anchor { margin-left: .4rem; color: var(--rule); text-decoration: none; font-weight: 400; opacity: 0; }
@@ -1097,6 +1147,30 @@ _NAV = """
       });
     });
   }
+  // Content tabs: a choice made in one set is made in every set with the same
+  // labels, on this page and the next, so a Claude Code reader stays there.
+  function chooseTab(group, label) {
+    document.querySelectorAll(".tabset").forEach(function (set) {
+      if (set.dataset.group !== group) return;
+      var buttons = set.querySelectorAll('[role="tab"]'), panels = set.querySelectorAll(".tabpanel");
+      buttons.forEach(function (b, n) {
+        var on = b.textContent === label;
+        b.setAttribute("aria-selected", on ? "true" : "false");
+        if (on) panels[n].removeAttribute("data-off"); else panels[n].setAttribute("data-off", "");
+      });
+    });
+  }
+  document.querySelectorAll(".tabset").forEach(function (set) {
+    set.classList.add("js");
+    set.querySelector(".tablist").hidden = false;
+    set.querySelectorAll('[role="tab"]').forEach(function (b) {
+      b.addEventListener("click", function () {
+        chooseTab(set.dataset.group, b.textContent);
+        try { localStorage.setItem("tabs:" + set.dataset.group, b.textContent); } catch (e) {}
+      });
+    });
+    try { var saved = localStorage.getItem("tabs:" + set.dataset.group); if (saved) chooseTab(set.dataset.group, saved); } catch (e) {}
+  });
   // A menu closes the way menus do: a click elsewhere, or Escape.
   if (menu) {
     document.addEventListener("click", function (e) { if (!menu.contains(e.target)) menu.open = false; });
@@ -1496,3 +1570,4 @@ def document(
 </body>
 </html>
 """
+
