@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   List how work arrives in a Routine: each schedule with its cadence, each
   webhook another system posts to, each message or document that starts work.
-concepts: [mcp]
+concepts: [triggers]
+used_with: [mcp-run-trigger]
 ---
 
 [read-only]

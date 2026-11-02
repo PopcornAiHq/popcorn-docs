@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   List the Connections a Routine needs: the accounts and other services its
   template works through.
-concepts: [mcp]
+concepts: [connections]
+used_with: [mcp-make-connection]
 ---
 
 [read-only]

@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Read one file of the Routine Template version a Routine runs, exactly as
   stored.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-list-routine-files]
 ---
 
 [read-only]

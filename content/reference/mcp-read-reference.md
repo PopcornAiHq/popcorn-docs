@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   One of a Routine's References: its text, or a download link for a file that
   isn't text, such as a PDF.
-concepts: [mcp]
+concepts: [reference-documents]
+used_with: [mcp-list-references]
 ---
 
 [read-only]

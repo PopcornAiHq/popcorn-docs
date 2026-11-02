@@ -9,7 +9,8 @@ summary: >
   List the Routines you can see in this workspace: the ones you're in
   (including Routines shared in from another workspace) and the ones you can
   view without joining (marked [not joined]).
-concepts: [mcp]
+concepts: [routines]
+used_with: [mcp-get-routine]
 ---
 
 [read-only]

@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   List the tables in a Routine, with each one's row count.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-get-table, mcp-list-rows]
 ---
 
 [read-only]

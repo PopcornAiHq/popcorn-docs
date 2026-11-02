@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Run one of a Routine's schedules now, with the inputs it runs with on
   schedule.
-concepts: [mcp]
+concepts: [triggers]
+used_with: [mcp-list-history, mcp-list-triggers]
 ---
 
 [writes] [destructive] [dry run]

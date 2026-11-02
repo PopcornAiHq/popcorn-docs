@@ -9,7 +9,8 @@ summary: >
   Where a Routine's items stand: how many are at each Status, and what is
   waiting for a person, with why and the Actions that settle it (take_action
   takes one on the item's row).
-concepts: [mcp]
+concepts: [actions-and-status]
+used_with: [mcp-take-action, mcp-list-rows, mcp-list-actions]
 ---
 
 [read-only]

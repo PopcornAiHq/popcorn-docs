@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Read one page of the Popcorn docs by its id (search_docs gives it), or one
   section of it.
-concepts: [mcp]
+concepts: []
+used_with: [mcp-search-docs]
 ---
 
 [read-only]

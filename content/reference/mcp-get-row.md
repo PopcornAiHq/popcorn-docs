@@ -9,7 +9,8 @@ summary: >
   One row in full: every column, its rev (update_row needs it as
   expected_rev), when it was created and last changed, and its state if the
   Routine's state machine runs on the table.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-update-row, mcp-list-tables, mcp-list-rows]
 ---
 
 [read-only]

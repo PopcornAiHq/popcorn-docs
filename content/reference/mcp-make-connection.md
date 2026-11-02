@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Make one of a Routine's Connections: connect an account you have signed in
   to, or make the webhook another system posts to.
-concepts: [mcp]
+concepts: [connections]
+used_with: [mcp-list-connections]
 ---
 
 [writes] [destructive] [dry run]

@@ -335,9 +335,13 @@ def tab_bar(tabs: list[Link]) -> str:
     return f'<div class="tabrow"><nav class="tabs" aria-label="Sections">{items}</nav></div>'
 
 
-def rail(*, contents: str = "", related: list[Link] = ()) -> str:
-    """The right column: where you are in this page, then the pages around it."""
+def rail(*, contents: str = "", used_with: list[Link] = (), related: list[Link] = ()) -> str:
+    """The right column: where you are in this page, then the pages around it:
+    the tools a tool's page is used with, then the concepts it relates to."""
     parts = [contents] if contents else []
+    if used_with:
+        items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in used_with)
+        parts.append(f'<div class="related"><p class="rail-title">Used with</p><ul class="used-with">{items}</ul></div>')
     if related:
         items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in related)
         parts.append(f'<div class="related"><p class="rail-title">Related</p><ul>{items}</ul></div>')
@@ -694,6 +698,7 @@ th { font-weight: 600; }
 .badge.danger { color: var(--hl-literal); }
 .badge.plain { color: var(--muted); }
 .badge.confirm { color: var(--brand); }
+.used-with a { font-family: var(--mono); font-size: .8rem; }
 details.example { margin: 0 0 1.4rem; border: 1px solid var(--rule); border-radius: 8px; }
 details.example > summary { padding: .55rem .85rem; cursor: pointer; color: var(--muted); }
 details.example > summary::before { content: "Example: "; color: var(--fg); font-weight: 600; }

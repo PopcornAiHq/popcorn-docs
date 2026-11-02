@@ -11,7 +11,8 @@ summary: >
   (Popcorn, or this workspace's own copy of the template), whether the latest
   install landed, and its Connections: each account or webhook the template
   needs, and whether it's connected.
-concepts: [mcp]
+concepts: [routines]
+used_with: [mcp-duplicate-routine, mcp-list-rows, mcp-take-action]
 ---
 
 [read-only]

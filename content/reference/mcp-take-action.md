@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Take one Action on one or more of a Routine's items, as a person pressing
   its button in Popcorn would.
-concepts: [mcp]
+concepts: [actions-and-status]
+used_with: [mcp-list-actions]
 ---
 
 [writes] [destructive] [dry run]

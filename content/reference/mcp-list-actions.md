@@ -9,7 +9,8 @@ summary: >
   List the Actions a person can take on one of a Routine's items now, given
   where it stands: the buttons Popcorn shows on it, each with the Status it
   moves the item to. take_action takes one.
-concepts: [mcp]
+concepts: [actions-and-status]
+used_with: [mcp-take-action, mcp-list-rows]
 ---
 
 [read-only]

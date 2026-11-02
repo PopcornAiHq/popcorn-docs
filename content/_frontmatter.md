@@ -84,6 +84,11 @@ the parent or one of its children, as the CLI's command pages sit under
 Commands. `check-content.py` fails a parent that is not the id of any page.
 A page with no parent is listed in its group as usual.
 
+**`used_with`** is written by `sync-mcp.py` on an MCP tool's page: the other
+tools its description names, in the order it names them, which the rail lists
+as "Used with" above the concepts. A hand-written page never sets it, and
+`check-content.py` fails an id that names no page.
+
 **`layout: lookup`** is for a page read by looking something up in it rather
 than top to bottom — the glossary and the reference pages. Its own entries
 replace the rail's contents list, with a filter: each `##` heading is a

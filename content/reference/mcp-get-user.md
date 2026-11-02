@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Look up a person by handle: yourself, a member of this workspace, or someone
   from another workspace you share a Routine or DM with.
-concepts: [mcp]
+concepts: []
+used_with: [mcp-list-workspace-members]
 ---
 
 [read-only]

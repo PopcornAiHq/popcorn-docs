@@ -78,6 +78,32 @@ _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
 # an "e.g." mid-sentence does not end it.
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 
+# The concept page each tool module's tools are about, shown as Related on a
+# tool's page: the idea behind the tool, for a reader who has its arguments
+# and wants the why. The server files its tools one module per area, so the
+# map is by module. None says the area has no concept page of its own; a
+# module missing here stops the sync, so a new area is placed, not dropped.
+CONCEPTS: dict[str, tuple[str, ...] | None] = {
+    "context": None,
+    "details": ("routines",),
+    "new_project": ("set-up-a-routine",),
+    "routine_change": ("steps",),
+    "messages": None,
+    "search_messages": None,
+    "app_bundle": ("copying-a-template", "versions"),
+    "flows": ("flow-grammar",),
+    "setup": ("set-up-a-routine",),
+    "settings": ("routine-settings",),
+    "instructions": ("instructions",),
+    "agent_store": ("tables",),
+    "triggers": ("triggers",),
+    "connections": ("connections",),
+    "references": ("reference-documents",),
+    "status": ("actions-and-status",),
+    "actions": ("actions-and-status",),
+    "history": ("history",),
+    "docs": None,
+}
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
 
@@ -278,6 +304,8 @@ def tools(root: pathlib.Path) -> list[dict]:
     found = []
     for path in sorted(root.joinpath(*TOOLS_DIR).glob("*.py")):
         source = path.read_text()
+        if "@mcp.tool" in source and path.stem not in CONCEPTS:
+            sys.exit(f"✖  tool module {path.stem!r} has no entry in CONCEPTS — name the page its tools are about, or None")
         for node in ast.walk(ast.parse(source)):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
@@ -302,7 +330,7 @@ def tools(root: pathlib.Path) -> list[dict]:
                     else ast.unparse(default).strip("'\""),
                     "text": described.get(param.arg, ""),
                 })
-            found.append({"name": node.name, "summary": summary,
+            found.append({"name": node.name, "summary": summary, "module": path.stem,
                           "hints": hints(decorator), "args": args})
     return sorted(found, key=lambda t: t["name"])
 
@@ -409,7 +437,8 @@ def signature(tool: dict) -> str:
 
 
 def header(*, id: str, title: str, order: int, summary: str, lede: str,
-           concepts: list[str], lookup: bool, parent: str = "") -> list[str]:
+           concepts: list[str], lookup: bool, parent: str = "",
+           used_with: list[str] = ()) -> list[str]:
     wrapped = lambda text: textwrap.wrap(text, 76, break_on_hyphens=False)
     return [
         "---",
@@ -423,12 +452,28 @@ def header(*, id: str, title: str, order: int, summary: str, lede: str,
         *(f"  {line}" for line in wrapped(summary)),
         *(["lede: >", *(f"  {line}" for line in wrapped(lede))] if lede else []),
         f"concepts: [{', '.join(concepts)}]",
+        *([f"used_with: [{', '.join(used_with)}]"] if used_with else []),
         "---",
         "",
     ]
 
 
-def tool_page(tool: dict, shown: dict[str, dict], order: int) -> str:
+def named_tools(tool: dict, names: set[str]) -> list[str]:
+    """The other tools a tool's description and argument notes name, in the
+    order they first appear: the workflow it belongs to, as the server
+    describes it ("list_actions shows what can be done… take_action does
+    it"). Read from the server's own text, so it follows each deploy."""
+    text = " ".join([tool["summary"], *(a["text"] for a in tool["args"])])
+    found = re.findall(r"(?<![\w.])([a-z]+(?:_[a-z]+)+)(?![\w(])|(?<![\w.])([a-z]+(?:_[a-z]+)+)\(", text)
+    seen = []
+    for a, b in found:
+        n = a or b
+        if n in names and n != tool["name"] and n not in seen:
+            seen.append(n)
+    return seen
+
+
+def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -> str:
     """One tool: its badges, what it does, the call, its arguments and, where
     the server has one, a worked example. The summary is the tool's own first
     sentence, which is what an assistant searching for it should read."""
@@ -442,9 +487,10 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int) -> str:
         order=order,
         summary=summary,
         lede="",
-        concepts=["mcp"],
+        concepts=list(CONCEPTS[tool["module"]] or ()),
         lookup=False,
         parent="mcp-tools",
+        used_with=[tool_id(n) for n in named_tools(tool, names)],
     )
     # The first sentence is the summary, which the page shows under its
     # title; the call comes next, as a usage line does, then the rest.
@@ -593,9 +639,10 @@ def landing(found: list[dict]) -> str:
 
 def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     """Every MCP page, by the path it is written to, without `updated:`."""
+    names = {t["name"] for t in found}
     out = {PAGE: landing(found), REFERENCE / "mcp-tools.md": tools_page(found, ORDER + 1)}
     for n, tool in enumerate(sorted(found, key=lambda t: t["name"]), 2):
-        out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n)
+        out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n, names)
     return out
 
 

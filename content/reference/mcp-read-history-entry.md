@@ -9,7 +9,8 @@ summary: >
   One change from an item's History, in full: every field it changed, before
   and after, who or what made it and why, and, when Popcorn's work made it,
   what that run did, in order, and how it ended.
-concepts: [mcp]
+concepts: [history]
+used_with: [mcp-list-history]
 ---
 
 [read-only]

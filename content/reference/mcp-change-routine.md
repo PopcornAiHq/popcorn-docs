@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Change a Routine's Steps by describing the change in words, previewed before
   anything is installed, or put back an earlier version of its Steps.
-concepts: [mcp]
+concepts: [steps]
+used_with: [mcp-update-routine-setting, mcp-get-routine-change]
 ---
 
 [writes] [destructive] [dry run]

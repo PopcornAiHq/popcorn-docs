@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Change one of a Routine's settings, on this Routine only.
-concepts: [mcp]
+concepts: [routine-settings]
+used_with: [mcp-create-routine-version, mcp-list-routine-settings]
 ---
 
 [writes] [destructive] [dry run]

@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Save changes as the next version of the Routine's own copy of its Routine
   Template.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-list-routine-settings, mcp-copy-routine-template, mcp-list-routine-files, mcp-read-routine-file, mcp-create-routine-file-upload]
 ---
 
 [writes] [destructive] [dry run]

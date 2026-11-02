@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Add rows to one of a Routine's tables.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-update-row, mcp-get-table, mcp-list-rows, mcp-list-tables]
 ---
 
 [writes] [dry run]

@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Get a URL to upload one file for one of a Routine's References, for
   add_reference to take.
-concepts: [mcp]
+concepts: [reference-documents]
+used_with: [mcp-add-reference, mcp-list-references]
 ---
 
 [writes]

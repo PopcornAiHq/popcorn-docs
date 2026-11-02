@@ -9,7 +9,8 @@ summary: >
   The documents a Routine works from (its References), each with what it is
   used for, when it was added and by whom, and the ones it is still waiting
   for.
-concepts: [mcp]
+concepts: [reference-documents]
+used_with: [mcp-read-reference, mcp-add-reference]
 ---
 
 [read-only]

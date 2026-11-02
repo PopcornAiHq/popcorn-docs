@@ -9,7 +9,7 @@ summary: >
   Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in
   order: each done or not, which are required, and what each one left still
   needs (a Connection, a document, a booking page, a value).
-concepts: [mcp]
+concepts: [set-up-a-routine]
 ---
 
 [read-only]

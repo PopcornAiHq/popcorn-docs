@@ -9,7 +9,8 @@ summary: >
   A Routine's Instructions in one read: the guidance its agents work from,
   Routine-wide and for each Step, each with where it came from (the
   template's, or changed for this Routine) and what changes it.
-concepts: [mcp]
+concepts: [instructions]
+used_with: [mcp-get-routine]
 ---
 
 [read-only]

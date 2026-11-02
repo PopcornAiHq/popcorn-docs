@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Give a Routine its own named copy of the Routine Template it runs.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-create-routine-version, mcp-list-routine-settings, mcp-install-routine]
 ---
 
 [writes] [destructive] [dry run]

@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Change some columns of one row.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-get-row, mcp-list-tables]
 ---
 
 [writes] [idempotent]

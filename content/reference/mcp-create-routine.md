@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
-concepts: [mcp]
+concepts: [set-up-a-routine]
+used_with: [mcp-get-routine, mcp-list-routine-templates]
 ---
 
 [writes] [dry run]

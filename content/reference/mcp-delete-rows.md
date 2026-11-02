@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Delete rows from one of a Routine's tables, by ID.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-list-tables]
 ---
 
 [writes] [destructive] [idempotent] [dry run]

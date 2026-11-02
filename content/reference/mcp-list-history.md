@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   What happened to one item: each change with who or what made it and why, the
   runs that changed it and how they ended, and its email turns.
-concepts: [mcp]
+concepts: [history]
+used_with: [mcp-list-rows, mcp-run-trigger]
 ---
 
 [read-only]

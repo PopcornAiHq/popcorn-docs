@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Add one of a Routine's References, or replace the one it has, as Replace on
   the Reference's card in Popcorn does.
-concepts: [mcp]
+concepts: [reference-documents]
+used_with: [mcp-create-reference-upload, mcp-change-routine, mcp-list-references]
 ---
 
 [writes] [destructive] [dry run]

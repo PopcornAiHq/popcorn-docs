@@ -9,7 +9,8 @@ summary: >
   Create a new Routine in this workspace that copies an existing one's setup:
   its Routine Template, on the same line, its Routine Settings and agent
   notes, its own Steps, its guidelines, and the References it has added.
-concepts: [mcp]
+concepts: [set-up-a-routine]
+used_with: [mcp-get-routine]
 ---
 
 [writes] [dry run]

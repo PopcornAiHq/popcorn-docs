@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   List the settings of a Routine's Routine Template, set or not.
-concepts: [mcp]
+concepts: [routine-settings]
+used_with: [mcp-copy-routine-template, mcp-get-routine-setting, mcp-update-routine-setting]
 ---
 
 [read-only]

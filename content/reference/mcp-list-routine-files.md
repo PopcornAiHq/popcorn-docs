@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   List the files of the Routine Template version a Routine runs, with sizes
   and sha256.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-create-routine-version, mcp-read-routine-file, mcp-list-routine-settings]
 ---
 
 [read-only]

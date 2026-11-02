@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   Get a URL to upload one file you made, for create_routine_version to take.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-create-routine-version]
 ---
 
 [writes]

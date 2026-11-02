@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.
-concepts: [mcp]
+concepts: [copying-a-template, versions]
+used_with: [mcp-create-routine, mcp-create-routine-version, mcp-get-routine, mcp-list-routine-settings, mcp-copy-routine-template]
 ---
 
 [writes] [destructive] [dry run]

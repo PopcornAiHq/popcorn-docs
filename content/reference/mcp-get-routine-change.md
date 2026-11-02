@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Where a change to a Routine's Steps stands: still drafting, the proposal as
   Steps before and after, refused and why, or installed.
-concepts: [mcp]
+concepts: [steps]
+used_with: [mcp-change-routine]
 ---
 
 [read-only]

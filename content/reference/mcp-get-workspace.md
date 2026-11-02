@@ -7,7 +7,7 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   The Popcorn workspace this connection is bound to.
-concepts: [mcp]
+concepts: []
 ---
 
 [read-only]

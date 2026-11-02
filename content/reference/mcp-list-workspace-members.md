@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   List the members of this workspace, alphabetically by name.
-concepts: [mcp]
+concepts: []
+used_with: [mcp-get-user]
 ---
 
 [read-only]

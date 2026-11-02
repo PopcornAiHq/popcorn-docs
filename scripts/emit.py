@@ -405,6 +405,16 @@ def pager(page: dict, pages: list[dict]) -> str:
     return f'<nav class="pager" aria-label="{part_label(page["part"]) if page.get("part") else LOOK_UP}">' + "".join(links) + "</nav>\n" if links else ""
 
 
+def used_with(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
+    """The pages a generated page names under `used_with:` — for an MCP tool,
+    the other tools its description points to — only ids that exist."""
+    return [
+        (render.inline(by_id[i]["title"]), href(by_id[i]), False)
+        for i in page.get("used_with", [])
+        if i in by_id and i != page["id"]
+    ]
+
+
 def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
     """"See also" from the page's `concepts:` — only ids that exist.
 
@@ -536,6 +546,7 @@ def main() -> int:
                 tabs=tabs(pages, page["id"]),
                 rail=render.rail(
                     contents=render.lookup_index(rendered, render.plain(page["title"])) if lookup else render.toc(rendered),
+                    used_with=used_with(page, by_id),
                     related=[] if lookup else related(page, by_id),
                 ),
                 url=url(page),

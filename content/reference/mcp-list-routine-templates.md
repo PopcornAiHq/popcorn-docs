@@ -7,7 +7,8 @@ parent: mcp-tools
 updated: 2026-11-01
 summary: >
   List the Routine Templates a new Routine in this workspace can start from.
-concepts: [mcp]
+concepts: [set-up-a-routine]
+used_with: [mcp-create-routine]
 ---
 
 [read-only]

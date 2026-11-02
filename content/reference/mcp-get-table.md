@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   A table's columns, in order: each one's name, type, label and merge policy,
   the table's merge key, and its state machine if the Routine runs one on it.
-concepts: [mcp]
+concepts: [tables]
+used_with: [mcp-create-rows, mcp-update-row, mcp-list-tables]
 ---
 
 [read-only]

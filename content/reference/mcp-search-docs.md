@@ -8,7 +8,8 @@ updated: 2026-11-01
 summary: >
   Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles,
   ids and summaries.
-concepts: [mcp]
+concepts: []
+used_with: [mcp-read-doc]
 ---
 
 [read-only]

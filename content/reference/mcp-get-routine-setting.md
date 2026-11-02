@@ -10,7 +10,8 @@ summary: >
   template's whole text), the template default, what it accepts, its
   description, its options with the warning each one carries, and who may
   change it.
-concepts: [mcp]
+concepts: [routine-settings]
+used_with: [mcp-list-routine-settings]
 ---
 
 [read-only]
