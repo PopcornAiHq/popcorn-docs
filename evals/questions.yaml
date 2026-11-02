@@ -443,7 +443,7 @@
   trap: says to change a Routine Setting with update_routine_setting, or that an assistant can add the Review through MCP
 
 - q: How do I connect Claude to my Popcorn workspace?
-  concept: add-popcorn-to-your-ai-assistant
+  concept: add-the-popcorn-mcp-server
   pass: add the MCP server at https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose the workspace on the consent page, then check with get_workspace; the connection is bound to that one workspace
   trap: says to paste an API key, or that the assistant can switch workspaces without reconnecting
 

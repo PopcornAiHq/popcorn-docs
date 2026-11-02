@@ -13,7 +13,7 @@ summary: >
 lede: >
   Connect your assistant to Popcorn's MCP server, and learn what every tool
   shares.
-concepts: [add-popcorn-to-your-ai-assistant, app-bundle, versions, copying-a-template]
+concepts: [add-the-popcorn-mcp-server, app-bundle, versions, copying-a-template]
 ---
 
 The hosted MCP server gives a person's assistant 43 tools. With them it
@@ -42,7 +42,7 @@ claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
 
 The assistant opens Popcorn's sign-in; after you sign in and allow it, you
 choose a Workspace if you belong to more than one. The connection stays
-bound to that Workspace. [Add Popcorn to your AI assistant](https://docs.popcorn.ai/add-popcorn-to-your-ai-assistant.md)
+bound to that Workspace. [Add the Popcorn MCP server to your AI assistant](https://docs.popcorn.ai/add-the-popcorn-mcp-server.md)
 has the steps for other assistants and how to check the connection.
 
 ## What every tool shares

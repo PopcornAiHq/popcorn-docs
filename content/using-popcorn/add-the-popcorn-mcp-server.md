@@ -1,6 +1,6 @@
 ---
-id: add-popcorn-to-your-ai-assistant
-title: Add Popcorn to your AI assistant
+id: add-the-popcorn-mcp-server
+title: Add the Popcorn MCP server to your AI assistant
 order: 1
 group: Getting started
 summary: >
