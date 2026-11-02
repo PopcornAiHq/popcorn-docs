@@ -33,7 +33,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         local = pathlib.Path(super().translate_path(path))
         if local.suffix == ".html" and local.name not in NAMED_HTML:
             return str(BUILD / "missing")
-        if not local.exists() and local.with_name(local.name + ".html").is_file():
+        # `/cli` is both a page and the folder its children's pages sit in
+        # (`/cli/commands`), so a page's HTML wins over a folder of that name.
+        if not local.is_file() and local.with_name(local.name + ".html").is_file():
             return str(local.with_name(local.name + ".html"))
         return str(local)
 

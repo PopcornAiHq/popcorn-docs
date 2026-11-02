@@ -136,8 +136,11 @@ def parse(path: pathlib.Path) -> dict:
     # The page's part, or for a page that serves both parts, its kind: read
     # from the content directory it lives in. A page's URL never includes
     # either; see `href`.
-    meta["section"] = SECTIONS.get(path.parent.name)
-    meta["directory"] = path.parent.name
+    # The top folder, not the nearest: a generated reference page nests under
+    # the pages above it, `reference/mcp/tools/get-status.md`.
+    top = path.relative_to(CONTENT).parts[0]
+    meta["section"] = SECTIONS.get(top)
+    meta["directory"] = top
     if meta["section"] in _PARTS:
         meta["part"] = meta["section"]
     return meta
@@ -201,7 +204,9 @@ def lede(page: dict) -> str:
 
 def href(page: dict, suffix: str = "") -> str:
     """A page's path on the site: its id, at the root. Ids are unique across
-    the site, so the part a page sits in needn't be part of its address.
+    the site, so the part a page sits in needn't be part of its address; a
+    generated reference page's id nests under the pages above it, so its
+    address does (`/mcp/tools/get-status`).
 
     The HTML page has no extension — `/steps`, the address a person types or
     shares — and is written to `<id>.html` only because a file needs one;

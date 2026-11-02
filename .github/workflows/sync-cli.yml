@@ -1,6 +1,6 @@
 name: Sync CLI reference
 
-# Keeps the CLI pages (content/reference/cli*.md) in step with the latest popcorn CLI release.
+# Keeps the CLI pages (content/reference/cli/) in step with the latest popcorn CLI release.
 #
 # The page is generated from the CLI's own help and schema, and the CLI ships
 # on its own schedule, so the page goes stale without any change here. This
@@ -72,8 +72,8 @@ jobs:
       # The landing page records the version; PAGES is every page the script
       # writes, as a pathspec, since a new menu heading adds a page and a removed
       # one deletes it.
-      PAGE: content/reference/cli.md
-      PAGES: content/reference/cli*.md
+      PAGE: content/reference/cli/index.md
+      PAGES: content/reference/cli
       # Agent mode keeps the CLI from ever prompting. It also implies no update
       # check; that is set explicitly too, because an auto-upgrade mid-run would
       # regenerate the page from a different release than the one installed.

@@ -10,8 +10,10 @@ caller pays.
 Checks, in the order a writer meets them:
 
 * frontmatter parses at all
-* `id` is present and equals the filename, because the id is a permanent
-  address and a file whose name disagrees with it has two
+* `id` is present and equals the file's path under its part or kind, with a
+  folder's `index.md` taking the folder's id, because the id is a permanent
+  address and a file whose path disagrees with it has two; and no two files
+  claim one id, as `cli.md` beside `cli/index.md` would
 * `summary` is present and within the cap
 * `lede`, when present, is a folded block within its own cap, with no code,
   URL or tool name in it. It is what a person reads under the title, so the
@@ -101,8 +103,8 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     ident = _ID.search(front)
     if not ident:
         problems.append("no id")
-    elif ident.group(1) != path.stem:
-        problems.append(f"id '{ident.group(1)}' does not match the filename")
+    elif ident.group(1) != page_id(path):
+        problems.append(f"id '{ident.group(1)}' is not its path; it should be '{page_id(path)}'")
 
     summary = _SUMMARY.search(front)
     if not summary:
@@ -157,7 +159,7 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         problems.append("updated: appears more than once; the build would show the last")
     if updated and _VERSION.search(front):
         problems.append("a page has version: or updated:, never both")
-    if updated and path.parent.name != "reference":
+    if updated and section_of(path) != "reference":
         problems.append("updated: is for a generated reference page; git knows when a hand-written one changed")
     elif updated:
         value = updated.group("value").strip()
@@ -172,9 +174,9 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
 
     # The glossary and the references serve both parts; every other page is in one.
     # A page's part is its directory; the glossary and the references serve both.
-    if path.parent.name not in PARTS | SHARED:
+    if section_of(path) not in PARTS | SHARED:
         problems.append(
-            f"content/{path.parent.name}/ is not a part ({', '.join(sorted(PARTS))}) "
+            f"content/{section_of(path)}/ is not a part ({', '.join(sorted(PARTS))}) "
             f"or a shared kind ({', '.join(sorted(SHARED))}); move the page into one"
         )
     if _PART.search(front) or _LAYER.search(front):
@@ -211,16 +213,30 @@ def shared_orders(files: list[pathlib.Path]) -> dict[pathlib.Path, list[str]]:
         doc = _DOC.match(path.read_text())
         if not doc:
             continue
-        part, order = path.parent.name, _ORDER.search(doc.group("fm"))
+        part, order = section_of(path), _ORDER.search(doc.group("fm"))
         if part in PARTS and order:
             key = (part, order.group("value").strip())
             seen.setdefault(key, []).append(path)
     out: dict[pathlib.Path, list[str]] = {}
     for (part, order), paths in seen.items():
         for path in paths if len(paths) > 1 else []:
-            others = ", ".join(o.stem for o in paths if o != path)
+            others = ", ".join(page_id(o) for o in paths if o != path)
             out[path] = [f"order {order} is also {others}'s, in part {part}"]
     return out
+
+
+def section_of(path: pathlib.Path) -> str:
+    """The content folder a page is in: its part's or its kind's, the top one."""
+    return path.relative_to(ROOT / "content").parts[0]
+
+
+def page_id(path: pathlib.Path) -> str:
+    """The id a page's path gives it: the path under its part or kind, without
+    `.md`, with a folder's `index.md` taking the folder's id. A generated
+    reference page nests under the pages above it, so its id is its URL:
+    `reference/mcp/tools/get-status.md` is `mcp/tools/get-status`."""
+    rel = path.relative_to(ROOT / "content" / section_of(path)).with_suffix("")
+    return str(rel.parent if rel.name == "index" else rel)
 
 
 def main() -> int:
@@ -230,13 +246,18 @@ def main() -> int:
         print("✖  no content files found", file=sys.stderr)
         return 1
 
-    # A page's id is its filename, which the id check above enforces, so the
-    # stems are the ids a `concepts:` entry may name.
-    ids = {f.stem for f in files}
+    # A page's id is its path, which the id check above enforces, so these
+    # are the ids a `concepts:` entry may name.
+    ids = {page_id(f) for f in files}
+    claims: dict[str, list[pathlib.Path]] = {}
+    for f in files:
+        claims.setdefault(page_id(f), []).append(f)
+    twins = {f: [f"id '{i}' is also {', '.join(str(o.relative_to(ROOT)) for o in fs if o != f)}'s"]
+             for i, fs in claims.items() if len(fs) > 1 for f in fs}
     shared = shared_orders(files)
     failed = 0
     for path in files:
-        problems = check(path, ids) + shared.get(path, [])
+        problems = check(path, ids) + shared.get(path, []) + twins.get(path, [])
         if problems:
             failed += 1
             print(f"\n✖  {path.relative_to(ROOT)}")

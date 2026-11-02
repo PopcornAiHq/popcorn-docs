@@ -4,11 +4,11 @@
 The pages list the tools the hosted Popcorn MCP server exposes, each with its
 arguments, as the server itself declares them: the name and signature of each
 function registered with `@mcp.tool`, its docstring, and its annotations.
-They are two pages: `mcp.md` says what the server is, how to connect to it,
-the conventions every tool shares and the tools still proposed, and
-`mcp-tools.md` lists every tool A to Z, one line each, and each tool has a
-page of its own under it (`mcp-get-status.md`) with its signature, arguments
-and example. All sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
+They are two pages: `mcp/index.md` says what the server is, how to connect
+to it, the conventions every tool shares and the tools still proposed, and
+`mcp/tools/index.md` lists every tool A to Z, one line each, and each tool has
+a page of its own under it (`mcp/tools/get-status.md`) with its signature,
+arguments and example. All sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
 reference — the definitions are what the server serves, and a hand-kept list
 is a second source that can only drift from them.
 
@@ -64,7 +64,10 @@ import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
-PAGE = REFERENCE / "mcp.md"
+PAGE = REFERENCE / "mcp" / "index.md"
+# The tool index, and the parent of every tool's page: its URL is the folder
+# the tool pages sit in.
+TOOLS = "mcp/tools"
 # Where the MCP pages sit among the reference pages: the landing page, then
 # the tools.
 ORDER = 300
@@ -403,8 +406,9 @@ def access(tool: dict) -> str:
 
 
 def tool_id(name: str) -> str:
-    """A tool's page id: `get_status` → `mcp-get-status`."""
-    return "mcp-" + name.replace("_", "-")
+    """A tool's page id: `get_status` → `mcp/tools/get-status`. Dashes, like
+    every other address on the site; the page's title keeps the tool's name."""
+    return f"{TOOLS}/" + name.replace("_", "-")
 
 
 def lead(summary: str) -> tuple[str, str]:
@@ -489,7 +493,7 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -
         lede="",
         concepts=list(CONCEPTS[tool["module"]] or ()),
         lookup=False,
-        parent="mcp-tools",
+        parent=TOOLS,
         used_with=[tool_id(n) for n in named_tools(tool, names)],
     )
     # The first sentence is the summary, which the page shows under its
@@ -522,7 +526,7 @@ def tools_page(found: list[dict], order: int) -> str:
     its badges and what it does, linking its page. The tool pages are this
     page's children in the sidebar."""
     out = header(
-        id="mcp-tools",
+        id=TOOLS,
         title="Tools",
         order=order,
         summary="Every tool the hosted server offers, A to Z, each with whether it reads "
@@ -630,7 +634,7 @@ def landing(found: list[dict]) -> str:
         "",
         "## Tool reference",
         "",
-        f"[Tools](https://docs.popcorn.ai/mcp-tools.md) lists all {len(found)} tools A to Z, each linking a",
+        f"[Tools](https://docs.popcorn.ai/{TOOLS}.md) lists all {len(found)} tools A to Z, each linking a",
         "page of its own with its call, arguments and access hints.",
     ]
     out.append("")
@@ -640,7 +644,7 @@ def landing(found: list[dict]) -> str:
 def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     """Every MCP page, by the path it is written to, without `updated:`."""
     names = {t["name"] for t in found}
-    out = {PAGE: landing(found), REFERENCE / "mcp-tools.md": tools_page(found, ORDER + 1)}
+    out = {PAGE: landing(found), REFERENCE / TOOLS / "index.md": tools_page(found, ORDER + 1)}
     for n, tool in enumerate(sorted(found, key=lambda t: t["name"]), 2):
         out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n, names)
     return out
@@ -666,7 +670,7 @@ def main() -> int:
         path: platform_version.stamp(text, path.read_text() if path.exists() else "", args.platform)
         for path, text in pages(found, shown).items()
     }
-    stale = [p for p in REFERENCE.glob("mcp-*.md") if p not in wanted]
+    stale = [p for p in (REFERENCE / "mcp").rglob("*.md") if p not in wanted]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:
@@ -679,6 +683,7 @@ def main() -> int:
         print(f"✔  the {len(wanted)} MCP pages already match — nothing to write")
         return 0
     for p in changed:
+        p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(wanted[p])
     for p in stale:
         p.unlink()

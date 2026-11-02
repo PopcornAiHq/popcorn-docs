@@ -2,13 +2,13 @@
 """Regenerate the CLI pages in `content/reference/` from the installed `popcorn` CLI.
 
 The CLI reference is its help menu as pages, laid out like the Temporal and
-Terraform CLI docs: `cli.md` is the CLI's landing page — installing it,
+Terraform CLI docs: `cli/index.md` is the CLI's landing page — installing it,
 signing in, and what every command shares (global flags, agent mode, the
-`--json` envelope, exit and error codes) — `cli-command-reference.md` indexes every
-command A to Z, and each top-level command gets a page of its own,
-`cli-<command>.md`, with every subcommand under it: what it does, a Usage
-line, and its arguments. A command with no subcommands is a single entry, so
-those share `cli-other.md`. All of them sit in the Reference
+`--json` envelope, exit and error codes) — `cli/commands/index.md` indexes
+every command A to Z, and each top-level command gets a page of its own,
+`cli/commands/<command>.md`, with every subcommand under it: what it does, a
+Usage line, and its arguments. A command with no subcommands is a single
+entry, so those share `cli/commands/other.md`. All of them sit in the Reference
 tab's CLI section. They are generated, never hand-written, because the CLI
 already describes itself two ways and a third copy would only disagree with
 them:
@@ -49,17 +49,18 @@ import textwrap
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
-PAGE = REFERENCE / "cli.md"
+PAGE = REFERENCE / "cli" / "index.md"
 # Where the CLI pages sit among the reference pages: after Activities and MCP,
 # the landing page first, then the menu's headings in its order.
 ORDER = 200
 REPO = "https://github.com/PopcornAiHq/popcorn-cli.git"
-# The command index, and the parent of every command's page. Not `cli-commands`,
-# which is the page of the CLI's own `commands` command.
-INDEX = "cli-command-reference"
+# The command index, and the parent of every command's page: its URL is the
+# folder the command pages sit in.
+INDEX = "cli/commands"
 # Where the commands with no subcommands go. Each is one entry, so a page each
-# would be a page holding one Usage line, and several would be stubs.
-OTHER = "cli-other"
+# would be a page holding one Usage line, and several would be stubs. The
+# CLI's own `commands` command is one of them, so it never claims INDEX's URL.
+OTHER = f"{INDEX}/other"
 
 _HEADING = re.compile(r"^(?P<name>[A-Z][^:]*):$")
 _ENTRY = re.compile(r"^  (?P<cmd>[a-z][\w-]*)\s{2,}")
@@ -138,8 +139,18 @@ def leaves(cmd: dict, prefix: str = "") -> list[tuple[str, dict]]:
 
 
 def slug(command: str) -> str:
-    """A top-level command's page id: `channel-config` → `cli-channel-config`."""
-    return f"cli-{command}"
+    """A top-level command's page id: `channel-config` → `cli/commands/channel-config`."""
+    if f"{INDEX}/{command}" == OTHER:
+        sys.exit(f"✖  a command named {command!r} would take the Other commands page's URL")
+    return f"{INDEX}/{command}"
+
+
+def file_of(page_id: str) -> pathlib.Path:
+    """Where a page's source is written: its id as a path, or the `index.md`
+    of the folder its children sit in."""
+    if page_id in ("cli", INDEX):
+        return REFERENCE / page_id / "index.md"
+    return REFERENCE / f"{page_id}.md"
 
 
 def bare(top: dict) -> bool:
@@ -400,14 +411,14 @@ def pages(schema: dict, help_text: str) -> dict[pathlib.Path, str]:
     tops = [(by_name[c], leaves(by_name[c])) for c in listed]
     out = {
         PAGE: landing(schema, tops, version),
-        REFERENCE / f"{INDEX}.md": commands_page(tops, version),
+        file_of(INDEX): commands_page(tops, version),
     }
     own = [(top, cmds) for top, cmds in tops if not bare(top)]
     for n, (top, cmds) in enumerate(own, 2):
-        out[REFERENCE / f"{slug(top['name'])}.md"] = command_page(top, cmds, ORDER + n, version)
+        out[file_of(slug(top['name']))] = command_page(top, cmds, ORDER + n, version)
     others = [top for top, _ in tops if bare(top)]
     if others:
-        out[REFERENCE / f"{OTHER}.md"] = other_page(others, ORDER + len(own) + 2, version)
+        out[file_of(OTHER)] = other_page(others, ORDER + len(own) + 2, version)
     return out
 
 
@@ -417,7 +428,7 @@ def main() -> int:
     args = ap.parse_args()
 
     wanted = pages(json.loads(run("commands")), run("--help"))
-    stale = [p for p in REFERENCE.glob("cli-*.md") if p not in wanted]
+    stale = [p for p in (REFERENCE / "cli").rglob("*.md") if p not in wanted]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:
@@ -430,6 +441,7 @@ def main() -> int:
         print(f"✔  the {len(wanted)} CLI pages already match the installed CLI — nothing to write")
         return 0
     for p in changed:
+        p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(wanted[p])
     for p in stale:
         p.unlink()
