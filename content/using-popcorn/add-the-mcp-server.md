@@ -4,77 +4,62 @@ title: Add the MCP server
 order: 1
 group: Getting started
 summary: >
-  Connecting an assistant to Popcorn: add the hosted MCP server at
-  https://mcp.popcorn.ai/mcp, sign in to Popcorn and choose a Workspace, then
-  check the connection with get_workspace. The assistant works with your
-  permissions, in that Workspace, until you disconnect it or sign out of
-  Popcorn.
+  Adding Popcorn's MCP server to an AI assistant: add the hosted server at
+  https://mcp.popcorn.ai/mcp (in Claude Code, then run /mcp to sign in), sign
+  in to Popcorn and choose a Workspace, then check it with get_workspace. The
+  assistant works with your permissions, in that Workspace, until you
+  disconnect it or sign out of Popcorn.
 lede: >
-  Connect your AI assistant to Popcorn so it can work with your Routines on
-  your behalf.
-concepts: [routines, connections, reviews]
+  Allow your AI assistant to find your Routines, see what needs your input
+  and act on your behalf through Popcorn's MCP server.
+concepts: [mcp, routines, set-up-a-routine]
 ---
 
-An assistant connected to Popcorn can find your Routines, see where their
-Items stand, decide at their Reviews, change their settings and
-start new ones. It does this through Popcorn's hosted MCP server. This guide
-connects one and checks it.
+## Connect to Popcorn MCP server
 
-## Add the server
+Popcorn MCP server: `https://mcp.popcorn.ai/mcp`
 
-The server's address is `https://mcp.popcorn.ai/mcp`.
-
-- **Claude, on the web or the desktop app**: in Claude's settings, add a
-  custom connector with that address.
 - **Claude Code**: run
-  `claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp`.
-  Or install the Popcorn plugin, which adds the server along with a skill for
-  working in Popcorn: `/plugin marketplace add PopcornAiHq/popcorn-claude-code`,
-  then `/plugin install popcorn@popcorn`.
-
-Any other assistant that connects to remote MCP servers with sign-in uses the
-same address.
+  `claude mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp`,
+  then run `/mcp` in Claude Code and choose **popcorn** to sign in.
+- **Claude Cowork**: add a custom connector with that address. See
+  [Claude's help](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
+  for details.
+- **ChatGPT**: see [OpenAI's help](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
+  for details.
 
 ## Sign in and choose a Workspace
 
-The assistant opens Popcorn's sign-in. After you sign in, a consent page
-names the assistant and asks you to allow it. If you belong to more than one
-Workspace, you choose one there.
+In your browser, Popcorn asks you to allow your assistant. Sign in if
+prompted, choose your Workspace, then select **Allow**. If you didn't start
+this from your assistant, select **Deny**.
 
-The connection stays bound to that Workspace. To use another, disconnect and
-connect again.
+> [!NOTE] One Workspace at a time
+> Popcorn's MCP server works in one Workspace at a time. To use a different
+> Workspace, disconnect and sign in to choose again.
 
-## Check it
+## Confirm it works
+
+Ask your assistant:
 
 > "Which Popcorn Workspace are you connected to?"
 
-The assistant calls `get_workspace`. Every response from the server also
-starts with the Workspace's name, so the assistant always knows where it is
-working.
+It should name the Workspace you chose.
 
-## Whose permissions it uses
+> [!TIP]
+> Most assistants show the tool calls they make, sometimes inside their
+> reasoning or a details view. Look for Popcorn's `get_workspace`.
 
-Every call runs as you, with your permissions: the assistant sees the
-Routines you can see and changes what you could change. Anything that
-changes a Routine, such as taking an Action, changing a setting or starting a
-new Routine, is a dry run first. The assistant shows you what would happen
-and asks before it goes ahead.
+## It acts as you
 
-Signing out of Popcorn ends every assistant connection you have made. Connect
-again to carry on.
+Every MCP tool call runs on your behalf with your permissions.
 
-## What stays in Popcorn
+Most changes, such as taking an
+[Action](https://docs.popcorn.ai/actions-and-status.md) or changing a
+setting, come back as a dry run first: the assistant shows you what would
+happen, and Popcorn asks it to check with you before going ahead. The [MCP server overview](https://docs.popcorn.ai/mcp.md) lists
+which tools do this.
 
-Some things are done in Popcorn itself, not through an assistant:
-
-- **A Connection**, such as the mailbox a Routine sends from,
-  because it signs in as you. An assistant can say which
-  [Connections](https://docs.popcorn.ai/connections.md) a Routine is missing.
-- **Reading or posting a Routine's messages**, and seeing its Runs.
-- **Changing a Routine's [Steps](https://docs.popcorn.ai/steps.md) or
-  [Instructions](https://docs.popcorn.ai/instructions.md)**, by telling its
-  Agent.
-- **Choices that open a form**, such as sending an agreement whose fields a
-  person checks first.
-
-Next: [setting up a Routine](https://docs.popcorn.ai/set-up-a-routine.md).
+> [!NOTE] Signing out ends access
+> Signing out of Popcorn disconnects every assistant you've added. To carry
+> on, sign in again from each one.
