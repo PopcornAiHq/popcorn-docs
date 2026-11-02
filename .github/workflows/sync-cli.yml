@@ -1,6 +1,6 @@
 name: Sync CLI reference
 
-# Keeps content/reference/cli.md in step with the latest popcorn CLI release.
+# Keeps the CLI pages (content/reference/cli*.md) in step with the latest popcorn CLI release.
 #
 # The page is generated from the CLI's own help and schema, and the CLI ships
 # on its own schedule, so the page goes stale without any change here. This
@@ -69,7 +69,11 @@ jobs:
       contents: read
     env:
       BRANCH: automation/sync-cli
+      # The landing page records the version; PAGES is every page the script
+      # writes, as a pathspec, since a new menu heading adds a page and a removed
+      # one deletes it.
       PAGE: content/reference/cli.md
+      PAGES: content/reference/cli*.md
       # Agent mode keeps the CLI from ever prompting. It also implies no update
       # check; that is set explicitly too, because an auto-upgrade mid-run would
       # regenerate the page from a different release than the one installed.
@@ -113,11 +117,13 @@ jobs:
       - name: Has it changed
         id: diff
         run: |
-          if git diff --quiet -- "$PAGE"; then
+          # status, not diff: a page for a new menu heading is untracked, and diff
+          # never sees an untracked file.
+          if [ -z "$(git status --porcelain -- "$PAGES")" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            git diff --stat -- "$PAGE"
+            git status --short -- "$PAGES"
           fi
 
       # The page is current, so any open proposal is stale — most likely the
@@ -141,7 +147,7 @@ jobs:
       - name: No internal references
         if: steps.diff.outputs.changed == 'true'
         run: |
-          git add -- "$PAGE"
+          git add -A -- "$PAGES"
           scripts/check-public-repo.sh
 
       # The branch is rebuilt from main on every run and force-pushed, so it
@@ -164,17 +170,17 @@ jobs:
           git config user.name "${APP_SLUG}[bot]"
           git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
-          git commit --quiet -m "$title" -- "$PAGE"
+          git commit --quiet -m "$title"
 
           if git fetch --quiet origin "$BRANCH" 2>/dev/null \
-            && git diff --quiet FETCH_HEAD -- "$PAGE"; then
-            echo "$BRANCH already carries this page; not pushing."
+            && git diff --quiet FETCH_HEAD -- "$PAGES"; then
+            echo "$BRANCH already carries these pages; not pushing."
           else
             git push --force origin "$BRANCH"
           fi
 
           body=$(cat <<EOF
-          Regenerated \`${PAGE}\` from popcorn ${version}, the latest CLI release, by \`scripts/sync-cli.py\`.
+          Regenerated the CLI pages (\`${PAGES}\`) from popcorn ${version}, the latest CLI release, by \`scripts/sync-cli.py\`.
 
           Opened by the docs bot from \`.github/workflows/sync-cli.yml\`. CI runs on this pull request as on any other; merge it when the checks pass.
           EOF

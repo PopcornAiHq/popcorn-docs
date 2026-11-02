@@ -244,7 +244,9 @@ def by_topic(pages: list[dict]) -> list[dict]:
     """
     topics: dict[tuple, list[dict]] = {}
     for page in pages:
-        key = (page.get("part") or "", page.get("group", "") if page.get("part") else "")
+        # A shared page has no part, so its kind keeps the glossary apart from
+        # the references, whose groups (the CLI's) sit among them.
+        key = (page.get("part") or page["source_dir"], page.get("group", ""))
         topics.setdefault(key, []).append(page)
     return [page for group in topics.values() for page in group]
 
@@ -283,19 +285,37 @@ def sidebar(pages: list[dict], current: str | None) -> str:
     """The site sidebar: the current tab's `group:`s, each under its heading.
 
     A group holds every page about one topic, whether it explains a thing or
-    walks through a task; pages without one are listed with no heading. On
-    the Reference tab each shared kind is its own section instead. The
+    walks through a task; pages without one are listed with no heading, and
+    a page with a `parent:` is listed under its parent when in focus. On
+    the Reference tab a page's group, such as the CLI's, is its section, and
+    a page without one sits under its kind. The
     Overview leads the first part's Getting started, which is where the 404
     page, under no tab, starts a reader again.
     """
     page = next((p for p in pages if p["id"] == current), None)
     tab = tab_of(page)
     groups: dict[str, list] = {}
+    # A page with a `parent:` is listed under that page instead of beside it,
+    # and only while the reader is on the parent or anywhere beneath it, the
+    # way the Temporal docs open "Command reference" when you are in it. A
+    # child can be a parent too, so the Activity Catalog opens to its tiers
+    # and a tier to its domains.
+    by_id = {p["id"]: p for p in pages}
+    focus = set()
+    at = page
+    while at:
+        focus.add(at["id"])
+        at = by_id.get(at.get("parent", ""))
+    children: dict[str, list] = {}
     for p in by_topic(pages):
         if tab_of(p) != tab:
             continue
-        link = (render.inline(p["title"]), href(p), p["id"] == current)
-        groups.setdefault(p.get("group", "") if tab else place_label(p), []).append(link)
+        link = [render.inline(p["title"]), href(p), p["id"] == current,
+                children.setdefault(p["id"], []), p["id"] in focus]
+        if p.get("parent"):
+            children.setdefault(p["parent"], []).append(link)
+            continue
+        groups.setdefault(p.get("group", "") if tab else p.get("group") or place_label(p), []).append(link)
     if tab == _PARTS[0]:
         home = ("Overview", "/", current is None)
         groups = {GETTING_STARTED: [home] + groups.pop(GETTING_STARTED, []), **groups}
@@ -383,6 +403,16 @@ def pager(page: dict, pages: list[dict]) -> str:
         links.append(f'<a class="next" rel="next" href="{href(nxt)}">'
                      f'<span>Next</span>{render.inline(nxt["title"])}</a>')
     return f'<nav class="pager" aria-label="{part_label(page["part"]) if page.get("part") else LOOK_UP}">' + "".join(links) + "</nav>\n" if links else ""
+
+
+def used_with(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
+    """The pages a generated page names under `used_with:` — for an MCP tool,
+    the other tools its description points to — only ids that exist."""
+    return [
+        (render.inline(by_id[i]["title"]), href(by_id[i]), False)
+        for i in page.get("used_with", [])
+        if i in by_id and i != page["id"]
+    ]
 
 
 def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
@@ -508,14 +538,15 @@ def main() -> int:
                 f"{version_badge(page)}</div>"
                 f"{render.page_actions('/' + path)}</div>\n"
                 f'<p class="summary">{render.inline(lede(page))}</p>\n'
-                f"{render.on_this_page(rendered, lookup=lookup)}"
+                f"{render.on_this_page(rendered, lookup=lookup, title=render.plain(page['title']))}"
                 f"{rendered}\n"
                 f"{pager(page, pages)}",
                 description=lede(page),
                 sidebar=sidebar(pages, page["id"]),
                 tabs=tabs(pages, page["id"]),
                 rail=render.rail(
-                    contents=render.lookup_index(rendered) if lookup else render.toc(rendered),
+                    contents=render.lookup_index(rendered, render.plain(page["title"])) if lookup else render.toc(rendered),
+                    used_with=used_with(page, by_id),
                     related=[] if lookup else related(page, by_id),
                 ),
                 url=url(page),

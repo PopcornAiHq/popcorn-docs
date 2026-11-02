@@ -9,6 +9,7 @@ id: copying-a-template         # kebab-case, citable; never reused for another p
 title: Copying a template      # a page about one thing is a noun phrase; a task is imperative: Set up a Routine
 order: 2                       # reading position within its part
 group: Making a change        # optional: sidebar topic within the part
+parent: cli-command-reference  # optional: listed under that page in the sidebar
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
@@ -76,6 +77,17 @@ page does in reading order, so it needs no order of its own, and a later page
 in it is listed there too. Pages without one are listed with no heading.
 Spell a group identically on every page in it — the label is the
 key. The Overview leads the group `Getting started` in `use`.
+
+**`parent`** names another page's `id` to list this page under it in the
+sidebar: indented beneath the parent, and shown only while the reader is on
+the parent or one of its children, as the CLI's command pages sit under
+Commands. `check-content.py` fails a parent that is not the id of any page.
+A page with no parent is listed in its group as usual.
+
+**`used_with`** is written by `sync-mcp.py` on an MCP tool's page: the other
+tools its description names, in the order it names them, which the rail lists
+as "Used with" above the concepts. A hand-written page never sets it, and
+`check-content.py` fails an id that names no page.
 
 **`layout: lookup`** is for a page read by looking something up in it rather
 than top to bottom — the glossary and the reference pages. Its own entries

@@ -113,15 +113,44 @@ def _score(page: dict[str, Any], terms: set[str]) -> int:
         (len(e) for e in page.get("_entries", ()) if e and e <= terms),
         default=0,
     )
+    # A list (a reference page laid out for lookup: the CLI's commands, the
+    # MCP tools, an Activity tier) is reached by naming one of its entries,
+    # which `named` rewards. Its title only says what kind of thing it lists,
+    # often a word that is also a concept's name (a CLI page titled
+    # "channel"), so its title and summary count half a written page's.
+    weight = 1 if _is_list(page) else 2
+    # A page that is one entry of a list (an MCP tool's page) is named by its
+    # title, as an entry is. Named in full, `add_reference` is what the query
+    # asks for and its title counts as a written page's; otherwise it counts
+    # nothing, so the tool is not an answer to every "reference".
+    if _is_entry(page):
+        if _terms(page["title"]) <= terms:
+            weight = 2
+        else:
+            ident = ident - _terms(page["title"]) - _terms(page["id"])
     return (
-        8 * len(terms & ident)
-        + 4 * len(terms & summary)
+        4 * weight * len(terms & ident)
+        + 2 * weight * len(terms & summary)
         + 2 * named
         + 1 * len(terms & body)
     )
 
 
 PARTS = ("use", "build")
+
+
+def _is_list(page: dict) -> bool:
+    """A reference page read for one of its entries: a list laid out for
+    lookup, or a page that is itself one entry of a list (an MCP tool's page,
+    under Tools)."""
+    return page.get("kind") == "reference" and (
+        page.get("layout") == "lookup" or bool(page.get("parent")))
+
+
+def _is_entry(page: dict) -> bool:
+    """A reference page that is itself one entry of a list: it has a parent
+    and no entries of its own."""
+    return page.get("kind") == "reference" and bool(page.get("parent")) and page.get("layout") != "lookup"
 
 
 def query_terms(pages: list[dict], query: str) -> set[str]:
@@ -136,13 +165,18 @@ def query_terms(pages: list[dict], query: str) -> set[str]:
     only of such terms keeps them, since an empty one would match nothing.
     """
     terms = _terms(query)
+    # Counted over the written pages only. The lists are many pages that share
+    # little prose with the rest, so counting them would turn a word most
+    # written pages are about ("Routine") back into one that decides the
+    # ranking.
+    written = [p for p in pages if not _is_list(p)]
     shared = {
         t
         for t in terms
         if sum(
             t in (_terms(p["id"]) | _terms(p["title"]) | _terms(p["summary"]))
-            for p in pages
-        ) > len(pages) / 2
+            for p in written
+        ) > len(written) / 2
     }
     return (terms - shared) or terms
 

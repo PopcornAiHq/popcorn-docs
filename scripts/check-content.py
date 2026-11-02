@@ -132,6 +132,14 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
         for ref in (i.strip() for i in concepts.group("ids").split(",")):
             if ref and ref not in ids:
                 problems.append(f"concepts: '{ref}' is not the id of any page")
+    used = re.search(r"^used_with:\s*\[(?P<ids>[^\]]*)\]", front, re.M)
+    if used:
+        for ref in (i.strip() for i in used.group("ids").split(",")):
+            if ref and ref not in ids:
+                problems.append(f"used_with: '{ref}' is not the id of any page")
+    parent = re.search(r"^parent:\s*(\S+)\s*$", front, re.M)
+    if parent and parent.group(1) not in ids:
+        problems.append(f"parent: '{parent.group(1)}' is not the id of any page")
 
     order = _ORDER.search(front)
     if order and not order.group("value").strip().isdigit():

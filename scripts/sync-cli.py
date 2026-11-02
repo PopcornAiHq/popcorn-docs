@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Regenerate `content/reference/cli.md` from the installed `popcorn` CLI.
+"""Regenerate the CLI pages in `content/reference/` from the installed `popcorn` CLI.
 
-The CLI reference is its help menu on a page: every command the menu lists,
-under the menu's own headings, with each command's arguments. It is
-generated, never hand-written, because the CLI already describes itself two
-ways and a third copy would only disagree with them:
+The CLI reference is its help menu as pages, laid out like the Temporal and
+Terraform CLI docs: `cli.md` is the CLI's landing page — installing it,
+signing in, and what every command shares (global flags, agent mode, the
+`--json` envelope, exit and error codes) — `cli-command-reference.md` indexes every
+command A to Z, and each top-level command gets a page of its own,
+`cli-<command>.md`, with every subcommand under it: what it does, a Usage
+line, and its arguments. A command with no subcommands is a single entry, so
+those share `cli-other.md`. All of them sit in the Reference
+tab's CLI section. They are generated, never hand-written, because the CLI
+already describes itself two ways and a third copy would only disagree with
+them:
 
     popcorn --help     the grouping — the menu's headings, in its order
     popcorn commands   everything else — every command, subcommand and
@@ -18,12 +25,16 @@ schema has and the menu does not list is left out, as the menu leaves it out;
 one the menu lists and the schema lacks is skipped, since there is nothing to
 say about it.
 
-    python3 scripts/sync-cli.py            # read the installed CLI, write the page
-    python3 scripts/sync-cli.py --check    # exit 1 if the page is stale
+    python3 scripts/sync-cli.py            # read the installed CLI, write the pages
+    python3 scripts/sync-cli.py --check    # exit 1 if any page is stale
 
-The page describes whichever CLI is installed, so upgrade first. The output is
+The pages describe whichever CLI is installed, so upgrade first. The output is
 deterministic — schema order, no timestamps — so a run with nothing changed
-produces no diff.
+produces no diff. A `cli-*.md` page whose heading the menu no longer has is
+deleted, so a removed command does not leave its old page behind.
+
+The install and sign-in prose on the landing page is the one part written
+here rather than read from the CLI; it follows the CLI repository's README.
 """
 
 from __future__ import annotations
@@ -34,9 +45,21 @@ import pathlib
 import re
 import subprocess
 import sys
+import textwrap
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PAGE = ROOT / "content" / "reference" / "cli.md"
+REFERENCE = ROOT / "content" / "reference"
+PAGE = REFERENCE / "cli.md"
+# Where the CLI pages sit among the reference pages: after Activities and MCP,
+# the landing page first, then the menu's headings in its order.
+ORDER = 200
+REPO = "https://github.com/PopcornAiHq/popcorn-cli.git"
+# The command index, and the parent of every command's page. Not `cli-commands`,
+# which is the page of the CLI's own `commands` command.
+INDEX = "cli-command-reference"
+# Where the commands with no subcommands go. Each is one entry, so a page each
+# would be a page holding one Usage line, and several would be stubs.
+OTHER = "cli-other"
 
 _HEADING = re.compile(r"^(?P<name>[A-Z][^:]*):$")
 _ENTRY = re.compile(r"^  (?P<cmd>[a-z][\w-]*)\s{2,}")
@@ -114,50 +137,166 @@ def leaves(cmd: dict, prefix: str = "") -> list[tuple[str, dict]]:
     return [leaf for sub in subs for leaf in leaves(sub, name)]
 
 
-def page(schema: dict, help_text: str) -> str:
-    version = schema["version"]
-    by_name = {c["name"]: c for c in schema["commands"]}
-    count = sum(len(leaves(by_name[c])) for _, cmds in menu(help_text) for c in cmds if c in by_name)
-    out = [
+def slug(command: str) -> str:
+    """A top-level command's page id: `channel-config` → `cli-channel-config`."""
+    return f"cli-{command}"
+
+
+def bare(top: dict) -> bool:
+    """A command with no subcommands, listed on OTHER."""
+    return not top.get("subcommands")
+
+
+def href_of(top: dict) -> str:
+    """Where a command is described: its own page, or its entry on OTHER."""
+    name = top["name"]
+    return f"{OTHER}.md#{name}" if bare(top) else f"{slug(name)}.md"
+
+
+def usage(name: str, args: list[dict]) -> str:
+    """The command as typed: its positional arguments, its required flags, and
+    `[flags]` when it takes optional ones."""
+    parts = ["popcorn", name]
+    for arg in args:
+        if "flags" in arg:
+            continue
+        parts.append(f"<{arg['name']}>" if arg.get("required") else f"[<{arg['name']}>]")
+    for arg in args:
+        if "flags" in arg and arg.get("required"):
+            value = "" if arg.get("type") == "bool" else f" <{arg.get('type') or 'value'}>"
+            parts.append(arg["flags"][0] + value)
+    if any("flags" in a and not a.get("required") for a in args):
+        parts.append("[flags]")
+    return " ".join(parts)
+
+
+def header(*, id: str, title: str, order: int, version: str, summary: str,
+           lede: str, concepts: list[str], lookup: bool, parent: str = "") -> list[str]:
+    wrapped = lambda text: textwrap.wrap(text, 76, break_on_hyphens=False)
+    return [
         "---",
-        "id: cli",
-        "title: CLI",
-        "order: 2",
-        "layout: lookup",
+        f"id: {id}",
+        f"title: {title}",
+        f"order: {order}",
+        "group: CLI",
+        *([f"parent: {parent}"] if parent else []),
+        *(["layout: lookup"] if lookup else []),
         f"version: {version}",
         "summary: >",
-        "  Every `popcorn` command, grouped the way `popcorn --help` groups them, with",
-        "  its arguments — generated from the CLI's own schema. Global flags, agent",
-        "  mode, the `--json` envelope, exit codes and error codes follow the",
-        "  commands. The CLI installs from its GitHub repository, not PyPI; this page",
-        "  describes one release, and `popcorn <command> --help` describes yours.",
+        *(f"  {line}" for line in wrapped(summary)),
         "lede: >",
-        "  Every command in the popcorn CLI, with its arguments, flags and error codes.",
-        "concepts: [template-authoring, versions, copying-a-template]",
+        *(f"  {line}" for line in wrapped(lede)),
+        f"concepts: [{', '.join(concepts)}]",
         "---",
-        "",
-        f"The {count} commands `popcorn` {version} lists in its help menu, under the",
-        "menu's own headings. Each is run as `popcorn <command>`; the global flags",
-        "at the end go before the command, as in `popcorn --json app status`.",
-        "",
-        "This page is generated from `popcorn --help` and `popcorn commands` by",
-        "`scripts/sync-cli.py` and never edited by hand. When it and the CLI you",
-        "have disagree, the CLI is right: run `popcorn <command> --help`.",
         "",
     ]
 
-    for heading, cmds in menu(help_text):
-        out += [f"## {heading}", ""]
-        for top in cmds:
-            if top not in by_name:
-                continue
-            for name, cmd in leaves(by_name[top]):
-                out += [f"### `{name}`", ""]
-                if cmd.get("description"):
-                    out += [cell(cmd["description"]), ""]
-                out += table(cmd.get("arguments") or [])
 
-    out += ["## Global options", "", "### Global flags", ""]
+def command_page(top: dict, commands: list[tuple[str, dict]], order: int, version: str) -> str:
+    """One top-level command and every subcommand under it, as the Temporal
+    docs give `temporal workflow` a page."""
+    name = top["name"]
+    out = header(
+        id=slug(name),
+        title=name,
+        order=order,
+        version=version,
+        # No "popcorn" and no list of subcommands: the subcommands are this
+        # page's entries, which search matches by name, and a word on every
+        # CLI page would count as one most pages share.
+        summary=f"The {name} command and its subcommands, each with its Usage line "
+                "and arguments.",
+        lede=f"Every {name} subcommand, with how to run it and its arguments.",
+        concepts=["cli"],
+        lookup=True,
+        parent=INDEX,
+    )
+    out += [
+        f"`popcorn {name}` in `popcorn` {version}. Global flags go before the command, as",
+        "in `popcorn --json app status`; the",
+        "[CLI overview](https://docs.popcorn.ai/cli.md) page lists them, with the",
+        "`--json` envelope and the exit codes every command shares.",
+        "",
+    ]
+    for full, cmd in commands:
+        args = cmd.get("arguments") or []
+        out += [f"### `{full}`", ""]
+        if cmd.get("description"):
+            out += [cell(cmd["description"]), ""]
+        out += ["```", usage(full, args), "```", ""]
+        out += table(args)
+    return "\n".join(out).rstrip() + "\n"
+
+
+def landing(schema: dict, tops: list[tuple[dict, list[tuple[str, dict]]]], version: str) -> str:
+    count = sum(len(cmds) for _, cmds in tops)
+    out = header(
+        id="cli",
+        # Not "Popcorn CLI": search weighs a title word heavily, and "popcorn"
+        # is in most questions, so the landing page would answer all of them.
+        title="CLI overview",
+        order=ORDER,
+        version=version,
+        summary="The `popcorn` CLI works with Popcorn from a terminal or a script. It "
+                "installs from its GitHub repository, not PyPI, and `popcorn auth login` "
+                "signs in. This page has what every command shares: global flags, agent "
+                "mode, the `--json` envelope, exit codes and error codes. Each command "
+                "group has its own page.",
+        lede="Install the popcorn CLI, sign in, and learn the flags and output every command shares.",
+        concepts=["template-authoring", "versions", "copying-a-template"],
+        lookup=False,
+    )
+    out += [
+        f"The `popcorn` CLI works with Popcorn from a terminal or a script: building and",
+        "publishing Routine Templates, reading and posting messages, running Flows and",
+        "reading their Runs. The CLI and the API call a Routine a *channel* and a",
+        "Routine Template an *app*, and its commands keep those names.",
+        "",
+        f"These pages describe `popcorn` {version} and are generated from the CLI's own",
+        "`popcorn --help` and `popcorn commands`. When they and the CLI you have",
+        "disagree, the CLI is right: run `popcorn <command> --help`.",
+        "",
+        "## Install",
+        "",
+        "The CLI installs from its GitHub repository; it is not on PyPI.",
+        "",
+        "```",
+        "# With uv (recommended)",
+        f"uv tool install git+{REPO}",
+        "",
+        "# With pipx",
+        f"pipx install git+{REPO}",
+        "",
+        "# With pip",
+        f"pip install git+{REPO}",
+        "```",
+        "",
+        "`popcorn --version` shows the version installed, and `popcorn upgrade`",
+        "upgrades it to the latest. `popcorn doctor` checks the local setup: sign-in,",
+        "whether the API is reachable, the environment and the config.",
+        "",
+        "## Sign in",
+        "",
+        "```",
+        "popcorn auth login",
+        "popcorn whoami",
+        "```",
+        "",
+        "`popcorn auth login` signs in through the browser, then asks which Workspace",
+        "to use; `--workspace <name>` chooses it instead. `popcorn whoami` shows who",
+        "you are signed in as and in which Workspace, and `popcorn workspace switch`",
+        "moves to another. A profile holds one sign-in: `-e <name>` uses a profile",
+        "for one command, and `popcorn env <name>` switches to it. The",
+        f"[auth](https://docs.popcorn.ai/{slug('auth')}.md) and [workspace](https://docs.popcorn.ai/{slug('workspace')}.md) have the rest.",
+        "",
+        "## Basics",
+        "",
+        "Each command is run as `popcorn <command>`, and the global flags go before",
+        "the command, as in `popcorn --json app status`.",
+        "",
+        "### Global flags",
+        "",
+    ]
     out += table(schema.get("global_flags") or [])
     agent = schema.get("agent_mode") or {}
     if agent:
@@ -182,27 +321,120 @@ def page(schema: dict, help_text: str) -> str:
     out += [f"| `{code}` | {name} |" for name, code in schema.get("exit_codes", {}).items()]
     out += ["", "### Error codes", "", "| `error_code` | Meaning |", "|---|---|"]
     out += [f"| `{e['code']}` | {cell(e['description'])} |" for e in schema.get("error_codes", [])]
+    out += [
+        "",
+        "## Command reference",
+        "",
+        f"[Commands](https://docs.popcorn.ai/{INDEX}.md) lists every command, A to Z, with a",
+        f"page for each and its subcommands: {count} in all.",
+    ]
     return "\n".join(out).rstrip() + "\n"
+
+
+def commands_page(tops: list[tuple[dict, list[tuple[str, dict]]]], version: str) -> str:
+    """The command reference's index: every top-level command A to Z, linking
+    its page. Those pages are its children in the sidebar."""
+    count = sum(len(cmds) for _, cmds in tops)
+    out = header(
+        id=INDEX,
+        title="Commands",
+        order=ORDER + 1,
+        version=version,
+        summary="The CLI's command reference: every command, A to Z, each on a page with "
+                "its subcommands.",
+        lede="Every command in the popcorn CLI, A to Z, each on its own page.",
+        concepts=["cli"],
+        lookup=True,
+    )
+    out += [
+        f"Every command `popcorn` {version} lists in its help menu, A to Z: {count} with",
+        "their subcommands. Each page shows the Usage line and arguments;",
+        "`popcorn <command> --help` describes the one you have installed.",
+        "",
+    ]
+    # One entry per command, so the page is a list like the pages under it:
+    # its rail indexes the commands, and search reads it as a list.
+    for top, _ in tops:
+        out.append(f"- **[`{top['name']}`](https://docs.popcorn.ai/{href_of(top)})** — "
+                   f"{cell(top.get('description') or '')}")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def other_page(tops: list[dict], order: int, version: str) -> str:
+    """The commands that have no subcommands, one entry each."""
+    out = header(
+        id=OTHER,
+        title="Other commands",
+        order=order,
+        version=version,
+        summary="The CLI's commands that have no subcommands, each with what it does, "
+                "its Usage line and its arguments.",
+        lede="The commands that have no subcommands, with how to run each and its arguments.",
+        concepts=["cli"],
+        lookup=True,
+        parent=INDEX,
+    )
+    out += [
+        f"The commands in `popcorn` {version} that have no subcommands.",
+        "Global flags still go before them, as in `popcorn --json whoami`; the",
+        "[CLI overview](https://docs.popcorn.ai/cli.md) page lists them.",
+        "",
+    ]
+    for top in tops:
+        out += [f"### `{top['name']}`", ""]
+        if top.get("description"):
+            out += [cell(top["description"]), ""]
+        args = top.get("arguments") or []
+        out += ["```", usage(top["name"], args), "```", ""]
+        out += table(args)
+    return "\n".join(out).rstrip() + "\n"
+
+
+def pages(schema: dict, help_text: str) -> dict[pathlib.Path, str]:
+    """Every CLI page, by the path it is written to. A command is listed when
+    the help menu lists it, as before; the menu's headings no longer group
+    the pages, which run A to Z."""
+    version = schema["version"]
+    by_name = {c["name"]: c for c in schema["commands"]}
+    listed = sorted({c for _, cmds in menu(help_text) for c in cmds if c in by_name})
+    tops = [(by_name[c], leaves(by_name[c])) for c in listed]
+    out = {
+        PAGE: landing(schema, tops, version),
+        REFERENCE / f"{INDEX}.md": commands_page(tops, version),
+    }
+    own = [(top, cmds) for top, cmds in tops if not bare(top)]
+    for n, (top, cmds) in enumerate(own, 2):
+        out[REFERENCE / f"{slug(top['name'])}.md"] = command_page(top, cmds, ORDER + n, version)
+    others = [top for top, _ in tops if bare(top)]
+    if others:
+        out[REFERENCE / f"{OTHER}.md"] = other_page(others, ORDER + len(own) + 2, version)
+    return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--check", action="store_true", help="exit 1 if the page differs, write nothing")
+    ap.add_argument("--check", action="store_true", help="exit 1 if any page differs, write nothing")
     args = ap.parse_args()
 
-    text = page(json.loads(run("commands")), run("--help"))
-    current = PAGE.read_text() if PAGE.exists() else ""
+    wanted = pages(json.loads(run("commands")), run("--help"))
+    stale = [p for p in REFERENCE.glob("cli-*.md") if p not in wanted]
+    changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
-        if text != current:
-            print(f"✖  {PAGE.relative_to(ROOT)} is stale — run scripts/sync-cli.py", file=sys.stderr)
+        for p in changed + stale:
+            print(f"✖  {p.relative_to(ROOT)} is stale — run scripts/sync-cli.py", file=sys.stderr)
+        if changed or stale:
             return 1
-        print(f"✔  {PAGE.relative_to(ROOT)} matches the installed CLI")
+        print(f"✔  the {len(wanted)} CLI pages match the installed CLI")
         return 0
-    if text == current:
-        print(f"✔  {PAGE.relative_to(ROOT)} already matches the installed CLI — nothing to write")
+    if not changed and not stale:
+        print(f"✔  the {len(wanted)} CLI pages already match the installed CLI — nothing to write")
         return 0
-    PAGE.write_text(text)
-    print(f"✔  wrote {PAGE.relative_to(ROOT)}: {text.count(chr(10) + '### `')} commands. "
+    for p in changed:
+        p.write_text(wanted[p])
+    for p in stale:
+        p.unlink()
+    commands = sum(text.count("\n### `") for text in wanted.values())
+    print(f"✔  wrote {len(changed)} and removed {len(stale)} of the CLI pages ({commands} commands). "
           "Review the diff, then run the leak guard before committing.")
     return 0
 

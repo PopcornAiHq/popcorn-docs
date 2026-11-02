@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""Regenerate `content/reference/activities.md` from the deployed activity catalog.
+"""Regenerate the Activity pages in `content/reference/` from the deployed catalog.
+
+The reference is laid out like the CLI's: `activities.md` is the landing
+page — what an Activity is, how a Flow Step calls one, the tiers and
+statuses, the arguments every Activity takes, and how to list them. Under it,
+three levels: the Activity Catalog (`activities-catalog.md`) indexes the
+tiers, each published tier's page (`activities-<tier>.md`) indexes its
+domains, and each domain has a page (`activities-<tier>-<domain>.md`) with
+its activities. The sidebar nests them in that order. All of them sit in the
+Reference tab's Activities section.
 
 The activity reference is generated, never hand-written: the catalog derives
 every activity's arguments from the model the activity accepts at runtime, so
@@ -8,15 +17,17 @@ script reads the catalog from the DEPLOYED platform — prod, not backend main,
 because the page describes what an author can call today, and main runs ahead
 of what is released.
 
-    python3 scripts/sync-activities.py               # fetch from prod, write the page
-    python3 scripts/sync-activities.py --check       # exit 1 if the page is stale
+    python3 scripts/sync-activities.py               # fetch from prod, write the pages
+    python3 scripts/sync-activities.py --check       # exit 1 if any page is stale
     python3 scripts/sync-activities.py --from DIR    # use saved <tier>.json files
     python3 scripts/sync-activities.py --from DIR --platform-version V
 
 After each prod deploy the backend's deploy pipeline saves the catalog to a
 directory and runs the last form with the deploy's version, then opens a pull
-request here as the docs bot when the page changed. `--platform-version` sets
-the page's `updated:` date; `platform_version.py` says when that line moves.
+request here as the docs bot when a page changed. `--platform-version` sets
+each page's `updated:` date; `platform_version.py` says when that line moves,
+page by page. An `activities-*.md` page for a tier no longer published is
+deleted.
 
 It shells out to the `popcorn` CLI rather than calling the API itself, so it
 runs on the credentials the author already has and needs no token of its own.
@@ -45,11 +56,16 @@ import pathlib
 import re
 import subprocess
 import sys
+import textwrap
 
 import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PAGE = ROOT / "content" / "reference" / "activities.md"
+REFERENCE = ROOT / "content" / "reference"
+PAGE = REFERENCE / "activities.md"
+# Where the Activity pages sit among the reference pages: first, the landing
+# page and then each tier.
+ORDER = 100
 
 TIERS = ("foundation", "feature")
 STATUSES = ("release", "beta")
@@ -165,6 +181,26 @@ def _types(schemas: list[dict]) -> list[str]:
     return out
 
 
+def _placeholder(spec: dict) -> str:
+    """A required argument's value in the Step example: its JSON type when it
+    has a plain one, `...` otherwise — an enum or a nested type is in the table."""
+    kind = spec.get("type")
+    return f"<{kind}>" if isinstance(kind, str) and kind in ("string", "integer", "number", "boolean", "array", "object") else "..."
+
+
+def step(a: dict) -> list[str]:
+    """How a Flow Step calls the activity: its wire name and its required
+    arguments, as `flow-grammar` writes a Step. Optional ones are in the table."""
+    schema = a.get("args_schema") or {}
+    props = schema.get("properties") or {}
+    required = [n for n in props if n in set(schema.get("required") or []) and n not in BASE_ARGS]
+    out = ["```yaml", "- id: <step>", f"  activity: {a['name']}"]
+    if required:
+        out.append("  args:")
+        out += [f"    {n}: {_placeholder(props[n])}" for n in required]
+    return out + ["```", ""]
+
+
 def activity(a: dict) -> list[str]:
     # The status is kept out of the heading: the heading is the anchor, and a
     # link to an activity must not break the day it leaves beta.
@@ -173,6 +209,7 @@ def activity(a: dict) -> list[str]:
         out += [f"*{a['status'].capitalize()}.*", ""]
     description = _prose(a.get("description"))
     out += [description or "No description in the catalog.", ""]
+    out += step(a)
     args = _fields(a.get("args_schema") or {}, args=True)
     out += (["**Arguments**", ""] + args + [""]) if args else ["Takes no arguments of its own.", ""]
     result = _fields(a.get("result_schema") or {}, args=False)
@@ -185,54 +222,245 @@ def activity(a: dict) -> list[str]:
     return out
 
 
-def page(acts: list[dict]) -> str:
-    counts = {t: sum(1 for a in acts if a["tier"] == t) for t in TIERS}
-    head = [
+def header(*, id: str, title: str, order: int, summary: str, lede: str,
+           concepts: list[str], lookup: bool, parent: str = "") -> list[str]:
+    wrapped = lambda text: textwrap.wrap(text, 76, break_on_hyphens=False)
+    return [
         "---",
-        "id: activities",
-        "title: Activities",
-        "order: 1",
-        "layout: lookup",
+        f"id: {id}",
+        f"title: {title}",
+        f"order: {order}",
+        "group: Activities",
+        *([f"parent: {parent}"] if parent else []),
+        *(["layout: lookup"] if lookup else []),
         "summary: >",
-        "  Every foundation and feature activity a flow step can call at release or",
-        "  beta status, with its arguments and what it returns — generated from the",
-        "  deployed catalog. Look an activity up here by its wire name, such as",
-        "  foundation.store.upsert_rows; `popcorn flow activities` lists alpha and",
-        "  deprecated ones too.",
+        *(f"  {line}" for line in wrapped(summary)),
         "lede: >",
-        "  Every activity a flow step can call, with its arguments and what it returns.",
-        "concepts: [app-bundle, template-authoring]",
+        *(f"  {line}" for line in wrapped(lede)),
+        f"concepts: [{', '.join(concepts)}]",
         "---",
-        "",
-        "A flow step names one of these by its wire name in `activity:` and passes",
-        "its arguments in `args:`. This page is generated from the catalog the",
-        "platform serves, which derives every argument list from the model the",
-        "activity accepts at runtime — so where this page and a hand-written example",
-        "disagree, this page is right. It is regenerated by `scripts/sync-activities.py`",
-        "after each prod deploy and never edited by hand; a date beside the title is",
-        "the day of the deploy that last changed it.",
-        "",
-        f"It lists the {counts['foundation']} `foundation` and {counts['feature']} `feature`",
-        "activities at `release` or `beta` status. `beta` ones are marked. For",
-        "`alpha`, `deprecated`, and app-specific activities, and for the full JSON",
-        "schemas, ask the CLI: `popcorn flow activities --name <wire.name>`.",
-        "",
-        "Every activity also accepts two optional arguments not repeated below:",
-        "`integration_id`, the connected account to run the step against — normally",
-        "`$channel.integrations.<name>.id` — and `integration_name`, a named channel",
-        "integration to resolve instead. Omit both for steps that touch no user",
-        "account.",
         "",
     ]
-    body = []
-    category = None
+
+
+# Each tier page's title, summary and lede. No activity names and no domain
+# words in the summaries: an activity is reached as this page's entry, which
+# search matches by its wire name, and a domain word in a summary would make
+# the tier page outrank the written page about that thing.
+TIER_PAGES = {
+    "foundation": (
+        "Foundation activities",
+        "The foundation tier: the platform operations every Flow is built from, "
+        "each with the Step that calls it, its arguments and what it returns.",
+        "The platform operations every Flow is built from, with their arguments and results.",
+    ),
+    "feature": (
+        "Feature activities",
+        "The feature tier: operations that build on the foundation tier for one "
+        "product capability each, with the Step that calls each, its arguments "
+        "and what it returns.",
+        "Operations for one product capability each, with their arguments and results.",
+    ),
+}
+
+
+def slug(tier: str) -> str:
+    return f"activities-{tier}"
+
+
+def domain(a: dict) -> str:
+    return a["name"].rsplit(".", 1)[0]
+
+
+def domain_slug(name: str) -> str:
+    """A domain's page id: `foundation.store` → `activities-foundation-store`."""
+    return "activities-" + name.replace(".", "-")
+
+
+def tier_page(tier: str, acts: list[dict], order: int) -> str:
+    """A tier's index: one entry per domain, linking its page. The domain
+    pages are its children in the sidebar, as it is the catalog's."""
+    title, summary, lede = TIER_PAGES[tier]
+    out = header(id=slug(tier), title=title, order=order, summary=summary, lede=lede,
+                 concepts=["activities", "flow-grammar"], lookup=True, parent=CATALOG)
+    out += [
+        f"The {len(acts)} `{tier}` activities at `release` or `beta` status, a page for",
+        "each domain. Each activity also takes the optional `integration_id` and",
+        "`integration_name` arguments, which the",
+        "[Activities](https://docs.popcorn.ai/activities.md) page explains with the",
+        "rest of what every activity shares.",
+        "",
+    ]
+    for name, in_domain in domains(acts).items():
+        out.append(f"- **[`{name}`](https://docs.popcorn.ai/{domain_slug(name)}.md)** — "
+                   f"{len(in_domain)} {'activity' if len(in_domain) == 1 else 'activities'}")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def domains(acts: list[dict]) -> dict[str, list[dict]]:
+    """The activities by domain, in catalog order."""
+    out: dict[str, list[dict]] = {}
     for a in acts:
-        group = a["name"].rsplit(".", 1)[0]
-        if group != category:
-            category = group
-            body += [f"## {group}", ""]
-        body += activity(a)
-    return "\n".join(head + body).rstrip() + "\n"
+        out.setdefault(domain(a), []).append(a)
+    return out
+
+
+def domain_page(name: str, tier: str, acts: list[dict], order: int) -> str:
+    """One domain's activities, each with the Step that calls it, its
+    arguments and what it returns."""
+    out = header(
+        id=domain_slug(name),
+        title=name,
+        order=order,
+        # The domain is in the title already; said again here it would count
+        # twice for any question sharing its word ("email", "channel").
+        summary="One domain's activities, each with the Step that calls it, its "
+                "arguments and what it returns.",
+        lede=f"The {name} activities, with how a Step calls each and its arguments.",
+        concepts=["activities", "flow-grammar"],
+        lookup=True,
+        parent=slug(tier),
+    )
+    out += [
+        f"The `{name}` activities at `release` or `beta` status; `beta` ones are",
+        "marked. Each also takes the optional `integration_id` and",
+        "`integration_name` arguments, which the",
+        "[Activities](https://docs.popcorn.ai/activities.md) page explains.",
+        "",
+    ]
+    for a in acts:
+        out += activity(a)
+    return "\n".join(out).rstrip() + "\n"
+
+
+def landing(acts: list[dict]) -> str:
+    counts = {t: sum(1 for a in acts if a["tier"] == t) for t in TIERS}
+    out = header(
+        id="activities",
+        title="Activities",
+        order=ORDER,
+        summary="An Activity is a platform operation a Flow Step calls by its wire name, "
+                "such as foundation.store.upsert_rows, with its arguments under `args:`. "
+                "Every one also takes integration_id or integration_name, the connected "
+                "account the step runs as. The Activity Catalog lists the foundation and "
+                "feature tiers at release or beta status; `popcorn flow activities` lists "
+                "alpha and deprecated ones too.",
+        lede="What an Activity is, how a Flow Step calls one, and where each tier's are listed.",
+        concepts=["flow-grammar", "app-bundle", "template-authoring"],
+        lookup=False,
+    )
+    out += [
+        "An Activity is a platform operation a Flow Step calls. A Step names one by",
+        "its wire name in `activity:` and passes its arguments in `args:`:",
+        "",
+        "```yaml",
+        "- id: fetch",
+        "  activity: foundation.store.list_rows",
+        "  args: { ... }",
+        "```",
+        "",
+        "These pages are generated from the catalog the platform serves, which",
+        "derives every argument list from the model the activity accepts at",
+        "runtime — so where they and a hand-written example disagree, they are",
+        "right. They are regenerated by `scripts/sync-activities.py` after each prod",
+        "deploy and never edited by hand; a date beside a title is the day of the",
+        "deploy that last changed that page.",
+        "",
+        "## Names, tiers and status",
+        "",
+        "A wire name is `<tier>.<domain>.<verb>`, sometimes with more segments",
+        "before the verb. These pages list two tiers: `foundation`, the platform",
+        "operations every Flow is built from, and `feature`, operations that build",
+        "on them for one product capability each. `app` activities belong to",
+        "individual shipped apps and `system` ones to the platform itself, so",
+        "neither is listed here.",
+        "",
+        f"They list the {counts['foundation']} `foundation` and {counts['feature']} `feature`",
+        "activities at `release` or `beta` status; `beta` ones are marked. `alpha`",
+        "and `deprecated` ones are not what a new Flow should reach for, and are",
+        "left out.",
+        "",
+        "## Arguments every activity takes",
+        "",
+        "Every activity also accepts two optional arguments not repeated on its",
+        "entry: `integration_id`, the connected account to run the step against —",
+        "normally `$channel.integrations.<name>.id` — and `integration_name`, a named",
+        "channel integration to resolve instead. Omit both for steps that touch no",
+        "user account.",
+        "",
+        "## Listing them",
+        "",
+        "The CLI lists the whole catalog, every tier and status included:",
+        "",
+        "```",
+        "popcorn flow activities --summary",
+        "popcorn flow activities --name <wire.name>",
+        "popcorn --json flow activities",
+        "```",
+        "",
+        "`--name` shows one activity with its full JSON schemas.",
+        "",
+        "## The Activity Catalog",
+        "",
+        f"The [Activity Catalog](https://docs.popcorn.ai/{CATALOG}.md) lists every activity a Flow",
+        "can call, a page for each tier.",
+    ]
+    return "\n".join(out).rstrip() + "\n"
+
+
+# The tier pages' parent: the catalog `popcorn flow activities` lists, which
+# the sidebar opens to show them while the reader is in it.
+CATALOG = "activities-catalog"
+
+
+def catalog_page(acts: list[dict]) -> str:
+    """The catalog's index: one row per tier, linking its page and naming its
+    domains. The tier pages are its children in the sidebar."""
+    out = header(
+        id=CATALOG,
+        title="Activity Catalog",
+        order=ORDER + 1,
+        summary="The Activity Catalog: every activity a Flow can call at release or beta "
+                "status, on a page for each tier.",
+        lede="Every activity a Flow can call, a page for each tier.",
+        concepts=["activities", "flow-grammar"],
+        lookup=True,
+    )
+    out += [
+        f"The {len(acts)} activities a Flow can call at `release` or `beta` status, a page",
+        "for each tier. `popcorn flow activities` lists the same catalog from the",
+        "platform you are signed in to.",
+        "",
+    ]
+    # One entry per tier, so the page is a list like the pages under it. The
+    # tier's page lists its domains; repeating them here would make this page
+    # a second index of the same thing.
+    for tier in TIERS:
+        count = sum(1 for a in acts if a["tier"] == tier)
+        if count:
+            title, _, lede = TIER_PAGES[tier]
+            out.append(f"- **[{title}](https://docs.popcorn.ai/{slug(tier)}.md)** — "
+                       f"{lede.rstrip('.')} ({count} activities).")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def pages(acts: list[dict]) -> dict[pathlib.Path, str]:
+    """Every Activity page, freshly generated without an `updated:` line, by path."""
+    out = {PAGE: landing(acts), REFERENCE / f"{CATALOG}.md": catalog_page(acts)}
+    order = ORDER + 2
+    for tier in TIERS:
+        tier_acts = [a for a in acts if a["tier"] == tier]
+        if not tier_acts:
+            continue
+        out[REFERENCE / f"{slug(tier)}.md"] = tier_page(tier, tier_acts, order)
+        order += 1
+    # The domain pages follow every tier page, so each tier's index comes
+    # before the pages under it in reading order.
+    for tier in TIERS:
+        for name, in_domain in domains([a for a in acts if a["tier"] == tier]).items():
+            out[REFERENCE / f"{domain_slug(name)}.md"] = domain_page(name, tier, in_domain, order)
+            order += 1
+    return out
 
 
 def main() -> int:
@@ -240,25 +468,33 @@ def main() -> int:
     ap.add_argument("--env", default="prod", help="CLI environment to read (default: prod)")
     ap.add_argument("--from", dest="source", type=pathlib.Path,
                     help="read <tier>.json files from this directory instead of the CLI")
-    ap.add_argument("--check", action="store_true", help="exit 1 if the page differs, write nothing")
+    ap.add_argument("--check", action="store_true", help="exit 1 if any page differs, write nothing")
     platform_version.add_argument(ap)
     args = ap.parse_args()
 
-    current = PAGE.read_text() if PAGE.exists() else ""
-    text = platform_version.stamp(page(load(args.source, args.env)), current, args.platform)
+    wanted = {}
+    for path, text in pages(load(args.source, args.env)).items():
+        current = path.read_text() if path.exists() else ""
+        wanted[path] = platform_version.stamp(text, current, args.platform)
+    stale = [p for p in REFERENCE.glob("activities-*.md") if p not in wanted]
+    changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
-        if text != current:
-            print(f"✖  {PAGE.relative_to(ROOT)} is stale — run scripts/sync-activities.py", file=sys.stderr)
+        for p in changed + stale:
+            print(f"✖  {p.relative_to(ROOT)} is stale — run scripts/sync-activities.py", file=sys.stderr)
+        if changed or stale:
             return 1
-        print(f"✔  {PAGE.relative_to(ROOT)} matches the catalog")
+        print(f"✔  the {len(wanted)} Activity pages match the catalog")
         return 0
-    if text == current:
-        print(f"✔  {PAGE.relative_to(ROOT)} already matches the catalog — nothing to write")
+    if not changed and not stale:
+        print(f"✔  the {len(wanted)} Activity pages already match the catalog — nothing to write")
         return 0
-    PAGE.parent.mkdir(parents=True, exist_ok=True)
-    PAGE.write_text(text)
-    n = text.count("\n### ")
-    print(f"✔  wrote {PAGE.relative_to(ROOT)}: {n} activities. Review the diff, then run the leak guard before committing.")
+    for p in changed:
+        p.write_text(wanted[p])
+    for p in stale:
+        p.unlink()
+    n = sum(text.count("\n### ") for text in wanted.values())
+    print(f"✔  wrote {len(changed)} and removed {len(stale)} of the Activity pages ({n} activities). "
+          "Review the diff, then run the leak guard before committing.")
     return 0
 
 

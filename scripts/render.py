@@ -64,8 +64,9 @@ _TERM = re.compile(r"^\*\*([^*]+)\*\*")
 # The generated MCP reference writes them, for a tool's access hints and for
 # a required argument.
 _BADGES = {"read-only": "safe", "writes": "write", "destructive": "danger",
-           "idempotent": "plain", "required": "plain"}
+           "idempotent": "plain", "required": "plain", "dry run": "confirm"}
 _BADGE = re.compile(r"\[(" + "|".join(map(re.escape, _BADGES)) + r")\](?!\()")
+_EXAMPLE = re.compile(r"^\*\*Example\*\* — (.+)$")
 _BADGE_LINE = re.compile(r"^(?:\s*" + _BADGE.pattern + r")+\s*$")
 
 SITE = "https://docs.popcorn.ai"
@@ -187,7 +188,7 @@ _ENTRY = re.compile(
 )
 
 
-def _lookup_entries(rendered: str) -> str:
+def _lookup_entries(rendered: str, title: str = "") -> str:
     """A lookup page's entries and the filter over them.
 
     Built from the rendered page rather than the Markdown, so an entry is
@@ -195,7 +196,8 @@ def _lookup_entries(rendered: str) -> str:
     the groups; third-level headings and glossary terms are the entries. An
     entry that repeats its group's name as a prefix — `foundation.agent.invoke`
     under `foundation.agent` — is listed by the part that differs, which is
-    what fits in the rail.
+    what fits in the rail. With no group heading the page's title stands in,
+    so a domain's page lists `claim_row` rather than `foundation.store.claim_row`.
     """
     groups: list[tuple[str, str, list[tuple[str, str, str]]]] = []
     for m in _ENTRY.finditer(rendered):
@@ -206,7 +208,7 @@ def _lookup_entries(rendered: str) -> str:
         name = _TAG.sub("", m.group("html") or m.group("term"))
         if not groups:
             groups.append(("", "", []))
-        prefix = groups[-1][1] + "."
+        prefix = (groups[-1][1] or title) + "."
         label = name[len(prefix):] if name.startswith(prefix) else name
         groups[-1][2].append((anchor, name, label))
 
@@ -231,17 +233,17 @@ def _lookup_entries(rendered: str) -> str:
     )
 
 
-def lookup_index(rendered: str) -> str:
+def lookup_index(rendered: str, title: str = "") -> str:
     """"On this page" for a lookup page: every entry, filterable.
 
     It takes the rail's place for the contents list, and the site sidebar
     stays on the left, so a reader looking a term up can still see where the
     page sits and leave it in one click.
     """
-    return '<p class="rail-title">On this page</p>' + _lookup_entries(rendered)
+    return '<p class="rail-title">On this page</p>' + _lookup_entries(rendered, title)
 
 
-def on_this_page(rendered: str, *, lookup: bool) -> str:
+def on_this_page(rendered: str, *, lookup: bool, title: str = "") -> str:
     """The rail's contents list again, collapsed above the page's text.
 
     Below the width that fits a rail, the rail's list is hidden and only its
@@ -258,7 +260,7 @@ def on_this_page(rendered: str, *, lookup: bool) -> str:
     A native <details>, so it opens without JavaScript and starts collapsed:
     the text is what the reader came for, and the list is one tap away.
     """
-    contents = _lookup_entries(rendered) if lookup else _toc_nav(rendered, 2, "")
+    contents = _lookup_entries(rendered, title) if lookup else _toc_nav(rendered, 2, "")
     if not contents:
         return ""
     return (
@@ -299,9 +301,15 @@ def site_nav(groups: list[tuple[str, list[Link]]], tabs: list[Link] = ()) -> str
     narrow layout, where the header has no room for them and the sidebar is
     the menu.
     """
-    def link(title: str, href: str, current: bool) -> str:
+    def link(title: str, href: str, current: bool, kids: list = (), open_: bool = False) -> str:
         attrs = ' aria-current="page"' if current else ""
-        return f'<li><a href="{href}"{attrs}>{title}</a></li>'
+        if not kids:
+            return f'<li><a href="{href}"{attrs}>{title}</a></li>'
+        # The children are listed only while open: the parent is the way in.
+        state = "open" if open_ else "closed"
+        nested = f'<ul class="nav-children">{"".join(link(*k) for k in kids)}</ul>' if open_ else ""
+        return (f'<li class="nav-parent {state}"><a href="{href}"{attrs}>{title}'
+                f'<span class="caret" aria-hidden="true">{_ICON_CARET}</span></a>{nested}</li>')
 
     out = []
     if tabs:
@@ -327,9 +335,13 @@ def tab_bar(tabs: list[Link]) -> str:
     return f'<div class="tabrow"><nav class="tabs" aria-label="Sections">{items}</nav></div>'
 
 
-def rail(*, contents: str = "", related: list[Link] = ()) -> str:
-    """The right column: where you are in this page, then the pages around it."""
+def rail(*, contents: str = "", used_with: list[Link] = (), related: list[Link] = ()) -> str:
+    """The right column: where you are in this page, then the pages around it:
+    the tools a tool's page is used with, then the concepts it relates to."""
     parts = [contents] if contents else []
+    if used_with:
+        items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in used_with)
+        parts.append(f'<div class="related"><p class="rail-title">Used with</p><ul class="used-with">{items}</ul></div>')
     if related:
         items = "".join(f'<li><a href="{href}">{title}</a></li>' for title, href, _ in related)
         parts.append(f'<div class="related"><p class="rail-title">Related</p><ul>{items}</ul></div>')
@@ -413,6 +425,22 @@ def body(md: str, *, terms: bool = False) -> str:
 
         if not line.strip():
             i += 1
+            continue
+
+        # A worked example: a line opening "**Example** —" and the code block
+        # under it become one closed <details>, the line its summary. The
+        # Markdown an agent reads keeps both as written.
+        example = _EXAMPLE.match(line)
+        if example and i + 2 < len(lines) and not lines[i + 1].strip() and _FENCE.match(lines[i + 2]):
+            lang = lines[i + 2].strip()[3:].strip().lower()
+            i += 3
+            code = []
+            while i < len(lines) and not _FENCE.match(lines[i]):
+                code.append(lines[i])
+                i += 1
+            i += 1  # closing fence
+            out.append(f'<details class="example"><summary>{inline(example.group(1))}</summary>'
+                       f"{code_block(chr(10).join(code), lang)}</details>")
             continue
 
         if _FENCE.match(line):
@@ -677,6 +705,13 @@ th { font-weight: 600; }
 .badge.write { color: var(--accent); }
 .badge.danger { color: var(--hl-literal); }
 .badge.plain { color: var(--muted); }
+.badge.confirm { color: var(--brand); }
+.used-with a { font-family: var(--mono); font-size: .8rem; }
+details.example { margin: 0 0 1.4rem; border: 1px solid var(--rule); border-radius: 8px; }
+details.example > summary { padding: .55rem .85rem; cursor: pointer; color: var(--muted); }
+details.example > summary::before { content: "Example: "; color: var(--fg); font-weight: 600; }
+details.example[open] > summary { border-bottom: 1px solid var(--rule); }
+details.example pre { margin: 0; border-radius: 0 0 8px 8px; }
 p.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
 /* After an entry's badges: its first paragraph is the lead, and the one
    after that is detail, set smaller so the leads are what a scan reads. */
@@ -737,6 +772,10 @@ main { min-width: 0; padding: 2.5rem 0 4rem; }
 .nav-group { margin: 1.9rem 0 .4rem .75rem; font-weight: 600; color: var(--fg); }
 .site-nav > .nav-group:first-child, .nav-tabs + .nav-group { margin-top: 0; }
 .nav-tabs { display: none; }
+.nav-parent > a { display: flex; align-items: center; justify-content: space-between; }
+.nav-parent .caret { display: flex; color: var(--muted); transform: rotate(-90deg); transition: transform .15s; }
+.nav-parent.open > a .caret { transform: none; }
+.nav-children { margin: .1rem 0 .3rem .9rem !important; padding-left: .2rem !important; }
 /* The header's second row. The tab underline sits on the header's own rule. */
 .site { display: flex; flex-direction: column; }
 .site .bar { height: 3.25rem; flex: none; width: 100%; box-sizing: border-box; }

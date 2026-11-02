@@ -123,20 +123,22 @@ with `scripts/check-published.py`. Nothing needs to be run by hand.
 ## Generated reference pages
 
 The pages under `content/reference/` are generated, never edited by hand. Each
-has a script that writes it and a `--check` that exits 1 when it is stale.
+reference is a landing page and the lists under it, all written by one script
+whose `--check` exits 1 when any of them is stale; the script deletes a page
+its source no longer has.
 
-| Page | Script | Refreshed |
+| Pages | Script | Refreshed |
 |---|---|---|
-| `cli.md` | `scripts/sync-cli.py` | automatically, daily |
-| `activities.md` | `scripts/sync-activities.py` | after each prod deploy, by the backend's deploy pipeline; or by hand through an authenticated CLI |
-| `mcp.md` | `scripts/sync-mcp.py` | after each prod deploy, by the backend's deploy pipeline; or by hand against a local backend checkout |
+| `cli.md`, `cli-command-reference.md` and a page per command (`cli-<command>.md`, with commands that have no subcommands on `cli-other.md`) | `scripts/sync-cli.py` | automatically, daily |
+| `activities.md`, `activities-catalog.md`, a page per tier (`activities-<tier>.md`) and a page per domain under it (`activities-foundation-store.md`) | `scripts/sync-activities.py` | after each prod deploy, by the backend's deploy pipeline; or by hand through an authenticated CLI |
+| `mcp.md`, `mcp-tools.md` (every tool, A to Z) and a page per tool (`mcp-get-status.md`) | `scripts/sync-mcp.py` | after each prod deploy, by the backend's deploy pipeline; or by hand against a local backend checkout, under Python 3.14 since it parses the backend's source |
 
 ### The CLI reference
 
 `.github/workflows/sync-cli.yml` installs the latest `popcorn-cli` release
-every day, runs `scripts/sync-cli.py`, and when the page differs opens a pull
+every day, runs `scripts/sync-cli.py`, and when a page differs opens a pull
 request from the `automation/sync-cli` branch — or updates the one already
-open. It runs the leak guard on the new page before pushing, since a pushed
+open. It runs the leak guard on the new pages before pushing, since a pushed
 branch is public. It pushes and opens the pull request as the docs bot, a
 GitHub App installed on this repository, so CI runs on the pull request as on
 any other. The App is configured by the `DOCS_BOT_CLIENT_ID` repository
@@ -155,12 +157,12 @@ python3 scripts/sync-cli.py
 
 ### The activity reference
 
-`content/reference/activities.md` is generated from the deployed activity
-catalog:
+The Activity pages (`content/reference/activities*.md`) are generated from the
+deployed activity catalog:
 
 ```bash
 python3 scripts/sync-activities.py           # reads prod through the popcorn CLI
-python3 scripts/sync-activities.py --check   # exit 1 if the page is stale
+python3 scripts/sync-activities.py --check   # exit 1 if a page is stale
 git add content/reference && ./scripts/check-public-repo.sh
 ```
 
