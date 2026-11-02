@@ -129,9 +129,9 @@ its source no longer has.
 
 | Pages | Script | Refreshed |
 |---|---|---|
-| `cli.md`, `cli-command-reference.md` and a page per command (`cli-<command>.md`, with commands that have no subcommands on `cli-other.md`) | `scripts/sync-cli.py` | automatically, daily |
-| `activities.md`, `activities-catalog.md`, a page per tier (`activities-<tier>.md`) and a page per domain under it (`activities-foundation-store.md`) | `scripts/sync-activities.py` | after each prod deploy, by the backend's deploy pipeline; or by hand through an authenticated CLI |
-| `mcp.md`, `mcp-tools.md` (every tool, A to Z) and a page per tool (`mcp-get-status.md`) | `scripts/sync-mcp.py` | after each prod deploy, by the backend's deploy pipeline; or by hand against a local backend checkout, under Python 3.14 since it parses the backend's source |
+| `cli/index.md`, `cli/commands/index.md` and a page per command (`cli/commands/<command>.md`, with commands that have no subcommands on `cli/commands/other.md`) | `scripts/sync-cli.py` | automatically, daily |
+| `activities/index.md`, `activities/catalog/index.md`, a page per tier (`activities/catalog/<tier>/index.md`) and a page per domain under it (`activities/catalog/foundation/store.md`) | `scripts/sync-activities.py` | after each prod deploy, by the backend's deploy pipeline; or by hand through an authenticated CLI |
+| `mcp/index.md`, `mcp/tools/index.md` (every tool, A to Z) and a page per tool (`mcp/tools/get-status.md`) | `scripts/sync-mcp.py` | after each prod deploy, by the backend's deploy pipeline; or by hand against a local backend checkout, under Python 3.14 since it parses the backend's source |
 
 ### The CLI reference
 
@@ -157,7 +157,7 @@ python3 scripts/sync-cli.py
 
 ### The activity reference
 
-The Activity pages (`content/reference/activities*.md`) are generated from the
+The Activity pages (`content/reference/activities/`) are generated from the
 deployed activity catalog:
 
 ```bash

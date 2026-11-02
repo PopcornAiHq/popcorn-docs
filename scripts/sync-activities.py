@@ -4,10 +4,11 @@
 The reference is laid out like the CLI's: `activities.md` is the landing
 page — what an Activity is, how a Flow Step calls one, the tiers and
 statuses, the arguments every Activity takes, and how to list them. Under it,
-three levels: the Activity Catalog (`activities-catalog.md`) indexes the
-tiers, each published tier's page (`activities-<tier>.md`) indexes its
-domains, and each domain has a page (`activities-<tier>-<domain>.md`) with
-its activities. The sidebar nests them in that order. All of them sit in the
+three levels: the Activity Catalog (`activities/catalog/index.md`) indexes
+the tiers, each published tier's page (`activities/catalog/<tier>/index.md`)
+indexes its domains, and each domain has a page
+(`activities/catalog/<tier>/<domain>.md`) with its activities. The sidebar
+nests them in that order, and so do their URLs. All of them sit in the
 Reference tab's Activities section.
 
 The activity reference is generated, never hand-written: the catalog derives
@@ -26,8 +27,8 @@ After each prod deploy the backend's deploy pipeline saves the catalog to a
 directory and runs the last form with the deploy's version, then opens a pull
 request here as the docs bot when a page changed. `--platform-version` sets
 each page's `updated:` date; `platform_version.py` says when that line moves,
-page by page. An `activities-*.md` page for a tier no longer published is
-deleted.
+page by page. A page under `activities/` for a tier or domain no longer
+published is deleted.
 
 It shells out to the `popcorn` CLI rather than calling the API itself, so it
 runs on the credentials the author already has and needs no token of its own.
@@ -62,7 +63,7 @@ import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
-PAGE = REFERENCE / "activities.md"
+PAGE = REFERENCE / "activities" / "index.md"
 # Where the Activity pages sit among the reference pages: first, the landing
 # page and then each tier.
 ORDER = 100
@@ -265,7 +266,8 @@ TIER_PAGES = {
 
 
 def slug(tier: str) -> str:
-    return f"activities-{tier}"
+    """A tier's page id: `foundation` → `activities/catalog/foundation`."""
+    return f"{CATALOG}/{tier}"
 
 
 def domain(a: dict) -> str:
@@ -273,8 +275,10 @@ def domain(a: dict) -> str:
 
 
 def domain_slug(name: str) -> str:
-    """A domain's page id: `foundation.store` → `activities-foundation-store`."""
-    return "activities-" + name.replace(".", "-")
+    """A domain's page id, under its tier's: `foundation.store` →
+    `activities/catalog/foundation/store`."""
+    tier, _, rest = name.partition(".")
+    return f"{slug(tier)}/" + rest.replace(".", "-")
 
 
 def tier_page(tier: str, acts: list[dict], order: int) -> str:
@@ -410,7 +414,7 @@ def landing(acts: list[dict]) -> str:
 
 # The tier pages' parent: the catalog `popcorn flow activities` lists, which
 # the sidebar opens to show them while the reader is in it.
-CATALOG = "activities-catalog"
+CATALOG = "activities/catalog"
 
 
 def catalog_page(acts: list[dict]) -> str:
@@ -446,13 +450,13 @@ def catalog_page(acts: list[dict]) -> str:
 
 def pages(acts: list[dict]) -> dict[pathlib.Path, str]:
     """Every Activity page, freshly generated without an `updated:` line, by path."""
-    out = {PAGE: landing(acts), REFERENCE / f"{CATALOG}.md": catalog_page(acts)}
+    out = {PAGE: landing(acts), REFERENCE / CATALOG / "index.md": catalog_page(acts)}
     order = ORDER + 2
     for tier in TIERS:
         tier_acts = [a for a in acts if a["tier"] == tier]
         if not tier_acts:
             continue
-        out[REFERENCE / f"{slug(tier)}.md"] = tier_page(tier, tier_acts, order)
+        out[REFERENCE / slug(tier) / "index.md"] = tier_page(tier, tier_acts, order)
         order += 1
     # The domain pages follow every tier page, so each tier's index comes
     # before the pages under it in reading order.
@@ -476,7 +480,7 @@ def main() -> int:
     for path, text in pages(load(args.source, args.env)).items():
         current = path.read_text() if path.exists() else ""
         wanted[path] = platform_version.stamp(text, current, args.platform)
-    stale = [p for p in REFERENCE.glob("activities-*.md") if p not in wanted]
+    stale = [p for p in (REFERENCE / "activities").rglob("*.md") if p not in wanted]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:
@@ -489,6 +493,7 @@ def main() -> int:
         print(f"✔  the {len(wanted)} Activity pages already match the catalog — nothing to write")
         return 0
     for p in changed:
+        p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(wanted[p])
     for p in stale:
         p.unlink()

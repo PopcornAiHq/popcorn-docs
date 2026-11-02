@@ -268,12 +268,12 @@
   trap: parses the human-readable error message, or branches on the code field
 
 - q: webhook list does not show the URL to post payloads to.
-  concept: cli-webhook
+  concept: cli/commands/webhook
   pass: pass --show-url to webhook list or webhook get; the ingest URL embeds a secret token, so it is hidden by default
   trap: says to build the URL from the webhook id, or that it cannot be read back after create
 
 - q: Which popcorn command stops every running run of a flow?
-  concept: cli-flow
+  concept: cli/commands/flow
   pass: flow runs cancel --flow <name> --channel <channel>, a cooperative cancel; --force terminates on the spot
   trap: loops over the runs cancelling one id at a time, invents a flow stop or disable command, or deletes the flow
 
@@ -283,7 +283,7 @@
   trap: invents a --page flag, or says to raise --limit until everything fits
 
 - q: Can I publish an app through the Popcorn MCP server?
-  concept: mcp, mcp-tools
+  concept: mcp, mcp/tools
   pass: no — the hosted tools cover identity, channels, search, messages and reactions; the app tools are proposed and not built, so publish with the CLI's app publish
   trap: describes app_publish, or its preview and confirm, as a tool that exists today
 
@@ -303,7 +303,7 @@
   trap: blames permissions, or an empty message history
 
 - q: What arguments does foundation.store.upsert_rows take?
-  concept: activities-foundation-store
+  concept: activities/catalog/foundation/store
   pass: conversation_id and table_name, and exactly one of rows or rows_file_key; merge_on updates a match instead of duplicating it, on_conflict is replace by default or merge to keep omitted columns, and change_kind and change_action name the write in the audit log
   trap: invents arguments such as table or records, or says rows and rows_file_key may both be given
 

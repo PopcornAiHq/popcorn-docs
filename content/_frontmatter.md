@@ -9,7 +9,7 @@ id: copying-a-template         # kebab-case, citable; never reused for another p
 title: Copying a template      # a page about one thing is a noun phrase; a task is imperative: Set up a Routine
 order: 2                       # reading position within its part
 group: Making a change        # optional: sidebar topic within the part
-parent: cli-command-reference  # optional: listed under that page in the sidebar
+parent: cli/commands         # optional: listed under that page in the sidebar
 layout: lookup                 # optional: the page's own entries index the rail
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
@@ -26,8 +26,13 @@ concepts: [versions, customizing-a-routine]   # other ids, for "see also" and se
 
 ## Field notes
 
-**`id`** is the page's handle: the last part of its URL, what MCP responses
-and `get_doc` use, and what another page's `concepts:` names. An id never
+**`id`** is the page's handle: its URL, what MCP responses and `get_doc` use,
+and what another page's `concepts:` names. It is the file's path under its
+part or kind, without `.md`, and a folder's `index.md` takes the folder's
+id: a hand-written page is one word at the root (`steps`), and a generated
+reference page nests under the pages above it (`content/reference/mcp/tools/
+get-status.md` is `mcp/tools/get-status`, and `mcp/tools/index.md` is
+`mcp/tools`). `check-content.py` fails an id that is not its path. An id never
 changes meaning and is never reused for another page. When a page is merged
 into another, its id is retired: removed everywhere it is named, in this
 repository and in the ones that link it, not redirected. Choose one as if it
