@@ -4,7 +4,7 @@ title: make_connection
 order: 335
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-03
 summary: >
   Make one of a Routine's Connections: connect an account you have signed in
   to, or make the webhook another system posts to.
@@ -37,7 +37,7 @@ For an email, calendar, files or documents (Notion) Connection, call it without 
 → make_connection(routine_id="c7d2…5b", connection="Adjuster calendar")
 
 Routine: #intake (c7d2…5b)
-- Adjuster calendar (calendar): NOT MADE
+- Adjuster calendar (calendar): NOT CONNECTED
   Without it: book inspection can't run; the rest of the Routine keeps working.
 It needs: https://www.googleapis.com/auth/calendar.events
 Your accounts that can serve it:
@@ -65,7 +65,7 @@ Routine: #intake (c7d2…5b)
 Connected adjusters@acme.example (google) as Adjuster calendar.
 - Bound: gcal
 - Started on_auth_change (workflow_id: member-run:on_auth_change)
-- Adjuster calendar (calendar): made
+- Adjuster calendar (calendar): connected
   Uses: adjusters@acme.example (google), connected by Dana Smith
   Without it: book inspection can't run; the rest of the Routine keeps working.
 ```
