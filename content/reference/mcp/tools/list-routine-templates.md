@@ -4,7 +4,7 @@ title: list_routine_templates
 order: 329
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-03
 summary: >
   List the Routine Templates a new Routine in this workspace can start from.
 concepts: [set-up-a-routine]
@@ -17,7 +17,7 @@ used_with: [mcp/tools/create-routine]
 list_routine_templates(query=None, cursor=None)
 ```
 
-Each row shows the template's name, its slug (what create_routine's `template` takes), what it does, and the connections someone sets up before it runs. A template this workspace can't run isn't listed.
+Each row shows the template's name, its slug (what create_routine's `template` takes), what it does, the connections someone sets up before it runs, and the optional ones that only the work using them needs. A template this workspace can't run isn't listed.
 
 ## Arguments
 
