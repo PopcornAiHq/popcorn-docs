@@ -420,6 +420,13 @@ _COPY_CODE = (
     '<button class="code-copy" type="button" aria-label="Copy code" hidden>'
     f'{_ICON_COPY}<span class="code-copy-done" aria-live="polite"></span></button>'
 )
+# A plain quote is a prompt, something to say to an assistant, so it is
+# copied the way code is: the same button, without the quotation marks.
+_COPY_PROMPT = _COPY_CODE.replace('"Copy code"', '"Copy prompt"')
+# A prompt opens with a `>`, the mark of a line typed to an assistant.
+_PROMPT_MARK = ('<svg class="prompt-mark" aria-hidden="true" viewBox="0 0 16 16" fill="none" '
+                'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+                '<path d="M5.5 3.5 10 8l-4.5 4.5"/></svg>')
 
 
 def code_block(code: str, lang: str = "", title: str = "") -> str:
@@ -572,7 +579,13 @@ def body(md: str, *, terms: bool = False) -> str:
                     f"{body(chr(10).join(inner[1:]))}</aside>"
                 )
                 continue
-            out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
+            # The bubble says "you say this", so it drops the quotation marks
+            # the Markdown needs to say it.
+            if inner[0].startswith('"') and inner[-1].endswith('"'):
+                inner = [inner[0][1:], *inner[1:]] if len(inner) > 1 else [inner[0][1:]]
+                inner[-1] = inner[-1][:-1]
+            out.append(f'<blockquote class="prompt">{_PROMPT_MARK}<div class="prompt-text">'
+                       f'{body(chr(10).join(inner))}</div>{_COPY_PROMPT}</blockquote>')
             continue
 
         if _ORDERED.match(line):
@@ -762,6 +775,19 @@ h2 code, h3 code, h4 code { font-size: .95em; background: none; padding: 0; }
 .code-copy-done:empty { display: none; }
 /* A touch screen has no hover to reveal the button with. */
 @media (hover: none) { .code-copy { opacity: 1; } }
+/* A prompt is a message bubble: what you'd send your assistant. Its shape,
+   warm tint and ink, and italic set it apart from the page's own voice; it has
+   no left rule, which the nav uses for the current page. A `>` opens it, and
+   its copy button sits inside, at the end. */
+blockquote.prompt { --prompt-bg: color-mix(in srgb, var(--brand) 4%, var(--card));
+  position: relative; display: flex; gap: .45rem; align-items: flex-start; width: fit-content; max-width: 100%;
+  padding: .55rem 2.9rem .55rem .7rem; border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--rule));
+  border-radius: 14px; background: var(--prompt-bg); color: color-mix(in srgb, var(--brand) 30%, var(--fg));
+  font-style: italic; }
+.prompt-mark { flex: none; width: 1rem; height: 1rem; margin-top: .28rem; color: var(--brand); }
+.prompt .code-copy { top: 50%; right: .45rem; transform: translateY(-50%);
+  background: var(--prompt-bg); border-color: transparent; font-style: normal; }
+.prompt:hover .code-copy { opacity: 1; }
 /* YAML, highlighted at build time; the classes are `highlight.py`'s. Keys
    take the link colour's hue and strings a green, so the two things a reader
    scans a block for differ in hue as well as in weight. */
@@ -1137,13 +1163,16 @@ _NAV = """
     }
   }
   // Each code block's copy button copies the block's text — the text, not
-  // its markup, so a highlighted block pastes exactly as it was written.
+  // its markup, so a highlighted block pastes exactly as it was written. A
+  // prompt's copies what to say, without the quotation marks around it.
   if (navigator.clipboard) {
     document.querySelectorAll(".code-copy").forEach(function (button) {
-      var code = button.parentNode.querySelector("code"), done = button.firstElementChild.nextElementSibling, timer;
+      var prompt = button.parentNode.querySelector(".prompt-text"), code = button.parentNode.querySelector("code"),
+          done = button.firstElementChild.nextElementSibling, timer;
       button.hidden = false;
       button.addEventListener("click", function () {
-        navigator.clipboard.writeText(code.textContent).then(function () { return "Copied"; }, function () { return "Copy failed"; })
+        var text = prompt ? prompt.innerText.trim().replace(/^["\u201c]|["\u201d]$/g, "") : code.textContent;
+        navigator.clipboard.writeText(text).then(function () { return "Copied"; }, function () { return "Copy failed"; })
           .then(function (text) {
             clearTimeout(timer);
             done.textContent = text;
