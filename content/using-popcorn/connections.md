@@ -22,8 +22,9 @@ documents in. The Routine's template says which Connections it needs.
 
 ## Finding what is missing
 
-- `list_routine_templates` and `create_routine`'s dry run list the
-  Connections a template needs, before any Routine exists.
+- `list_routine_templates` lists the Connections a template needs, before
+  any Routine exists, and `create_routine` names them again when it makes
+  one.
 - `list_routines` marks a Routine with an unconnected one as
   `[missing a connection]`.
 - `get_routine` lists every Connection the Routine needs, each as connected
