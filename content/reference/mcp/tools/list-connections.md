@@ -4,7 +4,7 @@ title: list_connections
 order: 324
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-03
 summary: >
   List the Connections a Routine needs: the accounts and other services its
   template works through.
@@ -18,7 +18,7 @@ used_with: [mcp/tools/make-connection]
 list_connections(routine)
 ```
 
-For each, whether it is made, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not made. Whether an account has since been revoked isn't checked. make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
+For each, whether it is connected, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not connected. Whether an account has since been revoked isn't checked. make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
 
 ## Arguments
 
@@ -32,13 +32,13 @@ For each, whether it is made, whose account it uses, and what stops while it is 
 → list_connections(routine="#intake")
 
 Routine: #intake (c7d2…5b)
-3 Connections, 1 not made:
-- Claims inbox (email): made
+3 Connections, 1 not connected:
+- Claims inbox (email): connected
   Uses: claims@acme.example (google), connected by Dana Smith
   Without it: Popcorn shows the Routine as not ready, and claim intake can't run.
-- Adjuster calendar (calendar): NOT MADE
+- Adjuster calendar (calendar): NOT CONNECTED
   Without it: book inspection can't run; the rest of the Routine keeps working.
-- Carrier portal (webhook): made
+- Carrier portal (webhook): connected
   Uses: webhook carrier-portal
   Without it: Popcorn shows the Routine as not ready, and nothing from the other system starts claim intake.
 Whether a connected account has since been revoked or its sign-in has expired isn't checked here.
