@@ -4,7 +4,7 @@ title: get_routine_change
 order: 314
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-03
 summary: >
   Where a change to a Routine's Steps stands: still drafting, the proposal as
   Steps before and after, refused and why, or installed.
@@ -35,14 +35,14 @@ A proposal shows the Steps that change, what it would set on each Step (saying w
 → get_routine_change(routine="#intake", change_id="wf-draft")
 
 Routine: #intake (c7d2…5b)
-Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version f21835b44da4).
+Change wf-draft: installed 2026-10-19T09:06:00+00:00 (version 3f330d97b2b0).
 Steps, before → after (- before, + after):
   3. Signature — Getting signatures (Status value: signing)
 +    - on its own: The claimant signed the standard retainer agreement and is asked to book the interview → Scheduling meeting (step 5)
 get_routine shows all 16 Steps.
 Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
-Before it: version 20a05588ee6a. To go back: change_routine with revert_to="20a05588…".
+Before it: version cb753fed723e. To go back: change_routine with revert_to="cb753fed…".
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
