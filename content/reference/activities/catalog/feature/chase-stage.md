@@ -5,7 +5,7 @@ order: 127
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
-updated: 2026-10-31
+updated: 2026-11-03
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -1114,6 +1114,7 @@ No description in the catalog.
 | `stage_from` | string |  |
 | `retire` | boolean |  |
 | `row_rev` | integer |  |
+| `row_stage` | string |  |
 | `stage_copy` | map of string |  |
 | `vocabulary` | map of string |  |
 
