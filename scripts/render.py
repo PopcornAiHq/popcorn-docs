@@ -1021,6 +1021,8 @@ blockquote p:last-child { margin-bottom: 0; }
    outlined circle at this size. */
 .callout-label .solid { fill: currentColor; }
 .callout-label .knockout { stroke: var(--bg); fill: var(--bg); }
+/* A label is set in capitals, but code in it keeps its own spelling. */
+.callout-label code { text-transform: none; letter-spacing: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
