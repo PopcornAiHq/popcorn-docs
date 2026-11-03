@@ -4,7 +4,7 @@ title: duplicate_routine
 order: 311
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-03
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup:
   its Routine Template, on the same line, its Routine Settings and agent
@@ -32,15 +32,15 @@ Nothing is copied that belongs to the work or the people: not its items, History
 | `confirm` | `bool` | true to create the Routine. Show the user the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for private and members: leave them out and the copy takes the dry run's, or send them and they must be the same. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
 
-**Example** — “Make a copy of #claims-west for the east office, called claims-east.”
+**Example** — “Make a copy of #new-clients for the east office, called new-clients-east.”
 
 ```text
-→ duplicate_routine(routine_id="0141…b3", name="claims-east")
+→ duplicate_routine(routine_id="569f…5c", name="new-clients-east")
 
 **Dry run.** Nothing was changed.
 
-Duplicate: #claims-east, a Routine in Acme, copied from #claims-west.
-- Template: Claim Coordinator (claimcoordinator), fork line "acme" at 0.15.1-acme.2, as #claims-west is.
+Duplicate: #new-clients-east, a Routine in Acme, copied from #new-clients.
+- Template: Claim Coordinator (claimcoordinator), fork line "acme" at 0.15.1-acme.2, as #new-clients is.
 - Joins fork line "acme", this workspace's own copy of the template. One-way: a Routine on its own copy of a template never goes back to Popcorn's. From then on it follows copy "acme", and new versions of that copy reach it within a day.
 - Members: everyone in the workspace (a Routine that isn't private adds every member).
 Copied:
@@ -55,13 +55,13 @@ Not copied:
 - What people told its agent, and its items, History, messages and members.
 The template installs in the background once the Routine exists, then the copy runs, typically within a few minutes; get_routine's Copied from: field shows each part as it lands.
 
-Call again with `confirm=true` to create #claims-east as a copy of #claims-west.
+Call again with `confirm=true` to create #new-clients-east as a copy of #new-clients.
 
-→ duplicate_routine(routine_id="0141…b3", name="claims-east", confirm=true)
+→ duplicate_routine(routine_id="569f…5c", name="new-clients-east", confirm=true)
 
-Created #claims-east (id: be23…ef), a Routine in Acme, copied from #claims-west.
+Created #new-clients-east (id: e75f…53), a Routine in Acme, copied from #new-clients.
 Members: everyone in the workspace (a Routine that isn't private adds every member).
-Claim Coordinator (claimcoordinator) is installing in the background, and the copy runs once it lands. Watch get_routine("be23…ef")'s Copied from: field until every part is in.
+Claim Coordinator (claimcoordinator) is installing in the background, and the copy runs once it lands. Watch get_routine("e75f…53")'s Copied from: field until every part is in.
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
 Pick again in Popcorn once Google Drive is connected: standard_retainer.
 ```
