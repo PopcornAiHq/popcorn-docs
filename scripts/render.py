@@ -659,12 +659,14 @@ _DARK = """
     color-scheme: dark;
 """
 
-# The two typefaces, by the path the build serves them at. emit.py fails the
-# build if either is missing, and check-published.py fetches them, so these
-# names are what ties the CSS to the files in `assets/fonts/`.
+# The typefaces, by the path the build serves them at. emit.py fails the
+# build if one is missing, and check-published.py fetches them, so these
+# names are what ties the CSS to the files in `assets/fonts/`. Inter's italic
+# is its own file: without it the browser slants the upright face instead.
 FONT_TEXT = "/fonts/inter-4.1-latin.woff2"
+FONT_ITALIC = "/fonts/inter-4.1-italic-latin.woff2"
 FONT_MONO = "/fonts/jetbrains-mono-2.304-latin.woff2"
-FONT_FILES = (FONT_TEXT, FONT_MONO)
+FONT_FILES = (FONT_TEXT, FONT_ITALIC, FONT_MONO)
 
 # `swap` shows the text in the fallback face at once and changes face when the
 # file arrives, rather than holding the page blank for it. The weight ranges
@@ -673,6 +675,8 @@ FONT_FILES = (FONT_TEXT, FONT_MONO)
 _CSS = """
 @font-face { font-family: "Inter"; font-style: normal; font-weight: 400 700; font-display: swap;
   src: url(""" + FONT_TEXT + """) format("woff2"); }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 400 700; font-display: swap;
+  src: url(""" + FONT_ITALIC + """) format("woff2"); }
 @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400 600; font-display: swap;
   src: url(""" + FONT_MONO + """) format("woff2"); }
 /* Off-screen until it takes focus, so it costs a sighted mouse user nothing
