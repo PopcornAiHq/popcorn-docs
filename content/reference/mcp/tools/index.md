@@ -13,8 +13,8 @@ lede: >
 concepts: [mcp]
 ---
 
-The 48 tools the hosted server offers, A to Z: 30 only read, and the
-other 18 write. A tool marked [dry run] only previews until it is
+The 49 tools the hosted server offers, A to Z: 30 only read, and the
+other 19 write. A tool marked [dry run] only previews until it is
 called again with `confirm=true`. Each tool's page has its call, its arguments
 and, for many, a worked example.
 
@@ -90,6 +90,7 @@ and, for many, a worked example.
 - **[`search_docs`](https://docs.popcorn.ai/mcp/tools/search-docs.md)** — [read-only] Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles, ids and summaries.
 - **[`search_messages`](https://docs.popcorn.ai/mcp/tools/search-messages.md)** — [read-only] Search message text across the Routines you can see, ranked by relevance (or newest first with sort="recent").
 - **[`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md)** — [writes] Post a message in a Routine, visible to its members.
+- **[`stop_run`](https://docs.popcorn.ai/mcp/tools/stop-run.md)** — [writes] [destructive] [idempotent] Stop one of a Routine's runs that's still going.
 
 ## T
 

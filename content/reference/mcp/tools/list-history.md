@@ -4,12 +4,12 @@ title: list_history
 order: 325
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   What happened to one item: each change with who or what made it and why, the
   runs that changed it and how they ended, and its email turns.
 concepts: [history]
-used_with: [mcp/tools/list-rows, mcp/tools/run-trigger]
+used_with: [mcp/tools/list-rows, mcp/tools/run-trigger, mcp/tools/take-action]
 ---
 
 [read-only]
@@ -27,7 +27,7 @@ Newest first, a page at a time. Each change shows when, who made it (a person by
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `row_id` | `int` | The item's row ID, as list_rows shows it ("row 88" is 88). |
 | `cursor` | `str` | next_cursor from the previous page, with the same other arguments. |
-| `run` | `str` | A run's reference, as run_trigger gives it, in place of row_id. |
+| `run` | `str` | A run's reference, in place of row_id: run_trigger and take_action give it, and list_history shows it beside a run still going. |
 
 **Example** — “What happened with row 88 in #intake?”
 
