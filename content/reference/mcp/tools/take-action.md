@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/take-action
 title: take_action
-order: 342
+order: 347
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Take one Action on one or more of a Routine's items, as a person pressing
   its button in Popcorn would.

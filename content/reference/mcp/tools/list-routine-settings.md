@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-routine-settings
 title: list_routine_settings
-order: 328
+order: 329
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   List the settings of a Routine's Routine Template, set or not.
 concepts: [routine-settings]

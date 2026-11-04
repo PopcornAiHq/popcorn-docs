@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/read-doc
 title: read_doc
-order: 336
+order: 338
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Read one page of the Popcorn docs by its id (search_docs gives it), or one
   section of it.

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/update-row
 title: update_row
-order: 344
+order: 349
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Change some columns of one row.
 concepts: [tables]

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/make-connection
 title: make_connection
-order: 335
+order: 336
 group: MCP
 parent: mcp/tools
-updated: 2026-11-03
+updated: 2026-11-04
 summary: >
   Make one of a Routine's Connections: connect an account you have signed in
   to, or make the webhook another system posts to.
