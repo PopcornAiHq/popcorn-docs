@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-tables
 title: list_tables
-order: 333
+order: 334
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

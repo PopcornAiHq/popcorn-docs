@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/read-doc
 title: read_doc
-order: 338
+order: 339
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

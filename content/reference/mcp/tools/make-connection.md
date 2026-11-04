@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/make-connection
 title: make_connection
-order: 336
+order: 337
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

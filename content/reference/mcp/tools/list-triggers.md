@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-triggers
 title: list_triggers
-order: 334
+order: 335
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

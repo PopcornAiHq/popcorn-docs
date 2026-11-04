@@ -13,7 +13,7 @@ lede: >
 concepts: [mcp]
 ---
 
-The 49 tools the hosted server offers, A to Z: 30 only read, and the
+The 50 tools the hosted server offers, A to Z: 31 only read, and the
 other 19 write. A tool marked [dry run] only previews until it is
 called again with `confirm=true`. Each tool's page has its call, its arguments
 and, for many, a worked example.
@@ -67,6 +67,7 @@ and, for many, a worked example.
 - **[`list_routine_templates`](https://docs.popcorn.ai/mcp/tools/list-routine-templates.md)** — [read-only] List the Routine Templates a new Routine in this workspace can start from.
 - **[`list_routines`](https://docs.popcorn.ai/mcp/tools/list-routines.md)** — [read-only] List the Routines you can see in this workspace: the ones you're in (including Routines shared in from another workspace) and the ones you can view without joining (marked [not joined]).
 - **[`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md)** — [read-only] List a table's rows, newest first unless sort says otherwise.
+- **[`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md)** — [read-only] The Routine's runs still going, newest first: the work each is doing, when it started and what started it, and its reference.
 - **[`list_tables`](https://docs.popcorn.ai/mcp/tools/list-tables.md)** — [read-only] List the tables in a Routine, with each one's row count.
 - **[`list_triggers`](https://docs.popcorn.ai/mcp/tools/list-triggers.md)** — [read-only] List how work arrives in a Routine: each schedule with its cadence, each webhook another system posts to, each message or document that starts work.
 - **[`list_workspace_members`](https://docs.popcorn.ai/mcp/tools/list-workspace-members.md)** — [read-only] List the members of this workspace, alphabetically by name.
