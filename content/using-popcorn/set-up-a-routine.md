@@ -4,21 +4,22 @@ title: Set up your first Routine
 order: 2
 group: Getting started
 summary: >
-  Setting up a new Routine from a Routine Template, such as client intake
-  from the Chase template: pick a template with list_routine_templates, create
-  the Routine with create_routine, wait for its template to
-  install, make its Connections with make_connection, add its References with
-  add_reference, check what's left with get_setup, then see what starts its
-  work with list_triggers.
+  Setting up a new Routine from the Questionnaire template: pick a template
+  with list_routine_templates, create the Routine with create_routine, wait
+  for its template to install, make its Connections with make_connection,
+  add its References with add_reference, check what's left with get_setup,
+  add a first client with create_rows, then see what starts its work with
+  list_triggers.
 lede: >
   Ask your AI assistant to set up a Routine from a template, make its
   Connections and check it's ready to run.
 concepts: [routines, connections, triggers]
 ---
 
-This guide sets up a Routine called `#new-clients` from the Chase template.
-It emails each new client a few questions and follows up until they
-answer. Each step starts with a prompt you might give your assistant.
+This guide sets up a Routine called `#new-clients` from the Questionnaire
+template. It emails each new client a few questions, records their answers
+from the replies, and follows up until they've answered. Each step starts
+with a prompt you might give your assistant.
 
 ## Pick a template
 
@@ -30,16 +31,12 @@ answer. Each step starts with a prompt you might give your assistant.
 Your assistant lists the
 [Routine Templates](https://docs.popcorn.ai/routines.md) available in your
 Workspace, describing what each one does and which
-[Connections](https://docs.popcorn.ai/connections.md) it needs. The Chase
-template needs only Gmail to get started.
-
-> [!NOTE] Optional Connections
-> Chase's other Connections, such as Google Calendar and E-signature, add
-> features you can set up later.
+[Connections](https://docs.popcorn.ai/connections.md) it needs. The
+Questionnaire template needs only Gmail.
 
 ## Create the Routine
 
-> "Create a private #new-clients Routine from the Chase template."
+> "Create a private #new-clients Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
 > Your assistant calls `create_routine`.
@@ -56,7 +53,7 @@ installing, its Members, and the Connections to set up before it runs.
 
 ## Wait for the install
 
-> "Is #new-clients ready?"
+> "Has #new-clients finished installing?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_routine` with `wait_seconds` until its
@@ -67,26 +64,32 @@ seconds. Wait for it to finish before making the Routine's Connections.
 
 ## Make its Connections
 
-> "Connect my Google account to #new-clients."
+> "What does #new-clients need connected?"
 
 > [!TIP] MCP tool call
-> Your assistant calls `list_connections`, then `make_connection`.
+> Your assistant calls `list_connections`.
 
-What happens:
+Your assistant lists the Routine's Connections and how each one is used.
+`#new-clients` has one: the Gmail its questions are sent from and its
+replies are read in.
 
-- Your assistant lists the Routine's Connections and what each one is for.
-- If you haven't signed in to Google yet, it gives you a link to do it.
-- Once you agree, it connects your Google account to Gmail.
+> "Connect my Gmail to #new-clients."
 
-A Connection signs in as you, so only your own accounts can be connected.
+> [!TIP] MCP tool call
+> Your assistant calls `make_connection`.
 
-The same account can fill Google Calendar and Google Drive too. The rest of
-the Connections are on the
-[Connections](https://docs.popcorn.ai/connections.md) page.
+If you haven't signed in to Google yet, your assistant first gives you a
+link to do it. It then lists your Google accounts that can be used for
+Gmail. Pick one and confirm, and it connects that account to the Routine.
+
+> [!NOTE] A teammate's or shared inbox
+> A Connection signs in as the person who makes it, so you can only connect
+> your own accounts. To use a teammate's inbox, they connect it themselves;
+> for a shared inbox, whoever can sign in to it does.
 
 > [!WARNING] A missing Connection stops work
-> Work that uses a missing Connection cannot run. Some hold the whole
-> Routine back, and Popcorn shows it as not ready.
+> Work that uses a missing Connection can't run. Some Connections, such as
+> Gmail here, hold back the whole Routine.
 
 ## Add its References
 
@@ -95,10 +98,12 @@ the Connections are on the
 > [!TIP] MCP tool call
 > Your assistant calls `add_reference`.
 
-A Chase Routine needs one Reference: the sample email its first
-[Step](https://docs.popcorn.ai/steps.md) takes its questions and wording
-from. Your assistant adds it from text or a file, after showing you what it
-will add. The agreement it sends for signature is optional; see
+A Questionnaire Routine needs one Reference: the questionnaire, a document
+listing the questions to ask, or a sample email with them in it. Your
+assistant adds it from text or a file, after showing you what it will add.
+Popcorn then reads the questions out of it, and the subject and opening
+line for the email if it has them. A document with no questions in it
+doesn't load, and Popcorn says no questions were found. See
 [References](https://docs.popcorn.ai/reference-documents.md).
 
 ## Check what's left
@@ -109,9 +114,32 @@ will add. The agreement it sends for signature is optional; see
 > Your assistant calls `get_setup`.
 
 Your assistant reads the Routine's setup checklist: each step done or left,
-which are required, and what each one left needs, such as a Connection or a
-value set in the Routine's Today tab. When nothing required is left, the
-Routine is ready.
+which are required, and what each one left needs. `#new-clients` has two,
+both required: connect Gmail, and add the questionnaire. When neither is
+left, the Routine is ready.
+
+## Add your first client
+
+> "Add jane@example.com to #new-clients as Jane."
+
+> [!TIP] MCP tool call
+> Your assistant calls `create_rows`.
+
+Clients are rows in the Routine's `clients`
+[Table](https://docs.popcorn.ai/tables.md): an email address and, if you
+know it, a name. Your assistant shows you the row before adding it. Adding
+an address that's already there updates that row, so a client is never
+asked twice.
+
+Adding a row doesn't email anyone by itself. The Routine's next Run does,
+within fifteen minutes, and marks the client Waiting. From then on each Run
+reads their replies, records each answer on their row, and follows up on
+the questions still open.
+
+> [!TIP] Try it on yourself first
+> Add your own address as the first client to see the email they'll get.
+> Or ask your assistant to set the Routine's send mode to drafts, and each
+> email waits in your Gmail Drafts for you to send.
 
 ## See what starts its work
 
@@ -123,12 +151,15 @@ Routine is ready.
 
 Your assistant shows how work arrives: the Routine's Schedules and when they
 run, the messages and documents that start work, and any other system that
-posts to it. To see the Routine work without waiting, ask it to run a
-Schedule now. It shows you what will run first, because the work is real.
-See [Triggers](https://docs.popcorn.ai/triggers.md).
+posts to it. `#new-clients` has one Schedule, every fifteen minutes, that
+asks new clients, reads replies and follows up.
+
+To email your first client without waiting, ask it to run that Schedule
+now. It shows you what will run first, because the work is real. See
+[Triggers](https://docs.popcorn.ai/triggers.md).
 
 ## Next
 
-To tune how the Routine behaves — when it sends reminders, how its emails
-read — see
+To tune how the Routine behaves — how long it waits before following up,
+how many follow-ups it sends — see
 [changing how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).
