@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/read-history-entry
 title: read_history_entry
-order: 339
+order: 340
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

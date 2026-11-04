@@ -4,7 +4,7 @@ title: get_instructions
 order: 312
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   A Routine's Instructions in one read: the guidance its agents work from,
   Routine-wide and for each Step, each with where it came from (the
@@ -16,10 +16,10 @@ used_with: [mcp/tools/get-routine]
 [read-only]
 
 ```
-get_instructions(routine, step=None)
+get_instructions(routine, step=None, guide=False, cursor=None)
 ```
 
-The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. On a workspace that guards personal data, what people told the agent shows each memory's category and date, not its text.
+The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. On a workspace that guards personal data, what people told the agent shows each memory's category and date, not its text. With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
 
 ## Arguments
 
@@ -27,6 +27,8 @@ The layers: the Routine's guidance per agent, its prompt files, its agent notes,
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `step` | `str` | One Step, by its label or its Status value, as get_routine lists the Steps. Omit for the whole Routine. |
+| `guide` | `bool` | true for the text of this Routine's AGENT.md. Default `False`. |
+| `cursor` | `str` | next_cursor from the previous range of AGENT.md, with guide=true. |
 
 **Example** — “What instructions is #intake's agent following?”
 
@@ -82,7 +84,7 @@ get_instructions(routine="#intake", step="<Status value>") shows one Step's in f
 
 ## The template's guide
 Changed by: a member of the Routine, in Popcorn. A template update keeps a change made to this Routine's copy.
-- AGENT.md (the template's): 1,475 characters, first heading "Claims intake agent". How the Routine's agent talks and what it knows about the template. Popcorn shows its text.
+- AGENT.md (the template's): 1,475 characters, first heading "Claims intake agent". How the Routine's agent talks and what it knows about the template. get_instructions with guide=true reads its text.
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool

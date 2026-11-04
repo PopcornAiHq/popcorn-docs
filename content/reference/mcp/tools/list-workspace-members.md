@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-workspace-members
 title: list_workspace_members
-order: 335
+order: 336
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

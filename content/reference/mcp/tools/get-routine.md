@@ -4,7 +4,7 @@ title: get_routine
 order: 313
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Show one Routine: its details, your membership, and its Routine Template,
   with the version it's on, the latest version, where its updates come from
@@ -54,7 +54,7 @@ Connections:
 - Claims inbox (email): connected: claims@acme.example (google)
 - Adjuster calendar (calendar): NOT CONNECTED; work that uses it can't run
 - Carrier portal (webhook): connected: carrier-portal
-Whether a connected account has since been revoked or its sign-in has expired isn't checked here. A Routine member connects these in the Routine's settings in Popcorn.
+Whether a connected account has since been revoked or its sign-in has expired isn't checked here. A Routine member connects these with make_connection, or in the Routine's settings in Popcorn.
 list_connections says whose account each one uses and what stops without it.
 ```
 

@@ -1,14 +1,14 @@
 ---
 id: mcp/tools/stop-run
 title: stop_run
-order: 347
+order: 348
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
 summary: >
   Stop one of a Routine's runs that's still going.
 concepts: [history]
-used_with: [mcp/tools/run-trigger, mcp/tools/take-action, mcp/tools/list-history]
+used_with: [mcp/tools/run-trigger, mcp/tools/take-action, mcp/tools/list-runs, mcp/tools/list-history]
 ---
 
 [writes] [destructive] [idempotent]
@@ -24,7 +24,7 @@ The run stops at its next step, so a step already under way finishes, and what t
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `run` [required] | `str` | The run's reference: run_trigger and take_action give it for the run they start, and list_history shows it beside a run still going. |
+| `run` [required] | `str` | The run's reference: run_trigger and take_action give it for the run they start, and list_runs and list_history show it beside a run still going. |
 
 **Example** — “Stop the claim tick I just started in #intake.”
 

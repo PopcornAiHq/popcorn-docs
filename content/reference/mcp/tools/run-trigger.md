@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/run-trigger
 title: run_trigger
-order: 343
+order: 344
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
