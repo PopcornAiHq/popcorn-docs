@@ -128,6 +128,17 @@ def _href(url: str) -> str:
     return path + (page.group("frag") or "")
 
 
+def _target(href: str) -> str:
+    """Attributes that open a link off this site in a new tab.
+
+    A reader following a link to another site, such as an assistant's help
+    page, is usually mid-way through a guide here and coming back to it.
+    `noopener` keeps the new tab from reaching back into this one.
+    """
+    external = href.startswith(("http://", "https://")) and not href.startswith(SITE)
+    return ' target="_blank" rel="noopener"' if external else ""
+
+
 def inline(text: str) -> str:
     """Escape, then apply the three inline marks. Code wins over the others."""
     out = html.escape(text, quote=False)
@@ -142,10 +153,11 @@ def inline(text: str) -> str:
 
     out = _CODE.sub(stash, out)
     out = _BADGE.sub(lambda m: f'<span class="badge {_BADGES[m.group(1)]}">{m.group(1)}</span>', out)
-    out = _LINK.sub(
-        lambda m: f'<a href="{_href(m.group(2)).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
-        out,
-    )
+    def link(match: re.Match) -> str:
+        href = _href(match.group(2))
+        return f'<a href="{href.replace(chr(34), "&quot;")}"{_target(href)}>{match.group(1)}</a>'
+
+    out = _LINK.sub(link, out)
     out = _BOLD.sub(r"<strong>\1</strong>", out)
     out = _ITALIC.sub(r"<em>\1</em>", out)
     for i, span in enumerate(spans):
@@ -1598,7 +1610,7 @@ def document(
 </main>
 <aside class="rail">{rail}</aside>
 <footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{"" if own_date else last_updated()}</span>
-<span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
+<span><a href="https://www.popcorn.ai/"{_target("https://www.popcorn.ai/")}>popcorn.ai</a><a href="{SOURCE}"{_target(SOURCE)}>Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}
 <script>{_THEME_TOGGLE}{_NAV}{_SEARCH}</script>
