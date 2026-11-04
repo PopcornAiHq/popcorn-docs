@@ -71,7 +71,7 @@ the Connections someone has to set up; the walkthrough is
 
 ## Copying one
 
-> "Make a copy of #new-clients for the east office, called new-clients-east."
+> "Make a copy of #team-offsite for the spring offsite, called spring-offsite."
 
 `duplicate_routine` makes a new Routine that starts as a copy of an existing
 one. It is a dry run first, and the dry run lists both what it copies and

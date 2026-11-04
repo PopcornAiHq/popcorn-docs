@@ -8,7 +8,7 @@ summary: >
   with list_routine_templates, create the Routine with create_routine, wait
   for its template to install, make its Connections with make_connection,
   add its References with add_reference, check what's left with get_setup,
-  add a first client with create_rows, then see what starts its work with
+  add a first recipient with create_rows, then see what starts its work with
   list_triggers.
 lede: >
   Ask your AI assistant to set up a Routine from a template, make its
@@ -16,10 +16,12 @@ lede: >
 concepts: [routines, connections, triggers]
 ---
 
-This guide sets up a Routine called `#new-clients` from the Questionnaire
-template. It emails each new client a few questions, records their answers
-from the replies, and follows up until they've answered. Each step starts
-with a prompt you might give your assistant.
+This guide sets up a Routine called `#team-offsite` from the Questionnaire
+template, to ask everyone coming to a team offsite a few questions before
+it: dietary needs, travel dates and the sessions they want. It emails each
+person the questions, records their answers from the replies, and follows
+up until they've answered. Each step starts with a prompt you might give
+your assistant.
 
 ## Pick a template
 
@@ -36,7 +38,7 @@ Questionnaire template needs only Gmail.
 
 ## Create the Routine
 
-> "Create a private #new-clients Routine from the Questionnaire template."
+> "Create a private #team-offsite Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
 > Your assistant calls `create_routine`.
@@ -53,7 +55,7 @@ installing, its Members, and the Connections to set up before it runs.
 
 ## Wait for the install
 
-> "Has #new-clients finished installing?"
+> "Has #team-offsite finished installing?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_routine` with `wait_seconds` until its
@@ -64,16 +66,16 @@ seconds. Wait for it to finish before making the Routine's Connections.
 
 ## Make its Connections
 
-> "What does #new-clients need connected?"
+> "What does #team-offsite need connected?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_connections`.
 
 Your assistant lists the Routine's Connections and how each one is used.
-`#new-clients` has one: the Gmail its questions are sent from and its
+`#team-offsite` has one: the Gmail its questions are sent from and its
 replies are read in.
 
-> "Connect my Gmail to #new-clients."
+> "Connect my Gmail to #team-offsite."
 
 > [!TIP] MCP tool call
 > Your assistant calls `make_connection`.
@@ -93,7 +95,7 @@ Gmail. Pick one and confirm, and it connects that account to the Routine.
 
 ## Add its References
 
-> "Add our intake questions to #new-clients."
+> "Add our offsite questions to #team-offsite."
 
 > [!TIP] MCP tool call
 > Your assistant calls `add_reference`.
@@ -108,42 +110,42 @@ doesn't load, and Popcorn says no questions were found. See
 
 ## Check what's left
 
-> "What's left to set up on #new-clients?"
+> "What's left to set up on #team-offsite?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_setup`.
 
 Your assistant reads the Routine's setup checklist: each step done or left,
-which are required, and what each one left needs. `#new-clients` has two,
+which are required, and what each one left needs. `#team-offsite` has two,
 both required: connect Gmail, and add the questionnaire. When neither is
 left, the Routine is ready.
 
-## Add your first client
+## Add your first attendee
 
-> "Add jane@example.com to #new-clients as Jane."
+> "Add jane@example.com to #team-offsite as Jane."
 
 > [!TIP] MCP tool call
 > Your assistant calls `create_rows`.
 
-Clients are rows in the Routine's `clients`
+Each person to ask is a row in the Routine's `recipients`
 [Table](https://docs.popcorn.ai/tables.md): an email address and, if you
 know it, a name. Your assistant shows you the row before adding it. Adding
-an address that's already there updates that row, so a client is never
-asked twice.
+an address that's already there updates that row, so nobody is asked
+twice. To add everyone at once, give your assistant the whole list.
 
 Adding a row doesn't email anyone by itself. The Routine's next Run does,
-within fifteen minutes, and marks the client Waiting. From then on each Run
+within fifteen minutes, and marks them Waiting. From then on each Run
 reads their replies, records each answer on their row, and follows up on
 the questions still open.
 
 > [!TIP] Try it on yourself first
-> Add your own address as the first client to see the email they'll get.
+> Add your own address first to see the email everyone will get.
 > Or ask your assistant to set the Routine's send mode to drafts, and each
 > email waits in your Gmail Drafts for you to send.
 
 ## See what starts its work
 
-> "What sets #new-clients working?"
+> "What sets #team-offsite working?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_triggers`, and `run_trigger` to run a Schedule
@@ -151,10 +153,10 @@ the questions still open.
 
 Your assistant shows how work arrives: the Routine's Schedules and when they
 run, the messages and documents that start work, and any other system that
-posts to it. `#new-clients` has one Schedule, every fifteen minutes, that
-asks new clients, reads replies and follows up.
+posts to it. `#team-offsite` has one Schedule, every fifteen minutes, that
+asks new recipients, reads replies and follows up.
 
-To email your first client without waiting, ask it to run that Schedule
+To email Jane without waiting, ask it to run that Schedule
 now. It shows you what will run first, because the work is real. See
 [Triggers](https://docs.popcorn.ai/triggers.md).
 
