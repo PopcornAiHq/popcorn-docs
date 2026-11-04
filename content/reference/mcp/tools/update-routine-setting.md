@@ -27,8 +27,8 @@ Without confirm=true this is a dry run that changes nothing: it shows the old an
 | `key` [required] | `str` | The setting's key, as list_routine_settings shows it. |
 | `value` | `Any` | The whole new value: text, a number, a list, a mapping, or null. Omit it to pass changes instead. Default `OMITTED`. |
 | `changes` | `list[Op]` | Text ops on the current text, instead of value. |
-| `confirm` | `bool` | true to change it. Show the user the dry run first. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of value and changes. |
+| `confirm` | `bool` | true to change it: at once when the person asked for this change, otherwise after they agree to the dry run. A new value whose option carries a warning (drafts to sending) is confirmed only with its dry run's plan_id. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of value and changes. Required for a warned value. |
 
 **Example** — “Stop chasing after five follow-ups on #chase-renewals.”
 

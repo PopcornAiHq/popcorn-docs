@@ -4,13 +4,13 @@ title: duplicate_routine
 order: 311
 group: MCP
 parent: mcp/tools
-updated: 2026-11-03
+updated: 2026-11-04
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup:
   its Routine Template, on the same line, its Routine Settings and agent
   notes, its own Steps, its guidelines, and the References it has added.
 concepts: [set-up-a-routine]
-used_with: [mcp/tools/get-routine]
+used_with: [mcp/tools/get-routine, mcp/tools/create-routine]
 ---
 
 [writes] [dry run]
@@ -29,7 +29,7 @@ Nothing is copied that belongs to the work or the people: not its items, History
 | `name` [required] | `str` | The new Routine's name, e.g. "claims-east". Spaces become hyphens; the response shows the name it got. |
 | `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. The original's members aren't copied. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
-| `confirm` | `bool` | true to create the Routine. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to create the Routine: at once when the person asked to duplicate this Routine, as create_routine creates, otherwise after they agree to the dry run. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for private and members: leave them out and the copy takes the dry run's, or send them and they must be the same. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Make a copy of #new-clients for the east office, called new-clients-east.”

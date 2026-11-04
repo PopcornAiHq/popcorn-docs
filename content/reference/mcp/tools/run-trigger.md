@@ -26,7 +26,7 @@ Its schedule is unchanged: the next scheduled run still happens. The run does wh
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `trigger` [required] | `str` | The schedule's name, as list_triggers shows it. |
-| `confirm` | `bool` | true to start the run. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to start the run: at once when the person asked to run this schedule now, otherwise after they agree to the dry run. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Send #intake's morning digest now; don't wait.”

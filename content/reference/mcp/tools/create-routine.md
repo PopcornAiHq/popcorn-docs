@@ -4,14 +4,14 @@ title: create_routine
 order: 306
 group: MCP
 parent: mcp/tools
-updated: 2026-11-03
+updated: 2026-11-04
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
 concepts: [set-up-a-routine]
 used_with: [mcp/tools/get-routine, mcp/tools/list-routine-templates]
 ---
 
-[writes] [dry run]
+[writes]
 
 ```
 create_routine(name, template=None, private=None, members=None, confirm=False, plan_id=None)
