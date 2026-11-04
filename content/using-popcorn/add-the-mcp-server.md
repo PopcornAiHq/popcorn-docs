@@ -56,7 +56,7 @@ Ask your assistant:
 
 It should name the Workspace you chose.
 
-> [!TIP] Where to look
+> [!TIP] MCP tool call
 > Most assistants show the tool calls they make, sometimes inside their
 > reasoning or a details view. Look for Popcorn's `get_workspace`.
 

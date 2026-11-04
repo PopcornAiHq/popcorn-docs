@@ -367,7 +367,7 @@
   pass: the template declares state machines; each Action is the button on a staff edge, offered when the edge is legal from where the item stands
   trap: says Actions are configured separately from Status
 
-- q: Is #claims-west on the latest version of its template, and is it finished installing?
+- q: Is #new-clients on the latest version of its template, and is it finished installing?
   concept: routines
   pass: get_routine shows Version (and whether it is the latest), Install (whether the latest install landed) and Updates from; wait_seconds waits up to 20 for an install in progress
   trap: says there is no way to tell, or reads the template list instead of the Routine

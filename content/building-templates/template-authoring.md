@@ -190,7 +190,7 @@ dry run was based on names the Copy's first Version. Confirm with the
 Copying a template, a new Version, an Install onto another Copy and a
 change to a setting are each a dry run until called again with
 `confirm=true`. An `install_routine` with no `copy` on a Routine behind its
-Copy, and `create_routine` with no template, start at once; and
+Copy, and `create_routine`, start at once; and
 `change_routine` with a `request` starts drafting at once, though it
 installs nothing until confirmed. `create_routine_version` takes changes, not a tree: each one
 creates, deletes, renames or edits one file with text ops, and an edit

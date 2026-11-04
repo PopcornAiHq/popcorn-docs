@@ -92,7 +92,18 @@ information to risk:
 Pick the mildest kind that is true: a Caution on something harmless teaches
 readers to skip the ones that aren't. Text after the marker is the label
 instead of the kind's name (`> [!NOTE] One Workspace at a time`); keep it
-to a few words. A plain `>` quote stays what it is everywhere else:
+to a few words.
+
+The MCP tools behind a step go in a Tip labelled "MCP tool call", right
+under the step's prompt, so the prose can say what the assistant does
+instead of naming them:
+
+```
+> [!TIP] MCP tool call
+> Your assistant calls `list_connections`, then `make_connection`.
+```
+
+A plain `>` quote stays what it is everywhere else:
 something a person says to their assistant. Anything a reader must do is a
 step, never a callout.
 

@@ -1,105 +1,167 @@
 ---
 id: set-up-a-routine
-title: Set up a Routine
+title: Set up your first Routine
 order: 2
 group: Getting started
 summary: >
-  Setting up a Routine from a Routine Template: pick a template with
-  list_routine_templates, create the Routine with create_routine (a dry run
-  first), wait for its template to install, have the right person connect each
-  account it needs, then check what starts its work with list_triggers.
+  Setting up a new Routine from the Questionnaire template: pick a template
+  with list_routine_templates, create the Routine with create_routine and
+  wait for its template to install, make its Connections with make_connection,
+  add its References with add_reference, check what's left with get_setup,
+  add a first recipient with create_rows, then find what starts its work with
+  list_triggers.
 lede: >
-  Set up a new Routine from a Routine Template and connect the accounts it
-  needs, so it is ready to start work.
+  Ask your AI assistant to set up a Routine from a template, make its
+  Connections and check it's ready to run.
 concepts: [routines, connections, triggers]
 ---
 
-This guide starts from "we need a Routine for this" and ends with a Routine
-whose Connections are made and whose work is ready to start. Every step is
-something a person can ask their assistant for, and the assistant does it
-through the Popcorn MCP server; one step needs the person themselves.
+This guide walks you through setting up a Routine called `#team-offsite`,
+created from the Questionnaire template. The Routine emails each team member
+a few questions about the offsite, such as their dietary needs, travel dates
+and which sessions they'd like to attend. It records their answers and
+follows up with anyone who hasn't answered them all.
 
-The example sets up a private Routine for western-region claims, called
-`#claims-west`, from the Chase template, whose
-[Steps](https://docs.popcorn.ai/steps.md) start as a claims intake: questions, a
-Review, then the retainer.
-
-## Or describe it in Popcorn
-
-A person can also start a Routine in Popcorn without picking a template.
-**New routine** takes a sentence such as "ask new clients a few questions,
-then send them a retainer", or an example to start from, and the new
-Routine's Agent drafts its Steps from it for the person to check. Popcorn can
-also suggest Routines from a connected inbox, from the work it finds waiting
-there. Both start from the same template as this guide, so the rest of it
-applies once the Routine exists.
+Each step below starts with a prompt you might give your assistant.
 
 ## Pick a template
 
-> "What templates could a new Routine here start from?"
+> "Which templates can I start a Routine from?"
 
-`list_routine_templates` lists the Routine Templates this Workspace can
-start from: each one's name, its slug, what it does, and the Connections it
-needs before it runs. A template the Workspace cannot run is not listed. Note
-the slug — `chase` here — and the Connections (Gmail, Google Drive, Google
-Calendar and an intake address), because someone has to make them under "Make its Connections".
+> [!TIP] MCP tool call
+> Your assistant calls `list_routine_templates`.
+
+Your assistant lists the
+[Routine Templates](https://docs.popcorn.ai/routines.md) available in your
+Workspace, describing what each one does and which
+[Connections](https://docs.popcorn.ai/connections.md) it needs. The
+Questionnaire template needs only Gmail.
 
 ## Create the Routine
 
-> "Set up a private #claims-west Routine from the Chase template, with
-> Jordan in it."
+> "Create a private #team-offsite Routine from the Questionnaire template."
 
-`create_routine` with a `template` is a dry run first. It names the
-Version that will install, the Members, and the Connections someone sets up
-before the Routine runs, and changes nothing. Read it back to the person, then
-call again with `confirm=true`.
+> [!TIP] MCP tool call
+> Your assistant calls `create_routine`, then `get_routine` until its
+> **Install** field says `installed`.
+
+In your request:
 
 - **Private or open.** A private Routine is joined only by you and the
-  people you name; one that is not private adds everyone in the Workspace.
+  people you name, whereas an open one adds everyone in the Workspace.
 - **The name.** Spaces become hyphens, and a name already used in the
-  Workspace is refused with the ID of the Routine that has it.
+  Workspace is refused.
 
-The response gives the new Routine's ID. Use the ID, not the name, in every
-call that changes it.
-
-## Wait for the template to install
-
-The template installs in the background once the Routine exists, usually in
-seconds. `get_routine` with `wait_seconds` (up to 20) waits for it:
-
-> "Is #claims-west ready?"
-
-Its **Install** field says `installed` when the template has landed. Until
-then the Routine exists but has nothing to run.
+Your assistant creates the Routine and tells you the Version that's
+installing, its Members, and the Connections to set up before it runs.
+Popcorn installs the template in the background, and your assistant waits
+for it to finish, usually within a few seconds.
 
 ## Make its Connections
 
-`get_routine` lists each Connection the Routine needs, as connected or
-**NOT CONNECTED**. A Connection signs in as a person, so the assistant cannot
-make one: the person who owns the account connects it in the Routine's
-settings in Popcorn, in a browser. Tell them which ones, and why — work that
-uses a missing Connection cannot run.
+> "What does #team-offsite need connected?"
 
-When they are done, `get_routine` again: every Connection should read
-connected. See [Connections](https://docs.popcorn.ai/connections.md).
+> [!TIP] MCP tool call
+> Your assistant calls `list_connections`.
+
+Your assistant lists the Routine's Connections and what each one does.
+`#team-offsite` needs just one, your Gmail, which sends the questions and
+reads the replies.
+
+> "Connect my Gmail to #team-offsite."
+
+> [!TIP] MCP tool call
+> Your assistant calls `make_connection`.
+
+If you haven't signed in to Google yet, your assistant first gives you a
+link to do it. Then, if you have one Google account that can be used for
+Gmail, it connects that account straight away and tells you which one; if
+you have several, it asks which to use.
+
+> [!NOTE] A teammate's or shared inbox
+> A Connection signs in as the person who makes it, so you can only connect
+> your own accounts. To use a teammate's inbox, they connect it themselves;
+> for a shared inbox, whoever can sign in to it does.
+
+> [!WARNING] A missing Connection stops work
+> Work that uses a missing Connection can't run. Some Connections, such as
+> Gmail here, hold back the whole Routine.
+
+## Add its References
+
+> "Add these offsite questions to #team-offsite:
+>
+> Subject: A few questions for the offsite
+>
+> 1. Do you have any dietary needs?
+> 2. Which day are you arriving, and how are you travelling?
+> 3. Which sessions would you like to attend?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `add_reference`, passing the questions as its
+> `text`.
+
+The Questionnaire Routine needs one
+[Reference](https://docs.popcorn.ai/reference-documents.md), the
+questionnaire itself: a subject line for its emails and the questions to ask.
+
+> [!NOTE] From a file
+> Some assistants, such as Claude Code, can add the questionnaire from a
+> text file instead of pasting it.
+
+## Check what's left
+
+> "What's left to set up on #team-offsite?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `get_setup`.
+
+Your assistant reads the Routine's setup checklist and tells you what's left
+to do. `#team-offsite` has two required steps, connecting Gmail and adding
+the questionnaire, and you've just done both. The Routine is ready.
+
+## Add your first attendee
+
+> "Add jane@example.com to #team-offsite as Jane."
+
+> [!TIP] MCP tool call
+> Your assistant calls `create_rows`.
+
+Each person to ask is a row in the Routine's `recipients`
+[Table](https://docs.popcorn.ai/tables.md): an email address and, if you
+know it, a name. Your assistant shows you the row before adding it. Adding
+an address that's already there updates that row, so nobody is asked
+twice. To add everyone at once, give your assistant the whole list.
+
+Adding a row doesn't email anyone by itself. The Routine's next Run does,
+within fifteen minutes, and marks them Waiting. From then on each Run
+reads their replies, records each answer on their row, and follows up on
+the questions still open.
+
+> [!TIP] Try it on yourself first
+> Add your own address first to see the email everyone will get.
+> Or ask your assistant to set the Routine's send mode to drafts, and each
+> email waits in your Gmail Drafts for you to send.
 
 ## See what starts its work
 
-> "What sets #claims-west working?"
+> "What sets #team-offsite working?"
 
-`list_triggers` shows how work arrives: its Schedules with their cadence,
-the messages and documents that start work, and any other system that posts to
-it. A Chase Routine needs its sample email before its first Step can ask
-anything, and its agreement before it can send one; adding them is a
-person's step in Popcorn (see
-[References](https://docs.popcorn.ai/reference-documents.md)).
+> [!TIP] MCP tool call
+> Your assistant calls `list_triggers`, and `run_trigger` to run a Schedule
+> now.
 
-To see the Routine work without waiting, `run_trigger` runs one of its
-Schedules now — a dry run first, because the work is real. See
+Your assistant shows how work arrives: the Routine's Schedules and when they
+run, the messages and documents that start work, and any other system that
+posts to it. `#team-offsite` has one Schedule, every fifteen minutes, that
+asks new recipients, reads replies and follows up.
+
+To email Jane without waiting, ask it to run that Schedule
+now. It shows you what will run first, because the work is real. See
 [Triggers](https://docs.popcorn.ai/triggers.md).
 
 ## Next
 
-To tune how the Routine behaves — when it sends reminders, how its emails
-read — see
+To tune how the Routine behaves — how long it waits before following up,
+how many follow-ups it sends — see
 [changing how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).

@@ -128,6 +128,17 @@ def _href(url: str) -> str:
     return path + (page.group("frag") or "")
 
 
+def _target(href: str) -> str:
+    """Attributes that open a link off this site in a new tab.
+
+    A reader following a link to another site, such as an assistant's help
+    page, is usually mid-way through a guide here and coming back to it.
+    `noopener` keeps the new tab from reaching back into this one.
+    """
+    external = href.startswith(("http://", "https://")) and not href.startswith(SITE)
+    return ' target="_blank" rel="noopener"' if external else ""
+
+
 def inline(text: str) -> str:
     """Escape, then apply the three inline marks. Code wins over the others."""
     out = html.escape(text, quote=False)
@@ -142,10 +153,11 @@ def inline(text: str) -> str:
 
     out = _CODE.sub(stash, out)
     out = _BADGE.sub(lambda m: f'<span class="badge {_BADGES[m.group(1)]}">{m.group(1)}</span>', out)
-    out = _LINK.sub(
-        lambda m: f'<a href="{_href(m.group(2)).replace(chr(34), "&quot;")}">{m.group(1)}</a>',
-        out,
-    )
+    def link(match: re.Match) -> str:
+        href = _href(match.group(2))
+        return f'<a href="{href.replace(chr(34), "&quot;")}"{_target(href)}>{match.group(1)}</a>'
+
+    out = _LINK.sub(link, out)
     out = _BOLD.sub(r"<strong>\1</strong>", out)
     out = _ITALIC.sub(r"<em>\1</em>", out)
     for i, span in enumerate(spans):
@@ -420,6 +432,13 @@ _COPY_CODE = (
     '<button class="code-copy" type="button" aria-label="Copy code" hidden>'
     f'{_ICON_COPY}<span class="code-copy-done" aria-live="polite"></span></button>'
 )
+# A plain quote is a prompt, something to say to an assistant, so it is
+# copied the way code is: the same button, without the quotation marks.
+_COPY_PROMPT = _COPY_CODE.replace('"Copy code"', '"Copy prompt"')
+# A prompt opens with a `>`, the mark of a line typed to an assistant.
+_PROMPT_MARK = ('<svg class="prompt-mark" aria-hidden="true" viewBox="0 0 16 16" fill="none" '
+                'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+                '<path d="M5.5 3.5 10 8l-4.5 4.5"/></svg>')
 
 
 def code_block(code: str, lang: str = "", title: str = "") -> str:
@@ -572,7 +591,13 @@ def body(md: str, *, terms: bool = False) -> str:
                     f"{body(chr(10).join(inner[1:]))}</aside>"
                 )
                 continue
-            out.append(f"<blockquote>{body(chr(10).join(inner))}</blockquote>")
+            # The bubble says "you say this", so it drops the quotation marks
+            # the Markdown needs to say it.
+            if inner[0].startswith('"') and inner[-1].endswith('"'):
+                inner = [inner[0][1:], *inner[1:]] if len(inner) > 1 else [inner[0][1:]]
+                inner[-1] = inner[-1][:-1]
+            out.append(f'<blockquote class="prompt">{_PROMPT_MARK}<div class="prompt-text">'
+                       f'{body(chr(10).join(inner))}</div>{_COPY_PROMPT}</blockquote>')
             continue
 
         if _ORDERED.match(line):
@@ -659,12 +684,14 @@ _DARK = """
     color-scheme: dark;
 """
 
-# The two typefaces, by the path the build serves them at. emit.py fails the
-# build if either is missing, and check-published.py fetches them, so these
-# names are what ties the CSS to the files in `assets/fonts/`.
+# The typefaces, by the path the build serves them at. emit.py fails the
+# build if one is missing, and check-published.py fetches them, so these
+# names are what ties the CSS to the files in `assets/fonts/`. Inter's italic
+# is its own file: without it the browser slants the upright face instead.
 FONT_TEXT = "/fonts/inter-4.1-latin.woff2"
+FONT_ITALIC = "/fonts/inter-4.1-italic-latin.woff2"
 FONT_MONO = "/fonts/jetbrains-mono-2.304-latin.woff2"
-FONT_FILES = (FONT_TEXT, FONT_MONO)
+FONT_FILES = (FONT_TEXT, FONT_ITALIC, FONT_MONO)
 
 # `swap` shows the text in the fallback face at once and changes face when the
 # file arrives, rather than holding the page blank for it. The weight ranges
@@ -673,6 +700,8 @@ FONT_FILES = (FONT_TEXT, FONT_MONO)
 _CSS = """
 @font-face { font-family: "Inter"; font-style: normal; font-weight: 400 700; font-display: swap;
   src: url(""" + FONT_TEXT + """) format("woff2"); }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 400 700; font-display: swap;
+  src: url(""" + FONT_ITALIC + """) format("woff2"); }
 @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400 600; font-display: swap;
   src: url(""" + FONT_MONO + """) format("woff2"); }
 /* Off-screen until it takes focus, so it costs a sighted mouse user nothing
@@ -758,6 +787,19 @@ h2 code, h3 code, h4 code { font-size: .95em; background: none; padding: 0; }
 .code-copy-done:empty { display: none; }
 /* A touch screen has no hover to reveal the button with. */
 @media (hover: none) { .code-copy { opacity: 1; } }
+/* A prompt is a message bubble: what you'd send your assistant. Its shape,
+   warm tint and ink, and italic set it apart from the page's own voice; it has
+   no left rule, which the nav uses for the current page. A `>` opens it, and
+   its copy button sits inside, at the end. */
+blockquote.prompt { --prompt-bg: color-mix(in srgb, var(--brand) 4%, var(--card));
+  position: relative; display: flex; gap: .45rem; align-items: flex-start; width: fit-content; max-width: 100%;
+  padding: .55rem 2.9rem .55rem .7rem; border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--rule));
+  border-radius: 14px; background: var(--prompt-bg); color: color-mix(in srgb, var(--brand) 30%, var(--fg));
+  font-style: italic; }
+.prompt-mark { flex: none; width: 1rem; height: 1rem; margin-top: .28rem; color: var(--brand); }
+.prompt .code-copy { top: 50%; right: .45rem; transform: translateY(-50%);
+  background: var(--prompt-bg); border-color: transparent; font-style: normal; }
+.prompt:hover .code-copy { opacity: 1; }
 /* YAML, highlighted at build time; the classes are `highlight.py`'s. Keys
    take the link colour's hue and strings a green, so the two things a reader
    scans a block for differ in hue as well as in weight. */
@@ -1021,6 +1063,8 @@ blockquote p:last-child { margin-bottom: 0; }
    outlined circle at this size. */
 .callout-label .solid { fill: currentColor; }
 .callout-label .knockout { stroke: var(--bg); fill: var(--bg); }
+/* A label is set in capitals, but code in it keeps its own spelling. */
+.callout-label code { text-transform: none; letter-spacing: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Too narrow for the rail: its contents list goes, and the related pages
@@ -1131,13 +1175,16 @@ _NAV = """
     }
   }
   // Each code block's copy button copies the block's text — the text, not
-  // its markup, so a highlighted block pastes exactly as it was written.
+  // its markup, so a highlighted block pastes exactly as it was written. A
+  // prompt's copies what to say, without the quotation marks around it.
   if (navigator.clipboard) {
     document.querySelectorAll(".code-copy").forEach(function (button) {
-      var code = button.parentNode.querySelector("code"), done = button.firstElementChild.nextElementSibling, timer;
+      var prompt = button.parentNode.querySelector(".prompt-text"), code = button.parentNode.querySelector("code"),
+          done = button.firstElementChild.nextElementSibling, timer;
       button.hidden = false;
       button.addEventListener("click", function () {
-        navigator.clipboard.writeText(code.textContent).then(function () { return "Copied"; }, function () { return "Copy failed"; })
+        var text = prompt ? prompt.innerText.trim().replace(/^["\u201c]|["\u201d]$/g, "") : code.textContent;
+        navigator.clipboard.writeText(text).then(function () { return "Copied"; }, function () { return "Copy failed"; })
           .then(function (text) {
             clearTimeout(timer);
             done.textContent = text;
@@ -1563,7 +1610,7 @@ def document(
 </main>
 <aside class="rail">{rail}</aside>
 <footer class="site-footer"><span class="site-meta"><span>\u00a9 2026 A Dream Inc. | All rights reserved.</span>{"" if own_date else last_updated()}</span>
-<span><a href="https://www.popcorn.ai/">popcorn.ai</a><a href="{SOURCE}">Source on GitHub</a></span></footer>
+<span><a href="https://www.popcorn.ai/"{_target("https://www.popcorn.ai/")}>popcorn.ai</a><a href="{SOURCE}"{_target(SOURCE)}>Source on GitHub</a></span></footer>
 </div>
 {_SEARCH_DIALOG}
 <script>{_THEME_TOGGLE}{_NAV}{_SEARCH}</script>

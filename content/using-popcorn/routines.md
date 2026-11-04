@@ -64,18 +64,18 @@ answering, which is how an assistant follows a new Routine until it is ready.
 
 `list_routine_templates` lists the templates this Workspace can start a
 Routine from, each with what it does and the Connections it needs.
-`create_routine` makes the Routine, private or open to the whole Workspace.
-From a template it is a dry run first, showing the Version that will install
-and the Connections someone has to set up; the walkthrough is
+`create_routine` makes the Routine at once, private or open to the whole
+Workspace. From a template, its answer names the Version that installs and
+the Connections someone has to set up; the walkthrough is
 [setting up a Routine](https://docs.popcorn.ai/set-up-a-routine.md).
 
 ## Copying one
 
-> "Make a copy of #claims-west for the east office, called claims-east."
+> "Make a copy of #team-offsite for the spring offsite, called spring-offsite."
 
 `duplicate_routine` makes a new Routine that starts as a copy of an existing
-one. Like `create_routine` it is a dry run first, and the dry run lists both
-what it copies and what it leaves out:
+one. It is a dry run first, and the dry run lists both what it copies and
+what it leaves out:
 
 | Copied | Not copied |
 |---|---|

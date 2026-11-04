@@ -16,19 +16,19 @@ lede: >
 concepts: [routine-settings, customizing-a-routine, instructions]
 ---
 
-This guide starts from a request such as "remind people every three days
-instead of every week" and ends with one Routine behaving the new way, and
+This guide starts from a request such as "follow up every day instead of
+every three days" and ends with one Routine behaving the new way, and
 every other Routine made from the same template unchanged.
 
 ## Say what should change
 
-Start from the outcome, in the person's words: *chase five times at most*,
+Start from the outcome, in the person's words: *follow up every day*,
 *send reminders from the claims team*, *run the morning digest at 7*. The
 change belongs to one Routine; note its name.
 
 ## Find the setting
 
-> "What can I change about how #chase-renewals chases people?"
+> "What can I change about how #team-offsite follows up?"
 
 `list_routine_settings` with a `query` lists the settings that match:
 each one's key, its value, and whether it was changed from the template's
@@ -49,7 +49,7 @@ it accepts, its options and the warning each carries, and who may change it.
 
 ## Change it
 
-> "Stop chasing after five follow-ups on #chase-renewals."
+> "The offsite is next week. Follow up every day on #team-offsite."
 
 `update_routine_setting` is a dry run first: it shows the old and new value
 and that the change reaches this Routine only. Read it back to the person,

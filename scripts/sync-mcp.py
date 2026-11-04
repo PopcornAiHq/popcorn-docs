@@ -387,6 +387,11 @@ def worked(example: dict) -> list[str]:
     return out + ["```", ""]
 
 
+# Tools that take `confirm` only for Popcorn's own channel agent: an
+# assistant's call acts at once, so their pages don't promise it a dry run.
+CONFIRM_FOR_CHANNEL_AGENT_ONLY = {"create_routine"}
+
+
 def access(tool: dict) -> str:
     """The tool's access hints as badges, which the renderer colours, and
     `[dry run]` on a tool that takes `confirm`: it only previews until called
@@ -400,7 +405,9 @@ def access(tool: dict) -> str:
             words.append("destructive")
         if h.get("idempotentHint"):
             words.append("idempotent")
-    if any(a["name"] == "confirm" for a in tool["args"]):
+    if tool["name"] not in CONFIRM_FOR_CHANNEL_AGENT_ONLY and any(
+        a["name"] == "confirm" for a in tool["args"]
+    ):
         words.append("dry run")
     return " ".join(f"[{w}]" for w in words)
 
