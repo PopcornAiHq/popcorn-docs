@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/update-routine-setting
 title: update_routine_setting
-order: 348
+order: 349
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

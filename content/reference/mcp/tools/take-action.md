@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/take-action
 title: take_action
-order: 347
+order: 348
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
@@ -50,7 +50,8 @@ Call again with `confirm=true` to take it, with run_key="Hc4pW8sN…" and the sa
 
 Routine: #intake (c7d2…5b) · table: claims
 Taking close on 1 item(s).
-It applies in the background; get_row shows each item's new Status once it has.
+Run: run_WzEs…
+It applies in the background; get_row shows each item's new Status once it has, and list_history with that run shows how it went.
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
