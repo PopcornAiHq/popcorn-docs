@@ -4,7 +4,7 @@ title: change_routine
 order: 303
 group: MCP
 parent: mcp/tools
-updated: 2026-11-03
+updated: 2026-11-04
 summary: >
   Change a Routine's Steps by describing the change in words, previewed before
   anything is installed, or put back an earlier version of its Steps.
@@ -57,7 +57,7 @@ The author assumed:
 - The booking email goes out as soon as the agreement is signed; the team no longer decides on the interview first.
 Questions it left open:
 - Should claimants who already had their interview skip the booking email?
-Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 3f330d97b2b0).
+Checks: passed against this Routine's items and template; no item is left at a Step that would go (recipe version 45f7332bb200).
 To install it: change_routine with change_id="8c1f3a52…" and confirm=true, once the person has read it. An open question above may change it; a new request starts a new change.
 
 → change_routine(routine_id="c7d2…5b", change_id="8c1f3a520d4e4b7a9f216a0c5d7b31e2-c7d20b9e5f134a8cb6e29d41f0a7c35b-recipe_build-req-Rv3kQ8pLm2Wx7Tz5a0d439dec3cde555", confirm=true)
