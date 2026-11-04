@@ -5,8 +5,8 @@ order: 2
 group: Getting started
 summary: >
   Setting up a new Routine from the Questionnaire template: pick a template
-  with list_routine_templates, create the Routine with create_routine, wait
-  for its template to install, make its Connections with make_connection,
+  with list_routine_templates, create the Routine with create_routine and
+  wait for its template to install, make its Connections with make_connection,
   add its References with add_reference, check what's left with get_setup,
   add a first recipient with create_rows, then see what starts its work with
   list_triggers.
@@ -16,12 +16,13 @@ lede: >
 concepts: [routines, connections, triggers]
 ---
 
-This guide sets up a Routine called `#team-offsite` from the Questionnaire
-template, to ask everyone coming to a team offsite a few questions before
-it: dietary needs, travel dates and the sessions they want. It emails each
-person the questions, records their answers from the replies, and follows
-up until they've answered. Each step starts with a prompt you might give
-your assistant.
+This guide walks you through setting up a Routine called `#team-offsite`,
+created from the Questionnaire template. The Routine emails each team member
+a few questions about the offsite, such as their dietary needs, travel dates
+and which sessions they'd like to attend. It records their answers and
+follows up with anyone who hasn't answered them all.
+
+Each step below starts with a prompt you might give your assistant.
 
 ## Pick a template
 
@@ -41,7 +42,8 @@ Questionnaire template needs only Gmail.
 > "Create a private #team-offsite Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
-> Your assistant calls `create_routine`.
+> Your assistant calls `create_routine`, then `get_routine` until its
+> **Install** field says `installed`.
 
 In your request:
 
@@ -52,17 +54,8 @@ In your request:
 
 Your assistant creates the Routine and tells you the Version that's
 installing, its Members, and the Connections to set up before it runs.
-
-## Wait for the install
-
-> "Has #team-offsite finished installing?"
-
-> [!TIP] MCP tool call
-> Your assistant calls `get_routine` with `wait_seconds` until its
-> **Install** field says `installed`.
-
-Popcorn installs the Routine's template in the background, usually within
-seconds. Wait for it to finish before making the Routine's Connections.
+Popcorn installs the template in the background, and your assistant waits
+for it to finish, usually within a few seconds.
 
 ## Make its Connections
 
@@ -71,9 +64,9 @@ seconds. Wait for it to finish before making the Routine's Connections.
 > [!TIP] MCP tool call
 > Your assistant calls `list_connections`.
 
-Your assistant lists the Routine's Connections and how each one is used.
-`#team-offsite` has one: the Gmail its questions are sent from and its
-replies are read in.
+Your assistant lists the Routine's Connections and what each one does.
+`#team-offsite` needs just one, your Gmail, which sends the questions and
+reads the replies.
 
 > "Connect my Gmail to #team-offsite."
 
@@ -81,8 +74,9 @@ replies are read in.
 > Your assistant calls `make_connection`.
 
 If you haven't signed in to Google yet, your assistant first gives you a
-link to do it. It then lists your Google accounts that can be used for
-Gmail. Pick one and confirm, and it connects that account to the Routine.
+link to do it. Then, if you have one Google account that can be used for
+Gmail, it connects that account straight away and tells you which one; if
+you have several, it asks which to use.
 
 > [!NOTE] A teammate's or shared inbox
 > A Connection signs in as the person who makes it, so you can only connect
@@ -95,18 +89,25 @@ Gmail. Pick one and confirm, and it connects that account to the Routine.
 
 ## Add its References
 
-> "Add our offsite questions to #team-offsite."
+> "Add these offsite questions to #team-offsite:
+>
+> Subject: A few questions for the offsite
+>
+> 1. Do you have any dietary needs?
+> 2. Which day are you arriving, and how are you travelling?
+> 3. Which sessions would you like to attend?"
 
 > [!TIP] MCP tool call
-> Your assistant calls `add_reference`.
+> Your assistant calls `add_reference`, passing the questions as its
+> `text`.
 
-A Questionnaire Routine needs one Reference: the questionnaire, a document
-listing the questions to ask, or a sample email with them in it. Your
-assistant adds it from text or a file, after showing you what it will add.
-Popcorn then reads the questions out of it, and the subject and opening
-line for the email if it has them. A document with no questions in it
-doesn't load, and Popcorn says no questions were found. See
-[References](https://docs.popcorn.ai/reference-documents.md).
+The Questionnaire Routine needs one
+[Reference](https://docs.popcorn.ai/reference-documents.md), the
+questionnaire itself: a subject line for its emails and the questions to ask.
+
+> [!NOTE] From a file
+> Some assistants, such as Claude Code, can add the questionnaire from a
+> text file instead of pasting it.
 
 ## Check what's left
 
@@ -115,10 +116,9 @@ doesn't load, and Popcorn says no questions were found. See
 > [!TIP] MCP tool call
 > Your assistant calls `get_setup`.
 
-Your assistant reads the Routine's setup checklist: each step done or left,
-which are required, and what each one left needs. `#team-offsite` has two,
-both required: connect Gmail, and add the questionnaire. When neither is
-left, the Routine is ready.
+Your assistant reads the Routine's setup checklist and tells you what's left
+to do. `#team-offsite` has two required steps, connecting Gmail and adding
+the questionnaire, and you've just done both. The Routine is ready.
 
 ## Add your first attendee
 
