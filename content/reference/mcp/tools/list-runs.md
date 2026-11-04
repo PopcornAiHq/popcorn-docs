@@ -6,26 +6,27 @@ group: MCP
 parent: mcp/tools
 updated: 2026-11-04
 summary: >
-  The Routine's runs still going, newest first: the work each is doing, when
-  it started and what started it, and its reference.
+  The Routine's runs, newest first: the work each did or is doing, how it
+  ended, when, what started it, and its reference.
 concepts: [history]
-used_with: [mcp/tools/stop-run, mcp/tools/list-history]
+used_with: [mcp/tools/get-run, mcp/tools/stop-run]
 ---
 
 [read-only]
 
 ```
-list_runs(routine, cursor=None)
+list_runs(routine, status="going", cursor=None)
 ```
 
-This is where a run a schedule or a webhook started is found before it has changed any item. stop_run takes a run's reference to stop it, and list_history with it follows the run.
+By default the runs still going. This is where a run a schedule or a webhook started is found before it has changed any item. get_run takes a run's reference to show it whole, and stop_run to stop one still going.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `cursor` | `str` | next_cursor from the previous page. |
+| `status` | `str` | "going" (the default), "ended", "failed" or "all". |
+| `cursor` | `str` | next_cursor from the previous page, with the same status. |
 
 **Example** — “What's running in #intake right now?”
 
