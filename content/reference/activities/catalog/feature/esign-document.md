@@ -5,7 +5,7 @@ order: 130
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
-updated: 2026-10-31
+updated: 2026-11-04
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -52,7 +52,7 @@ merged file, the signers, the fields.
 | `refusal_codes` | map of string | no | Rename a refusal's code for this bundle, e.g. {DocumentRecordNotFound: RecordNotFound}. |
 | `signers` | list of any, optional | no | Override for the row's Signers, [{role, email, name?}]; null uses the row's, [] is refused. |
 | `connection` | object, optional | no | feature.esign.check_configured's answer: a channel that is not connected is refused SigningNotConfigured in the connection's own reason and action, one whose sending is off SigningSendModeOff. Null: the flow vouches for it. |
-| `link_column` | string | no | The row column holding the address whose signer gets `delivery: link` (the bundle emails them the link itself); every other signer gets the provider's email. Blank: the provider emails everyone. Default `""`. |
+| `link_column` | string | no | The row column holding the address whose signer the bundle emails the link itself: `delivery: provider_email_and_link`, or `delivery: link` where the connection's provider cannot do both; every other signer, and that one if another signs first, gets the provider's email. Blank: the provider emails everyone. Default `""`. |
 
 **Returns**
 
@@ -103,7 +103,7 @@ merged file, the signers, the fields.
 | `email` | string | Where the request (or our email) goes. |
 | `name` | string | Full name. Required by some providers (capabilities.signer_name_required). |
 | `order` | integer | Signing order, 1-based. Equal numbers sign in parallel where the provider supports groups. |
-| `delivery` | string | provider_email (the provider emails them) / link (the flow hands them the link, e.g. in its own email) / embedded. |
+| `delivery` | string | provider_email (the provider emails them) / link (the flow hands them the link, e.g. in its own email) / embedded / provider_email_and_link (both, where the provider declares it). |
 
 `StoreClaimCondition`:
 

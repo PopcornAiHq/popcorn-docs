@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/read-reference
 title: read_reference
-order: 338
+order: 341
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   One of a Routine's References: its text, or a download link for a file that
   isn't text, such as a PDF.

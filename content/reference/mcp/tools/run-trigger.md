@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/run-trigger
 title: run_trigger
-order: 340
+order: 343
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Run one of a Routine's schedules now, with the inputs it runs with on
   schedule.

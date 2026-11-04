@@ -4,7 +4,7 @@ title: Tools
 order: 301
 group: MCP
 layout: lookup
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Every tool the hosted server offers, A to Z, each with whether it reads or
   writes and what it does, linking its own page.
@@ -13,8 +13,8 @@ lede: >
 concepts: [mcp]
 ---
 
-The 43 tools the hosted server offers, A to Z: 27 only read, and the
-other 16 write. A tool marked [dry run] only previews until it is
+The 48 tools the hosted server offers, A to Z: 30 only read, and the
+other 18 write. A tool marked [dry run] only previews until it is
 called again with `confirm=true`. Each tool's page has its call, its arguments
 and, for many, a worked example.
 
@@ -60,6 +60,7 @@ and, for many, a worked example.
 - **[`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md)** — [read-only] List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to. take_action takes one.
 - **[`list_connections`](https://docs.popcorn.ai/mcp/tools/list-connections.md)** — [read-only] List the Connections a Routine needs: the accounts and other services its template works through.
 - **[`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md)** — [read-only] What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
+- **[`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md)** — [read-only] A Routine's messages, newest first, or one thread's replies.
 - **[`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md)** — [read-only] The documents a Routine works from (its References), each with what it is used for, when it was added and by whom, and the ones it is still waiting for.
 - **[`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md)** — [read-only] List the files of the Routine Template version a Routine runs, with sizes and sha256.
 - **[`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md)** — [read-only] List the settings of a Routine's Routine Template, set or not.
@@ -76,8 +77,10 @@ and, for many, a worked example.
 
 ## R
 
+- **[`react`](https://docs.popcorn.ai/mcp/tools/react.md)** — [writes] [idempotent] Add an emoji reaction to a Routine message, or take yours off with remove=true.
 - **[`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md)** — [read-only] Read one page of the Popcorn docs by its id (search_docs gives it), or one section of it.
 - **[`read_history_entry`](https://docs.popcorn.ai/mcp/tools/read-history-entry.md)** — [read-only] One change from an item's History, in full: every field it changed, before and after, who or what made it and why, and, when Popcorn's work made it, what that run did, in order, and how it ended.
+- **[`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md)** — [read-only] One message in a Routine, in full: its whole text, a line per attachment or other part, the reply count and thread_id, and its reactions (marking yours).
 - **[`read_reference`](https://docs.popcorn.ai/mcp/tools/read-reference.md)** — [read-only] One of a Routine's References: its text, or a download link for a file that isn't text, such as a PDF.
 - **[`read_routine_file`](https://docs.popcorn.ai/mcp/tools/read-routine-file.md)** — [read-only] Read one file of the Routine Template version a Routine runs, exactly as stored.
 - **[`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md)** — [writes] [destructive] [dry run] Run one of a Routine's schedules now, with the inputs it runs with on schedule.
@@ -85,6 +88,8 @@ and, for many, a worked example.
 ## S
 
 - **[`search_docs`](https://docs.popcorn.ai/mcp/tools/search-docs.md)** — [read-only] Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles, ids and summaries.
+- **[`search_messages`](https://docs.popcorn.ai/mcp/tools/search-messages.md)** — [read-only] Search message text across the Routines you can see, ranked by relevance (or newest first with sort="recent").
+- **[`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md)** — [writes] Post a message in a Routine, visible to its members.
 
 ## T
 

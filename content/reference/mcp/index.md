@@ -3,7 +3,7 @@ id: mcp
 title: MCP server overview
 order: 300
 group: MCP
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a
   person's assistant tools for their Routines. This page says what they cover
@@ -15,7 +15,7 @@ lede: >
 concepts: [add-the-mcp-server, app-bundle, versions, copying-a-template]
 ---
 
-The hosted MCP server gives a person's assistant 43 tools. With them it
+The hosted MCP server gives a person's assistant 48 tools. With them it
 can find people and Routines, list the Routine Templates a new Routine can
 be made from, create a Routine (optionally from a template), see whether a
 Routine's Connections are made and make one from an account already
@@ -72,6 +72,6 @@ its first characters, and a long listing keeps its first rows.
 
 ## Tool reference
 
-[Tools](https://docs.popcorn.ai/mcp/tools.md) lists all 43 tools A to Z, each linking a
+[Tools](https://docs.popcorn.ai/mcp/tools.md) lists all 48 tools A to Z, each linking a
 page of its own with its call, arguments and access hints.
 
