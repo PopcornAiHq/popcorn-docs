@@ -28,7 +28,7 @@ and, for many, a worked example.
 - **[`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)** — [writes] [destructive] [dry run] Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
 - **[`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)** — [writes] [destructive] [dry run] Give a Routine its own named copy of the Routine Template it runs.
 - **[`create_reference_upload`](https://docs.popcorn.ai/mcp/tools/create-reference-upload.md)** — [writes] Get a URL to upload one file for one of a Routine's References, for add_reference to take.
-- **[`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)** — [writes] [dry run] Create a Routine in this workspace, optionally from a Routine Template.
+- **[`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)** — [writes] Create a Routine in this workspace, optionally from a Routine Template.
 - **[`create_routine_file_upload`](https://docs.popcorn.ai/mcp/tools/create-routine-file-upload.md)** — [writes] Get a URL to upload one file you made, for create_routine_version to take.
 - **[`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)** — [writes] [destructive] [dry run] Save changes as the next version of the Routine's own copy of its Routine Template.
 - **[`create_rows`](https://docs.popcorn.ai/mcp/tools/create-rows.md)** — [writes] [dry run] Add rows to one of a Routine's tables.

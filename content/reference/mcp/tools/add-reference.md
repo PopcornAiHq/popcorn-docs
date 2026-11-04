@@ -4,7 +4,7 @@ title: add_reference
 order: 302
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Add one of a Routine's References, or replace the one it has, as Replace on
   the Reference's card in Popcorn does.
@@ -28,8 +28,8 @@ Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file u
 | `reference` [required] | `str` | The Reference, as list_references names it. |
 | `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
 | `upload_id` | `str` | The upload_id create_reference_upload gave, once the file is uploaded. |
-| `confirm` | `bool` | true to add it. Show the user the dry run first. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `confirm` | `bool` | true to add it: at once when the person asked to add this document as this Reference, otherwise (a replace, or a Reference you chose) after they agree to the dry run. Default `False`. |
+| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it, and so must any caller replacing a Reference that already has a document (the replace's dry run gives every caller one). An OAuth client's first add is given none and needs none. |
 
 **Example** — “Add a fourth question to #intake's questions: the claim number.”
 
@@ -45,10 +45,11 @@ Add: Questions and first email (reference "questions") on #intake.
 - Used for: The questions, validation instructions and email wording for intake.
 - Required: the template counts on it, and what it is used for starts working once it's in.
 - Popcorn reads the file in the background, and the Routine works from it from then on.
+- plan_id: pL4nR3pl4ceQu3st10ns7a (lasts 30 minutes). Confirm with it and the same request.
 
 Call again with `confirm=true` to replace it.
 
-→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n", confirm=true)
+→ add_reference(routine_id="c7d2…5b", reference="questions", text="Subject: Your claim with Acme\n\nHi {first_name},\n\nThanks for reaching out. To get your claim started, please reply with:\n1. The date of the loss\n2. Your policy number\n3. Photos of the damage\n4. Your claim number, if you already have one\n", confirm=true, plan_id="pL4nR3pl4ceQu3st10ns7a")
 
 Routine: #intake (c7d2…5b)
 Started replacing Questions and first email (reference "questions").
