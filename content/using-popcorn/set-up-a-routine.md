@@ -8,7 +8,7 @@ summary: >
   with list_routine_templates, create the Routine with create_routine and
   wait for its template to install, make its Connections with make_connection,
   add its References with add_reference, check what's left with get_setup,
-  add a first recipient with create_rows, then see what starts its work with
+  add a first recipient with create_rows, then find what starts its work with
   list_triggers.
 lede: >
   Ask your AI assistant to set up a Routine from a template, make its
