@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/read-reference
 title: read_reference
-order: 342
+order: 343
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

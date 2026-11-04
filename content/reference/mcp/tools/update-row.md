@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/update-row
 title: update_row
-order: 351
+order: 352
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

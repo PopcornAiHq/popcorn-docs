@@ -13,7 +13,7 @@ lede: >
 concepts: [mcp]
 ---
 
-The 50 tools the hosted server offers, A to Z: 31 only read, and the
+The 51 tools the hosted server offers, A to Z: 32 only read, and the
 other 19 write. A tool marked [dry run] only previews until it is
 called again with `confirm=true`. Each tool's page has its call, its arguments
 and, for many, a worked example.
@@ -45,6 +45,7 @@ and, for many, a worked example.
 - **[`get_routine_change`](https://docs.popcorn.ai/mcp/tools/get-routine-change.md)** — [read-only] Where a change to a Routine's Steps stands: still drafting, the proposal as Steps before and after, refused and why, or installed.
 - **[`get_routine_setting`](https://docs.popcorn.ai/mcp/tools/get-routine-setting.md)** — [read-only] One of a Routine's settings in full: the whole value (a prompt or email template's whole text), the template default, what it accepts, its description, its options with the warning each one carries, and who may change it.
 - **[`get_row`](https://docs.popcorn.ai/mcp/tools/get-row.md)** — [read-only] One row in full: every column, its rev (update_row needs it as expected_rev), when it was created and last changed, and its state if the Routine's state machine runs on the table.
+- **[`get_run`](https://docs.popcorn.ai/mcp/tools/get-run.md)** — [read-only] One of a Routine's runs, by its reference: how it is going or how it ended, what started it, its inputs and outputs, the error it failed with, and its newest steps.
 - **[`get_setup`](https://docs.popcorn.ai/mcp/tools/get-setup.md)** — [read-only] Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in order: each done or not, which are required, and what each one left still needs (a Connection, a document, a booking page, a value).
 - **[`get_status`](https://docs.popcorn.ai/mcp/tools/get-status.md)** — [read-only] Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why and the Actions that settle it (take_action takes one on the item's row).
 - **[`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md)** — [read-only] A table's columns, in order: each one's name, type, label and merge policy, the table's merge key, and its state machine if the Routine runs one on it.

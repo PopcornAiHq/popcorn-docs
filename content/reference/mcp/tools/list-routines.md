@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-routines
 title: list_routines
-order: 331
+order: 332
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

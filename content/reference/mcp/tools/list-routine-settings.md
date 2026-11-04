@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-routine-settings
 title: list_routine_settings
-order: 329
+order: 330
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

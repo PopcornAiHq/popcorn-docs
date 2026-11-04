@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-history
 title: list_history
-order: 325
+order: 326
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

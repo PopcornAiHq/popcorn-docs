@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/read-message
 title: read_message
-order: 341
+order: 342
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

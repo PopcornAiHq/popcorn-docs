@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/search-docs
 title: search_docs
-order: 345
+order: 346
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

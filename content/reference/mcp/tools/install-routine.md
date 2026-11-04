@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/install-routine
 title: install_routine
-order: 322
+order: 323
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.

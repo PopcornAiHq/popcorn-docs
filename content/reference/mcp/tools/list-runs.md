@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-runs
 title: list_runs
-order: 333
+order: 334
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
@@ -37,7 +37,7 @@ Routine: #intake (c7d2…5b)
 - chase tick: still running · run run_WzEs… · started 2026-10-18 09:00
 - signing webhook: still running · run run_WzEs… · started 2026-10-18 08:58 by a webhook
 stop_run with a run's reference stops it.
-list_history with a run's reference follows it: how it is going and the items it has changed.
+get_run with a run's reference shows it: its steps, outputs and how it ended; list_history with it, the items it changed.
 list_history with an item's row_id shows that item's History, the runs that changed it among them.
 ```
 

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-connections
 title: list_connections
-order: 324
+order: 325
 group: MCP
 parent: mcp/tools
-updated: 2026-11-03
+updated: 2026-11-04
 summary: >
   List the Connections a Routine needs: the accounts and other services its
   template works through.

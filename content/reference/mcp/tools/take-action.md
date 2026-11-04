@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/take-action
 title: take_action
-order: 349
+order: 350
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
