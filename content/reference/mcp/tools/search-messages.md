@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/search-messages
 title: search_messages
-order: 346
+order: 347
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

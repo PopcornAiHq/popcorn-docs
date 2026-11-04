@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-workspace
 title: get_workspace
-order: 321
+order: 322
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   The Popcorn workspace this connection is bound to.
 concepts: []

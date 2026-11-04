@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-user
 title: get_user
-order: 320
+order: 321
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Look up a person by handle: yourself, a member of this workspace, or someone
   from another workspace you share a Routine or DM with.

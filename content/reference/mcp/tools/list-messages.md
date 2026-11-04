@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-messages
 title: list_messages
-order: 326
+order: 327
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

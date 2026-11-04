@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-rows
 title: list_rows
-order: 332
+order: 333
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

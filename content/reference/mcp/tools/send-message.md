@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/send-message
 title: send_message
-order: 347
+order: 348
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

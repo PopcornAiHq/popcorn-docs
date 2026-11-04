@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-routine-templates
 title: list_routine_templates
-order: 330
+order: 331
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04

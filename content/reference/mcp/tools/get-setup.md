@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-setup
 title: get_setup
-order: 317
+order: 318
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-04
 summary: >
   Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in
   order: each done or not, which are required, and what each one left still

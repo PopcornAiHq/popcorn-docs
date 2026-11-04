@@ -1,7 +1,7 @@
 ---
 id: mcp/tools/list-references
 title: list_references
-order: 327
+order: 328
 group: MCP
 parent: mcp/tools
 updated: 2026-11-04
