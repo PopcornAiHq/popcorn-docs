@@ -34,17 +34,18 @@ documents in. The Routine's template says which Connections it needs.
 > "Why hasn't #intake booked any inspections?"
 
 ```text
-3 Connections, 1 not made:
-- Claims inbox (email): made
+2 Connections, 1 not connected:
+- Claims inbox (email): connected
   Uses: claims@acme.example (google), connected by Dana Smith
-  Without it: Popcorn shows the Routine as not ready, and claim intake can't run.
-- Adjuster calendar (calendar): NOT MADE
+  Without it: the Routine's automations are paused, and claim intake can't run.
+- Adjuster calendar (calendar): NOT CONNECTED
   Without it: book inspection can't run; the rest of the Routine keeps working.
 ```
 
 Each Connection says whose account it uses, who connected it, and what
 stops while it is missing: some hold the whole Routine back, and Popcorn
-shows it as not ready; others stop only the work that uses them. The
+pauses its automations until they're connected; others stop only the work
+that uses them. The
 response ends with how to make the missing ones.
 
 Work that uses a missing Connection cannot run, so a Routine with one is
