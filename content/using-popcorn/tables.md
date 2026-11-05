@@ -41,8 +41,8 @@ Workspace, and a Column holding a credential is never shown or written.
 ## Writing
 
 - `create_rows` adds up to 50 Rows. Up to ten Rows you named are added at
-  once; more than ten, or Rows the assistant put together from a file or a
-  page, come back as a dry run first. A Row that matches an existing one on
+  once; more than ten, or Rows put together from a file or a page, come back
+  as a dry run first. A Row that matches an existing one on
   the Table's identifying Columns merges into it instead of adding another.
   The dry run says which Rows would be added and which would merge, and what
   an added Row starts; the response says which were added and which merged.
