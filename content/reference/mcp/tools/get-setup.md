@@ -41,6 +41,8 @@ Setup: 4 of 6 steps done; 1 required left.
   Warning: No booking of this page yet, so whose calendar it is can't be told until its first booking.
 - [left, required] Days to wait for a reply (step: setting_wait_days)
   Needs a value for Days to wait for a reply (days, 1–30): complete_setup_step sets it.
+  About: How long the Routine waits for an answer before it follows up.
+  Takes: Counted in calendar days. For example: 7.
 - [done] Connect your intake form (step: connect_intake_webhook)
 Also needed, with no step Popcorn shows: secret:portal_token.
 ```
