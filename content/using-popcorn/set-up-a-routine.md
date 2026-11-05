@@ -42,8 +42,8 @@ Questionnaire template needs only Gmail.
 > "Create a private #team-offsite Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
-> Your assistant calls `create_routine`, then `get_routine` until its
-> **Install** field says `installed`.
+> Your assistant calls `create_routine`, then `get_routine`, which waits
+> until its **Install** field says `installed`.
 
 In your request:
 
@@ -79,8 +79,9 @@ and setting the reply-by date. The next three sections take them in turn.
 `#team-offsite` uses Gmail to send questions and read replies. If you
 haven't signed in to Google yet, your assistant gives you a link to sign in.
 
-If you have only one Google account, your assistant connects it straight
-away. If you have more than one, it asks which one to use.
+If you have only one Google account, your assistant shows you which one it
+will connect, and connects it once you agree. If you have more than one, it
+asks which one to use.
 
 > [!NOTE] A teammate's or shared inbox
 > A Connection signs in as the person who makes it, so you can only connect
@@ -134,7 +135,7 @@ Routine is ready.
 > Your assistant calls `create_rows`.
 
 Jane is added as a Row in the Routine's `recipients`
-[Table](https://docs.popcorn.ai/tables.md), with her email address and name.
+[Table](https://docs.popcorn.ai/tables.md), with her `Email` and `Name`.
 Her email goes out on the Routine's next Run, which the next section covers.
 
 Each email address appears once in the Table, so adding one that's already
@@ -143,9 +144,9 @@ the whole list.
 
 > [!TIP] Use drafts mode
 > To check each email before it goes out, ask your assistant to set
-> `#team-offsite`'s send mode to drafts. Each email then waits in your Gmail
-> Drafts for you to review and send. Set it back to send once you're happy
-> with them.
+> `#team-offsite`'s send mode to draft. Each email then waits in your Gmail
+> Drafts for you to review and send, and its Row shows *Waiting* as soon as
+> it's drafted. Set the send mode back to send once you're happy with them.
 
 ## See what starts its work
 
