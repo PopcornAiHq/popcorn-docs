@@ -42,8 +42,8 @@ Questionnaire template needs only Gmail.
 > "Create a private #team-offsite Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
-> Your assistant calls `create_routine`, then `get_routine` until its
-> **Install** field says `installed`.
+> Your assistant calls `create_routine`, then `get_routine`, waiting until
+> its **Install** field says `installed`.
 
 In your request:
 
@@ -52,8 +52,9 @@ In your request:
 - **The name.** Spaces become hyphens, and a name already used in the
   Workspace is refused.
 
-Your assistant creates the Routine and tells you the Version that's
-installing, its Members, and the Connections to set up before it runs.
+Your assistant creates the Routine and tells you the
+[Version](https://docs.popcorn.ai/versions.md) that's installing, its
+Members, and the Connections to set up before it runs.
 Installing usually takes a few seconds, and your assistant waits for it to
 finish.
 
@@ -79,8 +80,9 @@ and setting the reply-by date. The next three sections take them in turn.
 `#team-offsite` uses Gmail to send questions and read replies. If you
 haven't signed in to Google yet, your assistant gives you a link to sign in.
 
-If you have only one Google account, your assistant connects it straight
-away. If you have more than one, it asks which one to use.
+If you have only one Google account, your assistant shows you which one it
+will connect, and connects it once you agree. If you have more than one, it
+asks which one to use.
 
 > [!NOTE] A teammate's or shared inbox
 > A Connection signs in as the person who makes it, so you can only connect
@@ -102,8 +104,8 @@ away. If you have more than one, it asks which one to use.
 > 3. Which sessions would you like to attend?"
 
 > [!TIP] MCP tool call
-> Your assistant calls `add_reference`, passing the questions as its
-> `text`.
+> Your assistant calls `add_reference` for the `questionnaire` Reference,
+> passing the questions as its `text`.
 
 The questionnaire gives the Routine a subject line for its emails and the
 questions to ask.
@@ -126,6 +128,14 @@ date passes, it stops following up and marks anyone who hasn't answered as
 Your assistant confirms the date and tells you setup is complete. The
 Routine is ready.
 
+> [!TIP] Use draft mode
+> Before adding anyone, you can ask your assistant to set `#team-offsite`'s
+> send mode to `draft`, to check each email before it goes out. Each email
+> then waits in your Gmail Drafts for you to review and send, and its Row
+> shows *Waiting* as soon as it's drafted. When you're happy with them, set
+> the send mode back to `send`. Your assistant warns you first that emails
+> will start going out.
+
 ## Add a Row
 
 > "Add jane@example.com to #team-offsite as Jane."
@@ -134,18 +144,12 @@ Routine is ready.
 > Your assistant calls `create_rows`.
 
 Jane is added as a Row in the Routine's `recipients`
-[Table](https://docs.popcorn.ai/tables.md), with her email address and name.
+[Table](https://docs.popcorn.ai/tables.md), with her `Email` and `Name`.
 Her email goes out on the Routine's next Run, which the next section covers.
 
 Each email address appears once in the Table, so adding one that's already
 there updates its Row instead. To add everyone at once, give your assistant
-the whole list.
-
-> [!TIP] Use drafts mode
-> To check each email before it goes out, ask your assistant to set
-> `#team-offsite`'s send mode to drafts. Each email then waits in your Gmail
-> Drafts for you to review and send. Set it back to send once you're happy
-> with them.
+the whole list; a list of more than ten is shown to you before it's added.
 
 ## See what starts its work
 
@@ -154,12 +158,13 @@ the whole list.
 > [!TIP] MCP tool call
 > Your assistant calls `list_triggers`.
 
-Your assistant shows how work arrives: the Routine's Schedules and when they
-run, the messages and documents that start work, and any other system that
-posts to it.
+Your assistant shows how work arrives: the Routine's
+[Schedules](https://docs.popcorn.ai/schedules.md) and when they run, the
+messages and documents that start work, and any other system that posts to
+it.
 
-`#team-offsite` has one Schedule that runs every fifteen minutes. Each
-Run emails anyone new, such as Jane, and marks them *Waiting*. It then reads
+`#team-offsite` has one Schedule that runs every fifteen minutes. Each Run
+emails anyone new, such as Jane, and marks them *Waiting*. It then reads
 replies, records the answers on each Row, and follows up on any questions
 still open. Replacing the questionnaire also starts work, reading in the new
 questions.
@@ -181,9 +186,11 @@ quarter-hour. See [Triggers](https://docs.popcorn.ai/triggers.md).
 > Your assistant calls `list_rows`.
 
 Your assistant lists each person's Row in the `recipients` Table, with their
-Status and the answers recorded so far. Someone who has answered every
+[Status](https://docs.popcorn.ai/actions-and-status.md) and the answers
+recorded so far. Someone who has answered every
 question is *Answered*. Anyone still *Waiting* gets a follow-up about the
-questions they left open, until the reply-by date.
+questions they left open, every three days and up to three times, until the
+reply-by date.
 
 ## Change how it behaves
 
