@@ -34,7 +34,7 @@ A Trigger that is paused or turned off says so. A webhook's address is never sho
 Routine: #intake (c7d2…5b) · template: claimcoordinator 0.15.1
 Schedules:
 - morning  cron '0 8 * * 1-5' (America/Los_Angeles)  starts daily digest
-- tick  every 180s  starts claim tick
+- tick  every 3 minutes  starts claim tick
 Webhooks:
 - carrier-portal  starts claim intake
 Messages:

@@ -10,7 +10,7 @@ summary: >
   what started it, its inputs and outputs, the error it failed with, and its
   newest steps.
 concepts: [history]
-used_with: [mcp/tools/list-history, mcp/tools/run-trigger, mcp/tools/take-action, mcp/tools/list-runs]
+used_with: [mcp/tools/list-history, mcp/tools/run-trigger, mcp/tools/take-action, mcp/tools/make-connection, mcp/tools/list-runs]
 ---
 
 [read-only]
@@ -26,7 +26,7 @@ A run still going shows the step it's on; call again to follow it, or pass wait_
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `run` [required] | `str` | The run's reference: run_trigger and take_action give it, and list_runs and list_history show it. |
+| `run` [required] | `str` | The run's reference: run_trigger, take_action and make_connection give it, and list_runs and list_history show it. |
 | `output` | `str` | One output's name, to read just that output whole. |
 | `cursor` | `str` | next_cursor from the previous range of that output. |
 | `wait_seconds` | `int` | Wait up to this many seconds for a run still going to end, then answer; the answer says whether it ended or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. With output, the wait comes first. |

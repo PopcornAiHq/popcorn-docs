@@ -17,7 +17,7 @@ used_with: [mcp/tools/get-row, mcp/tools/list-tables, mcp/tools/get-table]
 list_rows(routine, table, query=None, filter=None, columns=None, sort=None, cursor=None)
 ```
 
-Each row shows its ID, a few columns (long values are cut and marked; get_row shows a row in full) and when it last changed.
+Each row shows its ID, a few columns (long values are cut and marked; get_row shows a row in full) and when it last changed. A Status column shows its label, then the stored value in quotes: a filter on it matches the stored value.
 
 ## Arguments
 
@@ -40,7 +40,7 @@ Routine: #intake (c7d2…5b) · table: claims
 Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] picks others). Empty values are left out.
 2 rows matching "4471", newest first, shown on this page:
 - row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
-- row 88  claim_no: 4471  claimant: Ortiz  amount: 12400  Status: open  Stage: open  (updated 2026-09-29 14:05)
+- row 88  claim_no: 4471  claimant: Ortiz  amount: 12400  Status: Open (value "open")  Stage: open  (updated 2026-09-29 14:05)
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool

@@ -9,7 +9,7 @@ summary: >
   Make one of a Routine's Connections: connect an account you have signed in
   to, or make the webhook another system posts to.
 concepts: [connections]
-used_with: [mcp/tools/list-connections]
+used_with: [mcp/tools/get-run, mcp/tools/list-connections]
 ---
 
 [writes] [destructive] [dry run]
@@ -18,7 +18,7 @@ used_with: [mcp/tools/list-connections]
 make_connection(routine_id, connection, account=None, confirm=False, plan_id=None, only=False)
 ```
 
-For an email, calendar, files or documents (Notion) Connection, call it without account first: it lists your accounts that can serve it, each with whether its sign-in allows everything the Connection needs. Then call it with account, an address or ID from that list: a dry run of what it will connect, what it replaces and what runs after. With confirm=true it connects the account, gives the Routine the access it needs, and runs the template's on_auth_change step if it has one, all in one call. The answer is each Connection made, as list_connections shows it. Only your own accounts can be connected; a teammate connects theirs. When you have exactly one account of the provider and its sign-in allows everything needed, account can be left out: the call goes on with that one. A person asking to connect a Connection with their own account ("connect my Gmail to #intake") has agreed to it: call with confirm=true straight away, and tell them what was connected. With a person there, show the dry run first, and confirm only once they agree, when they haven't named the Connection, when there is more than one account to choose from, or when it replaces an account already connected (a confirm that would replace one without a dry run is refused). Connecting an account to a Connection that has none also connects it to the Routine's other Connections of its provider that have none yet and that its sign-in allows (one Google account serves the inbox, calendar and Drive together); the dry run names each one, and the answer says which were connected. Pass only=true to connect the named Connection alone. Replacing a Connection's account changes no other. A Google sign-in is done from here: when you have no Google account that can serve, or yours is signed out or lacks access, the answer (or the refusal) carries a sign-in link, asking for everything the Routine's unconnected Google Connections need. Pass the link to the person as it is, and nothing else from it: it works once, within minutes, and only for the person who asked, who finishes it signed in to Popcorn in the browser it opens. Once they say they have, call make_connection again (without account, to see the account, then with it). An account of another provider is signed in to in Popcorn; the answer says where. For a webhook Connection, call it without account: a dry run of the webhook it makes, and of the one it replaces if one serves it already, whose address then stops working. With confirm=true it makes the webhook and answers with its address, once. The address is a credential: anyone who has it can post to the Routine. Give it only to whoever sets up the other system; nothing here shows it again. Popcorn's channel agent is never given it, since its answers reach the whole Routine: the answer says [secret] in its place, and the person reads it on the Connection's card in Popcorn. An e-signature Connection isn't made here: its keys are workspace secrets a workspace admin or owner saves in Popcorn, and the refusal names them. Never pass a key or a password to this tool. It takes routine_id, the Routine's ID, as every tool that writes does. Making a Connection needs workspace admin, or membership of the Routine, and an archived Routine can't be changed.
+For an email, calendar, files or documents (Notion) Connection, call it without account first. When you have exactly one account of the provider and its sign-in allows everything the Connection needs, that call goes on with that account: it answers with the dry run for it (or, with confirm=true, connects it). Otherwise it lists your accounts that can serve it, each with whether its sign-in allows everything the Connection needs; then call it with account, an address or ID from that list, for the dry run of what it will connect, what it replaces and what runs after. With confirm=true it connects the account, gives the Routine the access it needs, and starts the Routine's own follow-up to a Connection changing if its template has one, all in one call. The answer is each Connection made, and a run reference for that follow-up, which get_run follows. Only your own accounts can be connected; a teammate connects theirs. A person asking to connect a Connection with their own account ("connect my Gmail to #intake") has agreed to it: call with confirm=true straight away, and tell them what was connected. With a person there, show the dry run first, and confirm only once they agree, when they haven't named the Connection, when there is more than one account to choose from, or when it replaces an account already connected (a confirm that would replace one without a dry run is refused). Connecting an account to a Connection that has none also connects it to the Routine's other Connections of its provider that have none yet and that its sign-in allows (one Google account serves the inbox, calendar and Drive together); the dry run names each one, and the answer says which were connected. Pass only=true to connect the named Connection alone. Replacing a Connection's account changes no other. A Google sign-in is done from here: when you have no Google account that can serve, or yours is signed out or lacks access, the answer (or the refusal) carries a sign-in link, asking for everything the Routine's unconnected Google Connections need. Pass the link to the person as it is, and nothing else from it: it works once, within minutes, and only for the person who asked, who finishes it signed in to Popcorn in the browser it opens. Once they say they have, call make_connection again (without account, to see the account, then with it). An account of another provider is signed in to in Popcorn; the answer says where. For a webhook Connection, call it without account: a dry run of the webhook it makes, and of the one it replaces if one serves it already, whose address then stops working. With confirm=true it makes the webhook and answers with its address, once. The address is a credential: anyone who has it can post to the Routine. Give it only to whoever sets up the other system; nothing here shows it again. Popcorn's channel agent is never given it, since its answers reach the whole Routine: the answer says [secret] in its place, and the person reads it on the Connection's card in Popcorn. An e-signature Connection isn't made here: its keys are workspace secrets a workspace admin or owner saves in Popcorn, and the refusal names them. Never pass a key or a password to this tool. It takes routine_id, the Routine's ID, as every tool that writes does. Making a Connection needs workspace admin, or membership of the Routine, and an archived Routine can't be changed.
 
 ## Arguments
 
@@ -38,11 +38,11 @@ For an email, calendar, files or documents (Notion) Connection, call it without 
 
 Routine: #intake (c7d2…5b)
 - Adjuster calendar (calendar): NOT CONNECTED
-  Without it: book inspection can't run; the rest of the Routine keeps working.
-It needs: https://www.googleapis.com/auth/calendar.events
+  Without it: the automations that use it can't run; the rest of the Routine keeps working.
+It needs an account that allows seeing and changing calendar events.
 Your accounts that can serve it:
 - adjusters@acme.example (google), id 9a3e…71: allows everything it needs
-- dana.smith@gmail.com (google), id 1c7d…94: its sign-in doesn't allow https://www.googleapis.com/auth/calendar.events; a person reconnects it in Popcorn to add that
+- dana.smith@gmail.com (google), id 1c7d…94: its sign-in doesn't allow seeing and changing calendar events; a person reconnects it in Popcorn to add that
 To connect one, call make_connection again with account set to its address or id, for a dry run.
 To connect an account not listed, a person signs in to it in Popcorn, in the browser: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, then Connect on the Adjuster calendar card. That can't be done from here. Only your own accounts are listed; a teammate connects theirs.
 
@@ -54,8 +54,8 @@ Routine: #intake (c7d2…5b)
 - Connection: Adjuster calendar (calendar)
 - Account: adjusters@acme.example (google), yours
 - Connects it as gcal
-- Lets this Routine use it for: https://www.googleapis.com/auth/calendar.events
-- Then runs on_auth_change, the template's own check after a Connection changes
+- Lets this Routine use it for seeing and changing calendar events
+- Then starts the Routine's own follow-up to a Connection changing, which its template defines
 
 Call again with `confirm=true` to connect adjusters@acme.example (google) as Adjuster calendar.
 
@@ -64,10 +64,10 @@ Call again with `confirm=true` to connect adjusters@acme.example (google) as Adj
 Routine: #intake (c7d2…5b)
 Connected adjusters@acme.example (google) as Adjuster calendar.
 - Bound: gcal
-- Started on_auth_change (workflow_id: member-run:on_auth_change)
+- Started the Routine's own follow-up to a Connection changing. Run: run_WzEs…; get_run with it shows how it went.
 - Adjuster calendar (calendar): connected
   Uses: adjusters@acme.example (google), connected by Dana Smith
-  Without it: book inspection can't run; the rest of the Routine keeps working.
+  Without it: the automations that use it can't run; the rest of the Routine keeps working.
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
