@@ -209,9 +209,8 @@ amount.
 
 An account Popcorn uses on the Routine's behalf, such as a mailbox it reads
 from or a calendar it books into. It signs in as a person, so only their own
-accounts can be connected; an assistant can say which ones a Routine is missing
-and, after a dry run, connect an account the person has signed in to, or make a
-Webhook. Building a template, *Integration* is the word, and it always needs a
+accounts can be connected; an assistant can say which ones a Routine is missing,
+connect an account the person has signed in to, or make a Webhook. Building a template, *Integration* is the word, and it always needs a
 qualifier. A **Connected Account** is one person's account with a provider,
 with an `integration_id` (`popcorn channel-config accounts` lists them). A
 **channel integration** is a name in the Routine's configuration bound to one

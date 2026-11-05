@@ -80,9 +80,9 @@ and setting the reply-by date. The next three sections take them in turn.
 `#team-offsite` uses Gmail to send questions and read replies. If you
 haven't signed in to Google yet, your assistant gives you a link to sign in.
 
-If you have only one Google account, your assistant shows you which one it
-will connect, and connects it once you agree. If you have more than one, it
-asks which one to use.
+If you have only one Google account, your assistant connects it straight
+away and tells you which one. If you have more than one, it asks which one
+to use.
 
 > [!NOTE] A teammate's or shared inbox
 > A Connection signs in as the person who makes it, so you can only connect
