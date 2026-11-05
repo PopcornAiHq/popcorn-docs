@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/duplicate-routine
 title: duplicate_routine
-order: 311
+order: 312
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup:
   its Routine Template, on the same line, its Routine Settings and agent

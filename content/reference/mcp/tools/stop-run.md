@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/stop-run
 title: stop_run
-order: 349
+order: 350
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Stop one of a Routine's runs that's still going.
 concepts: [history]

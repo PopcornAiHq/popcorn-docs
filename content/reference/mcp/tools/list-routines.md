@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-routines
 title: list_routines
-order: 332
+order: 333
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List the Routines you can see in this workspace: the ones you're in
   (including Routines shared in from another workspace) and the ones you can

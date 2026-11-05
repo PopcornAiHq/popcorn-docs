@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-row
 title: get_row
-order: 316
+order: 317
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-05
 summary: >
   One row in full: every column, its rev (update_row needs it as
   expected_rev), when it was created and last changed, and its state if the

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/install-routine
 title: install_routine
-order: 323
+order: 324
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.
@@ -26,7 +26,7 @@ It installs the Routine Template the Routine already runs, never another one: a 
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `copy` | `str` | The name of a copy of this Routine's template to move onto, as copy_routine_template named it. |
-| `confirm` | `bool` | true to make the move. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to make the move. With a person there, show them the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id a move's dry run gave, with confirm=true and the same copy. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”

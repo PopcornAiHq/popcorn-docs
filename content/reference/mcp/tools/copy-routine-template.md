@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/copy-routine-template
 title: copy_routine_template
-order: 304
+order: 305
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-05
 summary: >
   Give a Routine its own named copy of the Routine Template it runs.
 concepts: [copying-a-template, versions]
@@ -25,7 +25,7 @@ The copy starts byte-identical to the version of Popcorn's template the Routine 
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `name` [required] | `str` | The copy's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. This only creates a copy; to move a Routine onto a copy that exists, use install_routine(copy=...). |
-| `confirm` | `bool` | true to make the copy. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to make the copy. With a person there, show them the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-rows
 title: list_rows
-order: 333
+order: 334
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List a table's rows, newest first unless sort says otherwise.
 concepts: [tables]

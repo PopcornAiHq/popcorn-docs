@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-setup
 title: get_setup
-order: 318
+order: 319
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in
   order: each done or not, which are required, and what each one left still
@@ -40,7 +40,7 @@ Setup: 4 of 6 steps done; 1 required left.
 - [done] Add your booking page (step: connect_booking_link) · set: "Consult with Acme"
   Warning: No booking of this page yet, so whose calendar it is can't be told until its first booking.
 - [left, required] Days to wait for a reply (step: setting_wait_days)
-  Needs a value for Days to wait for a reply (days, 1–30); it is set in the Routine's Today tab.
+  Needs a value for Days to wait for a reply (days, 1–30): complete_setup_step sets it.
 - [done] Connect your intake form (step: connect_intake_webhook)
 Also needed, with no step Popcorn shows: secret:portal_token.
 ```

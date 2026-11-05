@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-runs
 title: list_runs
-order: 334
+order: 335
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   The Routine's runs, newest first: the work each did or is doing, how it
   ended, when, what started it, and its reference.

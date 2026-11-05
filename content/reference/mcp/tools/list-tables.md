@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-tables
 title: list_tables
-order: 335
+order: 336
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List the tables in a Routine, with each one's row count.
 concepts: [tables]
