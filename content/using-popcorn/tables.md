@@ -7,7 +7,7 @@ summary: >
   A Routine's Tables hold its Items — claims, orders, contacts — as Rows and
   Columns. An assistant lists and reads them (list_tables, get_table,
   list_rows with filters, get_row) and adds, changes and deletes Rows
-  (create_rows and delete_rows after a dry run, update_row). An added Row
+  (create_rows, delete_rows after a dry run, update_row). An added Row
   can be a new Item the Routine's work picks up; a Row's Status changes
   only by an Action.
 lede: >
@@ -40,12 +40,12 @@ Workspace, and a Column holding a credential is never shown or written.
 
 ## Writing
 
-- `create_rows` adds up to 50 Rows, after a dry run. A Row that matches an
-  existing one on the Table's identifying Columns merges into it instead of
-  adding another. The dry run says which Rows would be added and which would
-  merge, and what an added Row starts; the call with `confirm=true` and the
-  same Rows writes them, and its response says which were added and which
-  merged.
+- `create_rows` adds up to 50 Rows. Up to ten Rows you named are added at
+  once; more than ten, or Rows put together from a file or a page, come back
+  as a dry run first. A Row that matches an existing one on
+  the Table's identifying Columns merges into it instead of adding another.
+  The dry run says which Rows would be added and which would merge, and what
+  an added Row starts; the response says which were added and which merged.
 - `update_row` changes some Columns of one Row. It needs the Row's revision
   from `get_row`: if the Row changed since, nothing is written and the
   response shows it as it is now.

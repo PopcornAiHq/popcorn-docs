@@ -55,9 +55,10 @@ with the warning each carries, and who may change it.
 
 ## Changing one
 
-`update_routine_setting` changes one setting on one Routine. The first call
-is a dry run that shows the old and new value and what the setting does;
-`confirm=true` makes the change. A switch takes one of its options; any other
+`update_routine_setting` changes one setting on one Routine: at once when
+you named the setting and its new value, and otherwise after a dry run that
+shows the old and new value and what the setting does. A switch to sending
+email without review is always a dry run first. A switch takes one of its options; any other
 setting keeps the shape of its default, so a list stays a list. A long text is
 changed with edits to the current text rather than resent whole. Work already
 under way keeps the value it started with.

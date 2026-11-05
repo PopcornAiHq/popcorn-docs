@@ -64,10 +64,13 @@ It should name the Workspace you chose.
 
 Every MCP tool call runs on your behalf with your permissions.
 
-Most changes, such as taking an
-[Action](https://docs.popcorn.ai/actions-and-status.md) or changing a
-setting, come back as a dry run first: the assistant shows you what would
-happen, and Popcorn asks it to check with you before going ahead. The [MCP server overview](https://docs.popcorn.ai/mcp.md) lists
+A change you ask for in so many words, such as taking an
+[Action](https://docs.popcorn.ai/actions-and-status.md) on Items you name
+or changing a setting to a value you give, happens at once. Other changes
+come back as a dry run first: the assistant shows you what would happen and
+checks with you before going ahead. That includes anything that can't be
+undone, anything the assistant chose for you, and a switch to sending email
+without review. The [MCP server overview](https://docs.popcorn.ai/mcp.md) lists
 which tools do this.
 
 > [!NOTE] Signing out ends access

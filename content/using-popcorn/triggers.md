@@ -7,7 +7,7 @@ summary: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message
   posted in it, from a document added to it, or from another system posting to
   it. list_triggers shows each one and whether it is paused; run_trigger runs
-  a Schedule now, without waiting for its time, for real after a dry run. A
+  a Schedule now, without waiting for its time, for real. A
   Schedule's cadence is a Routine Setting.
 lede: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message or
@@ -60,9 +60,9 @@ like a password.
 `run_trigger` runs one of a Routine's Schedules now, with the inputs it
 runs with on schedule. Its next scheduled Run still happens. The work is real
 — posts, emails and changes to Items happen as they would on schedule — so
-the first call is a dry run that says what will run, and only the call with
-`confirm=true` starts it. How the Run ended is shown in Popcorn, with the
-Routine's work.
+it runs at once only when you asked for that Schedule to run; otherwise your
+assistant shows you a dry run of what will run first. `get_run` shows how
+the Run is going or how it ended, as Popcorn does with the Routine's work.
 
 > [!WARNING] A timeout may still have run
 > Each confirmed call starts a Run: one that timed out may still have

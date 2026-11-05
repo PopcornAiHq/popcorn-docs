@@ -5,11 +5,11 @@ order: 6
 group: How a Routine works
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a
-  form to fill, an example of good work. It informs the Routine and is not one
-  of its Items. list_references names the ones a Routine has and the ones
-  it is still waiting for, and read_reference returns one's text or a
-  download link. People add References in Popcorn; adding some starts work,
-  which list_triggers lists.
+  form to fill, an example of good work, not one of its Items.
+  list_references names the ones a Routine has and is waiting for,
+  read_reference returns one's text or a download link, and add_reference
+  adds one, as Popcorn does; adding some starts work, which list_triggers
+  lists.
 lede: >
   A Reference is a document a Routine works from, such as a policy, a price
   list or an example of good work.
@@ -32,13 +32,14 @@ it starts (see
 
 ## Where they live today
 
-People add and replace References in the Routine, in Popcorn. Adding some
-documents also starts work, and `list_triggers` shows those under
-**Documents** (see [Triggers](https://docs.popcorn.ai/triggers.md)). In a
-claims intake Routine, adding the sample email sets up the first Step's
-questions and its first email, and adding the agreement, a Google Doc or a
-Word file, makes it the one sent for signature. The sample email is the one Reference
-that Routine requires.
+People add and replace References in the Routine, in Popcorn or through an
+assistant (below). Adding some documents also starts work, and
+`list_triggers` shows those under **Documents** (see
+[Triggers](https://docs.popcorn.ai/triggers.md)). In a claims intake
+Routine, adding the sample email sets up the first Step's questions and its
+first email, and adding the agreement, a Google Doc or a Word file, makes it
+the one sent for signature. The sample email is the one Reference that
+Routine requires.
 
 ## Which References a Routine has
 
@@ -86,8 +87,9 @@ one with why:
 - **The Routine's Steps.** `change_routine` changes them, with a preview
   and a way back; `add_reference` won't replace them wholesale.
 
-In the templates Popcorn ships today, every Reference is one of these, so
-in practice a person still adds them in Popcorn.
+Any other Reference an assistant adds with `add_reference`, such as the
+Questionnaire template's questionnaire in
+[Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md).
 
 The same people can add a Reference as in Popcorn: a Workspace admin, or a
 Member of the Routine who isn't a guest.
