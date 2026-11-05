@@ -7,9 +7,9 @@ summary: >
   A Connection is an account Popcorn uses on a Routine's behalf, such as the
   mailbox it reads or the calendar it books into. list_connections names
   each one the Routine needs, whose account it uses, and what stops without
-  it. With make_connection an assistant makes one after a dry run, from an
-  account the person signed in to, or as a Webhook. For Google it can hand
-  them the sign-in link.
+  it. With make_connection an assistant connects an account the person
+  signed in to, at once when they asked for it, or makes a Webhook. For
+  Google it can hand them the sign-in link.
 lede: >
   A Connection is an account Popcorn uses on a Routine's behalf, such as the
   mailbox it reads or the calendar it books into.
@@ -55,12 +55,16 @@ partly idle until someone connects it.
 
 `make_connection` makes one of a Routine's Connections: it connects an
 account the person has already signed in to, or makes the Webhook another
-system posts to. It is a dry run first; called again with `confirm=true`, it
-makes the Connection.
+system posts to. When the person asks to connect their own account to a
+Connection they name, it connects at once and says which account it used.
+Otherwise it's a dry run first, and called again with `confirm=true` it
+makes the Connection: when they haven't named the Connection, have more
+than one account to choose from, or would replace an account already
+connected, and always for a Webhook.
 
-- **An account.** Called without one, it lists the person's own accounts
-  that can serve the Connection, and whether each one's sign-in allows
-  everything it needs. Called with one, the dry run says what it connects,
+- **An account.** Called without one, it goes on with the person's only
+  account that can serve the Connection, or lists their accounts that can,
+  and whether each one's sign-in allows everything it needs. Called with one, the dry run says what it connects,
   which account it replaces, and what runs after. The account also fills the
   Routine's other Connections that it can serve and that have none yet (one
   Google account serves the inbox, calendar and Drive together);

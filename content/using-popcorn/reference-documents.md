@@ -73,10 +73,12 @@ that works for a limited time.
 ## Adding or replacing one
 
 `add_reference` adds or replaces a Reference from text, or from a file sent
-with `create_reference_upload`. It is a dry run first: it says whether this
-is a first add or a replacement and what the Routine uses the document for,
-and refuses a file the Reference doesn't take. Called again with
-`confirm=true`, it starts the same work Popcorn's **Replace** button starts.
+with `create_reference_upload`. A first add the person asked for happens at
+once. Replacing a document the Reference already has is a dry run first: it
+says what the Routine uses the document for and what it replaces, and the
+call with `confirm=true` and the dry run's plan starts the same work
+Popcorn's **Replace** button starts. A file the Reference doesn't take is
+refused either way.
 An assistant whose network access is restricted may not reach the upload,
 and sends a text document as `text` instead.
 

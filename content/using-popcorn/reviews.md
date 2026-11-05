@@ -49,7 +49,8 @@ Items at one Review in full.
 ## Making the choice
 
 `list_actions` shows the choices an Item offers, and `take_action` takes one
-after a dry run, as pressing its button would. A choice that opens a form,
+as pressing its button would: at once when you name the Item and the choice,
+after a dry run otherwise. A choice that opens a form,
 such as sending an agreement whose fields a person checks first, is marked
 `[in the Popcorn app]` and is made there.
 
