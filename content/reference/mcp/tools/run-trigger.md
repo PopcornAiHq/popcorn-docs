@@ -9,7 +9,7 @@ summary: >
   Run one of a Routine's schedules now, with the inputs it runs with on
   schedule.
 concepts: [triggers]
-used_with: [mcp/tools/list-history, mcp/tools/list-triggers]
+used_with: [mcp/tools/get-run, mcp/tools/list-history, mcp/tools/list-triggers]
 ---
 
 [writes] [destructive] [dry run]
@@ -18,7 +18,7 @@ used_with: [mcp/tools/list-history, mcp/tools/list-triggers]
 run_trigger(routine_id, trigger, confirm=False, plan_id=None)
 ```
 
-Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started. A started run comes back with its reference, which list_history's run follows.
+Its schedule is unchanged: the next scheduled run still happens. The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started. A started run comes back with its reference: get_run with it shows how it is going or how it ended, and list_history with it the items it changed.
 
 ## Arguments
 
@@ -48,7 +48,7 @@ Call again with `confirm=true` to run it now.
 Routine: #intake (c7d2…5b)
 Started the morning schedule's work.
 Run: run_WzEs…
-It runs in the background. list_history with that run shows how it is going or how it ended, and the items it changed; each of those items' own History lists it too.
+It runs in the background. get_run with that run shows how it is going or how it ended, and list_history with it the items it changed; each of those items' own History lists it too. Work it hands to runs of their own is in list_runs.
 ```
 
 The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
