@@ -7,7 +7,7 @@ summary: >
   Reviewing what needs you: see what is waiting and why with get_status; find
   the claims or other Items at a Review, or still open, with list_rows,
   filtering by Status; read one with get_row; see the choices it offers with
-  list_actions and take one with take_action after a dry run; stop tracking an
+  list_actions and take one with take_action; stop tracking an
   Item; correct Rows with update_row; and run a scheduled Trigger now with
   run_trigger.
 lede: >
@@ -73,21 +73,21 @@ assistant.
 
 `take_action` takes one Action on one or more Items, as a person pressing
 its button would. *Stop tracking* works the same way on any Item, to stop
-its follow-ups without closing it. The dry run says what happens to each
-Item and gives a `run_key`; read it back, then call again with
-`confirm=true` and that `run_key`. The Action is real — anything it sends or records happens — and
-the `run_key` makes it act once even if the call is repeated. `get_row`
-shows the new Status once it has applied.
+its follow-ups without closing it. When you name the Items and the Action,
+it acts at once. Otherwise it's a dry run first: it says what happens to
+each Item and gives a `run_key`, and the call with `confirm=true` and that
+`run_key` acts, once even if repeated. The Action is real: anything it sends
+or records happens. `get_row` shows the new Status once it has applied.
 
 ## Fix what is wrong
 
 - **A wrong value** — `update_row` with the Columns to change and the
   revision from `get_row`. If someone changed the Row in the meantime,
   nothing is written and the response shows the Row as it is now.
-- **A missing Item** — `create_rows`, after its dry run. A Row that
-  matches an existing one merges into it rather than adding a duplicate. An
-  added Item is picked up by the Routine's next Run, which may send it an
-  email, and the dry run says so.
+- **A missing Item** — `create_rows`, at once for up to ten Rows you name
+  and after a dry run otherwise. A Row that matches an existing one merges
+  into it rather than adding a duplicate. An added Item is picked up by the
+  Routine's next Run, which may send it an email.
 - **A duplicate** — `delete_rows`, after its dry run.
 
 > [!CAUTION] Deleting is permanent
@@ -101,5 +101,6 @@ Action. See [Tables, Rows and Columns](https://docs.popcorn.ai/tables.md).
 > "Send #intake's due follow-ups now, don't wait for the next check."
 
 `list_triggers` names the Routine's Schedules, and `run_trigger` runs one
-now, after a dry run. Its next scheduled Run still happens. How the Run ended
-is shown in Popcorn.
+now: at once when you asked for that Schedule, after a dry run otherwise.
+Its next scheduled Run still happens. `get_run` shows how the Run is going or
+how it ended.

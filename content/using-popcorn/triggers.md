@@ -7,7 +7,7 @@ summary: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message
   posted in it, from a document added to it, or from another system posting to
   it. list_triggers shows each one and whether it is paused; run_trigger runs
-  a Schedule now, without waiting for its time, for real after a dry run. A
+  a Schedule now, without waiting for its time, for real. A
   Schedule's cadence is a Routine Setting.
 lede: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message or

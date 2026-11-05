@@ -5,8 +5,8 @@ order: 13
 group: Customizing a Routine
 summary: >
   Changing how one Routine behaves: find the Routine Setting that covers it
-  with list_routine_settings, read it in full, change it with
-  update_routine_setting after a dry run, and confirm it. A setting stays with
+  with list_routine_settings, read it in full, and change it with
+  update_routine_setting. A setting stays with
   that Routine and can be set back. Otherwise: its Steps, with change_routine
   after reading the proposal; its other Instructions, in Popcorn; or a Copy of
   its own.
@@ -51,9 +51,11 @@ it accepts, its options and the warning each carries, and who may change it.
 
 > "The offsite is next week. Follow up every day on #team-offsite."
 
-`update_routine_setting` is a dry run first: it shows the old and new value
-and that the change reaches this Routine only. Read it back to the person,
-then call again with `confirm=true`.
+`update_routine_setting` makes the change at once when you named the setting
+and its new value, as here. Otherwise it's a dry run first: it shows the old
+and new value and that the change reaches this Routine only, and the
+assistant confirms once you agree. A switch to sending email without review
+is always a dry run first, with the warning above.
 
 - **A switch** takes one of its options.
 - **A value** keeps the shape of its default: a list stays a list.
