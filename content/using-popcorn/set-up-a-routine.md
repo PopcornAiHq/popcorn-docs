@@ -132,8 +132,9 @@ Routine is ready.
 > Before adding anyone, you can ask your assistant to set `#team-offsite`'s
 > send mode to `draft`, to check each email before it goes out. Each email
 > then waits in your Gmail Drafts for you to review and send, and its Row
-> shows *Waiting* as soon as it's drafted. When you're happy with them, set the send mode back
-> to `send`; your assistant shows a warning first, since emails then go out.
+> shows *Waiting* as soon as it's drafted. When you're happy with them, set
+> the send mode back to `send`. Your assistant warns you first that emails
+> will start going out.
 
 ## Add a Row
 
