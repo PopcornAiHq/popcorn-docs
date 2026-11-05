@@ -29,7 +29,7 @@ A run still going shows the step it's on; call again to follow it, or pass wait_
 | `run` [required] | `str` | The run's reference: run_trigger and take_action give it, and list_runs and list_history show it. |
 | `output` | `str` | One output's name, to read just that output whole. |
 | `cursor` | `str` | next_cursor from the previous range of that output. |
-| `wait_seconds` | `int` | Wait up to this many seconds for a run still going to end, then answer; the answer says whether it ended or the wait ran out. At most 20; 0, the default, doesn't wait. |
+| `wait_seconds` | `int` | Wait up to this many seconds for a run still going to end, then answer; the answer says whether it ended or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. With output, the wait comes first. |
 
 **Example** — “How did the chase turn on row 88 in #intake go?”
 
