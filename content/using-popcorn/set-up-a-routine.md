@@ -52,8 +52,9 @@ In your request:
 - **The name.** Spaces become hyphens, and a name already used in the
   Workspace is refused.
 
-Your assistant creates the Routine and tells you the Version that's
-installing, its Members, and the Connections to set up before it runs.
+Your assistant creates the Routine and tells you the
+[Version](https://docs.popcorn.ai/versions.md) that's installing, its
+Members, and the Connections to set up before it runs.
 Installing usually takes a few seconds, and your assistant waits for it to
 finish.
 
@@ -142,7 +143,7 @@ Each email address appears once in the Table, so adding one that's already
 there updates its Row instead. To add everyone at once, give your assistant
 the whole list.
 
-> [!TIP] Use drafts mode
+> [!TIP] Use draft mode
 > To check each email before it goes out, ask your assistant to set
 > `#team-offsite`'s send mode to `draft`. Each email then waits in your Gmail
 > Drafts for you to review and send, and its Row shows *Waiting* as soon as
@@ -155,12 +156,13 @@ the whole list.
 > [!TIP] MCP tool call
 > Your assistant calls `list_triggers`.
 
-Your assistant shows how work arrives: the Routine's Schedules and when they
-run, the messages and documents that start work, and any other system that
-posts to it.
+Your assistant shows how work arrives: the Routine's
+[Schedules](https://docs.popcorn.ai/schedules.md) and when they run, the
+messages and documents that start work, and any other system that posts to
+it.
 
-`#team-offsite` has one Schedule that runs every fifteen minutes. Each
-Run emails anyone new, such as Jane, and marks them *Waiting*. It then reads
+`#team-offsite` has one Schedule that runs every fifteen minutes. Each Run
+emails anyone new, such as Jane, and marks them *Waiting*. It then reads
 replies, records the answers on each Row, and follows up on any questions
 still open. Replacing the questionnaire also starts work, reading in the new
 questions.
@@ -182,7 +184,8 @@ quarter-hour. See [Triggers](https://docs.popcorn.ai/triggers.md).
 > Your assistant calls `list_rows`.
 
 Your assistant lists each person's Row in the `recipients` Table, with their
-Status and the answers recorded so far. Someone who has answered every
+[Status](https://docs.popcorn.ai/actions-and-status.md) and the answers
+recorded so far. Someone who has answered every
 question is *Answered*. Anyone still *Waiting* gets a follow-up about the
 questions they left open, until the reply-by date.
 
