@@ -144,9 +144,9 @@ the whole list.
 
 > [!TIP] Use drafts mode
 > To check each email before it goes out, ask your assistant to set
-> `#team-offsite`'s send mode to draft. Each email then waits in your Gmail
+> `#team-offsite`'s send mode to `draft`. Each email then waits in your Gmail
 > Drafts for you to review and send, and its Row shows *Waiting* as soon as
-> it's drafted. Set the send mode back to send once you're happy with them.
+> it's drafted. Set the send mode back to `send` once you're happy with them.
 
 ## See what starts its work
 
