@@ -42,8 +42,8 @@ Questionnaire template needs only Gmail.
 > "Create a private #team-offsite Routine from the Questionnaire template."
 
 > [!TIP] MCP tool call
-> Your assistant calls `create_routine`, then `get_routine`, which waits
-> until its **Install** field says `installed`.
+> Your assistant calls `create_routine`, then `get_routine`, waiting until
+> its **Install** field says `installed`.
 
 In your request:
 
@@ -104,8 +104,8 @@ asks which one to use.
 > 3. Which sessions would you like to attend?"
 
 > [!TIP] MCP tool call
-> Your assistant calls `add_reference`, passing the questions as its
-> `text`.
+> Your assistant calls `add_reference` for the `questionnaire` Reference,
+> passing the questions as its `text`.
 
 The questionnaire gives the Routine a subject line for its emails and the
 questions to ask.
@@ -128,6 +128,13 @@ date passes, it stops following up and marks anyone who hasn't answered as
 Your assistant confirms the date and tells you setup is complete. The
 Routine is ready.
 
+> [!TIP] Use draft mode
+> Before adding anyone, you can ask your assistant to set `#team-offsite`'s
+> send mode to `draft`, to check each email before it goes out. Each email
+> then waits in your Gmail Drafts for you to review and send, and its Row
+> shows *Waiting* as soon as it's drafted. When you're happy with them, set the send mode back
+> to `send`; your assistant shows a warning first, since emails then go out.
+
 ## Add a Row
 
 > "Add jane@example.com to #team-offsite as Jane."
@@ -141,13 +148,7 @@ Her email goes out on the Routine's next Run, which the next section covers.
 
 Each email address appears once in the Table, so adding one that's already
 there updates its Row instead. To add everyone at once, give your assistant
-the whole list.
-
-> [!TIP] Use draft mode
-> To check each email before it goes out, ask your assistant to set
-> `#team-offsite`'s send mode to `draft`. Each email then waits in your Gmail
-> Drafts for you to review and send, and its Row shows *Waiting* as soon as
-> it's drafted. Set the send mode back to `send` once you're happy with them.
+the whole list; a list of more than ten is shown to you before it's added.
 
 ## See what starts its work
 
@@ -187,7 +188,8 @@ Your assistant lists each person's Row in the `recipients` Table, with their
 [Status](https://docs.popcorn.ai/actions-and-status.md) and the answers
 recorded so far. Someone who has answered every
 question is *Answered*. Anyone still *Waiting* gets a follow-up about the
-questions they left open, until the reply-by date.
+questions they left open, every three days and up to three times, until the
+reply-by date.
 
 ## Change how it behaves
 
