@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/read-routine-file
 title: read_routine_file
-order: 344
+order: 345
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Read one file of the Routine Template version a Routine runs, exactly as
   stored.

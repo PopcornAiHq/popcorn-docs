@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/update-routine-setting
 title: update_routine_setting
-order: 351
+order: 352
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Change one of a Routine's settings, on this Routine only.
 concepts: [routine-settings]

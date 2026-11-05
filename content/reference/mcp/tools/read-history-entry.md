@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/read-history-entry
 title: read_history_entry
-order: 341
+order: 342
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   One change from an item's History, in full: every field it changed, before
   and after, who or what made it and why, and, when Popcorn's work made it,

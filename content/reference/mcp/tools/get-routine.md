@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-routine
 title: get_routine
-order: 313
+order: 314
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Show one Routine: its details, your membership, and its Routine Template,
   with the version it's on, the latest version, where its updates come from

@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/create-reference-upload
 title: create_reference_upload
-order: 305
+order: 306
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-05
 summary: >
   Get a URL to upload one file for one of a Routine's References, for
   add_reference to take.

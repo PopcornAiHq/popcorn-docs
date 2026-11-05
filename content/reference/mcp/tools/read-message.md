@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/read-message
 title: read_message
-order: 342
+order: 343
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   One message in a Routine, in full: its whole text, a line per attachment or
   other part, the reply count and thread_id, and its reactions (marking

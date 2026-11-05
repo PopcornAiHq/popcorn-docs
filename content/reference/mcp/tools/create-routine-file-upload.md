@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/create-routine-file-upload
 title: create_routine_file_upload
-order: 307
+order: 308
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-05
 summary: >
   Get a URL to upload one file you made, for create_routine_version to take.
 concepts: [copying-a-template, versions]

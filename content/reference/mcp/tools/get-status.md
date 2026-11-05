@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-status
 title: get_status
-order: 319
+order: 320
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Where a Routine's items stand: how many are at each Status, and what is
   waiting for a person, with why and the Actions that settle it (take_action

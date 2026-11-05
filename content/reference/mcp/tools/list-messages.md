@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-messages
 title: list_messages
-order: 327
+order: 328
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   A Routine's messages, newest first, or one thread's replies.
 concepts: []

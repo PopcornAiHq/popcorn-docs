@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-history
 title: list_history
-order: 326
+order: 327
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   What happened to one item: each change with who or what made it and why, the
   runs that changed it and how they ended, and its email turns.

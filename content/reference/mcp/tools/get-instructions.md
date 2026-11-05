@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-instructions
 title: get_instructions
-order: 312
+order: 313
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   A Routine's Instructions in one read: the guidance its agents work from,
   Routine-wide and for each Step, each with where it came from (the

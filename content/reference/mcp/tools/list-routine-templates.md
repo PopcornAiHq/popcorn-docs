@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-routine-templates
 title: list_routine_templates
-order: 331
+order: 332
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List the Routine Templates a new Routine in this workspace can start from.
 concepts: [set-up-a-routine]

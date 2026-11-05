@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-routine-change
 title: get_routine_change
-order: 314
+order: 315
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Where a change to a Routine's Steps stands: still drafting, the proposal as
   Steps before and after, refused and why, or installed.

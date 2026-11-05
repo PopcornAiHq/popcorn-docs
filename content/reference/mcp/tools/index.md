@@ -4,7 +4,7 @@ title: Tools
 order: 301
 group: MCP
 layout: lookup
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Every tool the hosted server offers, A to Z, each with whether it reads or
   writes and what it does, linking its own page.
@@ -13,8 +13,8 @@ lede: >
 concepts: [mcp]
 ---
 
-The 51 tools the hosted server offers, A to Z: 32 only read, and the
-other 19 write. A tool marked [dry run] only previews until it is
+The 52 tools the hosted server offers, A to Z: 32 only read, and the
+other 20 write. A tool marked [dry run] only previews until it is
 called again with `confirm=true`. Each tool's page has its call, its arguments
 and, for many, a worked example.
 
@@ -26,6 +26,7 @@ and, for many, a worked example.
 ## C
 
 - **[`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)** — [writes] [destructive] [dry run] Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
+- **[`complete_setup_step`](https://docs.popcorn.ai/mcp/tools/complete-setup-step.md)** — [writes] [destructive] [dry run] Complete one step of a Routine's setup that asks for a value, as its card on the Today tab in Popcorn does: a setting its work needs (a reply-by date, a waiting period) or a booking page's link. get_setup lists the steps and what each asks for.
 - **[`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)** — [writes] [destructive] [dry run] Give a Routine its own named copy of the Routine Template it runs.
 - **[`create_reference_upload`](https://docs.popcorn.ai/mcp/tools/create-reference-upload.md)** — [writes] Get a URL to upload one file for one of a Routine's References, for add_reference to take.
 - **[`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)** — [writes] Create a Routine in this workspace, optionally from a Routine Template.

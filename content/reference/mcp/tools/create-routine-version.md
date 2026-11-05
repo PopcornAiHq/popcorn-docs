@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/create-routine-version
 title: create_routine_version
-order: 308
+order: 309
 group: MCP
 parent: mcp/tools
-updated: 2026-11-01
+updated: 2026-11-05
 summary: >
   Save changes as the next version of the Routine's own copy of its Routine
   Template.
@@ -28,7 +28,7 @@ A new version reaches every Routine on that copy: this Routine installs it now, 
 | `base_version` | `int | str` | The version the files were read from, as list_routine_files' header shows it: the copy's newest version. Its number ("0.16.0") or its version id. Just after copy_routine_template, the Popcorn version the copy was made from works too. |
 | `changes` | `list[Change]` | The changes, one per file, applied in order. |
 | `changelog` | `str` | What changed and why, in a sentence or two. |
-| `confirm` | `bool` | true to create the version. Show the user the dry run first. Default `False`. |
+| `confirm` | `bool` | true to create the version. With a person there, show them the dry run first. Default `False`. |
 | `plan_id` | `str` | The plan_id the dry run gave, with confirm=true, in place of base_version, changes and changelog. |
 | `diff` | `DiffLevel` | How much of each file's diff the dry run shows: "full" (the default), "summary" (line counts) or "none". A deleted file is always one line. |
 

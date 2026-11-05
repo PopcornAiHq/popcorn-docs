@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-routine-files
 title: list_routine_files
-order: 329
+order: 330
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List the files of the Routine Template version a Routine runs, with sizes
   and sha256.

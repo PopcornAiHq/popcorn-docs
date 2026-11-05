@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/get-run
 title: get_run
-order: 317
+order: 318
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   One of a Routine's runs, by its reference: how it is going or how it ended,
   what started it, its inputs and outputs, the error it failed with, and its

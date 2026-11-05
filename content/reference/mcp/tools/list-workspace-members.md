@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/list-workspace-members
 title: list_workspace_members
-order: 337
+order: 338
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   List the members of this workspace, alphabetically by name.
 concepts: []

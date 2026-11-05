@@ -1,10 +1,10 @@
 ---
 id: mcp/tools/create-routine
 title: create_routine
-order: 306
+order: 307
 group: MCP
 parent: mcp/tools
-updated: 2026-11-04
+updated: 2026-11-05
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
 concepts: [set-up-a-routine]
