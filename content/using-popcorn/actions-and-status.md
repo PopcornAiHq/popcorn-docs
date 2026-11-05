@@ -8,7 +8,7 @@ summary: >
   Popcorn works it out from what has happened, so it is never written
   directly. Actions are what a person does to move an Item on: approve, send,
   close. list_actions shows the Actions an Item offers now; take_action takes
-  one, after a dry run, as pressing its button would.
+  one, as pressing its button would.
 lede: >
   An Item's Status says where it stands, and its Actions are what a person
   does to move it on, such as approve, send or close.
@@ -50,9 +50,10 @@ as. To list the Items at one, filter Rows on the Status Column with
 
 `take_action` takes one Action on one or more Items, as a person pressing
 its button in Popcorn would, and what the Action sends or records is real.
-The first call is a dry run: it says what happens to each Item and gives a
-`run_key`. The call with `confirm=true` and that `run_key` acts, once —
-sending it again finds the work it already started. An Item that does not
+When you name the Items and the Action, it acts at once. Otherwise the first
+call is a dry run: it says what happens to each Item and gives a `run_key`,
+and the call with `confirm=true` and that `run_key` acts, once — sending it
+again finds the work it already started. An Item that does not
 offer the Action now is refused.
 
 The Action applies in the background; `get_row` shows the Item's new Status

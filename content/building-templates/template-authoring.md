@@ -187,9 +187,10 @@ changelog: the Copy starts with the same files, so the Version the first
 dry run was based on names the Copy's first Version. Confirm with the
 `plan_id` from that second dry run, which shows the reach.
 
-Copying a template, a new Version, an Install onto another Copy and a
-change to a setting are each a dry run until called again with
-`confirm=true`. An `install_routine` with no `copy` on a Routine behind its
+Copying a template, a new Version and an Install onto another Copy are each
+a dry run until called again with `confirm=true`. A change to a setting is
+made at once when the person gave the value, and is a dry run first
+otherwise, or when the new value carries a warning. An `install_routine` with no `copy` on a Routine behind its
 Copy, and `create_routine`, start at once; and
 `change_routine` with a `request` starts drafting at once, though it
 installs nothing until confirmed. `create_routine_version` takes changes, not a tree: each one

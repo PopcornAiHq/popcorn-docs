@@ -44,10 +44,14 @@ changed any Item:
   is going or how it ended, with its failure message, and the Items it
   changed, or what it did when it changed none. It takes the Run reference
   `run_trigger` returns, so it follows a Run the assistant started.
+- **`list_runs`** lists the Routine's Runs, newest first, whatever started
+  them, including ones that changed no Item; `get_run` shows one: what
+  started it, its inputs and outputs, its newest steps and the error it
+  failed with.
 
 History has limits that send you to the CLI. A Run is listed under an Item
 only when it wrote to that Item, so a Run that failed before writing anything
-is in no Item's History. In a Workspace that guards personal data, a failure
+is in no Item's History, though `list_runs` finds it. In a Workspace that guards personal data, a failure
 shows only that a Step failed, not its message. And History names a Run by
 the work it did, never by its `workflow_id`, which is how the CLI addresses
 a Run. For the Activity failures, the full timeline and the inputs to run it
