@@ -75,6 +75,4 @@ Only runs that wrote to this item are listed; a run that only read it isn't.
 History goes back 30 days; older changes aren't kept.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

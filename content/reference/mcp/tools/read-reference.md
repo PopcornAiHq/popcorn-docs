@@ -48,6 +48,4 @@ Thanks for reaching out. To get your claim started, please reply with:
 3. Photos of the damage
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

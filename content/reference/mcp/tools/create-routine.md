@@ -42,6 +42,4 @@ Claim Coordinator (claimcoordinator) 0.15.1 is installing in the background. Wat
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

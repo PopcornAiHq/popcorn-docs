@@ -57,6 +57,4 @@ Started replacing Questions and first email (reference "questions").
 Popcorn reads the file in the background. list_references shows it once it's in, as added just now; if it isn't after a few minutes, the Reference's card in Popcorn says why.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

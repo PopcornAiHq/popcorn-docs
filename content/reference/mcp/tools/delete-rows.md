@@ -51,6 +51,4 @@ Routine: #intake (c7d2…5b) · table: claims
 Deleted 1 of 1 rows: row 91.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

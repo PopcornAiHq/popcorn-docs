@@ -7,8 +7,8 @@ summary: >
   The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a
   person's assistant tools for their Routines, and its docs as Resources. This
   page says what the tools do, the one Workspace a connection works in, and
-  how to attach a docs page. The Tools page lists every tool, with what every
-  call shares: `routine` and `routine_id`, dry runs and paging.
+  how to attach a docs page. Adding the server and the list of tools have
+  pages of their own.
 lede: >
   Popcorn's MCP server lets your assistant work on your Routines for you.
 concepts: [add-the-mcp-server, app-bundle, versions, copying-a-template]
@@ -17,9 +17,7 @@ concepts: [add-the-mcp-server, app-bundle, versions, copying-a-template]
 ## Connect your assistant
 
 The server's address is `https://mcp.popcorn.ai/mcp`. [Add the MCP
-server](https://docs.popcorn.ai/add-the-mcp-server.md) has the steps for
-Claude, Claude Code and other assistants, from signing in and choosing a
-Workspace to checking the connection.
+server](https://docs.popcorn.ai/add-the-mcp-server.md) has the steps.
 
 > [!NOTE] One Workspace at a time
 > Every call runs as you, with your permissions, in the one Workspace the
@@ -29,8 +27,7 @@ Workspace to checking the connection.
 ## Tools
 
 The [Tools](https://docs.popcorn.ai/mcp/tools.md) page lists every tool and
-the patterns they share, such as naming a Routine, previewing a change
-before it's made, and paging through long lists.
+what they share.
 
 Some things your assistant can do:
 

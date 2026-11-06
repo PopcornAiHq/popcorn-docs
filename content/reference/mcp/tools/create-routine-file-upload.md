@@ -51,6 +51,4 @@ Then pass it to create_routine_version with this change (add expected_sha256 to 
 If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

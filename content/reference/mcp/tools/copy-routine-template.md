@@ -47,6 +47,4 @@ Copy: Popcorn's Claim Coordinator (claimcoordinator) 0.15.1 (version 812) → ne
 Call again with `confirm=true` to make copy "acme-intake" of the template.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

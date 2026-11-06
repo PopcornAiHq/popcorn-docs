@@ -7,49 +7,33 @@ layout: lookup
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Every tool the hosted server offers, A to Z, each with whether it reads or
-  writes and what it does, linking its own page.
+  Every tool the hosted server offers and what it does, with what its badges
+  mean and which tools preview a change before making it.
 lede: >
-  Every tool on the server, A to Z, each linking its own page.
+  Every tool on the server, and how your assistant calls them.
 concepts: [mcp]
 ---
 
-Every tool the hosted server offers, A to Z. Each tool's page has its call,
-its arguments and, for many, a worked example. Every call runs as you, in
-the one Workspace your assistant is connected to; the [MCP server
-overview](https://docs.popcorn.ai/mcp.md) says how to choose it.
+Each tool's page, generated from the server's own definitions, has its call
+and arguments. Many also have a worked example.
 
-A [read-only] tool takes a Routine as `routine`, by its `#name` or its ID. A
-tool that [writes] takes the ID only, as `routine_id`.
+A tool's badges say how it behaves. The first four are hints the server
+declares to your assistant, helping it decide what to ask before a call:
 
-A tool marked [dry run] previews, then acts when called again with
-`confirm=true`:
+| Badge | Means |
+|---|---|
+| [read-only] | Safe to call any time. Takes a Routine's `#name` or ID, as `routine` |
+| [writes] | May ask you first. Takes a Routine's ID only, as `routine_id` |
+| [destructive] | Can remove or overwrite what's there |
+| [idempotent] | Calling it again with the same arguments changes nothing more |
+| [dry run] | Previews first, and acts when called again with `confirm=true` |
+| [required] | Marks an argument that must be passed |
 
-```text
-→ delete_rows(…, row_ids=[91])                dry run: lists the rows
-→ delete_rows(…, row_ids=[91], confirm=true)  deletes them
-```
-
-For some, your assistant confirms straight away when you asked for that
-change yourself, such as an Action on Items you named; others, such as
-deleting rows, always preview first. Each tool's page says which.
-
-A listing returns one page and a `next_cursor`: pass it back with the same
-arguments for the next page.
-
-The other badges are the hints the server declares to your assistant's app,
-which may use them to decide what to ask before a call: [read-only], or
-[writes] with [destructive] or [idempotent]. On a tool's page, an argument
-marked [required] must be passed, and any other may be left out.
-
-A worked example is a request a person might make, each call an assistant
-makes for it, marked `→`, and what the tool returns. The response is the
-server's real output for sample data, the Workspace Acme, produced by its
-tests. It leaves out the Workspace line, shortens IDs as `8c1f…e2`, and
-keeps the first rows of a long listing.
-
-The list below and each tool's page are generated from the server's own
-definitions after each prod deploy, and never edited by hand.
+> [!NOTE] Straight to it
+> Some [dry run] tools act straight away when you've asked for the change
+> yourself, such as an Action on Items you named. Others, such as
+> [deleting rows](https://docs.popcorn.ai/mcp/tools/delete-rows.md), always
+> preview first. Each tool's page says which.
 
 <!-- generated: tools -->
 ## A
