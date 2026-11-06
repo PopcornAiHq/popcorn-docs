@@ -14,12 +14,26 @@ lede: >
 concepts: [mcp]
 ---
 
-The 52 tools the hosted server offers, A to Z: 32 only read, and the
-other 20 write. A tool marked [dry run] only previews until it is
-called again with `confirm=true`. Each tool's page has its call, its arguments
-and, for many, a worked example.
+Every tool the hosted server offers, A to Z. A tool marked [dry run] only
+previews until it is called again with `confirm=true`. Each tool's page has
+its call, its arguments and, for many, a worked example. What every tool
+shares is on the [MCP server overview](https://docs.popcorn.ai/mcp.md).
 
+The other badges are the hints the server declares to your assistant's app,
+which may use them to decide what to ask before a call: `[read-only]`, or
+`[writes]` with `[destructive]` or `[idempotent]`. On a tool's page, an
+argument marked `[required]` must be passed, and any other may be left out.
 
+A worked example is a request a person might make, each call an assistant
+makes for it, marked `→`, and what the tool returns. The response is the
+server's real output for sample data, the Workspace Acme, produced by its
+tests. It leaves out the Workspace line, shortens IDs as `8c1f…e2`, and
+keeps the first rows of a long listing.
+
+The list below and each tool's page are generated from the server's own
+definitions after each prod deploy, and never edited by hand.
+
+<!-- generated: tools -->
 ## A
 
 - **[`add_reference`](https://docs.popcorn.ai/mcp/tools/add-reference.md)** — [writes] [destructive] [dry run] Add one of a Routine's References, or replace the one it has, as Replace on the Reference's card in Popcorn does.
@@ -104,3 +118,4 @@ and, for many, a worked example.
 
 - **[`update_routine_setting`](https://docs.popcorn.ai/mcp/tools/update-routine-setting.md)** — [writes] [destructive] [dry run] Change one of a Routine's settings, on this Routine only.
 - **[`update_row`](https://docs.popcorn.ai/mcp/tools/update-row.md)** — [writes] [idempotent] Change some columns of one row.
+<!-- /generated -->

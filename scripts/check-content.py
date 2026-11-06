@@ -33,6 +33,8 @@ Checks, in the order a writer meets them:
   as generated — for a reader opening the file, for the build, which names
   such a page in llms-full.txt without inlining it, and for the script, which
   rewrites or removes only the pages that name it
+* a generated region (`fences.py`) is a well-formed pair of markers, on a
+  page whose `generated:` names the script that fills it
 * `updated` and `version` only on a generated page, never both. `updated`,
   when present, is a real `YYYY-MM-DD` date: a malformed one would be a
   claim about freshness nobody can read. A hand-written page has neither: git
@@ -63,6 +65,8 @@ import datetime
 import pathlib
 import re
 import sys
+
+import fences
 
 SUMMARY_MAX = 400
 # A link preview cuts a description off at about this length, and a lede that
@@ -167,6 +171,11 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
             problems.append(f"generated: '{script}' is not a script in scripts/")
         if section_of(path) != "reference":
             problems.append("generated: is for a reference page; a generator writes only there")
+
+    if fences.unbalanced(body):
+        problems.append("a generated region's markers are unpaired or misnamed (see scripts/fences.py)")
+    if fences.names(body) and not generated:
+        problems.append("generated regions need generated: naming the script that fills them")
 
     updated = _UPDATED.search(front)
     if len(_UPDATED.findall(front)) > 1:

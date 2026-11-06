@@ -75,6 +75,7 @@ import re
 import shutil
 import sys
 
+import fences
 import render
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -132,7 +133,9 @@ def parse(path: pathlib.Path) -> dict:
     # would come before 2. check-content.py rejects anything that is not one.
     if "order" in meta:
         meta["order"] = int(meta["order"])
-    meta["body"] = doc.group("body").strip()
+    # A generated region's markers are for the script that fills it, never
+    # for a reader: removed here, before the page, its twin or a chunk is built.
+    meta["body"] = fences.strip(doc.group("body")).strip()
     # The page's part, or for a page that serves both parts, its kind: read
     # from the content directory it lives in. A page's URL never includes
     # either; see `href`.

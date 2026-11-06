@@ -99,7 +99,7 @@ written, and the glossary should link to it instead.
 
 ## `content/reference/`
 
-**Generated, except a section's overview. A generated page is never hand-edited.**
+**Generated, except the prose around it. What a script writes is never hand-edited.**
 
 **Audience:** an agent that needs exact argument names, and a person checking
 one.
@@ -110,12 +110,15 @@ tools, each with the script that generates it (`sync-activities.py`,
 and a per-app states rendering belong here too, and land here only once
 something generates them — never hand-written in the meantime.
 
-**The one exception** is a section's overview, such as the MCP server
-overview (`mcp/index.md`): what the section's entries share and how to start,
-which no definition in the backend says. It is hand-written like any other
-page. Every generated page carries `generated:`, naming the script that
-writes it, and a hand-written overview does not, so its generator never
-rewrites or removes it.
+**The exceptions** are the prose no definition in the backend says. A
+section's overview, such as the MCP server overview (`mcp/index.md`) or the
+Activities one, is what the section's entries share and how to start: it is
+hand-written like any other page, without `generated:`, so its generator
+never rewrites or removes it. An index or landing page that wraps a derived
+list or table — the Tools page, the CLI overview — is hand-written around a
+*generated region* the script fills (`content/_frontmatter.md` has the
+markers), so the prose has one copy, in the page, and the data has one
+writer.
 
 **The test:** *is there a symbol in the backend that already enforces this?*
 Then it is generated, and hand-writing it creates a second source that will

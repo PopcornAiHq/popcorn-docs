@@ -4,12 +4,14 @@
 The pages list the tools the hosted Popcorn MCP server exposes, each with its
 arguments, as the server itself declares them: the name and signature of each
 function registered with `@mcp.tool`, its docstring, and its annotations.
-`mcp/tools/index.md` lists every tool A to Z, one line each, and each tool has
-a page of its own under it (`mcp/tools/get-status.md`) with its signature,
-arguments and example. They are generated, never hand-written, for the same
-reason as the activity reference — the definitions are what the server
-serves, and a hand-kept list is a second source that can only drift from
-them.
+Each tool has a page of its own (`mcp/tools/get-status.md`) with its
+signature, arguments and example, and the Tools page (`mcp/tools/index.md`)
+lists every tool A to Z, one line each. They are generated, never
+hand-written, for the same reason as the activity reference — the
+definitions are what the server serves, and a hand-kept list is a second
+source that can only drift from them. The Tools page's prose and frontmatter
+are hand-written, though: this script fills only its `tools` region
+(`fences.py`).
 
 The MCP overview above them, `mcp/index.md`, is hand-written: what the
 server offers, how to connect, and what every tool shares, none of which a
@@ -57,6 +59,7 @@ import re
 import sys
 import textwrap
 
+import fences
 import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -67,9 +70,9 @@ GENERATED_BY = "scripts/sync-mcp.py"
 # The tool index, and the parent of every tool's page: its URL is the folder
 # the tool pages sit in.
 TOOLS = "mcp/tools"
-# Where the MCP pages sit among the reference pages: after the hand-written
-# overview, `mcp/index.md`, which is `ORDER` itself; the tool index, then each
-# tool.
+# Where the MCP pages sit among the reference pages. The overview
+# (`mcp/index.md`) is `ORDER` and the Tools page `ORDER + 1`, both hand-written
+# with their own `order:`; each tool's page follows from `ORDER + 2`.
 ORDER = 300
 DEFAULT_BACKEND = pathlib.Path.home() / "popcorn" / "backend"
 TOOLS_DIR = ("services", "mcp", "tools")
@@ -417,28 +420,12 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -
     return "\n".join(out).rstrip() + "\n"
 
 
-def tools_page(found: list[dict], order: int) -> str:
-    """Every tool A to Z under a heading for its first letter, one line each:
-    its badges and what it does, linking its page. The tool pages are this
-    page's children in the sidebar."""
-    out = header(
-        id=TOOLS,
-        title="Tools",
-        order=order,
-        summary="Every tool the hosted server offers, A to Z, each with whether it reads "
-                "or writes and what it does, linking its own page.",
-        lede="Every tool on the server, A to Z, each linking its own page.",
-        concepts=["mcp"],
-        lookup=True,
-    )
-    reads = sum(1 for t in found if t["hints"].get("readOnlyHint"))
-    out += [
-        f"The {len(found)} tools the hosted server offers, A to Z: {reads} only read, and the",
-        f"other {len(found) - reads} write. A tool marked [dry run] only previews until it is",
-        "called again with `confirm=true`. Each tool's page has its call, its arguments",
-        "and, for many, a worked example.",
-        "",
-    ]
+def tool_list(found: list[dict]) -> str:
+    """The Tools page's `tools` region: every tool A to Z under a heading for
+    its first letter, one line each — its badges and what it does, linking its
+    page. The page around it, and its frontmatter, are hand-written; the tool
+    pages are its children in the sidebar."""
+    out = []
     letter = None
     for tool in sorted(found, key=lambda t: t["name"]):
         if tool["name"][0].upper() != letter:
@@ -447,13 +434,17 @@ def tools_page(found: list[dict], order: int) -> str:
         first, _ = lead(tool["summary"])
         out.append(f"- **[`{tool['name']}`](https://docs.popcorn.ai/{tool_id(tool['name'])}.md)** — "
                    f"{access(tool)} {cell(first)}")
-    return "\n".join(out).rstrip() + "\n"
+    return "\n".join(out).strip("\n")
 
 
 def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     """Every MCP page, by the path it is written to, without `updated:`."""
     names = {t["name"] for t in found}
-    out = {REFERENCE / TOOLS / "index.md": tools_page(found, ORDER + 1)}
+    index = REFERENCE / TOOLS / "index.md"
+    if not index.exists():
+        sys.exit(f"✖  {index.relative_to(ROOT)} is missing — it is hand-written, with a `tools` region")
+    page = fences.fill(index.read_text(), {"tools": tool_list(found)}, str(index.relative_to(ROOT)))
+    out = {index: platform_version.without(page)}
     for n, tool in enumerate(sorted(found, key=lambda t: t["name"]), 2):
         out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n, names)
     return out
@@ -485,7 +476,7 @@ def main() -> int:
         path: platform_version.stamp(text, path.read_text() if path.exists() else "", args.platform)
         for path, text in pages(found, shown).items()
     }
-    stale = [p for p in (REFERENCE / "mcp").rglob("*.md") if p not in wanted and ours(p)]
+    stale = [p for p in (REFERENCE / "mcp").rglob("*.md") if p not in wanted and ours(p) and not fences.names(p.read_text())]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:

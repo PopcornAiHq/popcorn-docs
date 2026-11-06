@@ -19,7 +19,8 @@ A name is allowed:
 
 Not checked: the glossary, which defines the names, and generated pages
 (those carrying `generated:`), whose text comes from the
-platform itself.
+platform itself — except the prose around a page's generated regions
+(`fences.py`), which a person wrote.
 
 Some names are everyday English as well — a person's *app*, a *project*, a
 *record* of what happened — and can't be told apart from the platform's word
@@ -45,6 +46,8 @@ from __future__ import annotations
 import pathlib
 import re
 import sys
+
+import fences
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
@@ -204,8 +207,16 @@ def main() -> int:
         text = f.read_text()
         # The Overview has no frontmatter; it is prose all the same.
         doc = _DOC.match(text) or _DOC.match(f"---\n\n---\n{text}")
-        if not doc or _GENERATED.search(doc.group("fm")):
+        if not doc:
             continue
+        if _GENERATED.search(doc.group("fm")):
+            # A generated page's words are the platform's — except the prose a
+            # person wrote around its generated regions, which is checked like
+            # any page, with the regions taken out (and its line numbers with
+            # them).
+            if not fences.names(text):
+                continue
+            doc = _DOC.match(fences.outside(text))
         checked += 1
         for hit in capitalization(f, doc):
             found.setdefault(f.stem, []).append(hit)

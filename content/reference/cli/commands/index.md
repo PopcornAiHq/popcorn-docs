@@ -14,10 +14,12 @@ lede: >
 concepts: [cli]
 ---
 
-Every command `popcorn` 0.63.1 lists in its help menu, A to Z: 87 with
-their subcommands. Each page shows the Usage line and arguments;
-`popcorn <command> --help` describes the one you have installed.
+Every command `popcorn` lists in its help menu, A to Z, with their
+subcommands. Each page shows the Usage line and arguments for the version
+beside its title; `popcorn <command> --help` describes the one you have
+installed.
 
+<!-- generated: commands -->
 - **[`api`](https://docs.popcorn.ai/cli/commands/other.md#api)** — Raw API call (escape hatch, like gh api)
 - **[`app`](https://docs.popcorn.ai/cli/commands/app.md)** — App bundles — fork, check out, edit and publish one
 - **[`auth`](https://docs.popcorn.ai/cli/commands/auth.md)** — Auth commands (login, logout, status, token)
@@ -36,3 +38,4 @@ their subcommands. Each page shows the Usage line and arguments;
 - **[`webhook`](https://docs.popcorn.ai/cli/commands/webhook.md)** — Webhook commands (create, list, get, update, delete, override-rules get/set, deliveries, event-types, send)
 - **[`whoami`](https://docs.popcorn.ai/cli/commands/other.md#whoami)** — Show current user and workspace
 - **[`workspace`](https://docs.popcorn.ai/cli/commands/workspace.md)** — Workspace commands (check-access, inbox, list, switch, users)
+<!-- /generated -->

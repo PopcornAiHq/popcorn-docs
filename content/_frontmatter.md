@@ -102,15 +102,35 @@ group, and each `###` heading or bold-led bullet (`- **term** — …`) is an
 entry, so prose on such a page that needs bold-led points uses a numbered
 list. It is the only value; omit the field for every other page.
 
-**`generated`** names the script that writes the page, and is on every page
-a script writes and no other: a hand-written page leaves it out. It is the
-one mark of a generated page. A person opening the file sees it is not
-theirs to edit; the build names such a page in `llms-full.txt` without its
+**`generated`** names the script that writes the page, or part of it, and
+is on every such page and no other: a wholly hand-written page leaves it out.
+It is the one mark of a generated page. A person opening the file sees which
+script writes it; the build names such a page in `llms-full.txt` without its
 body; `check-vocabulary.py` leaves its wording to the platform it describes;
 and the script rewrites or removes only the pages that name it, so a
 hand-written page can sit beside generated ones, as the MCP overview does.
 Every generated page is a reference page, and `check-content.py` fails the
 field anywhere else, or naming a script that does not exist.
+
+**Generated regions.** An index or landing page whose prose a person writes
+around a list a script derives — the Tools page, the CLI overview, the
+Commands page, the Activity Catalog — keeps that prose in the page and marks
+the derived part:
+
+```
+<!-- generated: tools -->
+…written by the script…
+<!-- /generated -->
+```
+
+The script replaces only what is between the markers and leaves every other
+line, frontmatter included, as written; `scripts/fences.py` says how. Such a
+page carries `generated:` too, and its prose is edited in place like any
+page's: `check-vocabulary.py` reads it, with the regions taken out. The
+markers never reach a reader. `check-content.py` fails an unpaired marker,
+and a region on a page whose `generated:` does not name a script, and the
+script stops on a region it does not write or one it writes and the page
+lacks.
 
 **`version`** is written by a generator whose page describes one release of
 something — `sync-cli.py` records the `popcorn` version it read — and is shown
