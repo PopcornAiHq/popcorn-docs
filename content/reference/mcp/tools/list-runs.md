@@ -43,6 +43,6 @@ get_run with a run's reference shows it: its steps, outputs and how it ended; li
 list_history with an item's row_id shows that item's History, the runs that changed it among them.
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
+shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
+with `next_cursor`.

@@ -38,6 +38,6 @@ Routine: #intake (c7d2…5b)
 - Contacts  3 rows
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
+shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
+with `next_cursor`.

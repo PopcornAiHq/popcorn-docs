@@ -55,6 +55,6 @@ Run: run_WzEs…
 It applies in the background; get_row shows each item's new Status once it has, and get_run with that run shows how it went.
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
+shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
+with `next_cursor`.

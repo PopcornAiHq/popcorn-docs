@@ -44,6 +44,6 @@ Routine: #intake (c7d2…5b)
 [2026-09-29 09:00] (id: e769…47) Intake agent: Morning summary: 3 new claims overnight, 2 waiting on a repair estimate.
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
+shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
+with `next_cursor`.
