@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-workspace-members
 title: list_workspace_members
-order: 338
+order: 340
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   List the members of this workspace, alphabetically by name.
 concepts: []

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-history
 title: list_history
-order: 327
+order: 328
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   What happened to one item: each change with who or what made it and why, the
   runs that changed it and how they ended, and its email turns.

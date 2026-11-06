@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/react
 title: react
-order: 340
+order: 342
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Add an emoji reaction to a Routine message, or take yours off with
   remove=true.

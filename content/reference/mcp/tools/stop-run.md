@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/stop-run
 title: stop_run
-order: 350
+order: 352
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Stop one of a Routine's runs that's still going.
 concepts: [history]

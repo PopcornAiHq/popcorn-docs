@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-routine
 title: get_routine
-order: 314
+order: 315
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Show one Routine: its details, your membership, and its Routine Template,
   with the version it's on, the latest version, where its updates come from

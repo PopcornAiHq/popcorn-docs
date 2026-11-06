@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-message
 title: read_message
-order: 343
+order: 345
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   One message in a Routine, in full: its whole text, a line per attachment or
   other part, the reply count and thread_id, and its reactions (marking
