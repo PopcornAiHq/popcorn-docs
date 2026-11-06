@@ -4,6 +4,7 @@ title: search_docs
 order: 347
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles,

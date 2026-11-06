@@ -4,6 +4,7 @@ title: create_routine_version
 order: 309
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Save changes as the next version of the Routine's own copy of its Routine

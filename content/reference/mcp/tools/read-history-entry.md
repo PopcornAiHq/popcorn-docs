@@ -4,6 +4,7 @@ title: read_history_entry
 order: 342
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   One change from an item's History, in full: every field it changed, before

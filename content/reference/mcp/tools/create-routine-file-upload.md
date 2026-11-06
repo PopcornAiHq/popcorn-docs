@@ -4,6 +4,7 @@ title: create_routine_file_upload
 order: 308
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Get a URL to upload one file you made, for create_routine_version to take.

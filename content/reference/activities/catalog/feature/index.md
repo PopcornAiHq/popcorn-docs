@@ -5,6 +5,7 @@ order: 103
 group: Activities
 parent: activities/catalog
 layout: lookup
+generated: scripts/sync-activities.py
 updated: 2026-10-31
 summary: >
   The feature tier: operations that build on the foundation tier for one

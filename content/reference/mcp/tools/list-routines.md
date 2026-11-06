@@ -4,6 +4,7 @@ title: list_routines
 order: 333
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List the Routines you can see in this workspace: the ones you're in

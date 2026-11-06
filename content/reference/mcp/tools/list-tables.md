@@ -4,6 +4,7 @@ title: list_tables
 order: 336
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List the tables in a Routine, with each one's row count.

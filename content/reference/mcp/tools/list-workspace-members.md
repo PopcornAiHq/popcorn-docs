@@ -4,6 +4,7 @@ title: list_workspace_members
 order: 338
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List the members of this workspace, alphabetically by name.

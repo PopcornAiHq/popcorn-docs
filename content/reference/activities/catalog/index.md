@@ -4,6 +4,7 @@ title: Activity Catalog
 order: 101
 group: Activities
 layout: lookup
+generated: scripts/sync-activities.py
 updated: 2026-10-31
 summary: >
   The Activity Catalog: every activity a Flow can call at release or beta

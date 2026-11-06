@@ -4,6 +4,7 @@ title: install_routine
 order: 324
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Install the newest version of a Routine's copy of its template, or move it

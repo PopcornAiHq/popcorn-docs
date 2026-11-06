@@ -5,6 +5,7 @@ order: 212
 group: CLI
 parent: cli/commands
 layout: lookup
+generated: scripts/sync-cli.py
 version: 0.63.1
 summary: >
   The CLI's commands that have no subcommands, each with what it does, its

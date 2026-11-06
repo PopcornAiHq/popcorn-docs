@@ -4,6 +4,7 @@ title: read_reference
 order: 344
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   One of a Routine's References: its text, or a download link for a file that

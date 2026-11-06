@@ -4,6 +4,7 @@ title: get_setup
 order: 319
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in

@@ -4,6 +4,7 @@ title: list_references
 order: 329
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   The documents a Routine works from (its References), each with what it is

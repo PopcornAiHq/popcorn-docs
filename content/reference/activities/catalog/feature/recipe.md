@@ -5,6 +5,7 @@ order: 138
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
+generated: scripts/sync-activities.py
 updated: 2026-10-31
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and

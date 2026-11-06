@@ -4,6 +4,7 @@ title: list_triggers
 order: 337
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List how work arrives in a Routine: each schedule with its cadence, each

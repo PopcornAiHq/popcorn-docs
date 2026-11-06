@@ -4,6 +4,7 @@ title: list_messages
 order: 328
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   A Routine's messages, newest first, or one thread's replies.

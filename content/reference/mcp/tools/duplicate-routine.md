@@ -4,6 +4,7 @@ title: duplicate_routine
 order: 312
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup:

@@ -3,6 +3,7 @@ id: activities
 title: Activities
 order: 100
 group: Activities
+generated: scripts/sync-activities.py
 updated: 2026-10-31
 summary: >
   An Activity is a platform operation a Flow Step calls by its wire name, such
