@@ -321,11 +321,63 @@ _CODE_LINE = re.compile(r"^[{\[]")
 _INLINE_JSON = re.compile(r'(?<!`)\{"[^{}`]*\}(?!`)')
 
 
-def description(text: str) -> list[str]:
+# Text inline() leaves as it is: code already, a link, or an address.
+_KEPT = re.compile(r"`[^`]*`|\[[^\]]*\]\([^)]*\)|https?://\S+")
+# An argument given a value, as a call writes it: confirm=true, sort="recent".
+_ASSIGNED = re.compile(
+    r'(?<![\w`])[a-z][a-z0-9_]*=(?:true|false|None|"[^"]*"|-?\d+|[a-z][a-z0-9_]*)\b'
+)
+# A snake_case name: a tool's or an argument's. Not the last part of a
+# dotted name (foundation.store.upsert_rows), nor a call written out.
+_IDENT = re.compile(r"(?<![\w.`/-])[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?![\w(`])")
+# A paragraph that opens with a short label and then a sentence of its own
+# ("Webhooks: For a webhook Connection, …") is a topic: the label is set as
+# a run-in heading, so a long description can be scanned. The capital after
+# the colon is what makes it a label; "Its schedule is unchanged: the next
+# run still happens" is a sentence, and stays one.
+_LABEL = re.compile(r"^([A-Z][\w'’-]*(?: [\w'’-]+){0,3}): ([A-Z].*)$")
+
+
+class Inline:
+    """Sets the names a description uses as code, whether or not the
+    docstring did: every tool name, each linking its page the first time a
+    page names it (never the page's own tool), and every other snake_case
+    name or argument=value, as an argument table and a call show them. What
+    is code, a link or an address already is left as it is. The docstrings
+    are written for an assistant, which reads them as plain text either way;
+    this is only how the site shows them."""
+
+    def __init__(self, names: set[str], own: str) -> None:
+        self.names, self.own, self.linked = names, own, {own}
+
+    def _ident(self, m: re.Match) -> str:
+        name = m.group(0)
+        if name in self.names and name not in self.linked:
+            self.linked.add(name)
+            return f"[`{name}`](https://docs.popcorn.ai/{tool_id(name)}.md)"
+        return f"`{name}`"
+
+    def __call__(self, text: str) -> str:
+        for pattern, sub in (
+            (_INLINE_JSON, lambda m: f"`{m.group(0)}`"),
+            (_ASSIGNED, lambda m: f"`{m.group(0)}`"),
+            (_IDENT, self._ident),
+        ):
+            out, last = [], 0
+            for kept in _KEPT.finditer(text):
+                out += [pattern.sub(sub, text[last:kept.start()]), kept.group(0)]
+                last = kept.end()
+            text = "".join(out + [pattern.sub(sub, text[last:])])
+        return text
+
+
+def description(text: str, inline=lambda t: t) -> list[str]:
     """A description's text as Markdown: each paragraph a paragraph, a run of
     `- ` lines a list (an indented line continues the item above it), and a
     run of JSON lines a code block. Docstrings are written as plain text, so
-    without this every line break is lost and a page reads as one block."""
+    without this every line break is lost and a page reads as one block.
+    ``inline`` sets the names in prose and list items (Inline); a paragraph
+    that opens with a label ("Webhooks: …") starts with it in bold."""
     out: list[str] = []
     for paragraph in re.split(r"\n\s*\n", text.strip()):
         prose: list[str] = []
@@ -335,10 +387,15 @@ def description(text: str) -> list[str]:
         def flush() -> None:
             if prose:
                 text = " ".join(" ".join(prose).split())
-                out.extend([_INLINE_JSON.sub(lambda m: f"`{m.group(0)}`", text), ""])
+                label = _LABEL.match(text) if not out or out[-1] == "" else None
+                if label:
+                    text = f"**{label.group(1)}.** {inline(label.group(2))}"
+                else:
+                    text = inline(text)
+                out.extend([text, ""])
                 prose.clear()
             if items:
-                out.extend([*(f"- {' '.join(i.split())}" for i in items), ""])
+                out.extend([*(f"- {inline(' '.join(i.split()))}" for i in items), ""])
                 items.clear()
             if code:
                 out.extend(["```text", *code, "```", ""])
@@ -457,12 +514,13 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -
     # The first sentence is the summary, which the page shows under its
     # title; the call comes next, as a usage line does, then the rest.
     out += [access(tool), "", "```", signature(tool), "```", ""]
+    inline = Inline(names, tool["name"])
     if rest:
-        out += description(rest)
+        out += description(rest, inline)
     if tool["args"]:
         out += ["## Arguments", "", "| Argument | Type | Notes |", "|---|---|---|"]
         for a in tool["args"]:
-            note = cell(a["text"])
+            note = inline(cell(a["text"]))
             # A docstring often states its own default; say it once.
             if a["default"] is not None and "default" not in note.lower():
                 note = f"{note} Default `{a['default']}`.".strip()

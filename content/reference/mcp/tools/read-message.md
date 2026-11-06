@@ -26,8 +26,8 @@ Each file attached to it comes with a download link, which works for a limited t
 | Argument | Type | Notes |
 |---|---|---|
 | `message_id` [required] | `str` | The message's ID. |
-| `include_parts` | `bool` | Also list every part's kind and fields, including tool calls with their arguments and integration payloads: what an agent actually did. Large; leave off unless needed. The parts are paged: a response ends with next_cursor when more follow. Default `False`. |
-| `cursor` | `str` | next_cursor from the previous page of parts. A later page holds only the parts, not the message text again. |
+| `include_parts` | `bool` | Also list every part's kind and fields, including tool calls with their arguments and integration payloads: what an agent actually did. Large; leave off unless needed. The parts are paged: a response ends with `next_cursor` when more follow. Default `False`. |
+| `cursor` | `str` | `next_cursor` from the previous page of parts. A later page holds only the parts, not the message text again. |
 
 **Example** — “Show me Dana's question about claim 4471 in full.”
 

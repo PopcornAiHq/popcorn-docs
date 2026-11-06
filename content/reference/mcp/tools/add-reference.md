@@ -19,20 +19,20 @@ used_with: [mcp/tools/create-reference-upload, mcp/tools/change-routine, mcp/too
 add_reference(routine_id, reference, text=None, upload_id=None, confirm=False, plan_id=None)
 ```
 
-Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with create_reference_upload. Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with change_routine; list_references marks both.
+Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with [`create_reference_upload`](https://docs.popcorn.ai/mcp/tools/create-reference-upload.md). Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with [`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md); [`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md) marks both.
 
-Without confirm=true this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. When the person asked to add this document as this Reference and it has none yet, confirm at once, without a dry run; otherwise show the dry run, and confirm once they agree. Replacing a document the Reference already has is confirmed only with its dry run's plan_id: a confirm without one is refused, and changes nothing. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; list_references shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check list_references first. Workspace admins and members of the Routine only.
+Without `confirm=true` this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. When the person asked to add this document as this Reference and it has none yet, confirm at once, without a dry run; otherwise show the dry run, and confirm once they agree. Replacing a document the Reference already has is confirmed only with its dry run's `plan_id`: a confirm without one is refused, and changes nothing. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; `list_references` shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check `list_references` first. Workspace admins and members of the Routine only.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `reference` [required] | `str` | The Reference, as `list_references` names it. |
 | `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
-| `upload_id` | `str` | The upload_id create_reference_upload gave, once the file is uploaded. |
+| `upload_id` | `str` | The `upload_id` `create_reference_upload` gave, once the file is uploaded. |
 | `confirm` | `bool` | true to add it: at once when the person asked to add this document as this Reference, otherwise (a replace, or a Reference you chose) after they agree to the dry run. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it, and so must any caller replacing a Reference that already has a document (the replace's dry run gives every caller one). An OAuth client's first add is given none and needs none. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. Popcorn's channel agent must pass it, and so must any caller replacing a Reference that already has a document (the replace's dry run gives every caller one). An OAuth client's first add is given none and needs none. |
 
 **Example** — “Add a fourth question to #intake's questions: the claim number.”
 

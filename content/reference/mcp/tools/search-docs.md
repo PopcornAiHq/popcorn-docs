@@ -19,7 +19,7 @@ used_with: [mcp/tools/read-doc]
 search_docs(query, limit=5)
 ```
 
-Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. read_doc reads a page in full.
+Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) reads a page in full.
 
 ## Arguments
 

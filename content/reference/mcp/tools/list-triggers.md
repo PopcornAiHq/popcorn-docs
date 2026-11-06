@@ -21,7 +21,7 @@ list_triggers(routine)
 
 A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential.
 
-run_trigger runs a schedule now.
+[`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) runs a schedule now.
 
 ## Arguments
 

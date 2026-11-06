@@ -19,9 +19,9 @@ used_with: [mcp/tools/read-message, mcp/tools/list-messages]
 search_messages(query, routine=None, author=None, after=None, before=None, sort="relevance", cursor=None)
 ```
 
-Direct messages are never searched. Each result names its Routine; read_message returns a result in full, and list_messages(Routine, after=<id>) shows what followed it.
+Direct messages are never searched. Each result names its Routine; [`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) returns a result in full, and list_messages(Routine, after=<id>) shows what followed it.
 
-To page through one Routine in time order, use list_messages.
+To page through one Routine in time order, use [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md).
 
 ## Arguments
 
@@ -33,7 +33,7 @@ To page through one Routine in time order, use list_messages.
 | `after` | `str` | Only messages from this ISO timestamp on (inclusive), or from this message's time on, the message itself left out. |
 | `before` | `str` | Only messages up to this ISO timestamp (inclusive), or up to this message's time, the message itself left out. |
 | `sort` | one of `relevance`, `recent` | "relevance" (default) or "recent". |
-| `cursor` | `str` | next_cursor from the previous page. |
+| `cursor` | `str` | `next_cursor` from the previous page. |
 
 **Example** — “Find where anyone mentioned Northside Auto this month.”
 

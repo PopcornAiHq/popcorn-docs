@@ -22,9 +22,9 @@ used_with: [mcp/tools/duplicate-routine, mcp/tools/list-rows, mcp/tools/take-act
 get_routine(routine, wait_seconds=0)
 ```
 
-A Routine made with duplicate_routine also shows how far its copy got, and any part that didn't copy, with why.
+A Routine made with [`duplicate_routine`](https://docs.popcorn.ai/mcp/tools/duplicate-routine.md) also shows how far its copy got, and any part that didn't copy, with why.
 
-A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what list_rows filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked
+A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked
 
 ```text
 [in Popcorn] opens a form there; take_action takes the others.

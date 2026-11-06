@@ -21,7 +21,7 @@ list_runs(routine, status="going", cursor=None)
 
 By default the runs still going.
 
-This is where a run a schedule or a webhook started is found before it has changed any item. get_run takes a run's reference to show it whole, and stop_run to stop one still going.
+This is where a run a schedule or a webhook started is found before it has changed any item. [`get_run`](https://docs.popcorn.ai/mcp/tools/get-run.md) takes a run's reference to show it whole, and [`stop_run`](https://docs.popcorn.ai/mcp/tools/stop-run.md) to stop one still going.
 
 ## Arguments
 
@@ -29,7 +29,7 @@ This is where a run a schedule or a webhook started is found before it has chang
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `status` | `str` | "going" (the default), "ended", "failed" or "all". |
-| `cursor` | `str` | next_cursor from the previous page, with the same status. |
+| `cursor` | `str` | `next_cursor` from the previous page, with the same status. |
 
 **Example** — “What's running in #intake right now?”
 

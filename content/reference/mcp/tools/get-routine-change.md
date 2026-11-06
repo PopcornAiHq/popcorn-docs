@@ -19,14 +19,14 @@ used_with: [mcp/tools/change-routine]
 get_routine_change(routine, change_id, wait_seconds=0, detail=None)
 ```
 
-A proposal shows the Steps that change, what it would set on each Step (saying which part is a Routine Setting the person could change directly), the author's assumptions and open questions, and the checks it passed. An installed change names the version before it, which change_routine's revert_to puts back.
+A proposal shows the Steps that change, what it would set on each Step (saying which part is a Routine Setting the person could change directly), the author's assumptions and open questions, and the checks it passed. An installed change names the version before it, which [`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)'s `revert_to` puts back.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `change_id` [required] | `str` | The change_id change_routine returned. |
+| `change_id` [required] | `str` | The `change_id` `change_routine` returned. |
 | `wait_seconds` | `int` | Wait up to this many seconds for a change that is drafting or installing to move on, then answer. At most 20 (more is read as 20); 0, the default, doesn't wait. |
 | `detail` | `str` | "recipe" adds the recipe's own text diff to a proposal, for people who author templates. |
 

@@ -18,14 +18,14 @@ used_with: [mcp/tools/create-routine]
 list_routine_templates(query=None, cursor=None)
 ```
 
-Each row shows the template's name, its slug (what create_routine's `template` takes), what it does, the connections someone sets up before it runs, and the optional ones that only the work using them needs. A template this workspace can't run isn't listed.
+Each row shows the template's name, its slug (what [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)'s `template` takes), what it does, the connections someone sets up before it runs, and the optional ones that only the work using them needs. A template this workspace can't run isn't listed.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `query` | `str` | Case-insensitive substring of the template's name or slug. |
-| `cursor` | `str` | The next_cursor from the previous page, with the same query. |
+| `cursor` | `str` | The `next_cursor` from the previous page, with the same query. |
 
 **Example** — “What templates could a new Routine here start from?”
 

@@ -18,7 +18,7 @@ used_with: [mcp/tools/copy-routine-template, mcp/tools/get-routine-setting, mcp/
 list_routine_settings(routine, query=None, cursor=None)
 ```
 
-A setting changes how this Routine alone behaves: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one Routine, can be set back, and is kept through template updates, so check here before giving the Routine its own copy of its template (copy_routine_template). Each prompt or email template file is its own setting, so changing one leaves the others following template updates. Each row shows the value; an unset one says what unset means, and one changed from the template default says so. Secrets show only whether they're set. get_routine_setting shows one in full; update_routine_setting changes one.
+A setting changes how this Routine alone behaves: sending modes, schedules, limits, and the prompts and email templates its agents use. A changed setting reaches one Routine, can be set back, and is kept through template updates, so check here before giving the Routine its own copy of its template ([`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)). Each prompt or email template file is its own setting, so changing one leaves the others following template updates. Each row shows the value; an unset one says what unset means, and one changed from the template default says so. Secrets show only whether they're set. [`get_routine_setting`](https://docs.popcorn.ai/mcp/tools/get-routine-setting.md) shows one in full; [`update_routine_setting`](https://docs.popcorn.ai/mcp/tools/update-routine-setting.md) changes one.
 
 ## Arguments
 
@@ -26,7 +26,7 @@ A setting changes how this Routine alone behaves: sending modes, schedules, limi
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `query` | `str` | Only settings whose key or label contains this. |
-| `cursor` | `str` | next_cursor from the previous page. |
+| `cursor` | `str` | `next_cursor` from the previous page. |
 
 **Example** — “What can I change about how #chase-renewals chases people, without giving it its own copy of its template?”
 

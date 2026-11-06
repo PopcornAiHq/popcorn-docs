@@ -19,14 +19,14 @@ used_with: [mcp/tools/create-rows, mcp/tools/update-row, mcp/tools/list-tables]
 get_table(routine, table)
 ```
 
-A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or increment_on_change (a counter the store keeps). Columns marked as state change only when one of the state machine's transitions fires, so create_rows and update_row refuse them.
+A merge policy says what a write that merges into an existing row does to that column: replace (the default), keep the first value, concat (append), or `increment_on_change` (a counter the store keeps). Columns marked as state change only when one of the state machine's transitions fires, so [`create_rows`](https://docs.popcorn.ai/mcp/tools/create-rows.md) and [`update_row`](https://docs.popcorn.ai/mcp/tools/update-row.md) refuse them.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `table` [required] | `str` | The table's name, as [`list_tables`](https://docs.popcorn.ai/mcp/tools/list-tables.md) shows it. |
 
 **Example** — “What columns does #intake's claims table have?”
 

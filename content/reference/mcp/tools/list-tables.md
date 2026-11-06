@@ -18,14 +18,14 @@ used_with: [mcp/tools/get-table, mcp/tools/list-rows]
 list_tables(routine, cursor=None)
 ```
 
-A Routine's tables hold the rows its template, agents and people keep. get_table shows a table's columns; list_rows reads its rows.
+A Routine's tables hold the rows its template, agents and people keep. [`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md) shows a table's columns; [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) reads its rows.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `cursor` | `str` | next_cursor from the previous page. |
+| `cursor` | `str` | `next_cursor` from the previous page. |
 
 **Example** — “What does #intake keep track of?”
 

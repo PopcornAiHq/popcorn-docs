@@ -23,7 +23,7 @@ For each, whether it is connected, whose account it uses, and what stops while i
 
 A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not connected. Whether an account has since been revoked isn't checked.
 
-make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where.
+[`make_connection`](https://docs.popcorn.ai/mcp/tools/make-connection.md) makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where.
 
 Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
 

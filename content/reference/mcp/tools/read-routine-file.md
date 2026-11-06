@@ -19,16 +19,16 @@ used_with: [mcp/tools/list-routine-files]
 read_routine_file(routine, path, version=None, cursor=None)
 ```
 
-The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and next_cursor reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
+The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and `next_cursor` reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `path` [required] | `str` | The file's path, as list_routine_files shows it. |
+| `path` [required] | `str` | The file's path, as [`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md) shows it. |
 | `version` | `int \| str` | An older version of the Routine's template: its number ("0.15.1") or its version id. Omit for the base for edits. |
-| `cursor` | `str` | next_cursor from the previous range. |
+| `cursor` | `str` | `next_cursor` from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
 

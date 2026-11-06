@@ -20,7 +20,7 @@ used_with: [mcp/tools/get-memory]
 list_memories(routine=None, scope="routine", category=None, cursor=None)
 ```
 
-Without category, the first page lists each category with its count and last change, then the newest memories across them; with one, that category's. Each row is the memory's name (<category>/<key>), when it last changed and the start of its text; get_memory shows one whole.
+Without category, the first page lists each category with its count and last change, then the newest memories across them; with one, that category's. Each row is the memory's name (<category>/<key>), when it last changed and the start of its text; [`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md) shows one whole.
 
 ## Arguments
 
@@ -29,7 +29,7 @@ Without category, the first page lists each category with its count and last cha
 | `routine` | `str` | Routine name ("#intake") or ID, for scope "routine". |
 | `scope` | `Scope` | "routine" (the default) for the Routine's own memory, "workspace" for what every Routine in the workspace shares (the Knowledge Base tab shows it), or "me" for your own. Leave out routine for "workspace" and "me". |
 | `category` | `str` | Only this category, e.g. "preferences". |
-| `cursor` | `str` | next_cursor from the previous page. |
+| `cursor` | `str` | `next_cursor` from the previous page. |
 
 **Example** — “What does #intake's agent remember?”
 

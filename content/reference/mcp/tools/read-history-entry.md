@@ -27,7 +27,7 @@ Only the fields the change touched are shown, not the whole item. Email content 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `entry_id` [required] | `int` | The entry's ID, as list_history shows it ("entry_id 6" is 6). |
+| `entry_id` [required] | `int` | The entry's ID, as [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) shows it ("`entry_id` 6" is 6). |
 
 **Example** — “Show me entry 6 of row 88's history in #intake in full: what changed and what the run did.”
 

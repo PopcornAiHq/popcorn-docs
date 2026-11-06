@@ -23,18 +23,18 @@ Newest first, a page at a time.
 
 Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far.
 
-With run instead of row_id, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did).
+With run instead of `row_id`, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did).
 
-list_runs lists the Routine's runs still going.
+[`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md) lists the Routine's runs still going.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `row_id` | `int` | The item's row ID, as list_rows shows it ("row 88" is 88). |
-| `cursor` | `str` | next_cursor from the previous page, with the same other arguments. |
-| `run` | `str` | A run's reference, in place of row_id: run_trigger and take_action give it, and list_runs and list_history show it beside a run still going. |
+| `row_id` | `int` | The item's row ID, as [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows it ("row 88" is 88). |
+| `cursor` | `str` | `next_cursor` from the previous page, with the same other arguments. |
+| `run` | `str` | A run's reference, in place of `row_id`: [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) give it, and `list_runs` and `list_history` show it beside a run still going. |
 
 **Example** — “What happened with row 88 in #intake?”
 
