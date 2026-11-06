@@ -5,7 +5,7 @@ order: 302
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Add one of a Routine's References, or replace the one it has, as Replace on
   the Reference's card in Popcorn does.
@@ -19,7 +19,9 @@ used_with: [mcp/tools/create-reference-upload, mcp/tools/change-routine, mcp/too
 add_reference(routine_id, reference, text=None, upload_id=None, confirm=False, plan_id=None)
 ```
 
-Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with create_reference_upload. Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with change_routine; list_references marks both. Without confirm=true this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. When the person asked to add this document as this Reference and it has none yet, confirm at once, without a dry run; otherwise show the dry run, and confirm once they agree. Replacing a document the Reference already has is confirmed only with its dry run's plan_id: a confirm without one is refused, and changes nothing. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; list_references shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check list_references first. Workspace admins and members of the Routine only.
+Pass exactly one of `text`, the Reference's whole text, or `upload_id`, a file uploaded with create_reference_upload. Only the References the Routine's template expects can be added, and only with a file of a kind each takes. A Reference picked from Google Drive is picked in Popcorn instead, and one holding the Routine's Steps is changed with change_routine; list_references marks both.
+
+Without confirm=true this is a dry run that changes nothing: it says whether this is a first add or a replace, what the Routine uses the Reference for, and, for a required one, what starts working once it's in. When the person asked to add this document as this Reference and it has none yet, confirm at once, without a dry run; otherwise show the dry run, and confirm once they agree. Replacing a document the Reference already has is confirmed only with its dry run's plan_id: a confirm without one is refused, and changes nothing. Once confirmed, Popcorn reads the file in the background and the Routine works from it from then on; list_references shows it once it's in. Each confirmed call with `text` adds it again, so don't repeat one that timed out: check list_references first. Workspace admins and members of the Routine only.
 
 ## Arguments
 
@@ -56,5 +58,3 @@ Routine: #intake (c7d2…5b)
 Started replacing Questions and first email (reference "questions").
 Popcorn reads the file in the background. list_references shows it once it's in, as added just now; if it isn't after a few minutes, the Reference's card in Popcorn says why.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

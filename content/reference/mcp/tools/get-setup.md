@@ -19,7 +19,9 @@ concepts: [set-up-a-routine]
 get_setup(routine)
 ```
 
-A step that keeps a value shows what is set. A Routine whose template builds its checklist from its Steps has it built here when it hasn't been yet, as opening its Today tab does; that can take some seconds. If it isn't done in time, the template's own steps are listed meanwhile, and it says so. A Routine with no checklist says so.
+A step that keeps a value shows what is set.
+
+A Routine whose template builds its checklist from its Steps has it built here when it hasn't been yet, as opening its Today tab does; that can take some seconds. If it isn't done in time, the template's own steps are listed meanwhile, and it says so. A Routine with no checklist says so.
 
 ## Arguments
 
@@ -47,5 +49,3 @@ Setup: 4 of 6 steps done; 1 required left.
 - [done] Connect your intake form (step: connect_intake_webhook)
 Also needed, with no step Popcorn shows: secret:portal_token.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

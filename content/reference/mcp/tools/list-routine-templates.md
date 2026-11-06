@@ -38,5 +38,3 @@ Each row shows the template's name, its slug (what create_routine's `template` t
 - Claim Coordinator  claimcoordinator  Imports arbitration leads, emails each one its questions, and tracks every answer until the claim is complete.  needs Gmail, Google Calendar, Google Drive
 - … 2 more rows
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

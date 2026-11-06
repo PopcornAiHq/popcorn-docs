@@ -19,7 +19,9 @@ used_with: [mcp/tools/run-trigger]
 list_triggers(routine)
 ```
 
-A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential. run_trigger runs a schedule now.
+A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential.
+
+run_trigger runs a schedule now.
 
 ## Arguments
 
@@ -43,5 +45,3 @@ Messages:
 Documents:
 - uploading the 'policy' document  starts policy upsert
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

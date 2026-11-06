@@ -52,5 +52,3 @@ State machine:
 - Status column: Status · Actions: CTAs · sub: Stage
 - funnel (column Stage): open, closed
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

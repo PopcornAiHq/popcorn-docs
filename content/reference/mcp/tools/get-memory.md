@@ -44,5 +44,3 @@ Metadata: {"date": "2026-11-05", "key": "picture"}
 Text, 140 characters:
 #intake is where Acme's claims team takes in new water-damage claims. Dana answers most of them; adjusters step in for anything over $2,000.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -18,7 +18,9 @@ used_with: [mcp/tools/read-message]
 list_messages(routine, thread_id=None, after=None, before=None, cursor=None, wait_seconds=0)
 ```
 
-Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read. To read the Routine's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a Routine the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A Routine set to reply outside threads posts top-level instead, so if the thread stays empty, list the Routine with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
+Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; read_message returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the thread_id that lists the replies. Listing doesn't mark anything read.
+
+To read the Routine's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a Routine the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A Routine set to reply outside threads posts top-level instead, so if the thread stays empty, list the Routine with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass wait_seconds to have this call wait for one.
 
 ## Arguments
 
@@ -43,5 +45,3 @@ Routine: #intake (c7d2…5b)
   ↳ 1 reply (thread_id: 7e1a…47)
 [2026-09-29 09:00] (id: e769…47) Intake agent: Morning summary: 3 new claims overnight, 2 waiting on a repair estimate.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

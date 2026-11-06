@@ -5,7 +5,7 @@ order: 308
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Get a URL to upload one file you made, for create_routine_version to take.
 concepts: [copying-a-template, versions]
@@ -18,7 +18,15 @@ used_with: [mcp/tools/create-routine-version]
 create_routine_file_upload(routine_id, path, size, sha256)
 ```
 
-For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then create the version with the change {"path": …, "from_upload": "<upload_id>"}. If the upload fails or can't connect, don't retry it: use from_url for a public file, or send the content in the change. One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like create_routine_version.
+For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then create the version with the change
+
+```text
+{"path": …, "from_upload": "<upload_id>"}. If the upload fails or
+```
+
+can't connect, don't retry it: use from_url for a public file, or send the content in the change.
+
+One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like create_routine_version.
 
 ## Arguments
 
@@ -50,5 +58,3 @@ Then pass it to create_routine_version with this change (add expected_sha256 to 
 {"path": "code/engine/engine.js", "from_upload": "3f6a…93"}
 If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: use from_url for a public file, or send the content in the change.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

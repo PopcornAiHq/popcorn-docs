@@ -22,7 +22,13 @@ used_with: [mcp/tools/duplicate-routine, mcp/tools/list-rows, mcp/tools/take-act
 get_routine(routine, wait_seconds=0)
 ```
 
-A Routine made with duplicate_routine also shows how far its copy got, and any part that didn't copy, with why. A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what list_rows filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked [in Popcorn] opens a form there; take_action takes the others.
+A Routine made with duplicate_routine also shows how far its copy got, and any part that didn't copy, with why.
+
+A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what list_rows filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked
+
+```text
+[in Popcorn] opens a form there; take_action takes the others.
+```
 
 ## Arguments
 
@@ -58,5 +64,3 @@ Connections:
 Whether a connected account has since been revoked or its sign-in has expired isn't checked here. A Routine member connects these with make_connection, or in the Routine's settings in Popcorn.
 list_connections says whose account each one uses and what stops without it.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

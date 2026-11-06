@@ -19,7 +19,13 @@ used_with: [mcp/tools/update-routine-setting, mcp/tools/get-routine-change]
 change_routine(routine_id, request=None, change_id=None, confirm=False, revert_to=None, run_key=None, plan_id=None)
 ```
 
-Only a Routine whose template keeps its Steps with the Routine can be changed this way; any other is refused with what changes it instead (a Routine Setting, or a copy of its template of its own). For a change that is only a Routine Setting, update_routine_setting is quicker. Three calls: - request: starts drafting the change and returns a change_id. Drafting takes minutes; get_routine_change shows the proposal, as the Steps before and after. Nothing is installed. One change drafts at a time per Routine. - change_id with confirm=true: installs that proposal, once the person has read it. Sent again, it finds the install it started. - revert_to: "previous", "template" or a version, as get_routine_change names them. Without confirm it checks the revert against the Routine's items and gives a run_key; with confirm=true and that run_key it installs it.
+Only a Routine whose template keeps its Steps with the Routine can be changed this way; any other is refused with what changes it instead (a Routine Setting, or a copy of its template of its own). For a change that is only a Routine Setting, update_routine_setting is quicker.
+
+Three calls:
+
+- request: starts drafting the change and returns a change_id. Drafting takes minutes; get_routine_change shows the proposal, as the Steps before and after. Nothing is installed. One change drafts at a time per Routine.
+- change_id with confirm=true: installs that proposal, once the person has read it. Sent again, it finds the install it started.
+- revert_to: "previous", "template" or a version, as get_routine_change names them. Without confirm it checks the revert against the Routine's items and gives a run_key; with confirm=true and that run_key it installs it.
 
 ## Arguments
 
@@ -66,5 +72,3 @@ To install it: change_routine with change_id="8c1f3a52…" and confirm=true, onc
 Routine: #intake (c7d2…5b)
 Installing change 8c1f3a52…. It checks the proposal once more against the Routine's items and puts it in only if it is unchanged; get_routine_change shows when it's done.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

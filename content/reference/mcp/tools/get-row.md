@@ -48,5 +48,3 @@ State: Status = Open (open) · Stage = Open (open)
 - home_address: 12 Elm St
 - summary: Ortiz called about the roof
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

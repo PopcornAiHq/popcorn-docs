@@ -51,5 +51,3 @@ The run that made it:
   - apply: completed · 1.2s
 A run a person's button started shows as Popcorn, for a person: runs don't record who pressed it.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

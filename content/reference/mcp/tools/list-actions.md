@@ -9,7 +9,7 @@ updated: 2026-11-06
 summary: >
   List the Actions a person can take on one of a Routine's items now, given
   where it stands: the buttons Popcorn shows on it, each with the Status it
-  moves the item to. take_action takes one.
+  moves the item to.
 concepts: [actions-and-status]
 used_with: [mcp/tools/take-action, mcp/tools/list-rows]
 ---
@@ -19,6 +19,8 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows]
 ```
 list_actions(routine, row_id)
 ```
+
+take_action takes one.
 
 Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
 
@@ -40,5 +42,3 @@ Actions offered now:
 - Close claim  action: close  moves it to: Closed (closed)
 - Ask for documents  action: ask_docs  [in Popcorn]
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

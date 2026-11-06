@@ -19,7 +19,9 @@ used_with: [mcp/tools/get-run, mcp/tools/stop-run]
 list_runs(routine, status="going", cursor=None)
 ```
 
-By default the runs still going. This is where a run a schedule or a webhook started is found before it has changed any item. get_run takes a run's reference to show it whole, and stop_run to stop one still going.
+By default the runs still going.
+
+This is where a run a schedule or a webhook started is found before it has changed any item. get_run takes a run's reference to show it whole, and stop_run to stop one still going.
 
 ## Arguments
 
@@ -42,5 +44,3 @@ stop_run with a run's reference stops it.
 get_run with a run's reference shows it: its steps, outputs and how it ended; list_history with it, the items it changed.
 list_history with an item's row_id shows that item's History, the runs that changed it among them.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

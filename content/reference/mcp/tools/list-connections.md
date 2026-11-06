@@ -19,7 +19,13 @@ used_with: [mcp/tools/make-connection]
 list_connections(routine)
 ```
 
-For each, whether it is connected, whose account it uses, and what stops while it is missing. A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not connected. Whether an account has since been revoked isn't checked. make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where. Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
+For each, whether it is connected, whose account it uses, and what stops while it is missing.
+
+A Connection whose account is connected but hasn't given the Routine all the access it needs counts as not connected. Whether an account has since been revoked isn't checked.
+
+make_connection makes one from an account you have already signed in to, or makes its webhook. Signing in to a new account is a person's job, done in Popcorn in the browser; the response says where.
+
+Seeing a Routine's Connections needs workspace admin, or membership of the Routine.
 
 ## Arguments
 
@@ -45,5 +51,3 @@ Routine: #intake (c7d2…5b)
 Whether a connected account has since been revoked or its sign-in has expired isn't checked here.
 make_connection makes a Connection from an account the person has already signed in to, or makes its webhook. For a Google account not yet signed in to, or one whose sign-in lacks access, make_connection gives a sign-in link to pass on when it can. Any other account is signed in to in Popcorn, in the browser: open #intake (https://app.popcorn.ai/ws/acme/conversation/c7d2…5b), then its settings, then Automations, which lists its Connections.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

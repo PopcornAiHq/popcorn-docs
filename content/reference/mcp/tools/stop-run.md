@@ -35,5 +35,3 @@ The run stops at its next step, so a step already under way finishes, and what t
 Routine: #intake (c7d2…5b)
 Stopping the run: it stops at its next step. list_history with this run shows when it has.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

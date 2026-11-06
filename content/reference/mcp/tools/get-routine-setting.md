@@ -44,5 +44,3 @@ Template default: the same as the value
 Accepts: text, the shape of the template default
 Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

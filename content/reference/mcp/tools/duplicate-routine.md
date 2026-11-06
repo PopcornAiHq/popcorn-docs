@@ -5,7 +5,7 @@ order: 312
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup:
   its Routine Template, on the same line, its Routine Settings and agent
@@ -20,7 +20,11 @@ used_with: [mcp/tools/get-routine, mcp/tools/create-routine]
 duplicate_routine(routine_id, name, private=None, members=None, confirm=False, plan_id=None)
 ```
 
-Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection. The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with confirm=true to create the Routine. The template installs in the background, then the copy runs; get_routine's Copied from: field shows each part as it lands, and any that didn't, with why. A name already used in this workspace is refused, with the ID of the Routine that has it. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
+Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection.
+
+The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with confirm=true to create the Routine. The template installs in the background, then the copy runs; get_routine's Copied from: field shows each part as it lands, and any that didn't, with why.
+
+A name already used in this workspace is refused, with the ID of the Routine that has it. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
 
 ## Arguments
 
@@ -66,5 +70,3 @@ Claim Coordinator (claimcoordinator) is installing in the background, and the co
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
 Pick again in Popcorn once Google Drive is connected: standard_retainer.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

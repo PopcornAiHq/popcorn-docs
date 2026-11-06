@@ -19,7 +19,9 @@ used_with: [mcp/tools/list-actions]
 take_action(routine_id, row_ids=None, action=None, confirm=False, run_key=None, plan_id=None)
 ```
 
-Refused, with the reason, for an item the Action isn't offered on now. Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started. When the person named the items and the Action themselves, confirm at once, without a dry run or run_key; each such call starts its own run, so don't repeat one that timed out.
+Refused, with the reason, for an item the Action isn't offered on now.
+
+Without confirm=true this is a dry run: it says what happens to each item and gives a run_key. To act, call again with the same items and action, confirm=true and that run_key. A run_key acts once: calling again with it finds the run it started. When the person named the items and the Action themselves, confirm at once, without a dry run or run_key; each such call starts its own run, so don't repeat one that timed out.
 
 ## Arguments
 
@@ -54,5 +56,3 @@ Taking close on 1 item(s).
 Run: run_WzEs…
 It applies in the background; get_row shows each item's new Status once it has, and get_run with that run shows how it went.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -5,7 +5,7 @@ order: 311
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Delete rows from one of a Routine's tables, by ID.
 concepts: [tables]
@@ -50,5 +50,3 @@ Call again with `confirm=true` to delete this row.
 Routine: #intake (c7d2…5b) · table: claims
 Deleted 1 of 1 rows: row 91.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

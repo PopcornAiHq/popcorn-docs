@@ -20,7 +20,7 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows, mcp/tools/list-actions]
 get_status(routine)
 ```
 
-Each Status shows its label (what Popcorn shows) and its stored value. list_rows shows the items at one Status, filtered on the value: filter={"Status": "<value>"}. list_actions shows what can be done with an item and take_action does it.
+Each Status shows its label (what Popcorn shows) and its stored value. list_rows shows the items at one Status, filtered on the value: filter=`{"Status": "<value>"}`. list_actions shows what can be done with an item and take_action does it.
 
 ## Arguments
 
@@ -48,5 +48,3 @@ Waiting for a person (3, newest first, from table issues):
   Why: Claimant disputes the deductible.
 list_rows shows the items; list_actions and take_action act on one.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -18,7 +18,13 @@ used_with: [mcp/tools/list-messages, mcp/tools/get-routine]
 send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None)
 ```
 
-You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving. Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; the agent of a Routine that runs an app answers most messages, other Routines' agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace, and while the agent is already running a task in the Routine, your message joins that task instead of getting its own reply. Replies arrive asynchronously, in a thread under a top-level message (unless the Routine is set to reply outside threads). The response gives the new message's ID and the list_messages call that reads the answer. Without a `thread_id`, the Routine's own agent posts in the thread it is answering.
+You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving.
+
+Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; the agent of a Routine that runs an app answers most messages, other Routines' agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace, and while the agent is already running a task in the Routine, your message joins that task instead of getting its own reply.
+
+Replies arrive asynchronously, in a thread under a top-level message (unless the Routine is set to reply outside threads). The response gives the new message's ID and the list_messages call that reads the answer.
+
+Without a `thread_id`, the Routine's own agent posts in the thread it is answering.
 
 ## Arguments
 
@@ -44,5 +50,3 @@ Routine: #intake (c7d2…5b) · thread: 7e1a…47
 1 of 1 replies, newest first:
 [2026-09-29 14:03] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.
