@@ -26,7 +26,7 @@ A long text is cut, and the download link gives the whole file. A link works for
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `reference` [required] | `str` | The Reference, as [`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md) names it. |
 
 **Example** — “Show me the questions #intake sends.”
 

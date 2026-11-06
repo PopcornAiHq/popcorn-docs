@@ -20,18 +20,18 @@ used_with: [mcp/tools/list-memories, mcp/tools/get-memory, mcp/tools/get-routine
 get_instructions(routine, step=None, guide=False, cursor=None)
 ```
 
-The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; list_memories and get_memory read them all.
+The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) and [`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md) read them all.
 
-With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
+With `guide=true` it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `step` | `str` | One Step, by its label or its Status value, as get_routine lists the Steps. Omit for the whole Routine. |
+| `step` | `str` | One Step, by its label or its Status value, as [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) lists the Steps. Omit for the whole Routine. |
 | `guide` | `bool` | true for the text of this Routine's AGENT.md. Default `False`. |
-| `cursor` | `str` | next_cursor from the previous range of AGENT.md, with guide=true. |
+| `cursor` | `str` | `next_cursor` from the previous range of AGENT.md, with `guide=true`. |
 
 **Example** — “What instructions is #intake's agent following?”
 

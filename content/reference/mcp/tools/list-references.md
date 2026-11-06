@@ -20,7 +20,7 @@ used_with: [mcp/tools/read-reference, mcp/tools/add-reference]
 list_references(routine)
 ```
 
-A Reference marked required is one the template counts on; the Routine works without it until someone adds it. read_reference returns one's text, or a download link for a file that isn't text. A Reference add_reference can't take is marked with why. On a workspace that guards personal data, file names aren't listed.
+A Reference marked required is one the template counts on; the Routine works without it until someone adds it. [`read_reference`](https://docs.popcorn.ai/mcp/tools/read-reference.md) returns one's text, or a download link for a file that isn't text. A Reference [`add_reference`](https://docs.popcorn.ai/mcp/tools/add-reference.md) can't take is marked with why. On a workspace that guards personal data, file names aren't listed.
 
 ## Arguments
 

@@ -19,16 +19,16 @@ used_with: [mcp/tools/list-memories]
 get_memory(memory, routine=None, scope="routine", cursor=None)
 ```
 
-A very long one comes a range at a time, with a next_cursor for the rest.
+A very long one comes a range at a time, with a `next_cursor` for the rest.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
-| `memory` [required] | `str` | The memory's name as list_memories shows it ("<category>/<key>", e.g. "autochat:channel/picture"), or its ID. |
+| `memory` [required] | `str` | The memory's name as [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) shows it ("<category>/<key>", e.g. "autochat:channel/picture"), or its ID. |
 | `routine` | `str` | Routine name ("#intake") or ID, for scope "routine". |
-| `scope` | `Scope` | "routine" (the default), "workspace" or "me", as for list_memories. Leave out routine for "workspace" and "me". |
-| `cursor` | `str` | next_cursor from the previous range of this memory. |
+| `scope` | `Scope` | "routine" (the default), "workspace" or "me", as for `list_memories`. Leave out routine for "workspace" and "me". |
+| `cursor` | `str` | `next_cursor` from the previous range of this memory. |
 
 **Example** — “What's #intake's agent's picture of the channel?”
 

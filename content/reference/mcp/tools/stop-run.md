@@ -25,7 +25,7 @@ The run stops at its next step, so a step already under way finishes, and what t
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `run` [required] | `str` | The run's reference: run_trigger and take_action give it for the run they start, and list_runs and list_history show it beside a run still going. |
+| `run` [required] | `str` | The run's reference: [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) give it for the run they start, and [`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md) and [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) show it beside a run still going. |
 
 **Example** — “Stop the claim tick I just started in #intake.”
 

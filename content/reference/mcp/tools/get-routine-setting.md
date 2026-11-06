@@ -26,7 +26,7 @@ get_routine_setting(routine, key)
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `key` [required] | `str` | The setting's key, as list_routine_settings shows it. |
+| `key` [required] | `str` | The setting's key, as [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) shows it. |
 
 **Example** — “Show me the email #chase-renewals sends when it chases someone.”
 

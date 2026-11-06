@@ -25,8 +25,8 @@ get_row(routine, table, row_id)
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `table` [required] | `str` | The table's name, as list_tables shows it. |
-| `row_id` [required] | `int` | The row's ID, as list_rows shows it ("row 88" is 88). |
+| `table` [required] | `str` | The table's name, as [`list_tables`](https://docs.popcorn.ai/mcp/tools/list-tables.md) shows it. |
+| `row_id` [required] | `int` | The row's ID, as [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows it ("row 88" is 88). |
 
 **Example** — “Show me everything on row 88 of #intake's claims.”
 

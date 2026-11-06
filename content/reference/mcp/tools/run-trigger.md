@@ -21,16 +21,16 @@ run_trigger(routine_id, trigger, confirm=False, plan_id=None)
 
 Its schedule is unchanged: the next scheduled run still happens.
 
-The run does what the schedule's work does, for real. Without confirm=true this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started. A started run comes back with its reference: get_run with it shows how it is going or how it ended, and list_history with it the items it changed.
+The run does what the schedule's work does, for real. Without `confirm=true` this is a dry run that starts nothing and says what will run. Each confirmed call starts a run, so don't repeat one that timed out: the run may have started. A started run comes back with its reference: [`get_run`](https://docs.popcorn.ai/mcp/tools/get-run.md) with it shows how it is going or how it ended, and [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) with it the items it changed.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `trigger` [required] | `str` | The schedule's name, as list_triggers shows it. |
+| `trigger` [required] | `str` | The schedule's name, as [`list_triggers`](https://docs.popcorn.ai/mcp/tools/list-triggers.md) shows it. |
 | `confirm` | `bool` | true to start the run: at once when the person asked to run this schedule now, otherwise after they agree to the dry run. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Send #intake's morning digest now; don't wait.”
 

@@ -20,7 +20,7 @@ update_row(routine_id, table, row_id, data, expected_rev)
 
 Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored.
 
-expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again.
+`expected_rev` is the rev [`get_row`](https://docs.popcorn.ai/mcp/tools/get-row.md) shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again.
 
 Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns.
 
@@ -29,10 +29,10 @@ Changing a row starts no work. Columns the Routine's state machine owns are refu
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `table` [required] | `str` | The table's name, as list_tables shows it. |
+| `table` [required] | `str` | The table's name, as [`list_tables`](https://docs.popcorn.ai/mcp/tools/list-tables.md) shows it. |
 | `row_id` [required] | `int` | The row's ID ("row 88" is 88). |
 | `data` [required] | `dict[str, Any]` | The columns to change, as column: value. |
-| `expected_rev` [required] | `int` | The row's rev, from get_row. |
+| `expected_rev` [required] | `int` | The row's rev, from `get_row`. |
 
 **Example** — “Add a note to claim 4471 in #intake that the adjuster called back.”
 

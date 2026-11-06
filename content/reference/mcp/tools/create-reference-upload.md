@@ -19,18 +19,18 @@ used_with: [mcp/tools/add-reference, mcp/tools/list-references]
 create_reference_upload(routine_id, reference, filename, size, sha256)
 ```
 
-Nothing changes in the Routine until add_reference is confirmed.
+Nothing changes in the Routine until [`add_reference`](https://docs.popcorn.ai/mcp/tools/add-reference.md) is confirmed.
 
-Upload with the curl line this returns, then call add_reference with the upload_id. The upload goes straight to Popcorn's file storage host, which an assistant whose network access is restricted (such as claude.ai's sandbox) may not reach. In that case, pass a text Reference to add_reference as `text` instead, or add the file in Popcorn.
+Upload with the curl line this returns, then call `add_reference` with the `upload_id`. The upload goes straight to Popcorn's file storage host, which an assistant whose network access is restricted (such as claude.ai's sandbox) may not reach. In that case, pass a text Reference to `add_reference` as `text` instead, or add the file in Popcorn.
 
-One file per upload, for this Routine and Reference only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; at most 50 MiB (a text file 1.5 MB), and of a kind the Reference takes (the refusal says which). The URL works for 15 minutes. Not for a Reference picked from Google Drive, or one holding the Routine's Steps; list_references marks both. Workspace admins and members of the Routine only.
+One file per upload, for this Routine and Reference only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; at most 50 MiB (a text file 1.5 MB), and of a kind the Reference takes (the refusal says which). The URL works for 15 minutes. Not for a Reference picked from Google Drive, or one holding the Routine's Steps; [`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md) marks both. Workspace admins and members of the Routine only.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `reference` [required] | `str` | The Reference, as list_references names it. |
+| `reference` [required] | `str` | The Reference, as `list_references` names it. |
 | `filename` [required] | `str` | The file's name with its extension, e.g. fees.pdf; the extension decides what kind of file it is. |
 | `size` [required] | `int` | The file's size in bytes. |
 | `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |

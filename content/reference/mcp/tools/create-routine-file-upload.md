@@ -24,15 +24,15 @@ For a file too large to send in a change, such as a bundled script or a generate
 {"path": …, "from_upload": "<upload_id>"}. If the upload fails or
 ```
 
-can't connect, don't retry it: use from_url for a public file, or send the content in the change.
+can't connect, don't retry it: use `from_url` for a public file, or send the content in the change.
 
-One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like create_routine_version.
+One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md).
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
-| `routine_id` [required] | `str` | The Routine's ID (not its name), as for create_routine_version. |
+| `routine_id` [required] | `str` | The Routine's ID (not its name), as for `create_routine_version`. |
 | `path` [required] | `str` | The path the file will have in the template, e.g. code/engine/lib.js. |
 | `size` [required] | `int` | The file's size in bytes. |
 | `sha256` [required] | `str` | The file's sha256, as 64 hex characters (`sha256sum FILE`). |

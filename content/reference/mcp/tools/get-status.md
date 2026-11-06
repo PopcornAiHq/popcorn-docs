@@ -20,7 +20,7 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows, mcp/tools/list-actions]
 get_status(routine)
 ```
 
-Each Status shows its label (what Popcorn shows) and its stored value. list_rows shows the items at one Status, filtered on the value: filter=`{"Status": "<value>"}`. list_actions shows what can be done with an item and take_action does it.
+Each Status shows its label (what Popcorn shows) and its stored value. [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows the items at one Status, filtered on the value: filter=`{"Status": "<value>"}`. [`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) shows what can be done with an item and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) does it.
 
 ## Arguments
 

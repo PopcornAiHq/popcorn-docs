@@ -22,7 +22,7 @@ list_routines(query=None, template=None, copy=None, include_archived=False, sort
 
 Direct messages are not listed.
 
-Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
+Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows one Routine's version, install state and Connections.
 
 ## Arguments
 
@@ -33,7 +33,7 @@ Each row shows the Routine's name, its Routine Template and whose version of it 
 | `copy` | `str` | Only Routines on this workspace's copy of that name: the Routines a new version of the copy reaches. A copy's name is unique per template, so pass template too when two templates have copies of the same name. |
 | `include_archived` | `bool` | Also list archived Routines (marked [archived]). Default `False`. |
 | `sort` | one of `name`, `recent` | "name" (default), or "recent": pinned first, then by last message. |
-| `cursor` | `str` | The next_cursor from the previous page, with the same other arguments. |
+| `cursor` | `str` | The `next_cursor` from the previous page, with the same other arguments. |
 
 **Example** — “Which of our Routines use the Claim Coordinator template?”
 

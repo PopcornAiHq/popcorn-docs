@@ -19,13 +19,13 @@ used_with: [mcp/tools/update-routine-setting, mcp/tools/get-routine-change]
 change_routine(routine_id, request=None, change_id=None, confirm=False, revert_to=None, run_key=None, plan_id=None)
 ```
 
-Only a Routine whose template keeps its Steps with the Routine can be changed this way; any other is refused with what changes it instead (a Routine Setting, or a copy of its template of its own). For a change that is only a Routine Setting, update_routine_setting is quicker.
+Only a Routine whose template keeps its Steps with the Routine can be changed this way; any other is refused with what changes it instead (a Routine Setting, or a copy of its template of its own). For a change that is only a Routine Setting, [`update_routine_setting`](https://docs.popcorn.ai/mcp/tools/update-routine-setting.md) is quicker.
 
 Three calls:
 
-- request: starts drafting the change and returns a change_id. Drafting takes minutes; get_routine_change shows the proposal, as the Steps before and after. Nothing is installed. One change drafts at a time per Routine.
-- change_id with confirm=true: installs that proposal, once the person has read it. Sent again, it finds the install it started.
-- revert_to: "previous", "template" or a version, as get_routine_change names them. Without confirm it checks the revert against the Routine's items and gives a run_key; with confirm=true and that run_key it installs it.
+- request: starts drafting the change and returns a `change_id`. Drafting takes minutes; [`get_routine_change`](https://docs.popcorn.ai/mcp/tools/get-routine-change.md) shows the proposal, as the Steps before and after. Nothing is installed. One change drafts at a time per Routine.
+- `change_id` with `confirm=true`: installs that proposal, once the person has read it. Sent again, it finds the install it started.
+- `revert_to`: "previous", "template" or a version, as `get_routine_change` names them. Without confirm it checks the revert against the Routine's items and gives a `run_key`; with `confirm=true` and that `run_key` it installs it.
 
 ## Arguments
 
@@ -33,11 +33,11 @@ Three calls:
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `request` | `str` | The change, in the person's words ("after the retainer is signed, ask for their insurance card"). |
-| `change_id` | `str` | The change_id change_routine returned, with confirm=true, to install its proposal. |
+| `change_id` | `str` | The `change_id` `change_routine` returned, with `confirm=true`, to install its proposal. |
 | `confirm` | `bool` | true to install. Show the person the proposal (or the revert's check) first. Default `False`. |
 | `revert_to` | `str` | "previous", "template", or a version (sha) to go back to. |
-| `run_key` | `str` | The run_key a revert's check gave, with confirm=true. |
-| `plan_id` | `str` | The plan_id get_routine_change or the revert's check gave, with confirm=true; it stands in for the run_key. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `run_key` | `str` | The `run_key` a revert's check gave, with `confirm=true`. |
+| `plan_id` | `str` | The `plan_id` `get_routine_change` or the revert's check gave, with `confirm=true`; it stands in for the `run_key`. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “In #intake, once a claimant signs the retainer, have them book the interview straight away.”
 

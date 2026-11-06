@@ -20,7 +20,7 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows]
 list_actions(routine, row_id)
 ```
 
-take_action takes one.
+[`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one.
 
 Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
 
@@ -29,7 +29,7 @@ Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `row_id` [required] | `int` | The item's row ID in the Routine's main table, as list_rows shows it ("row 88" is 88). |
+| `row_id` [required] | `int` | The item's row ID in the Routine's main table, as [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows it ("row 88" is 88). |
 
 **Example** — “What can I do with claim 4471 in #intake?”
 

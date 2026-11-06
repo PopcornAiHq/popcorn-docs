@@ -22,7 +22,7 @@ duplicate_routine(routine_id, name, private=None, members=None, confirm=False, p
 
 Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection.
 
-The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with confirm=true to create the Routine. The template installs in the background, then the copy runs; get_routine's Copied from: field shows each part as it lands, and any that didn't, with why.
+The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with `confirm=true` to create the Routine. The template installs in the background, then the copy runs; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md)'s Copied from: field shows each part as it lands, and any that didn't, with why.
 
 A name already used in this workspace is refused, with the ID of the Routine that has it. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
 
@@ -34,8 +34,8 @@ A name already used in this workspace is refused, with the ID of the Routine tha
 | `name` [required] | `str` | The new Routine's name, e.g. "claims-east". Spaces become hyphens; the response shows the name it got. |
 | `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. The original's members aren't copied. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
-| `confirm` | `bool` | true to create the Routine: at once when the person asked to duplicate this Routine, as create_routine creates, otherwise after they agree to the dry run. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for private and members: leave them out and the copy takes the dry run's, or send them and they must be the same. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
+| `confirm` | `bool` | true to create the Routine: at once when the person asked to duplicate this Routine, as [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md) creates, otherwise after they agree to the dry run. Default `False`. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`. It stands in for private and members: leave them out and the copy takes the dry run's, or send them and they must be the same. A Routine's own agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Make a copy of #new-clients for the east office, called new-clients-east.”
 

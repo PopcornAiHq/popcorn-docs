@@ -18,7 +18,7 @@ used_with: [mcp/tools/get-routine, mcp/tools/list-routine-templates]
 create_routine(name, template=None, private=None, members=None, confirm=False, plan_id=None)
 ```
 
-The Routine is created at once, with or without `template` (for Popcorn's channel agent it is a dry run first, like any other). From a template, the answer names the version that installs, the connections someone sets up before it runs, and the optional ones. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands.
+The Routine is created at once, with or without `template` (for Popcorn's channel agent it is a dry run first, like any other). From a template, the answer names the version that installs, the connections someone sets up before it runs, and the optional ones. The template installs in the background after the Routine exists; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md)'s Install: field shows when it lands.
 
 A name already used in this workspace is refused, with the ID of the Routine that has it.
 
@@ -27,11 +27,11 @@ A name already used in this workspace is refused, with the ID of the Routine tha
 | Argument | Type | Notes |
 |---|---|---|
 | `name` [required] | `str` | The Routine's name, e.g. "claims-west". Spaces become hyphens; the response shows the name it got. |
-| `template` | `str` | A Routine Template's slug from list_routine_templates, e.g. "claimcoordinator". |
+| `template` | `str` | A Routine Template's slug from [`list_routine_templates`](https://docs.popcorn.ai/mcp/tools/list-routine-templates.md), e.g. "claimcoordinator". |
 | `private` | `bool` | true for a private Routine, joined only by you and `members`. A Routine that isn't private adds everyone in the workspace. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all members of this workspace. You're always a member. |
 | `confirm` | `bool` | For Popcorn's channel agent, true to create what its dry run showed. Any other caller creates without it. Default `False`. |
-| `plan_id` | `str` | The plan_id the dry run gave, with confirm=true. It stands in for template, private and members: leave them out and the create takes the dry run's, or send them and they must be the same. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`. It stands in for template, private and members: leave them out and the create takes the dry run's, or send them and they must be the same. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
 
 **Example** — “Set up a private #new-clients Routine from the claims template, with Jordan in it.”
 

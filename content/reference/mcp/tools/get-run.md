@@ -20,16 +20,16 @@ used_with: [mcp/tools/list-history, mcp/tools/run-trigger, mcp/tools/take-action
 get_run(routine, run, output=None, cursor=None, wait_seconds=0)
 ```
 
-A run still going shows the step it's on; call again to follow it, or pass wait_seconds to have this call wait for it to end. Outputs too long to show together are listed by name; output=<name> reads one whole, a range at a time when it is long. list_history with run shows the items it changed.
+A run still going shows the step it's on; call again to follow it, or pass `wait_seconds` to have this call wait for it to end. Outputs too long to show together are listed by name; output=<name> reads one whole, a range at a time when it is long. [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) with run shows the items it changed.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `run` [required] | `str` | The run's reference: run_trigger, take_action and make_connection give it, and list_runs and list_history show it. |
+| `run` [required] | `str` | The run's reference: [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md), [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) and [`make_connection`](https://docs.popcorn.ai/mcp/tools/make-connection.md) give it, and [`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md) and `list_history` show it. |
 | `output` | `str` | One output's name, to read just that output whole. |
-| `cursor` | `str` | next_cursor from the previous range of that output. |
+| `cursor` | `str` | `next_cursor` from the previous range of that output. |
 | `wait_seconds` | `int` | Wait up to this many seconds for a run still going to end, then answer; the answer says whether it ended or the wait ran out. At most 20 (more is read as 20); 0, the default, doesn't wait. With output, the wait comes first. |
 
 **Example** — “How did the chase turn on row 88 in #intake go?”

@@ -18,7 +18,7 @@ used_with: [mcp/tools/get-user]
 list_workspace_members(query=None, include_bots=False, cursor=None)
 ```
 
-This workspace's members only: someone from another workspace who is in a shared Routine isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use get_user.
+This workspace's members only: someone from another workspace who is in a shared Routine isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use [`get_user`](https://docs.popcorn.ai/mcp/tools/get-user.md).
 
 ## Arguments
 
@@ -26,7 +26,7 @@ This workspace's members only: someone from another workspace who is in a shared
 |---|---|---|
 | `query` | `str` | Case-insensitive text to find in a username, display name or email, e.g. "dana". A leading "@" also matches the username after it ("@dsmith"), and still matches inside emails, so "@acme.example" finds everyone at that domain. |
 | `include_bots` | `bool` | Also list bots. Default `False`. |
-| `cursor` | `str` | The next_cursor of the previous page, to continue. Pass the same query and include_bots as that call. |
+| `cursor` | `str` | The `next_cursor` of the previous page, to continue. Pass the same query and `include_bots` as that call. |
 
 **Example** — “Who on the Acme team is named Lee?”
 
