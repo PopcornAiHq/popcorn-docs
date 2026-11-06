@@ -14,15 +14,33 @@ lede: >
 concepts: [mcp]
 ---
 
-Every tool the hosted server offers, A to Z. A tool marked [dry run] only
-previews until it is called again with `confirm=true`. Each tool's page has
-its call, its arguments and, for many, a worked example. What every tool
-shares is on the [MCP server overview](https://docs.popcorn.ai/mcp.md).
+Every tool the hosted server offers, A to Z. Each tool's page has its call,
+its arguments and, for many, a worked example. Every call runs as you, in
+the one Workspace your assistant is connected to; the [MCP server
+overview](https://docs.popcorn.ai/mcp.md) says how to choose it.
+
+A [read-only] tool takes a Routine as `routine`, by its `#name` or its ID. A
+tool that [writes] takes the ID only, as `routine_id`.
+
+A tool marked [dry run] previews, then acts when called again with
+`confirm=true`:
+
+```text
+→ delete_rows(…, row_ids=[91])                dry run: lists the rows
+→ delete_rows(…, row_ids=[91], confirm=true)  deletes them
+```
+
+For some, your assistant confirms straight away when you asked for that
+change yourself, such as an Action on Items you named; others, such as
+deleting rows, always preview first. Each tool's page says which.
+
+A listing returns one page and a `next_cursor`: pass it back with the same
+arguments for the next page.
 
 The other badges are the hints the server declares to your assistant's app,
-which may use them to decide what to ask before a call: `[read-only]`, or
-`[writes]` with `[destructive]` or `[idempotent]`. On a tool's page, an
-argument marked `[required]` must be passed, and any other may be left out.
+which may use them to decide what to ask before a call: [read-only], or
+[writes] with [destructive] or [idempotent]. On a tool's page, an argument
+marked [required] must be passed, and any other may be left out.
 
 A worked example is a request a person might make, each call an assistant
 makes for it, marked `→`, and what the tool returns. The response is the

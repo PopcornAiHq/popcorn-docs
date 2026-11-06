@@ -52,6 +52,6 @@ Run: run_WzEs…
 It runs in the background. get_run with that run shows how it is going or how it ended, and list_history with it the items it changed; each of those items' own History lists it too. Work it hands to runs of their own is in list_runs.
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
+shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
+with `next_cursor`.
