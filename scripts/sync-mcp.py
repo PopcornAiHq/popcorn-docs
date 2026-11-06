@@ -4,13 +4,17 @@
 The pages list the tools the hosted Popcorn MCP server exposes, each with its
 arguments, as the server itself declares them: the name and signature of each
 function registered with `@mcp.tool`, its docstring, and its annotations.
-They are two pages: `mcp/index.md` says what the server is, how to connect
-to it, the conventions every tool shares and the tools still proposed, and
 `mcp/tools/index.md` lists every tool A to Z, one line each, and each tool has
 a page of its own under it (`mcp/tools/get-status.md`) with its signature,
-arguments and example. All sit in the Reference tab's MCP section. They are generated, never hand-written, for the same reason as the activity
-reference — the definitions are what the server serves, and a hand-kept list
-is a second source that can only drift from them.
+arguments and example. They are generated, never hand-written, for the same
+reason as the activity reference — the definitions are what the server
+serves, and a hand-kept list is a second source that can only drift from
+them.
+
+The MCP overview above them, `mcp/index.md`, is hand-written: what the
+server offers, how to connect, and what every tool shares, none of which a
+tool definition says. It carries no `generated:` line, so this script leaves
+it alone.
 
 The server lives in the private backend, so this runs only where a backend
 checkout exists, named by `$POPCORN_BACKEND` (default `$HOME/popcorn/backend`),
@@ -27,13 +31,6 @@ After each prod deploy the backend's deploy pipeline runs the last form
 against the deployed checkout with the deploy's version, then opens a pull
 request here as the docs bot when the page changed. `--platform-version` sets
 the page's `updated:` date; `platform_version.py` says when that line moves.
-
-The page also carries a "Proposed tools" section, which is the one part of
-the reference no source generates: tools that are designed but not built.
-It is kept here, as `PROPOSED`, so the page still has one writer and is
-never edited by hand, and it is deleted as the tools ship and start being
-generated like the rest, or as a design is dropped. Nothing in it may name a ticket, a pull request, a
-private repository or a design document; describe the tool and stop.
 
 Some tools carry a worked example: a request a person might make, the calls
 an assistant makes for it, and what each returns. The backend writes these as
@@ -67,12 +64,12 @@ REFERENCE = ROOT / "content" / "reference"
 # Written into every page this script generates; it is also how the script
 # knows which pages under its folder are its own to rewrite or remove.
 GENERATED_BY = "scripts/sync-mcp.py"
-PAGE = REFERENCE / "mcp" / "index.md"
 # The tool index, and the parent of every tool's page: its URL is the folder
 # the tool pages sit in.
 TOOLS = "mcp/tools"
-# Where the MCP pages sit among the reference pages: the landing page, then
-# the tools.
+# Where the MCP pages sit among the reference pages: after the hand-written
+# overview, `mcp/index.md`, which is `ORDER` itself; the tool index, then each
+# tool.
 ORDER = 300
 DEFAULT_BACKEND = pathlib.Path.home() / "popcorn" / "backend"
 TOOLS_DIR = ("services", "mcp", "tools")
@@ -112,119 +109,6 @@ CONCEPTS: dict[str, tuple[str, ...] | None] = {
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
 _LONG_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{32,}")
-
-# Designed, not built: the product surface, named from the glossary.
-# See the module docstring before adding to this. An entry is a
-# "## Proposed tools" intro, then one "### `tool`" section per tool;
-# proposed() drops a section once the server defines that name. Any numbered
-# rules go in a numbered list, not bullets: on a lookup page a bullet that
-# opens in bold is read as a glossary-style entry and indexed.
-PROPOSED = """\
-## Proposed tools
-
-**None of these tools exist yet, and nothing depends on them arriving.** They
-are a design for the tools a person's assistant uses to run Routines, named
-in the [glossary](https://docs.popcorn.ai/glossary.md)'s
-terms rather than the platform's. They are listed so an author can see what is
-being considered; names and arguments may change before any ships.
-
-The message, flow, run and stored-value tools have already left this
-surface: a Routine's work starts from its Triggers and Actions, a switch is a
-Routine Setting, an item's runs are read with `list_history`, and its
-conversation is read in Popcorn. Changing a Routine Template itself is not
-part of this design.
-
-Three rules run through it:
-
-1. **Ask for the outcome; Popcorn picks the mechanism.** A tool takes what
-   the person wants changed, in product terms, and Popcorn decides which
-   setting, document or step has to change to get it.
-2. **Every write is a dry run until `confirm=true`**, and the dry run says
-   whether the change stays with this Routine or gives it a copy of its own,
-   which stops receiving its template's improvements.
-3. **Reads take `routine`** (its ID or `#name`); **writes take `routine_id`**,
-   since a write is the worst place to resolve a name to the wrong Routine.
-
-### `duplicate_routine`
-
-Makes a new Routine that starts as a copy of an existing one: its template,
-Routine Settings, Instructions and References, but none of its items or
-History. Connections are not copied, because they sign in as a person.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | The Routine to copy |
-| `name` | | The new Routine's name |
-| `confirm` | `false` | Create the previewed copy |
-
-### `list_connections`
-
-Read-only. The Connections a Routine needs, each with whether it is made,
-whose account it uses, and what stops while it is missing. Making one is a
-person's job, in the browser; the result says where.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `list_references`
-
-Read-only. The documents a Routine works from, each with what it is used for,
-when it was added and by whom, and the ones the Routine is still waiting for.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-
-### `read_reference`
-
-Read-only. One Reference's text, or a download link for a file that is not
-text.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `reference` | | As `list_references` names it |
-
-### `add_reference`
-
-Adds a document to a Routine, or replaces one, from text or a file the
-caller uploaded. Without `confirm`, says what the Routine will do with it.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine_id` | | Routine ID |
-| `reference` | | Which document this is, as `list_references` names it |
-| `text` | | The document as text |
-| `upload_id` | | A file uploaded for this Routine, in place of `text` |
-| `confirm` | `false` | Add the previewed document |
-
-### `read_history_entry`
-
-Read-only. One entry from `list_history` in full: a run's steps and result, a
-message and its replies, or a change's before and after.
-
-| Argument | Default | Notes |
-|---|---|---|
-| `routine` | | Routine ID or `#name` |
-| `entry_id` | | From `list_history` |
-"""
-
-
-def proposed(defined: set[str]) -> str:
-    """`PROPOSED` without the tools the server already defines.
-
-    A tool's entry stays in `PROPOSED` until someone deletes it, but the
-    server can ship the tool first; the page then lists it once, as
-    generated. With no proposed tool left, the section goes.
-    """
-    intro, _, rest = PROPOSED.partition("\n### ")
-    sections = ["### " + part for part in rest.split("\n### ")] if rest else []
-    kept = [s for s in sections if re.match(r"### `(\w+)`", s).group(1) not in defined]
-    if not kept:
-        return ""
-    return intro + "\n" + "\n".join(kept)
-
 
 def backend() -> pathlib.Path | None:
     path = pathlib.Path(os.environ.get("POPCORN_BACKEND") or DEFAULT_BACKEND).expanduser()
@@ -565,92 +449,10 @@ def tools_page(found: list[dict], order: int) -> str:
     return "\n".join(out).rstrip() + "\n"
 
 
-def landing(found: list[dict]) -> str:
-    out = header(
-        id="mcp",
-        # Not "Popcorn MCP server": search weighs a title word heavily, and
-        # "popcorn" is in most questions. Setting the server up is its own
-        # page, which this one links; "overview" pairs it with the CLI's.
-        title="MCP server overview",
-        order=ORDER,
-        summary="The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a "
-                "person's assistant tools for their Routines. This page says what they "
-                "cover and what every tool shares: the Workspace a call runs in, dry "
-                "runs and `confirm=true`, `routine` and `routine_id`, and paging. Adding "
-                "the server to an assistant has its own page, and the tools are listed "
-                "A to Z on theirs.",
-        lede="What Popcorn's MCP server gives your assistant, and what every tool shares.",
-        concepts=["add-the-mcp-server", "app-bundle", "versions", "copying-a-template"],
-        lookup=False,
-    )
-    out += [
-        f"The hosted MCP server gives a person's assistant {len(found)} tools. With them it",
-        "can find people and Routines, list the Routine Templates a new Routine can",
-        "be made from, create a Routine (optionally from a template), see whether a",
-        "Routine's Connections are made and make one from an account already",
-        "signed in to or as a webhook, see what starts its work and run a",
-        "schedule now, list and take the Actions on its items, read and change its",
-        "settings, read its tables and rows and add, change or delete rows, and read",
-        "the files of the app a Routine runs, fork it onto the workspace's own line,",
-        "publish changes to a fork line, and bring a Routine on a fork line to its",
-        "line's head or move it onto another line. They work on Routines only; a",
-        "Routine's messages and runs are read in Popcorn.",
-        "",
-        "A Routine is what the CLI and the API call a channel, and its Routine",
-        "Template's code is what they call an app (an app bundle); the `#name` and",
-        "the IDs are the same.",
-        "",
-        "## Get started",
-        "",
-        "The server's address is `https://mcp.popcorn.ai/mcp`. [Add the MCP",
-        "server](https://docs.popcorn.ai/add-the-mcp-server.md) has the steps for",
-        "Claude, Claude Code and other assistants, signing in and choosing a",
-        "Workspace, and checking the connection.",
-        "",
-        "## What every tool shares",
-        "",
-        "Every call runs as the person who connected the server, with that person's",
-        "permissions, in the one workspace the connection is bound to; every",
-        "response starts with that workspace's name. To use another workspace,",
-        "reconnect. Read tools accept a Routine's `#name` or its ID as `routine`;",
-        "tools that write into a Routine take `routine_id`, the ID only. A listing",
-        "returns one page and a `next_cursor` to pass back with the same arguments.",
-        "A fork, a publish, an install that moves a Routine onto another line,",
-        "creating a Routine from a template, running a Trigger, taking an Action,",
-        "making a Connection, changing a setting and deleting rows are a dry run",
-        "until called again with",
-        "`confirm=true`. An",
-        "install that brings a Routine to its own line's head starts at once, and",
-        "so does creating a Routine with no template.",
-        "",
-        "These pages are generated from the server's tool definitions by",
-        "`scripts/sync-mcp.py` after each prod deploy and never edited by hand.",
-        "The badges under each tool are the access hints the server declares to the",
-        "host — `[read-only]`, or `[writes]` with `[destructive]` or `[idempotent]`",
-        "— and a host may use them to decide what to ask before calling. An argument",
-        "marked `[required]` must be passed; every other one may be left out.",
-        "",
-        "Under some tools is an example: a request a person might make, then each",
-        "call an assistant makes for it, marked `→`, followed by what the tool",
-        "returns. The response is the server's real output for sample data — the",
-        "workspace Acme — produced by running the tool in the server's tests, so it",
-        "changes when the tool's output does. Examples leave out the workspace line",
-        "every response opens with. IDs are shortened, as `8c1f…e2`, a cursor keeps",
-        "its first characters, and a long listing keeps its first rows.",
-        "",
-        "## Tool reference",
-        "",
-        f"[Tools](https://docs.popcorn.ai/{TOOLS}.md) lists all {len(found)} tools A to Z, each linking a",
-        "page of its own with its call, arguments and access hints.",
-    ]
-    out.append("")
-    return "\n".join(out) + "\n" + proposed({t["name"] for t in found})
-
-
 def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     """Every MCP page, by the path it is written to, without `updated:`."""
     names = {t["name"] for t in found}
-    out = {PAGE: landing(found), REFERENCE / TOOLS / "index.md": tools_page(found, ORDER + 1)}
+    out = {REFERENCE / TOOLS / "index.md": tools_page(found, ORDER + 1)}
     for n, tool in enumerate(sorted(found, key=lambda t: t["name"]), 2):
         out[REFERENCE / f"{tool_id(tool['name'])}.md"] = tool_page(tool, shown, ORDER + n, names)
     return out

@@ -108,7 +108,7 @@ one mark of a generated page. A person opening the file sees it is not
 theirs to edit; the build names such a page in `llms-full.txt` without its
 body; `check-vocabulary.py` leaves its wording to the platform it describes;
 and the script rewrites or removes only the pages that name it, so a
-hand-written page can sit beside generated ones.
+hand-written page can sit beside generated ones, as the MCP overview does.
 Every generated page is a reference page, and `check-content.py` fails the
 field anywhere else, or naming a script that does not exist.
 

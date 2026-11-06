@@ -99,7 +99,7 @@ written, and the glossary should link to it instead.
 
 ## `content/reference/`
 
-**Generated. Never hand-edited.**
+**Generated, except a section's overview. A generated page is never hand-edited.**
 
 **Audience:** an agent that needs exact argument names, and a person checking
 one.
@@ -110,12 +110,12 @@ tools, each with the script that generates it (`sync-activities.py`,
 and a per-app states rendering belong here too, and land here only once
 something generates them — never hand-written in the meantime.
 
-**The one exception** is the MCP page's "Proposed tools": tools that are
-designed and not built, so nothing can generate them. The text lives in
-`sync-mcp.py` rather than the page, so the page still has one writer, and it
-says plainly that nothing depends on the tools arriving. Each tool leaves that
-section when it ships and the generator starts finding it, or when its design
-is dropped.
+**The one exception** is a section's overview, such as the MCP server
+overview (`mcp/index.md`): what the section's entries share and how to start,
+which no definition in the backend says. It is hand-written like any other
+page. Every generated page carries `generated:`, naming the script that
+writes it, and a hand-written overview does not, so its generator never
+rewrites or removes it.
 
 **The test:** *is there a symbol in the backend that already enforces this?*
 Then it is generated, and hand-writing it creates a second source that will
