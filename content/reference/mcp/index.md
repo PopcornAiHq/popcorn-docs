@@ -55,9 +55,8 @@ install that brings a Routine to its own line's head starts at once, and
 so does creating a Routine with no template.
 
 These pages are generated from the server's tool definitions by
-`scripts/sync-mcp.py` after each prod deploy and never edited by hand; a
-date beside the title is the day of the deploy that last changed it. The
-badges under each tool are the access hints the server declares to the
+`scripts/sync-mcp.py` after each prod deploy and never edited by hand.
+The badges under each tool are the access hints the server declares to the
 host — `[read-only]`, or `[writes]` with `[destructive]` or `[idempotent]`
 — and a host may use them to decide what to ask before calling. An argument
 marked `[required]` must be passed; every other one may be left out.

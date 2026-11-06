@@ -107,11 +107,12 @@ beside the title. A hand-written page never sets it.
 
 **`updated`** is `version`'s counterpart for pages that describe the
 deployed platform rather than a release — `sync-activities.py` and
-`sync-mcp.py` write it from `--platform-version`, and it is shown beside the
-title as "updated 2026-10-26". It holds only the date of the prod deploy the
-page was regenerated from. The deploy's own id carries a commit hash from a
-private repository, which cannot appear here, and the date is what tells a
-reader how fresh the page is. It changes only when something else on the page
+`sync-mcp.py` write it from `--platform-version`. It is not shown on the
+page: those pages are regenerated after every prod deploy, and the footer's
+"Last updated" says how fresh the site is. It holds only the date of the prod
+deploy the page was regenerated from, since the deploy's own id carries a
+commit hash from a private repository, which cannot appear here, and it marks
+the page as generated. It changes only when something else on the page
 does, so a deploy that changes nothing leaves the page untouched: the date is
 that of the deploy that last changed what the generator writes. A hand edit to
 the page does not move it, and a hand run that changes the page drops the

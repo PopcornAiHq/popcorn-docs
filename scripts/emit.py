@@ -441,24 +441,20 @@ def related(page: dict, by_id: dict[str, dict]) -> list[render.Link]:
 
 
 def version_badge(page: dict) -> str:
-    """What a generated page describes, beside its title.
+    """The release a generated page describes, beside its title.
 
-    Only a page whose generator records one gets a badge. `version:` is the
-    release the CLI reference describes, which it would otherwise mention only
-    mid-sentence. `updated:` is the date of the prod deploy the activity and
-    MCP references were last regenerated from, which moves only when the page
-    does — the platform has no release number a reader could use, so the date
-    is what says how fresh the page is.
-    A page has one or the other.
+    Only `version:` gets a badge: it is the release the CLI reference
+    describes, which a reader compares with the one they have installed and
+    the page would otherwise mention only mid-sentence. `updated:` on the
+    activity and MCP references gets none — those are regenerated after every
+    prod deploy, so they describe the platform as it is, and the footer's
+    "Last updated" already says how fresh the site is.
     """
     if page.get("version"):
         # Written without its `v` by the generator; stripped anyway, so a
         # value that arrives with one still reads as a version, not `vv…`.
         release = str(page["version"]).removeprefix("v")
         return f'<span class="version-badge" title="Generated from this release">v{release}</span>'
-    if page.get("updated"):
-        return (f'<span class="version-badge" title="Generated from the platform deployed on this date">'
-                f'updated {page["updated"]}</span>')
     return ""
 
 
@@ -559,7 +555,6 @@ def main() -> int:
                 url=url(page),
                 lookup=lookup,
                 kind=kind(page),
-                own_date=bool(page.get("updated")),
             )
         )
 
