@@ -5,13 +5,13 @@ order: 313
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   A Routine's Instructions in one read: the guidance its agents work from,
   Routine-wide and for each Step, each with where it came from (the
   template's, or changed for this Routine) and what changes it.
 concepts: [instructions]
-used_with: [mcp/tools/get-routine]
+used_with: [mcp/tools/list-memories, mcp/tools/get-memory, mcp/tools/get-routine]
 ---
 
 [read-only]
@@ -20,7 +20,7 @@ used_with: [mcp/tools/get-routine]
 get_instructions(routine, step=None, guide=False, cursor=None)
 ```
 
-The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. On a workspace that guards personal data, what people told the agent shows each memory's category and date, not its text. With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
+The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; list_memories and get_memory read them all. With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
 
 ## Arguments
 
@@ -71,8 +71,8 @@ Changed by: in Popcorn.
 
 ## What people told the agent (2, newest first)
 Changed by: in Popcorn, by telling the agent.
-- preferences  2026-10-14: Mrs. Ortiz prefers a call after 5pm.
-- decisions  2026-10-09: Water damage under $2,000 skips the adjuster call.
+- preferences/00000014  2026-10-14: Mrs. Ortiz prefers a call after 5pm.
+- decisions/00000009  2026-10-09: Water damage under $2,000 skips the adjuster call.
 
 ## Each Step's note, copy, questions and deadlines
 Changed by: with change_routine (describe the change), or in Popcorn by telling the Routine's agent.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-rows
 title: list_rows
-order: 334
+order: 336
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   List a table's rows, newest first unless sort says otherwise.
 concepts: [tables]
