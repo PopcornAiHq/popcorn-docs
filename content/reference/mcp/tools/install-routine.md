@@ -19,7 +19,13 @@ used_with: [mcp/tools/create-routine, mcp/tools/create-routine-version, mcp/tool
 install_routine(routine_id, copy=None, confirm=False, plan_id=None)
 ```
 
-It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…). Without copy, this is a catch-up (as `popcorn app apply`): a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. Use it after a create_routine_version whose install was blocked, or when get_routine shows the Routine behind its copy. With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. A move is a dry run that changes nothing unless confirm=true. It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. To change how one Routine behaves, check list_routine_settings first; a move onto a copy is one-way.
+It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…).
+
+Without copy, this is a catch-up (as `popcorn app apply`): a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. Use it after a create_routine_version whose install was blocked, or when get_routine shows the Routine behind its copy.
+
+With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. A move is a dry run that changes nothing unless confirm=true.
+
+It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. To change how one Routine behaves, check list_routine_settings first; a move onto a copy is one-way.
 
 ## Arguments
 
@@ -45,5 +51,3 @@ Install: #intake moves from Popcorn's Claim Coordinator (claimcoordinator) 0.15.
 
 Call again with `confirm=true` to move #intake onto copy "acme-west".
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

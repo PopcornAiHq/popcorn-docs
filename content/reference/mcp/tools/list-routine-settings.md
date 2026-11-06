@@ -41,5 +41,3 @@ Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 - prompts.chase_email  Hi {{ name }}, just following up on the documents we asked for last week. If you've already sent them, thank you, and pl… [truncated; get_routine_setting(key="prompts.chase_email") for the full text]
 2 values set on this Routine are read by nothing and not shown.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

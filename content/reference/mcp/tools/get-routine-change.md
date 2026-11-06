@@ -45,5 +45,3 @@ Set:
 - `interview`: reminders 2, then 5 days after our last email; copy subject
 Before it: version 8766b94ba656. To go back: change_routine with revert_to="8766b94b…".
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

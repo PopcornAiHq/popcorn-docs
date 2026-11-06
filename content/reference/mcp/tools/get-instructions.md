@@ -20,7 +20,9 @@ used_with: [mcp/tools/list-memories, mcp/tools/get-memory, mcp/tools/get-routine
 get_instructions(routine, step=None, guide=False, cursor=None)
 ```
 
-The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; list_memories and get_memory read them all. With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
+The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown in full and each Step is summarised; with step, that Step's are shown in full. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; list_memories and get_memory read them all.
+
+With guide=true it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
 
 ## Arguments
 
@@ -87,5 +89,3 @@ get_instructions(routine="#intake", step="<Status value>") shows one Step's in f
 Changed by: a member of the Routine, in Popcorn. A template update keeps a change made to this Routine's copy.
 - AGENT.md (the template's): 1,475 characters, first heading "Claims intake agent". How the Routine's agent talks and what it knows about the template. get_instructions with guide=true reads its text.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

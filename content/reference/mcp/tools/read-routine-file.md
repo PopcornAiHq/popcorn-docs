@@ -27,7 +27,7 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `path` [required] | `str` | The file's path, as list_routine_files shows it. |
-| `version` | `int | str` | An older version of the Routine's template: its number ("0.15.1") or its version id. Omit for the base for edits. |
+| `version` | `int \| str` | An older version of the Routine's template: its number ("0.15.1") or its version id. Omit for the base for edits. |
 | `cursor` | `str` | next_cursor from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”
@@ -44,5 +44,3 @@ app_type: claimcoordinator
 display_name: Claim Coordinator
 version: 0.15.1
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

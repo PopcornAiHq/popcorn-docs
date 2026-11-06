@@ -43,5 +43,3 @@ Columns shown: claim_no, claimant, amount, Status, Stage (of 11; columns=[…] p
 - row 91  claim_no: 44710  claimant: Lee  amount: 900  (updated 2026-09-29 14:05)
 - row 88  claim_no: 4471  claimant: Ortiz  amount: 12400  Status: Open (value "open")  Stage: open  (updated 2026-09-29 14:05)
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

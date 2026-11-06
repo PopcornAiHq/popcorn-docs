@@ -20,7 +20,9 @@ used_with: [mcp/tools/get-routine]
 list_routines(query=None, template=None, copy=None, include_archived=False, sort="name", cursor=None)
 ```
 
-Direct messages are not listed. Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
+Direct messages are not listed.
+
+Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. get_routine shows one Routine's version, install state and Connections.
 
 ## Arguments
 
@@ -45,5 +47,3 @@ Direct messages are not listed. Each row shows the Routine's name, its Routine T
 - … 47 more rows
 next_cursor: eyJ2Ijox…
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

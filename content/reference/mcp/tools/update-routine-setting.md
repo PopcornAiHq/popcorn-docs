@@ -18,7 +18,17 @@ used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings]
 update_routine_setting(routine_id, key, value="OMITTED", changes=None, confirm=False, plan_id=None)
 ```
 
-Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here. For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as create_routine_version's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string). A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
+Without confirm=true this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a plan_id: to change it, call again with the key, confirm=true and that plan_id, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here.
+
+For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as create_routine_version's ops are. The anchor is the text exactly and must match once: {"op": "replace", "old_string": "Hi {{name}},", "new_string": "Hello {{name}},"}. Also insert_before and insert_after (anchor, text), prepend and append (text), and replace_range (from, to, new_string).
+
+A value with credentials inside it shows them as [secret]. Keep
+
+```text
+[secret] exactly where a read shows it; the stored credential stays
+```
+
+in place. Credentials, and what surrounds them, change in the app.
 
 ## Arguments
 
@@ -51,5 +61,3 @@ Routine: #chase-renewals (4b0e…12) · template: chase 0.3.1
 Changed chase_max_followups on #chase-renewals: 10 → 5.
 Runs already under way keep the value they started with.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -47,5 +47,3 @@ Thanks for reaching out. To get your claim started, please reply with:
 2. Your policy number
 3. Photos of the damage
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -39,5 +39,3 @@ Reacted 👍 to message 9a3c…19.
 
 Removed your 👀 from message 7e1a…47.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

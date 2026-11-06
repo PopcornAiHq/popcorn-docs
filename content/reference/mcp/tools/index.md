@@ -43,7 +43,7 @@ declares to your assistant, helping it decide what to ask before a call:
 ## C
 
 - **[`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)** — [writes] [destructive] [dry run] Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
-- **[`complete_setup_step`](https://docs.popcorn.ai/mcp/tools/complete-setup-step.md)** — [writes] [destructive] [dry run] Complete one step of a Routine's setup that asks for a value, as its card on the Today tab in Popcorn does: a setting its work needs (a reply-by date, a waiting period) or a booking page's link. get_setup lists the steps and what each asks for.
+- **[`complete_setup_step`](https://docs.popcorn.ai/mcp/tools/complete-setup-step.md)** — [writes] [destructive] [dry run] Complete one step of a Routine's setup that asks for a value, as its card on the Today tab in Popcorn does: a setting its work needs (a reply-by date, a waiting period) or a booking page's link.
 - **[`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)** — [writes] [destructive] [dry run] Give a Routine its own named copy of the Routine Template it runs.
 - **[`create_reference_upload`](https://docs.popcorn.ai/mcp/tools/create-reference-upload.md)** — [writes] Get a URL to upload one file for one of a Routine's References, for add_reference to take.
 - **[`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)** — [writes] Create a Routine in this workspace, optionally from a Routine Template.
@@ -77,7 +77,7 @@ declares to your assistant, helping it decide what to ask before a call:
 
 ## L
 
-- **[`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md)** — [read-only] List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to. take_action takes one.
+- **[`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md)** — [read-only] List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to.
 - **[`list_connections`](https://docs.popcorn.ai/mcp/tools/list-connections.md)** — [read-only] List the Connections a Routine needs: the accounts and other services its template works through.
 - **[`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md)** — [read-only] What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
 - **[`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md)** — [read-only] List memories, newest first: what people told a Routine's agent (preferences, decisions, feedback) and what its template keeps there (categories named "<feature>:<name>", such as autochat:day).

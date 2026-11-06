@@ -37,5 +37,3 @@ Routine: #intake (c7d2…5b)
 - claims  212 rows
 - Contacts  3 rows
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

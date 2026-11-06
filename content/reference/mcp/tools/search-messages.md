@@ -19,7 +19,9 @@ used_with: [mcp/tools/read-message, mcp/tools/list-messages]
 search_messages(query, routine=None, author=None, after=None, before=None, sort="relevance", cursor=None)
 ```
 
-Direct messages are never searched. Each result names its Routine; read_message returns a result in full, and list_messages(Routine, after=<id>) shows what followed it. To page through one Routine in time order, use list_messages.
+Direct messages are never searched. Each result names its Routine; read_message returns a result in full, and list_messages(Routine, after=<id>) shows what followed it.
+
+To page through one Routine in time order, use list_messages.
 
 ## Arguments
 
@@ -42,5 +44,3 @@ Direct messages are never searched. Each result names its Routine; read_message 
 [2026-09-29 14:03] (id: 9a3c…19) #intake · Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension.
 [2026-09-12 10:15] (id: e11b…9d) #claims-east · Dana Smith: Northside Auto says the parts arrive Monday.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -46,5 +46,3 @@ Steps, newest first:
 - load_item · completed · 0.4s
 list_history with this run shows the items it changed.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

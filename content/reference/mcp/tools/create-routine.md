@@ -5,7 +5,7 @@ order: 307
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
 concepts: [set-up-a-routine]
@@ -18,7 +18,9 @@ used_with: [mcp/tools/get-routine, mcp/tools/list-routine-templates]
 create_routine(name, template=None, private=None, members=None, confirm=False, plan_id=None)
 ```
 
-The Routine is created at once, with or without `template` (for Popcorn's channel agent it is a dry run first, like any other). From a template, the answer names the version that installs, the connections someone sets up before it runs, and the optional ones. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands. A name already used in this workspace is refused, with the ID of the Routine that has it.
+The Routine is created at once, with or without `template` (for Popcorn's channel agent it is a dry run first, like any other). From a template, the answer names the version that installs, the connections someone sets up before it runs, and the optional ones. The template installs in the background after the Routine exists; get_routine's Install: field shows when it lands.
+
+A name already used in this workspace is refused, with the ID of the Routine that has it.
 
 ## Arguments
 
@@ -41,5 +43,3 @@ Members: you, @jlee.
 Claim Coordinator (claimcoordinator) 0.15.1 is installing in the background. Watch get_routine("569f…5c")'s Install: field until it says installed.
 Before the Routine runs, someone sets up in it: Gmail, Google Calendar, Google Drive.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

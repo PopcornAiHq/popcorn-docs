@@ -80,9 +80,10 @@ EXAMPLES_DIR = ("services", "mcp", "examples")
 INTERNAL_TOOLS = ("services", "mcp", "internal_tools.py")
 
 _ARG = re.compile(r"^(?P<name>\w+):\s*(?P<text>.*)$")
-# The end of a description's first sentence: a stop followed by a capital, so
-# an "e.g." mid-sentence does not end it.
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+# The end of a description's first sentence: a stop followed by a capital, or
+# by a tool's snake_case name ("… the table. update_row needs …"), which starts
+# a sentence lowercase. An "e.g." or "i.e." before one does not end it.
+_SENTENCE_END = re.compile(r"(?<!\be\.g\.)(?<!\bi\.e\.)(?<=[.!?])\s+(?=[A-Z]|[a-z]+_[a-z_]+\b)")
 
 # The concept page each tool module's tools are about, shown as Related on a
 # tool's page: the idea behind the tool, for a reader who has its arguments
@@ -145,8 +146,10 @@ def docstring(text: str) -> tuple[str, dict[str, str]]:
         if in_args and not stripped:
             continue
         in_args = False
-        prose.append(line)
-    return " ".join(" ".join(prose).split()), args
+        prose.append(line.rstrip())
+    # Lines and blank lines kept: a description's paragraphs, lists and
+    # example lines are its structure, and description() lays them out.
+    return "\n".join(prose).strip(), args
 
 
 def kind(annotation: ast.expr | None) -> tuple[str, bool]:
@@ -309,10 +312,66 @@ def tool_id(name: str) -> str:
     return f"{TOOLS}/" + name.replace("_", "-")
 
 
+_BULLET = re.compile(r"^[-*] ")
+# A line of example input, such as one of create_routine_version's change
+# shapes: JSON, shown as code rather than run into the prose around it.
+_CODE_LINE = re.compile(r"^[{\[]")
+# A JSON object written inline in a sentence, as an example argument. Shown
+# as code: in prose, the site would read a "* * *" in it as emphasis.
+_INLINE_JSON = re.compile(r'(?<!`)\{"[^{}`]*\}(?!`)')
+
+
+def description(text: str) -> list[str]:
+    """A description's text as Markdown: each paragraph a paragraph, a run of
+    `- ` lines a list (an indented line continues the item above it), and a
+    run of JSON lines a code block. Docstrings are written as plain text, so
+    without this every line break is lost and a page reads as one block."""
+    out: list[str] = []
+    for paragraph in re.split(r"\n\s*\n", text.strip()):
+        prose: list[str] = []
+        items: list[str] = []
+        code: list[str] = []
+
+        def flush() -> None:
+            if prose:
+                text = " ".join(" ".join(prose).split())
+                out.extend([_INLINE_JSON.sub(lambda m: f"`{m.group(0)}`", text), ""])
+                prose.clear()
+            if items:
+                out.extend([*(f"- {' '.join(i.split())}" for i in items), ""])
+                items.clear()
+            if code:
+                out.extend(["```text", *code, "```", ""])
+                code.clear()
+
+        for line in paragraph.splitlines():
+            stripped = line.strip()
+            if _CODE_LINE.match(stripped):
+                if not code:
+                    flush()
+                code.append(stripped)
+            elif _BULLET.match(stripped):
+                if not items:
+                    flush()
+                items.append(stripped[2:])
+            elif items and line.startswith((" ", "\t")):
+                items[-1] += " " + stripped
+            else:
+                if items or code:
+                    flush()
+                prose.append(stripped)
+        flush()
+    return out
+
+
 def lead(summary: str) -> tuple[str, str]:
-    """A description split into its first sentence and the rest."""
-    parts = _SENTENCE_END.split(" ".join(summary.split()), maxsplit=1)
-    return parts[0], parts[1] if len(parts) > 1 else ""
+    """A description split into its first sentence and the rest. Only the
+    first paragraph is split; the paragraphs after it are returned as written,
+    for description() to lay out."""
+    first, _, others = summary.strip().partition("\n\n")
+    parts = _SENTENCE_END.split(" ".join(first.split()), maxsplit=1)
+    rest = "\n\n".join(x for x in (parts[1] if len(parts) > 1 else "", others.strip()) if x)
+    return parts[0], rest
 
 
 def cell(text: str) -> str:
@@ -399,7 +458,7 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -
     # title; the call comes next, as a usage line does, then the rest.
     out += [access(tool), "", "```", signature(tool), "```", ""]
     if rest:
-        out += [cell(rest), ""]
+        out += description(rest)
     if tool["args"]:
         out += ["## Arguments", "", "| Argument | Type | Notes |", "|---|---|---|"]
         for a in tool["args"]:
@@ -408,13 +467,11 @@ def tool_page(tool: dict, shown: dict[str, dict], order: int, names: set[str]) -
             if a["default"] is not None and "default" not in note.lower():
                 note = f"{note} Default `{a['default']}`.".strip()
             name = f"`{a['name']}`" + (" [required]" if a["required"] else "")
-            out.append(f"| {name} | {a['type']} | {note} |")
+            # A union type ("int | str") has pipes, which would split the row.
+            out.append(f"| {name} | {a['type'].replace('|', chr(92) + '|')} | {note} |")
         out.append("")
     if tool["name"] in shown:
         out += worked(shown[tool["name"]])
-    out += [
-        "The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.",
-    ]
     return "\n".join(out).rstrip() + "\n"
 
 

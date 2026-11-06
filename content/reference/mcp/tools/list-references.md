@@ -48,5 +48,3 @@ Routine: #intake (c7d2…5b)
 read_reference(routine="#intake", reference="<name>") returns one's text or a download link.
 add_reference adds or replaces a Reference not marked otherwise, as its card in Popcorn does; adding one starts work, which list_triggers shows.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

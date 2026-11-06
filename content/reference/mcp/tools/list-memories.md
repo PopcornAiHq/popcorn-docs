@@ -48,5 +48,3 @@ Categories (4):
 - preferences/00000003  2026-11-04 09:00: Mrs. Ortiz prefers a call after 5pm.
 - decisions/00000004  2026-11-02 09:00: Water damage under $2,000 skips the adjuster call.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

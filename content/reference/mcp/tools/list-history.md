@@ -19,7 +19,13 @@ used_with: [mcp/tools/list-runs, mcp/tools/list-rows, mcp/tools/run-trigger, mcp
 list_history(routine, row_id=None, cursor=None, run=None)
 ```
 
-Newest first, a page at a time. Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far. With run instead of row_id, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did). list_runs lists the Routine's runs still going.
+Newest first, a page at a time.
+
+Each change shows when, who made it (a person by name; Popcorn and the work it was doing, for a run), the Status it moved to and its Why, and the other fields it changed. A run is listed only when it wrote to the item, and one a person's button started shows as Popcorn, for a person. History goes back as far as Popcorn keeps an item's changes; the last page says how far.
+
+With run instead of row_id, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did).
+
+list_runs lists the Routine's runs still going.
 
 ## Arguments
 
@@ -74,5 +80,3 @@ A run a person's button started shows as Popcorn, for a person: runs don't recor
 Only runs that wrote to this item are listed; a run that only read it isn't.
 History goes back 30 days; older changes aren't kept.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

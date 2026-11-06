@@ -18,7 +18,11 @@ used_with: [mcp/tools/get-row, mcp/tools/list-tables]
 update_row(routine_id, table, row_id, data, expected_rev)
 ```
 
-Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored. expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again. Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns.
+Only the columns in data change; the rest stay as they are. Each changes by its merge policy, and the response names any column where that policy, not the value sent, decided what's stored.
+
+expected_rev is the rev get_row shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again.
+
+Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns.
 
 ## Arguments
 
@@ -53,5 +57,3 @@ The row as stored:
 - home_address: 12 Elm St
 - summary: Ortiz called about the roof
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

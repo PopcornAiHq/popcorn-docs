@@ -5,7 +5,7 @@ order: 305
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Give a Routine its own named copy of the Routine Template it runs.
 concepts: [copying-a-template, versions]
@@ -18,7 +18,11 @@ used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings, m
 copy_routine_template(routine_id, name, confirm=False, plan_id=None)
 ```
 
-The copy starts byte-identical to the version of Popcorn's template the Routine runs, and the Routine moves onto it. That's one-way: the Routine never goes back to Popcorn's template, stops receiving Popcorn's improvements, and from then on gets only the new versions of its copy. Only a copy takes new versions, with create_routine_version. To change how one Routine behaves, check list_routine_settings first: a setting reaches one Routine and can be set back. Copy the template only for what settings can't express. Check an edit first with create_routine_version's dry run, since the copy is the step that can't be undone. Without confirm=true this is a dry run that changes nothing.
+The copy starts byte-identical to the version of Popcorn's template the Routine runs, and the Routine moves onto it. That's one-way: the Routine never goes back to Popcorn's template, stops receiving Popcorn's improvements, and from then on gets only the new versions of its copy. Only a copy takes new versions, with create_routine_version.
+
+To change how one Routine behaves, check list_routine_settings first: a setting reaches one Routine and can be set back. Copy the template only for what settings can't express. Check an edit first with create_routine_version's dry run, since the copy is the step that can't be undone.
+
+Without confirm=true this is a dry run that changes nothing.
 
 ## Arguments
 
@@ -46,5 +50,3 @@ Copy: Popcorn's Claim Coordinator (claimcoordinator) 0.15.1 (version 812) → ne
 
 Call again with `confirm=true` to make copy "acme-intake" of the template.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

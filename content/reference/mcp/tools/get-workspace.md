@@ -31,5 +31,3 @@ Your role: member
 
 This connection is bound to this workspace. To use a different one, the user reconnects Popcorn.
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

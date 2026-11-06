@@ -37,5 +37,3 @@ This workspace's members only: someone from another workspace who is in a shared
 - Jordan Lee  @jlee  jordan@acme.example  member  (id: 5d33…0c)
 - Sam Lee  @slee  sam@acme.example  admin  (id: 7a41…d2)
 ```
-
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.
