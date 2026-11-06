@@ -29,8 +29,8 @@ Workspace to checking the connection.
 ## Tools
 
 The [Tools](https://docs.popcorn.ai/mcp/tools.md) page lists every tool and
-what it does, and how your assistant names a Routine, previews a change
-before making it, and pages through a long list. 
+the patterns they share, such as naming a Routine, previewing a change
+before it's made, and paging through long lists.
 
 Some things your assistant can do:
 
@@ -51,13 +51,11 @@ Some things your assistant can do:
   [Steps](https://docs.popcorn.ai/steps.md), or a
   [Copy](https://docs.popcorn.ai/copying-a-template.md) of its template.
 
-
-
 ## Resources
 
-Your assistant reads these docs itself, with `search_docs` and `read_doc`.
-Every page is also an MCP Resource, so an assistant that lets you attach one
-can add a page to the conversation.
+Your assistant can read these docs with the `search_docs` and `read_doc`
+tools. Every page is also an MCP Resource, so an assistant that lets you
+attach one can add a page to the conversation.
 
 > [!TIP] In Claude Code
 > Type `@popcorn:` and pick a page, such as
