@@ -5,7 +5,7 @@ order: 301
 group: MCP
 layout: lookup
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Every tool the hosted server offers, A to Z, each with whether it reads or
   writes and what it does, linking its own page.
@@ -75,6 +75,7 @@ definitions after each prod deploy, and never edited by hand.
 ## G
 
 - **[`get_instructions`](https://docs.popcorn.ai/mcp/tools/get-instructions.md)** — [read-only] A Routine's Instructions in one read: the guidance its agents work from, Routine-wide and for each Step, each with where it came from (the template's, or changed for this Routine) and what changes it.
+- **[`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md)** — [read-only] One memory whole: its text, its category and name, when it was saved and last changed, and its metadata.
 - **[`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md)** — [read-only] Show one Routine: its details, your membership, and its Routine Template, with the version it's on, the latest version, where its updates come from (Popcorn, or this workspace's own copy of the template), whether the latest install landed, and its Connections: each account or webhook the template needs, and whether it's connected.
 - **[`get_routine_change`](https://docs.popcorn.ai/mcp/tools/get-routine-change.md)** — [read-only] Where a change to a Routine's Steps stands: still drafting, the proposal as Steps before and after, refused and why, or installed.
 - **[`get_routine_setting`](https://docs.popcorn.ai/mcp/tools/get-routine-setting.md)** — [read-only] One of a Routine's settings in full: the whole value (a prompt or email template's whole text), the template default, what it accepts, its description, its options with the warning each one carries, and who may change it.
@@ -95,6 +96,7 @@ definitions after each prod deploy, and never edited by hand.
 - **[`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md)** — [read-only] List the Actions a person can take on one of a Routine's items now, given where it stands: the buttons Popcorn shows on it, each with the Status it moves the item to. take_action takes one.
 - **[`list_connections`](https://docs.popcorn.ai/mcp/tools/list-connections.md)** — [read-only] List the Connections a Routine needs: the accounts and other services its template works through.
 - **[`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md)** — [read-only] What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
+- **[`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md)** — [read-only] List memories, newest first: what people told a Routine's agent (preferences, decisions, feedback) and what its template keeps there (categories named "<feature>:<name>", such as autochat:day).
 - **[`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md)** — [read-only] A Routine's messages, newest first, or one thread's replies.
 - **[`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md)** — [read-only] The documents a Routine works from (its References), each with what it is used for, when it was added and by whom, and the ones it is still waiting for.
 - **[`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md)** — [read-only] List the files of the Routine Template version a Routine runs, with sizes and sha256.

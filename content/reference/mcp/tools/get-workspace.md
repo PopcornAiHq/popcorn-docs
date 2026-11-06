@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-workspace
 title: get_workspace
-order: 323
+order: 324
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   The Popcorn workspace this connection is bound to.
 concepts: []

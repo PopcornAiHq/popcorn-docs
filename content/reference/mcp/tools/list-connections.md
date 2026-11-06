@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-connections
 title: list_connections
-order: 326
+order: 327
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   List the Connections a Routine needs: the accounts and other services its
   template works through.

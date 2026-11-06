@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-reference
 title: read_reference
-order: 344
+order: 346
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   One of a Routine's References: its text, or a download link for a file that
   isn't text, such as a PDF.

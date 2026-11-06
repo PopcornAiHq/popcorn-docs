@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-row
 title: get_row
-order: 317
+order: 318
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   One row in full: every column, its rev (update_row needs it as
   expected_rev), when it was created and last changed, and its state if the

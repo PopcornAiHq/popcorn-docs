@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-actions
 title: list_actions
-order: 325
+order: 326
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   List the Actions a person can take on one of a Routine's items now, given
   where it stands: the buttons Popcorn shows on it, each with the Status it

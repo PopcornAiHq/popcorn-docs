@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/install-routine
 title: install_routine
-order: 324
+order: 325
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-routine-setting
 title: get_routine_setting
-order: 316
+order: 317
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   One of a Routine's settings in full: the whole value (a prompt or email
   template's whole text), the template default, what it accepts, its

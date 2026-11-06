@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/update-row
 title: update_row
-order: 353
+order: 355
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Change some columns of one row.
 concepts: [tables]

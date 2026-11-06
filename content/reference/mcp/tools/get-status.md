@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-status
 title: get_status
-order: 320
+order: 321
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-05
+updated: 2026-11-06
 summary: >
   Where a Routine's items stand: how many are at each Status, and what is
   waiting for a person, with why and the Actions that settle it (take_action
