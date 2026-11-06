@@ -88,6 +88,4 @@ Changed by: a member of the Routine, in Popcorn. A template update keeps a chang
 - AGENT.md (the template's): 1,475 characters, first heading "Claims intake agent". How the Routine's agent talks and what it knows about the template. get_instructions with guide=true reads its text.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

@@ -49,6 +49,4 @@ Waiting for a person (3, newest first, from table issues):
 list_rows shows the items; list_actions and take_action act on one.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

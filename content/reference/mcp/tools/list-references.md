@@ -49,6 +49,4 @@ read_reference(routine="#intake", reference="<name>") returns one's text or a do
 add_reference adds or replaces a Reference not marked otherwise, as its card in Popcorn does; adding one starts work, which list_triggers shows.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

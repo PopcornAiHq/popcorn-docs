@@ -48,6 +48,4 @@ Setup: 4 of 6 steps done; 1 required left.
 Also needed, with no step Popcorn shows: secret:portal_token.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

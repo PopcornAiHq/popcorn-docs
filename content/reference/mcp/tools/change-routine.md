@@ -67,6 +67,4 @@ Routine: #intake (c7d2…5b)
 Installing change 8c1f3a52…. It checks the proposal once more against the Routine's items and puts it in only if it is unchanged; get_routine_change shows when it's done.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

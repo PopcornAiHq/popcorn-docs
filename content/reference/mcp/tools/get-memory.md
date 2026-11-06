@@ -45,6 +45,4 @@ Text, 140 characters:
 #intake is where Acme's claims team takes in new water-damage claims. Dana answers most of them; adjusters step in for anything over $2,000.
 ```
 
-The [MCP server overview](https://docs.popcorn.ai/mcp.md) has what every tool
-shares: the Workspace a call runs in, dry runs and `confirm=true`,
-`routine` and `routine_id`, and paging with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.

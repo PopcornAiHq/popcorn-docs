@@ -59,6 +59,4 @@ Whether a connected account has since been revoked or its sign-in has expired is
 list_connections says whose account each one uses and what stops without it.
 ```
 
-The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool
-shares: `routine` and `routine_id`, dry runs and `confirm=true`, and paging
-with `next_cursor`.
+The [Tools](https://docs.popcorn.ai/mcp/tools.md) page has what every tool shares.
