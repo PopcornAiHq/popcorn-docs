@@ -2,7 +2,7 @@
 """Regenerate the CLI pages in `content/reference/` from the installed `popcorn` CLI.
 
 The CLI reference is its help menu as pages, laid out like the Temporal and
-Terraform CLI docs: `cli/index.md` is the CLI's landing page — installing it,
+Terraform CLI docs: `cli/index.md` is the CLI's overview — installing it,
 signing in, and what every command shares (global flags, agent mode, the
 `--json` envelope, exit and error codes) — `cli/commands/index.md` indexes
 every command A to Z, and each top-level command gets a page of its own,
@@ -33,8 +33,11 @@ deterministic — schema order, no timestamps — so a run with nothing changed
 produces no diff. A `cli-*.md` page whose heading the menu no longer has is
 deleted, so a removed command does not leave its old page behind.
 
-The install and sign-in prose on the landing page is the one part written
-here rather than read from the CLI; it follows the CLI repository's README.
+The overview's and the Commands page's prose, and their frontmatter but for
+`version:`, are hand-written in the pages, which follow the CLI repository's
+README for installing and signing in. This script fills only their generated
+regions — `basics` on the overview, `commands` on the Commands page
+(`fences.py`) — and keeps their `version:` current.
 """
 
 from __future__ import annotations
@@ -47,16 +50,18 @@ import subprocess
 import sys
 import textwrap
 
+import fences
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
 # Written into every page this script generates; it is also how the script
 # knows which pages under its folder are its own to rewrite or remove.
 GENERATED_BY = "scripts/sync-cli.py"
 PAGE = REFERENCE / "cli" / "index.md"
-# Where the CLI pages sit among the reference pages: after Activities and MCP,
-# the landing page first, then the menu's headings in its order.
+# Where the CLI pages sit among the reference pages: after Activities and MCP.
+# The overview (`cli/index.md`) is `ORDER` and the Commands page `ORDER + 1`,
+# both hand-written with their own `order:`; each command's page follows.
 ORDER = 200
-REPO = "https://github.com/PopcornAiHq/popcorn-cli.git"
 # The command index, and the parent of every command's page: its URL is the
 # folder the command pages sit in.
 INDEX = "cli/commands"
@@ -243,76 +248,12 @@ def command_page(top: dict, commands: list[tuple[str, dict]], order: int, versio
     return "\n".join(out).rstrip() + "\n"
 
 
-def landing(schema: dict, tops: list[tuple[dict, list[tuple[str, dict]]]], version: str) -> str:
-    count = sum(len(cmds) for _, cmds in tops)
-    out = header(
-        id="cli",
-        # Not "Popcorn CLI": search weighs a title word heavily, and "popcorn"
-        # is in most questions, so the landing page would answer all of them.
-        title="CLI overview",
-        order=ORDER,
-        version=version,
-        summary="The `popcorn` CLI works with Popcorn from a terminal or a script. It "
-                "installs from its GitHub repository, not PyPI, and `popcorn auth login` "
-                "signs in. This page has what every command shares: global flags, agent "
-                "mode, the `--json` envelope, exit codes and error codes. Each command "
-                "group has its own page.",
-        lede="Install the popcorn CLI, sign in, and learn the flags and output every command shares.",
-        concepts=["template-authoring", "versions", "copying-a-template"],
-        lookup=False,
-    )
-    out += [
-        f"The `popcorn` CLI works with Popcorn from a terminal or a script: building and",
-        "publishing Routine Templates, reading and posting messages, running Flows and",
-        "reading their Runs. The CLI and the API call a Routine a *channel* and a",
-        "Routine Template an *app*, and its commands keep those names.",
-        "",
-        f"These pages describe `popcorn` {version} and are generated from the CLI's own",
-        "`popcorn --help` and `popcorn commands`. When they and the CLI you have",
-        "disagree, the CLI is right: run `popcorn <command> --help`.",
-        "",
-        "## Install",
-        "",
-        "The CLI installs from its GitHub repository; it is not on PyPI.",
-        "",
-        "```",
-        "# With uv (recommended)",
-        f"uv tool install git+{REPO}",
-        "",
-        "# With pipx",
-        f"pipx install git+{REPO}",
-        "",
-        "# With pip",
-        f"pip install git+{REPO}",
-        "```",
-        "",
-        "`popcorn --version` shows the version installed, and `popcorn upgrade`",
-        "upgrades it to the latest. `popcorn doctor` checks the local setup: sign-in,",
-        "whether the API is reachable, the environment and the config.",
-        "",
-        "## Sign in",
-        "",
-        "```",
-        "popcorn auth login",
-        "popcorn whoami",
-        "```",
-        "",
-        "`popcorn auth login` signs in through the browser, then asks which Workspace",
-        "to use; `--workspace <name>` chooses it instead. `popcorn whoami` shows who",
-        "you are signed in as and in which Workspace, and `popcorn workspace switch`",
-        "moves to another. A profile holds one sign-in: `-e <name>` uses a profile",
-        "for one command, and `popcorn env <name>` switches to it. The",
-        f"[auth](https://docs.popcorn.ai/{slug('auth')}.md) and [workspace](https://docs.popcorn.ai/{slug('workspace')}.md) have the rest.",
-        "",
-        "## Basics",
-        "",
-        "Each command is run as `popcorn <command>`, and the global flags go before",
-        "the command, as in `popcorn --json app status`.",
-        "",
-        "### Global flags",
-        "",
-    ]
-    out += table(schema.get("global_flags") or [])
+def basics(schema: dict) -> str:
+    """The CLI overview's `basics` region: what every command shares, as the
+    CLI's own schema states it — global flags, agent mode, the `--json`
+    envelope, exit codes and error codes. The prose around it, and the page's
+    frontmatter but for `version:`, are hand-written."""
+    out = table(schema.get("global_flags") or [])
     agent = schema.get("agent_mode") or {}
     if agent:
         out += ["### Agent mode", "", f"`{agent['env_var']}=1`. {cell(agent['description'])}", ""]
@@ -336,43 +277,30 @@ def landing(schema: dict, tops: list[tuple[dict, list[tuple[str, dict]]]], versi
     out += [f"| `{code}` | {name} |" for name, code in schema.get("exit_codes", {}).items()]
     out += ["", "### Error codes", "", "| `error_code` | Meaning |", "|---|---|"]
     out += [f"| `{e['code']}` | {cell(e['description'])} |" for e in schema.get("error_codes", [])]
-    out += [
-        "",
-        "## Command reference",
-        "",
-        f"[Commands](https://docs.popcorn.ai/{INDEX}.md) lists every command, A to Z, with a",
-        f"page for each and its subcommands: {count} in all.",
-    ]
-    return "\n".join(out).rstrip() + "\n"
+    return "\n".join(out).strip("\n")
 
 
-def commands_page(tops: list[tuple[dict, list[tuple[str, dict]]]], version: str) -> str:
-    """The command reference's index: every top-level command A to Z, linking
-    its page. Those pages are its children in the sidebar."""
-    count = sum(len(cmds) for _, cmds in tops)
-    out = header(
-        id=INDEX,
-        title="Commands",
-        order=ORDER + 1,
-        version=version,
-        summary="The CLI's command reference: every command, A to Z, each on a page with "
-                "its subcommands.",
-        lede="Every command in the popcorn CLI, A to Z, each on its own page.",
-        concepts=["cli"],
-        lookup=True,
+def command_list(tops: list[tuple[dict, list[tuple[str, dict]]]]) -> str:
+    """The Commands page's `commands` region: every top-level command A to Z,
+    one entry each, linking its page — so the page is a list like the pages
+    under it, its rail indexes the commands, and search reads it as a list."""
+    return "\n".join(
+        f"- **[`{top['name']}`](https://docs.popcorn.ai/{href_of(top)})** — "
+        f"{cell(top.get('description') or '')}"
+        for top, _ in tops
     )
-    out += [
-        f"Every command `popcorn` {version} lists in its help menu, A to Z: {count} with",
-        "their subcommands. Each page shows the Usage line and arguments;",
-        "`popcorn <command> --help` describes the one you have installed.",
-        "",
-    ]
-    # One entry per command, so the page is a list like the pages under it:
-    # its rail indexes the commands, and search reads it as a list.
-    for top, _ in tops:
-        out.append(f"- **[`{top['name']}`](https://docs.popcorn.ai/{href_of(top)})** — "
-                   f"{cell(top.get('description') or '')}")
-    return "\n".join(out).rstrip() + "\n"
+
+
+def fenced(path: pathlib.Path, regions: dict[str, str], version: str) -> str:
+    """A hand-written page with its generated regions and `version:` filled in."""
+    where = str(path.relative_to(ROOT))
+    if not path.exists():
+        sys.exit(f"✖  {where} is missing — it is hand-written, with regions {sorted(regions)}")
+    page = fences.fill(path.read_text(), regions, where)
+    page, n = re.subn(r"^version: .*$", f"version: {version}", page, count=1, flags=re.M)
+    if not n:
+        sys.exit(f"✖  {where} has no `version:` line for this script to keep current")
+    return page
 
 
 def other_page(tops: list[dict], order: int, version: str) -> str:
@@ -414,8 +342,8 @@ def pages(schema: dict, help_text: str) -> dict[pathlib.Path, str]:
     listed = sorted({c for _, cmds in menu(help_text) for c in cmds if c in by_name})
     tops = [(by_name[c], leaves(by_name[c])) for c in listed]
     out = {
-        PAGE: landing(schema, tops, version),
-        file_of(INDEX): commands_page(tops, version),
+        PAGE: fenced(PAGE, {"basics": basics(schema)}, version),
+        file_of(INDEX): fenced(file_of(INDEX), {"commands": command_list(tops)}, version),
     }
     own = [(top, cmds) for top, cmds in tops if not bare(top)]
     for n, (top, cmds) in enumerate(own, 2):
@@ -438,7 +366,7 @@ def main() -> int:
     args = ap.parse_args()
 
     wanted = pages(json.loads(run("commands")), run("--help"))
-    stale = [p for p in (REFERENCE / "cli").rglob("*.md") if p not in wanted and ours(p)]
+    stale = [p for p in (REFERENCE / "cli").rglob("*.md") if p not in wanted and ours(p) and not fences.names(p.read_text())]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:

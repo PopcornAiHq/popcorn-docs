@@ -72,20 +72,3 @@ These docs are also MCP Resources, for an assistant that lets you attach
 one to a conversation. `popcorn://docs/index` lists every page, and
 `popcorn://docs/<id>` is one page, such as
 `popcorn://docs/mcp/tools/get-status`.
-
-## Reading the tool pages
-
-- **Badges.** `[read-only]`, or `[writes]` with `[destructive]` or
-  `[idempotent]`, are the hints the server declares to your assistant's
-  app, which may use them to decide what to ask before a call.
-- **Arguments.** One marked `[required]` must be passed. Any other may be
-  left out.
-- **Examples.** Some tools show a request a person might make, each call
-  an assistant makes for it, marked `→`, and what the tool returns. The
-  response is the server's real output for sample data, the Workspace
-  Acme, produced by its tests. It leaves out the Workspace line, shortens
-  IDs as `8c1f…e2`, and keeps the first rows of a long listing.
-
-The tool pages are generated from the server's own definitions after each
-prod deploy, and never edited by hand.
-

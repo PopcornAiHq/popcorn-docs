@@ -58,7 +58,7 @@ def add_argument(ap: argparse.ArgumentParser) -> None:
                          "only its date is written, and only when the page otherwise changes")
 
 
-def _without(text: str) -> str:
+def without(text: str) -> str:
     """The page with its `updated:` line removed from the frontmatter only."""
     front = _FRONT.match(text)
     if not front:
@@ -71,7 +71,7 @@ def stamp(generated: str, current: str, date: str | None) -> str:
 
     The line goes before `summary:`, beside the other short scalars.
     """
-    if generated == _without(current):
+    if generated == without(current):
         return current
     if date is None:
         return generated

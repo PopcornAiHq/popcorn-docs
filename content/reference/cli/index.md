@@ -22,9 +22,10 @@ publishing Routine Templates, reading and posting messages, running Flows and
 reading their Runs. The CLI and the API call a Routine a *channel* and a
 Routine Template an *app*, and its commands keep those names.
 
-These pages describe `popcorn` 0.63.1 and are generated from the CLI's own
-`popcorn --help` and `popcorn commands`. When they and the CLI you have
-disagree, the CLI is right: run `popcorn <command> --help`.
+The command pages and the tables under Basics are generated from the CLI's
+own `popcorn --help` and `popcorn commands`, for the version beside each
+title. When they and the CLI you have disagree, the CLI is right: run
+`popcorn <command> --help`.
 
 ## Install
 
@@ -57,7 +58,9 @@ to use; `--workspace <name>` chooses it instead. `popcorn whoami` shows who
 you are signed in as and in which Workspace, and `popcorn workspace switch`
 moves to another. A profile holds one sign-in: `-e <name>` uses a profile
 for one command, and `popcorn env <name>` switches to it. The
-[auth](https://docs.popcorn.ai/cli/commands/auth.md) and [workspace](https://docs.popcorn.ai/cli/commands/workspace.md) have the rest.
+[`auth`](https://docs.popcorn.ai/cli/commands/auth.md) and
+[`workspace`](https://docs.popcorn.ai/cli/commands/workspace.md) pages have
+the rest.
 
 ## Basics
 
@@ -66,6 +69,7 @@ the command, as in `popcorn --json app status`.
 
 ### Global flags
 
+<!-- generated: basics -->
 | Argument | Required | Notes |
 |---|---|---|
 | `--json` |  | Output as JSON |
@@ -125,8 +129,9 @@ the command, as in `popcorn --json app status`.
 | `unhealthy` | The command succeeded but the thing it checked is unhealthy (`channel-config show --strict` with fatal findings) |
 | `timeout` | Client-side wait elapsed before the operation finished |
 | `internal` | Unexpected internal CLI error |
+<!-- /generated -->
 
 ## Command reference
 
-[Commands](https://docs.popcorn.ai/cli/commands.md) lists every command, A to Z, with a
-page for each and its subcommands: 87 in all.
+[Commands](https://docs.popcorn.ai/cli/commands.md) lists every command, A to
+Z, with a page for each and its subcommands.
