@@ -5,6 +5,7 @@ order: 202
 group: CLI
 parent: cli/commands
 layout: lookup
+generated: scripts/sync-cli.py
 version: 0.63.1
 summary: >
   The app command and its subcommands, each with its Usage line and arguments.

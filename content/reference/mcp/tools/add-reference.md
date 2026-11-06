@@ -4,6 +4,7 @@ title: add_reference
 order: 302
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Add one of a Routine's References, or replace the one it has, as Replace on

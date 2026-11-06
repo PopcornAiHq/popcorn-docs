@@ -4,6 +4,7 @@ title: Tools
 order: 301
 group: MCP
 layout: lookup
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Every tool the hosted server offers, A to Z, each with whether it reads or

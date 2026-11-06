@@ -3,6 +3,7 @@ id: mcp
 title: MCP server overview
 order: 300
 group: MCP
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   The hosted Popcorn MCP server, at https://mcp.popcorn.ai/mcp, gives a

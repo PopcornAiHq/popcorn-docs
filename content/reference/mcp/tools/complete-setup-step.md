@@ -4,6 +4,7 @@ title: complete_setup_step
 order: 304
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Complete one step of a Routine's setup that asks for a value, as its card on

@@ -4,6 +4,7 @@ title: change_routine
 order: 303
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-04
 summary: >
   Change a Routine's Steps by describing the change in words, previewed before

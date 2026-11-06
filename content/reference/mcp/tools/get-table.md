@@ -4,6 +4,7 @@ title: get_table
 order: 321
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   A table's columns, in order: each one's name, type, label and merge policy,

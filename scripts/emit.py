@@ -166,10 +166,6 @@ SHARED = [
     ("glossary", "Glossary"),
 ]
 
-# The kinds whose pages a generator writes. llms-full.txt names them without
-# inlining them; see the module docstring.
-GENERATED = {"reference"}
-
 _PARTS = [name for name, *_ in PARTS]
 _SHARED = [name for name, *_ in SHARED]
 # Content directory → section: a part's directory gives its short name, and
@@ -518,7 +514,9 @@ def main() -> int:
     for page in pages:
         path = href(page, ".md").lstrip("/")
         index += [f"## {page['title']}", f"{SITE}/{path}", "", page["summary"], ""]
-        if page["section"] in GENERATED:
+        # A page a generator wrote says so in `generated:`; llms-full.txt names
+        # it without inlining it, as the module docstring says.
+        if page.get("generated"):
             full += [f"# {page['title']}", "", page["summary"], "", f"Full reference: {SITE}/{path}", ""]
         else:
             full += [f"# {page['title']}", "", page["summary"], "", page["body"], ""]

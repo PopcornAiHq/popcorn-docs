@@ -1,0 +1,3 @@
+# Pages a sync script writes (each says so in `generated:`): GitHub collapses
+# their diffs in a pull request, where the bot's regenerations are long.
+content/reference/** linguist-generated=true

@@ -4,6 +4,7 @@ title: list_routine_settings
 order: 331
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List the settings of a Routine's Routine Template, set or not.

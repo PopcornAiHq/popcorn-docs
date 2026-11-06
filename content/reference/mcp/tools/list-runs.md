@@ -4,6 +4,7 @@ title: list_runs
 order: 335
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   The Routine's runs, newest first: the work each did or is doing, how it

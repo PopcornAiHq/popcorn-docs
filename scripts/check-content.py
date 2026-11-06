@@ -28,11 +28,16 @@ Checks, in the order a writer meets them:
   one sequence, and a tie would be settled by title, out of sight
 * `layout`, when present, is `lookup` — the only layout the build knows, so
   anything else would silently render as an ordinary page
-* `updated`, when present, is a real `YYYY-MM-DD` date, on a generated
-  reference page only — it is shown to readers as the day the page last
-  changed, so a malformed one would be published as a claim about freshness
-  nobody can read. A hand-written page has none: git knows when it changed.
-  Its old names, `deployed:` and `platform:`, are refused
+* `generated`, when present, names the script that writes the page, and
+  the script exists, and the page is a reference page. It is what marks a page
+  as generated — for a reader opening the file, for the build, which names
+  such a page in llms-full.txt without inlining it, and for the script, which
+  rewrites or removes only the pages that name it
+* `updated` and `version` only on a generated page, never both. `updated`,
+  when present, is a real `YYYY-MM-DD` date: a malformed one would be a
+  claim about freshness nobody can read. A hand-written page has neither: git
+  knows when it changed. The old names, `deployed:` and `platform:`, are
+  refused
 * no `source:` field. The backend symbols behind a page are private names,
   kept in a mapping in the private backend repository; this repository is
   public, so a page that lists them leaks them, and this is the guard that
@@ -76,6 +81,7 @@ _LEDE_DETAIL = re.compile(r"`|https?://|\b[a-z]+_[a-z_]+\b")
 _ORDER = re.compile(r"^order:\s*(?P<value>.*)$", re.M)
 _LAYOUT = re.compile(r"^layout:\s*(?P<value>.*)$", re.M)
 LAYOUTS = {"lookup"}
+_GENERATED = re.compile(r"^generated:[ \t]*(?P<value>.*)$", re.M)
 _UPDATED = re.compile(r"^updated:[ \t]*(?P<value>.*)$", re.M)
 _VERSION = re.compile(r"^version\s*:", re.M)
 _DEPLOYED = re.compile(r"^deployed\s*:", re.M)
@@ -154,13 +160,21 @@ def check(path: pathlib.Path, ids: set[str]) -> list[str]:
     if layout and layout.group("value").strip() not in LAYOUTS:
         problems.append(f"layout '{layout.group('value').strip()}' is not one of {sorted(LAYOUTS)}")
 
+    generated = _GENERATED.search(front)
+    if generated:
+        script = generated.group("value").strip()
+        if not script.startswith("scripts/") or not (ROOT / script).is_file():
+            problems.append(f"generated: '{script}' is not a script in scripts/")
+        if section_of(path) != "reference":
+            problems.append("generated: is for a reference page; a generator writes only there")
+
     updated = _UPDATED.search(front)
     if len(_UPDATED.findall(front)) > 1:
         problems.append("updated: appears more than once; the build would show the last")
     if updated and _VERSION.search(front):
         problems.append("a page has version: or updated:, never both")
-    if updated and section_of(path) != "reference":
-        problems.append("updated: is for a generated reference page; git knows when a hand-written one changed")
+    if (updated or _VERSION.search(front)) and not generated:
+        problems.append("updated: and version: are for a generated page; git knows when a hand-written one changed")
     elif updated:
         value = updated.group("value").strip()
         try:

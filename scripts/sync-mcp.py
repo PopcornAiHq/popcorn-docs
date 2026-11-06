@@ -64,6 +64,9 @@ import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
+# Written into every page this script generates; it is also how the script
+# knows which pages under its folder are its own to rewrite or remove.
+GENERATED_BY = "scripts/sync-mcp.py"
 PAGE = REFERENCE / "mcp" / "index.md"
 # The tool index, and the parent of every tool's page: its URL is the folder
 # the tool pages sit in.
@@ -459,6 +462,7 @@ def header(*, id: str, title: str, order: int, summary: str, lede: str,
         "group: MCP",
         *([f"parent: {parent}"] if parent else []),
         *(["layout: lookup"] if lookup else []),
+        f"generated: {GENERATED_BY}",
         "summary: >",
         *(f"  {line}" for line in wrapped(summary)),
         *(["lede: >", *(f"  {line}" for line in wrapped(lede))] if lede else []),
@@ -652,6 +656,12 @@ def pages(found: list[dict], shown: dict[str, dict]) -> dict[pathlib.Path, str]:
     return out
 
 
+def ours(path: pathlib.Path) -> bool:
+    """A page this script generated, by its `generated:` line. A hand-written
+    page beside the generated ones is never this script's to remove."""
+    return re.search(rf"^generated: {re.escape(GENERATED_BY)}$", path.read_text(), re.M) is not None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="exit 1 if the page differs, write nothing")
@@ -672,7 +682,7 @@ def main() -> int:
         path: platform_version.stamp(text, path.read_text() if path.exists() else "", args.platform)
         for path, text in pages(found, shown).items()
     }
-    stale = [p for p in (REFERENCE / "mcp").rglob("*.md") if p not in wanted]
+    stale = [p for p in (REFERENCE / "mcp").rglob("*.md") if p not in wanted and ours(p)]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:

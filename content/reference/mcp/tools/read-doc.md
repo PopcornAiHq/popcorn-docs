@@ -4,6 +4,7 @@ title: read_doc
 order: 341
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Read one page of the Popcorn docs by its id (search_docs gives it), or one

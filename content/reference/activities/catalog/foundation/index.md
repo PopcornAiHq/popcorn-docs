@@ -5,6 +5,7 @@ order: 102
 group: Activities
 parent: activities/catalog
 layout: lookup
+generated: scripts/sync-activities.py
 updated: 2026-10-31
 summary: >
   The foundation tier: the platform operations every Flow is built from, each

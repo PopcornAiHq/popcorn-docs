@@ -4,6 +4,7 @@ title: search_messages
 order: 348
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Search message text across the Routines you can see, ranked by relevance (or

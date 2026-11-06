@@ -5,6 +5,7 @@ order: 208
 group: CLI
 parent: cli/commands
 layout: lookup
+generated: scripts/sync-cli.py
 version: 0.63.1
 summary: >
   The schedule command and its subcommands, each with its Usage line and

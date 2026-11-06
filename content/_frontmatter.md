@@ -11,6 +11,7 @@ order: 2                       # reading position within its part
 group: Making a change        # optional: sidebar topic within the part
 parent: cli/commands         # optional: listed under that page in the sidebar
 layout: lookup                 # optional: the page's own entries index the rail
+generated: scripts/sync-cli.py # generated pages only: the script that writes it
 version: 0.57.0                # optional, generated pages only: the release described
 updated: 2026-09-25            # optional, generated reference pages only: the deploy that last changed it
 summary: >                     # THE PRODUCT — under 400 characters
@@ -101,6 +102,16 @@ group, and each `###` heading or bold-led bullet (`- **term** — …`) is an
 entry, so prose on such a page that needs bold-led points uses a numbered
 list. It is the only value; omit the field for every other page.
 
+**`generated`** names the script that writes the page, and is on every page
+a script writes and no other: a hand-written page leaves it out. It is the
+one mark of a generated page. A person opening the file sees it is not
+theirs to edit; the build names such a page in `llms-full.txt` without its
+body; `check-vocabulary.py` leaves its wording to the platform it describes;
+and the script rewrites or removes only the pages that name it, so a
+hand-written page can sit beside generated ones.
+Every generated page is a reference page, and `check-content.py` fails the
+field anywhere else, or naming a script that does not exist.
+
 **`version`** is written by a generator whose page describes one release of
 something — `sync-cli.py` records the `popcorn` version it read — and is shown
 beside the title. A hand-written page never sets it.
@@ -111,14 +122,13 @@ deployed platform rather than a release — `sync-activities.py` and
 page: those pages are regenerated after every prod deploy, and the footer's
 "Last updated" says how fresh the site is. It holds only the date of the prod
 deploy the page was regenerated from, since the deploy's own id carries a
-commit hash from a private repository, which cannot appear here, and it marks
-the page as generated. It changes only when something else on the page
-does, so a deploy that changes nothing leaves the page untouched: the date is
+commit hash from a private repository, which cannot appear here. It changes
+only when something else on the page does, so a deploy that changes nothing leaves the page untouched: the date is
 that of the deploy that last changed what the generator writes. A hand edit to
 the page does not move it, and a hand run that changes the page drops the
 line, since it does not know which deploy it read. A page has `version` or
-`updated`, never both. A hand-written page has neither, and `check-content.py`
-refuses `updated:` on one: git knows when a hand-written page changed. The
+`updated`, never both, and only with `generated`. A hand-written page has
+neither, and `check-content.py` refuses either on one: git knows when a hand-written page changed. The
 field's old names, `deployed:` and `platform:`, are refused.
 
 **The part is the directory**, not a field: a page is written in

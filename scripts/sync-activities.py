@@ -63,6 +63,9 @@ import platform_version
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REFERENCE = ROOT / "content" / "reference"
+# Written into every page this script generates; it is also how the script
+# knows which pages under its folder are its own to rewrite or remove.
+GENERATED_BY = "scripts/sync-activities.py"
 PAGE = REFERENCE / "activities" / "index.md"
 # Where the Activity pages sit among the reference pages: first, the landing
 # page and then each tier.
@@ -234,6 +237,7 @@ def header(*, id: str, title: str, order: int, summary: str, lede: str,
         "group: Activities",
         *([f"parent: {parent}"] if parent else []),
         *(["layout: lookup"] if lookup else []),
+        f"generated: {GENERATED_BY}",
         "summary: >",
         *(f"  {line}" for line in wrapped(summary)),
         "lede: >",
@@ -467,6 +471,12 @@ def pages(acts: list[dict]) -> dict[pathlib.Path, str]:
     return out
 
 
+def ours(path: pathlib.Path) -> bool:
+    """A page this script generated, by its `generated:` line. A hand-written
+    page beside the generated ones is never this script's to remove."""
+    return re.search(rf"^generated: {re.escape(GENERATED_BY)}$", path.read_text(), re.M) is not None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--env", default="prod", help="CLI environment to read (default: prod)")
@@ -480,7 +490,7 @@ def main() -> int:
     for path, text in pages(load(args.source, args.env)).items():
         current = path.read_text() if path.exists() else ""
         wanted[path] = platform_version.stamp(text, current, args.platform)
-    stale = [p for p in (REFERENCE / "activities").rglob("*.md") if p not in wanted]
+    stale = [p for p in (REFERENCE / "activities").rglob("*.md") if p not in wanted and ours(p)]
     changed = [p for p, text in wanted.items() if not p.exists() or p.read_text() != text]
     if args.check:
         for p in changed + stale:

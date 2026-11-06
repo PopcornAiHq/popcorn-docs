@@ -4,6 +4,7 @@ title: copy_routine_template
 order: 305
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Give a Routine its own named copy of the Routine Template it runs.

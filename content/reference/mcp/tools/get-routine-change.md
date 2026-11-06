@@ -4,6 +4,7 @@ title: get_routine_change
 order: 315
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Where a change to a Routine's Steps stands: still drafting, the proposal as

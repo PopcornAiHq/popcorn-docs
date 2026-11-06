@@ -4,6 +4,7 @@ title: Commands
 order: 201
 group: CLI
 layout: lookup
+generated: scripts/sync-cli.py
 version: 0.63.1
 summary: >
   The CLI's command reference: every command, A to Z, each on a page with its

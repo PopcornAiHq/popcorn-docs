@@ -4,6 +4,7 @@ title: make_connection
 order: 339
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Make one of a Routine's Connections: connect an account you have signed in

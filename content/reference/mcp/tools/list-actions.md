@@ -4,6 +4,7 @@ title: list_actions
 order: 325
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   List the Actions a person can take on one of a Routine's items now, given

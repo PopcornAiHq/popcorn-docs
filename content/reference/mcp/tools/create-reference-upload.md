@@ -4,6 +4,7 @@ title: create_reference_upload
 order: 306
 group: MCP
 parent: mcp/tools
+generated: scripts/sync-mcp.py
 updated: 2026-11-05
 summary: >
   Get a URL to upload one file for one of a Routine's References, for
