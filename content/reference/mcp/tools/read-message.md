@@ -8,8 +8,7 @@ generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
   One message in a Routine, in full: its whole text, a line per attachment or
-  other part, the reply count and thread_id, and its reactions (marking
-  yours).
+  other part, its reply count and its reactions.
 concepts: []
 ---
 
@@ -18,6 +17,8 @@ concepts: []
 ```
 read_message(message_id, include_parts=False, cursor=None)
 ```
+
+It also gives the message's `thread_id` and marks your reactions. Reading it doesn't mark it read.
 
 Each file attached to it comes with a download link, which works for a limited time (call again for a fresh one). A text file's text is included too, up to a limit shared by the message's files; the link gives the rest.
 

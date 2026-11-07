@@ -7,9 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  List the Actions a person can take on one of a Routine's items now, given
-  where it stands: the buttons Popcorn shows on it, each with the Status it
-  moves the item to.
+  List the Actions a person can take on one of a Routine's items now: the
+  buttons Popcorn shows on it, each with the Status it moves the item to.
 concepts: [actions-and-status]
 used_with: [mcp/tools/take-action, mcp/tools/list-rows]
 ---
@@ -20,7 +19,7 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows]
 list_actions(routine, row_id)
 ```
 
-[`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one.
+Which ones are offered depends on where the item stands; [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one.
 
 Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
 

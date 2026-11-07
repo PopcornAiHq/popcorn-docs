@@ -20,6 +20,8 @@ stop_run(routine_id, run)
 
 The run stops at its next step, so a step already under way finishes, and what the run already did (items changed, messages posted) stays done: nothing is undone. A run that already ended is left as it was, so calling again is safe. Only stop a run the person asked you to stop.
 
+A guest can't stop runs; a member or admin can, in an archived Routine too.
+
 ## Arguments
 
 | Argument | Type | Notes |

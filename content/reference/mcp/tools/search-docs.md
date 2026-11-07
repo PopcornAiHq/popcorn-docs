@@ -7,8 +7,7 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Search the Popcorn docs (docs.popcorn.ai) and get the best pages' titles,
-  ids and summaries.
+  Search the Popcorn docs and get the best pages' titles, ids and summaries.
 concepts: []
 used_with: [mcp/tools/read-doc]
 ---
@@ -19,14 +18,14 @@ used_with: [mcp/tools/read-doc]
 search_docs(query, limit=5)
 ```
 
-Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) reads a page in full.
+The docs are docs.popcorn.ai. Search before building or changing a Routine Template: the docs cover manifest keys, flow activities, table columns and merge policy, schedules, state machines, and copying a template and publishing its versions, which these tools' descriptions don't. Also search when a term or an error names a concept you can't define exactly. [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) reads a page in full.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `query` [required] | `str` | What you want to know, in your own words or by name. |
-| `limit` | `int` | How many pages to return, 1 to 10. Default `5`. |
+| `limit` | `int` | How many pages to return, 1 to 10; default 5. Nothing is ever empty: with no match it returns the nearest pages, so try another name before concluding there's no such thing. |
 
 **Example** — “If I publish a change to our copy of the intake template, which Routines does it reach?”
 

@@ -7,7 +7,7 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  The Popcorn workspace this connection is bound to.
+  Show the Popcorn workspace this connection is bound to, and your role in it.
 concepts: []
 ---
 

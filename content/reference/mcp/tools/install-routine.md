@@ -10,7 +10,7 @@ summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.
 concepts: [copying-a-template, versions]
-used_with: [mcp/tools/create-routine, mcp/tools/create-routine-version, mcp/tools/get-routine, mcp/tools/list-routine-settings, mcp/tools/copy-routine-template]
+used_with: [mcp/tools/create-routine, mcp/tools/get-routine, mcp/tools/create-routine-version, mcp/tools/list-routine-settings, mcp/tools/copy-routine-template]
 ---
 
 [writes] [destructive] [dry run]
@@ -21,11 +21,11 @@ install_routine(routine_id, copy=None, confirm=False, plan_id=None)
 
 It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…).
 
-Without copy, this is a catch-up (as `popcorn app apply`): a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install was blocked, or when [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows the Routine behind its copy.
+Without copy, this is a catch-up: a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. The install runs in the background; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows when it lands. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install waited on another install, or when `get_routine` shows the Routine behind its copy.
 
-With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. A move is a dry run that changes nothing unless `confirm=true`.
+With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. If the workspace has several copies, name one with copy. A move is a dry run that changes nothing unless `confirm=true`. Workspace admins and the Routine's members may call it.
 
-It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
+It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. It is refused while the Routine's template updates are locked, and when another install is still running on the Routine. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
 
 ## Arguments
 
@@ -34,7 +34,7 @@ It doesn't put a template on a Routine that has none, and Popcorn's new versions
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `copy` | `str` | The name of a copy of this Routine's template to move onto, as [`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md) named it. |
 | `confirm` | `bool` | true to make the move. With a person there, show them the dry run first. Default `False`. |
-| `plan_id` | `str` | The `plan_id` a move's dry run gave, with `confirm=true` and the same copy. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The `plan_id` a move's dry run gave, with `confirm=true` and the same copy. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 

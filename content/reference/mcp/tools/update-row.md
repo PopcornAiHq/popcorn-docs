@@ -9,7 +9,7 @@ updated: 2026-11-06
 summary: >
   Change some columns of one row.
 concepts: [tables]
-used_with: [mcp/tools/get-row, mcp/tools/list-tables]
+used_with: [mcp/tools/get-row, mcp/tools/list-actions, mcp/tools/list-tables]
 ---
 
 [writes] [idempotent]
@@ -22,7 +22,7 @@ Only the columns in data change; the rest stay as they are. Each changes by its 
 
 `expected_rev` is the rev [`get_row`](https://docs.popcorn.ai/mcp/tools/get-row.md) shows. If the row has changed since (its rev moved on), nothing is written and the response shows the row as it is now, with its new rev, so you can decide again.
 
-Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by a transition), and so are credential columns.
+Changing a row starts no work. Columns the Routine's state machine owns are refused (they change only by an Action or the Routine's own work), and so are credential columns. To change an item's Status, take an Action ([`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md)). On a workspace that guards personal data, a placeholder a read showed in place of a hidden value can't be written back: leave that column out.
 
 ## Arguments
 

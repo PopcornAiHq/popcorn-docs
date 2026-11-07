@@ -8,8 +8,7 @@ generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
   One change from an item's History, in full: every field it changed, before
-  and after, who or what made it and why, and, when Popcorn's work made it,
-  what that run did, in order, and how it ended.
+  and after, and who or what made it and why.
 concepts: [history]
 used_with: [mcp/tools/list-history]
 ---
@@ -20,14 +19,16 @@ used_with: [mcp/tools/list-history]
 read_history_entry(routine, entry_id)
 ```
 
-Only the fields the change touched are shown, not the whole item. Email content isn't part of History.
+When Popcorn's work made it, it also shows what that run did, in order, and how it ended.
+
+Only the fields the change touched are shown, not the whole item. An email turn [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) shows has no `entry_id` and isn't read here.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `entry_id` [required] | `int` | The entry's ID, as [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) shows it ("`entry_id` 6" is 6). |
+| `entry_id` [required] | `int` | The entry's ID, as `list_history` shows it ("`entry_id` 6" is 6). |
 
 **Example** — “Show me entry 6 of row 88's history in #intake in full: what changed and what the run did.”
 

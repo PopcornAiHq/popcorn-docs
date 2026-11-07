@@ -25,7 +25,7 @@ Each change shows when, who made it (a person by name; Popcorn and the work it w
 
 With run instead of `row_id`, it follows one run: how it is going or how it ended, and the items it changed (or, if it changed none, what it did).
 
-[`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md) lists the Routine's runs still going.
+[`list_runs`](https://docs.popcorn.ai/mcp/tools/list-runs.md) lists the Routine's runs, ones that changed no item too.
 
 ## Arguments
 
@@ -34,7 +34,7 @@ With run instead of `row_id`, it follows one run: how it is going or how it ende
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `row_id` | `int` | The item's row ID, as [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows it ("row 88" is 88). |
 | `cursor` | `str` | `next_cursor` from the previous page, with the same other arguments. |
-| `run` | `str` | A run's reference, in place of `row_id`: [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) give it, and `list_runs` and `list_history` show it beside a run still going. |
+| `run` | `str` | A run's reference, in place of `row_id` (and without cursor): [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) give it, `list_runs` shows it for each run, and `list_history` beside a run still going. |
 
 **Example** — “What happened with row 88 in #intake?”
 

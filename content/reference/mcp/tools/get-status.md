@@ -8,10 +8,9 @@ generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
   Where a Routine's items stand: how many are at each Status, and what is
-  waiting for a person, with why and the Actions that settle it (take_action
-  takes one on the item's row).
+  waiting for a person, with why and the Actions that settle it.
 concepts: [actions-and-status]
-used_with: [mcp/tools/take-action, mcp/tools/list-rows, mcp/tools/list-actions]
+used_with: [mcp/tools/take-action, mcp/tools/list-actions, mcp/tools/list-rows, mcp/tools/get-table]
 ---
 
 [read-only]
@@ -20,7 +19,11 @@ used_with: [mcp/tools/take-action, mcp/tools/list-rows, mcp/tools/list-actions]
 get_status(routine)
 ```
 
-Each Status shows its label (what Popcorn shows) and its stored value. [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows the items at one Status, filtered on the value: filter=`{"Status": "<value>"}`. [`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) shows what can be done with an item and [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) does it.
+[`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one of an item's Actions on the row it names; [`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) shows what can be done with an item.
+
+Each Status shows its label (what Popcorn shows) and its stored value. [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows the items at one Status with a filter on the Status column's stored value ([`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md) names the column; it isn't always "Status").
+
+It counts up to 40 Statuses (those needing a person first) and lists the 10 newest items waiting. A Routine whose template has no Statuses is refused; `list_rows` reads its rows.
 
 ## Arguments
 

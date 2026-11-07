@@ -32,7 +32,7 @@ Without `confirm=true` this is a dry run that changes nothing: it says whether t
 | `text` | `str` | The Reference's whole text, for a Reference that takes a plain text file. At most 1.5 MB. |
 | `upload_id` | `str` | The `upload_id` `create_reference_upload` gave, once the file is uploaded. |
 | `confirm` | `bool` | true to add it: at once when the person asked to add this document as this Reference, otherwise (a replace, or a Reference you chose) after they agree to the dry run. Default `False`. |
-| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. Popcorn's channel agent must pass it, and so must any caller replacing a Reference that already has a document (the replace's dry run gives every caller one). An OAuth client's first add is given none and needs none. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. Required to replace a document the Reference already has (that dry run gives every caller one). A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none for a first add and needn't. |
 
 **Example** — “Add a fourth question to #intake's questions: the claim number.”
 

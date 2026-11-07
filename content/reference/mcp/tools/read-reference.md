@@ -7,8 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  One of a Routine's References: its text, or a download link for a file that
-  isn't text, such as a PDF.
+  Read one of a Routine's References: its text, or a download link for a file
+  that isn't text, such as a PDF.
 concepts: [reference-documents]
 used_with: [mcp/tools/list-references]
 ---
@@ -19,7 +19,7 @@ used_with: [mcp/tools/list-references]
 read_reference(routine, reference)
 ```
 
-A long text is cut, and the download link gives the whole file. A link works for a limited time; call again for a fresh one. On a workspace that guards personal data, neither the text nor a link is returned: Popcorn shows the file.
+A long text is cut, and the download link gives the whole file. A link works for a limited time; call again for a fresh one. On a workspace that guards personal data, neither the text nor a link is returned: Popcorn shows the file. If that can't be checked, it refuses; try again shortly.
 
 ## Arguments
 

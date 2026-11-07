@@ -7,7 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  List the settings of a Routine's Routine Template, set or not.
+  List a Routine's settings, set or not: what its template lets this Routine
+  change on its own.
 concepts: [routine-settings]
 used_with: [mcp/tools/copy-routine-template, mcp/tools/get-routine-setting, mcp/tools/update-routine-setting]
 ---

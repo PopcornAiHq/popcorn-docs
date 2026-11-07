@@ -7,8 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Search message text across the Routines you can see, ranked by relevance (or
-  newest first with sort="recent").
+  Search message text across the Routines you can see, ranked by relevance or
+  newest first.
 concepts: []
 used_with: [mcp/tools/read-message, mcp/tools/list-messages]
 ---
@@ -19,9 +19,11 @@ used_with: [mcp/tools/read-message, mcp/tools/list-messages]
 search_messages(query, routine=None, author=None, after=None, before=None, sort="relevance", cursor=None)
 ```
 
-Direct messages are never searched. Each result names its Routine; [`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) returns a result in full, and list_messages(Routine, after=<id>) shows what followed it.
+Direct messages are never searched, and the Routine's own agent searches only its Routine.
 
-To page through one Routine in time order, use [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md).
+Each result names its Routine, and its `thread_id` when it is a reply; [`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) returns a result in full. To see what followed a result, call [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) with its Routine and `after` set to its ID, and `thread_id` too when it is a reply.
+
+To page through one Routine in time order, use `list_messages`.
 
 ## Arguments
 
