@@ -7,10 +7,10 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  List the files of the Routine Template version a Routine runs, with sizes
+  List the files of a version of a Routine's template, with each file's size
   and sha256.
 concepts: [copying-a-template, versions]
-used_with: [mcp/tools/create-routine-version, mcp/tools/read-routine-file, mcp/tools/list-routine-settings]
+used_with: [mcp/tools/create-routine-version, mcp/tools/read-routine-file, mcp/tools/list-routine-settings, mcp/tools/read-doc]
 ---
 
 [read-only]
@@ -23,12 +23,14 @@ The header names the template, whether it is Popcorn's or the workspace's own co
 
 To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first: a copy of the template is one-way, and a new version reaches every Routine on that copy.
 
+What each file is for, and how a manifest and a Flow are written, is in the docs: [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) with `app-bundle`, `manifest-keys` and `flow-grammar`.
+
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
-| `version` | `int \| str` | An older version of the Routine's template, to read its history. Pass its number ("0.15.1") or its version id. Omit for the base for edits. |
+| `version` | `int \| str` | Another version of the Routine's template, such as an older one to read its history. Pass its number ("0.15.1") or its version id. Omit for the base for edits. |
 | `paths` | `list[str]` | Only files matching any of these: an exact path or a glob ("flows/*", "code/**"). |
 | `cursor` | `str` | `next_cursor` from the previous page. |
 

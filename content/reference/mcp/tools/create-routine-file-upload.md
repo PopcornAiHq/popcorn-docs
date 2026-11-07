@@ -7,7 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Get a URL to upload one file you made, for create_routine_version to take.
+  Get a URL to upload one file you made, for the next version of a Routine's
+  template.
 concepts: [copying-a-template, versions]
 used_with: [mcp/tools/create-routine-version]
 ---
@@ -18,15 +19,13 @@ used_with: [mcp/tools/create-routine-version]
 create_routine_file_upload(routine_id, path, size, sha256)
 ```
 
-For a file too large to send in a change, such as a bundled script or a generated data file. Works only where your organization allows uploads.popcorn.ai in claude.ai's network egress settings. Upload with the curl line this returns, then create the version with the change
+For a file too large to send in a change to [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md), such as a bundled script or a generated data file. Works only where your network lets you reach uploads.popcorn.ai (on claude.ai, the organization's network egress settings). Upload with the curl line this returns, then create the version with the change below. If the upload fails or can't connect, don't retry it: use `from_url` for a public file, or send the content in the change.
 
 ```text
-{"path": …, "from_upload": "<upload_id>"}. If the upload fails or
+{"path": "…", "from_upload": "<upload_id>"}
 ```
 
-can't connect, don't retry it: use `from_url` for a public file, or send the content in the change.
-
-One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into a version for most of a day. Workspace admins only, like [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md).
+One file per upload, for this Routine and path only. The upload must be exactly `size` bytes with this `sha256`, or it is refused; UTF-8 text only, at most 4 MiB. The URL works for 15 minutes, and the upload can go into one version for most of a day. You can have at most 10 uploads from the last 15 minutes that aren't yet in a version. Workspace admins only, like `create_routine_version`.
 
 ## Arguments
 

@@ -20,11 +20,11 @@ send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=No
 
 You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving.
 
-Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier; the agent of a Routine that runs an app answers most messages, other Routines' agents only those that need it. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace, and while the agent is already running a task in the Routine, your message joins that task instead of getting its own reply.
+It is refused in an archived Routine, and in one in announcement mode unless you are its admin or a workspace admin.
 
-Replies arrive asynchronously, in a thread under a top-level message (unless the Routine is set to reply outside threads). The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) call that reads the answer.
+Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need an answer, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace. While the agent is already running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting a reply of its own.
 
-Without a `thread_id`, the Routine's own agent posts in the thread it is answering.
+Replies arrive asynchronously: to a top-level message, in a thread under it or, in a Routine that answers top-level (many do), after it; inside a thread, in that thread. The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) calls that read the answer.
 
 ## Arguments
 
@@ -32,7 +32,7 @@ Without a `thread_id`, the Routine's own agent posts in the thread it is answeri
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID ([`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) returns it). |
 | `text` | `str` | Message text (markdown). Optional with an attachment. |
-| `thread_id` | `str` | Reply in this thread (its first message's ID). |
+| `thread_id` | `str` | Reply in this thread (its first message's ID). The Routine's own agent, without one, posts in the thread it is answering. |
 | `mentions` | `list[str]` | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
 | `attachment` | `Attachment` | A text file to attach. |
 

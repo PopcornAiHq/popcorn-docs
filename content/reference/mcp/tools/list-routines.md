@@ -7,9 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  List the Routines you can see in this workspace: the ones you're in
-  (including Routines shared in from another workspace) and the ones you can
-  view without joining (marked [not joined]).
+  List the Routines you can see in this workspace: the ones you're in, and the
+  ones you can view without joining.
 concepts: [routines]
 used_with: [mcp/tools/get-routine]
 ---
@@ -20,9 +19,9 @@ used_with: [mcp/tools/get-routine]
 list_routines(query=None, template=None, copy=None, include_archived=False, sort="name", cursor=None)
 ```
 
-Direct messages are not listed.
+Routines shared in from another workspace are among the ones you're in, and the ones you haven't joined are marked [not joined]. Direct messages are not listed.
 
-Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID; [missing a connection] marks one whose template needs an account nobody has connected. [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows one Routine's version, install state and Connections.
+Each row shows the Routine's name, its Routine Template and whose version of it it runs (Popcorn's, or this workspace's copy by name), your unread count and mentions, and its ID. [missing a connection] marks one whose template needs an account nobody has connected; it is checked only on Routines you're in or, as a workspace admin, any here, so no marker isn't proof. [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows one Routine's version, install state and Connections.
 
 ## Arguments
 

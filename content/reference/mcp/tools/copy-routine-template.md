@@ -9,7 +9,7 @@ updated: 2026-11-06
 summary: >
   Give a Routine its own named copy of the Routine Template it runs.
 concepts: [copying-a-template, versions]
-used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings, mcp/tools/install-routine]
+used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings, mcp/tools/read-doc, mcp/tools/install-routine]
 ---
 
 [writes] [destructive] [dry run]
@@ -20,18 +20,18 @@ copy_routine_template(routine_id, name, confirm=False, plan_id=None)
 
 The copy starts byte-identical to the version of Popcorn's template the Routine runs, and the Routine moves onto it. That's one-way: the Routine never goes back to Popcorn's template, stops receiving Popcorn's improvements, and from then on gets only the new versions of its copy. Only a copy takes new versions, with [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md).
 
-To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first: a setting reaches one Routine and can be set back. Copy the template only for what settings can't express. Check an edit first with `create_routine_version`'s dry run, since the copy is the step that can't be undone.
+To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first: a setting reaches one Routine and can be set back. Copy the template only for what settings can't express. Check an edit first with `create_routine_version`'s dry run, since the copy is the step that can't be undone. [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) with `template-authoring` has the whole loop, from settings to a confirmed install.
 
-Without `confirm=true` this is a dry run that changes nothing.
+Without `confirm=true` this is a dry run that changes nothing. Workspace admins and the Routine's members may call it.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `name` [required] | `str` | The copy's name: lowercase letters, digits, "-" and "_", starting with a letter or digit. This only creates a copy; to move a Routine onto a copy that exists, use install_routine(copy=...). |
+| `name` [required] | `str` | The copy's name: lowercase letters, digits, "-" and "_", starting with a letter or digit, at most 64 characters. This only creates a copy; to move a Routine onto a copy that exists, use install_routine(copy=...). |
 | `confirm` | `bool` | true to make the copy. With a person there, show them the dry run first. Default `False`. |
-| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same request. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
 
 **Example** — “Give #intake its own copy of the claims app, called acme-intake, so we can change its intake form.”
 

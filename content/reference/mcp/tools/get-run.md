@@ -8,8 +8,7 @@ generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
   One of a Routine's runs, by its reference: how it is going or how it ended,
-  what started it, its inputs and outputs, the error it failed with, and its
-  newest steps.
+  what started it, and its inputs and outputs.
 concepts: [history]
 used_with: [mcp/tools/list-history, mcp/tools/run-trigger, mcp/tools/take-action, mcp/tools/make-connection, mcp/tools/list-runs]
 ---
@@ -20,7 +19,9 @@ used_with: [mcp/tools/list-history, mcp/tools/run-trigger, mcp/tools/take-action
 get_run(routine, run, output=None, cursor=None, wait_seconds=0)
 ```
 
-A run still going shows the step it's on; call again to follow it, or pass `wait_seconds` to have this call wait for it to end. Outputs too long to show together are listed by name; output=<name> reads one whole, a range at a time when it is long. [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) with run shows the items it changed.
+A failed run shows the error it failed with, and every run shows its newest steps.
+
+A run still going shows the step it's on; call again to follow it, or pass `wait_seconds` to have this call wait for it to end. Outputs too long to show together are listed by name; pass one as `output` to read it whole, a range at a time when it is long. [`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md) with run shows the items it changed.
 
 ## Arguments
 

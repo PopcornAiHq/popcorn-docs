@@ -7,11 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Show one Routine: its details, your membership, and its Routine Template,
-  with the version it's on, the latest version, where its updates come from
-  (Popcorn, or this workspace's own copy of the template), whether the latest
-  install landed, and its Connections: each account or webhook the template
-  needs, and whether it's connected.
+  Show one Routine: its details, your membership, its Routine Template and the
+  version it's on, and its Connections.
 concepts: [routines]
 used_with: [mcp/tools/duplicate-routine, mcp/tools/list-rows, mcp/tools/take-action]
 ---
@@ -22,9 +19,11 @@ used_with: [mcp/tools/duplicate-routine, mcp/tools/list-rows, mcp/tools/take-act
 get_routine(routine, wait_seconds=0)
 ```
 
-A Routine made with [`duplicate_routine`](https://docs.popcorn.ai/mcp/tools/duplicate-routine.md) also shows how far its copy got, and any part that didn't copy, with why.
+It also shows the latest version, where its updates come from (Popcorn, or this workspace's own copy of the template), whether the latest install landed, and each account or webhook the template needs, with whether it's connected. A Routine made with [`duplicate_routine`](https://docs.popcorn.ai/mcp/tools/duplicate-routine.md) also shows how far its copy got, and any part that didn't copy, with why.
 
-A Routine whose template has Steps also lists them in order, with which version of them is installed: each Step's kind (Answers, Signature, Booking, Reminder, Delivery, or Review, where a person decides), its name and the Status value an item at it holds (what [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) filters on), the ways an item leaves it on its own, and each Review's reason and choices with where each leads. A choice marked [in Popcorn] opens a form there; [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes the others.
+Connections are shown only to the Routine's members and workspace admins. A Routine shared in from another workspace shows no version, Connections or Steps: its home workspace manages them.
+
+A Routine whose template has Steps also lists them in order, with which version of them is installed. A Step's Status value is what [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) filters on. A choice marked [in Popcorn] opens a form there; [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes the others.
 
 ## Arguments
 

@@ -7,9 +7,9 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  A Routine's messages, newest first, or one thread's replies.
+  A Routine's top-level messages, newest first, or one thread's replies.
 concepts: []
-used_with: [mcp/tools/read-message]
+used_with: [mcp/tools/read-message, mcp/tools/send-message]
 ---
 
 [read-only]
@@ -18,9 +18,9 @@ used_with: [mcp/tools/read-message]
 list_messages(routine, thread_id=None, after=None, before=None, cursor=None, wait_seconds=0)
 ```
 
-Each row is a timestamp (UTC), the message ID, the author, the text (long text is cut and marked; [`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) returns it whole), one bracketed line per attachment, tool run or other part, and the reply count with the `thread_id` that lists the replies. Listing doesn't mark anything read.
+A page holds 50. Long text is cut ([`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) returns it whole), a message with replies shows the `thread_id` that lists them, and times are UTC. Listing doesn't mark anything read.
 
-To read the Routine's agent's answer to a top-level message you sent, pass that message's ID as `thread_id`: in a Routine the agent answers in a thread under the message that asked. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. A Routine set to reply outside threads posts top-level instead, so if the thread stays empty, list the Routine with `after=<your message's ID>`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass `wait_seconds` to have this call wait for one.
+To read the Routine's agent's answer to a top-level message you sent, use the `list_messages` call [`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md) returned: a Routine answers either in a thread under your message (pass its ID as `thread_id`) or top-level after it (pass its ID as `after`), and many answer top-level. For a message you sent inside a thread, pass the thread's ID as `thread_id` and your message's ID as `after`. Replies arrive asynchronously, so if nothing is there yet, call again shortly, or pass `wait_seconds` to have this call wait for one.
 
 ## Arguments
 

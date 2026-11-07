@@ -7,8 +7,7 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Add an emoji reaction to a Routine message, or take yours off with
-  remove=true.
+  Add an emoji reaction to a Routine message, or take yours off.
 concepts: []
 ---
 
@@ -24,7 +23,7 @@ You react as yourself; the Routine's own agent reacts as itself (its bot user), 
 
 | Argument | Type | Notes |
 |---|---|---|
-| `emoji` [required] | `str` | A Unicode emoji, e.g. "👍". |
+| `emoji` [required] | `str` | A Unicode emoji, e.g. "👍". Several in one string are each added; remove takes one at a time. |
 | `message_id` | `str` | The message's ID. The Routine's own agent may leave it out for the message it is answering. |
 | `remove` | `bool` | Take your reaction off instead of adding it. Default `False`. |
 

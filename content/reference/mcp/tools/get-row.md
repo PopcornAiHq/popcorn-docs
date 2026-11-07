@@ -7,9 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  One row in full: every column, its rev (update_row needs it as
-  expected_rev), when it was created and last changed, and its state if the
-  Routine's state machine runs on the table.
+  Show one row in full: every column, its rev, when it was created and last
+  changed, and its state if the table has a state machine.
 concepts: [tables]
 used_with: [mcp/tools/update-row, mcp/tools/list-tables, mcp/tools/list-rows]
 ---
@@ -19,6 +18,8 @@ used_with: [mcp/tools/update-row, mcp/tools/list-tables, mcp/tools/list-rows]
 ```
 get_row(routine, table, row_id)
 ```
+
+[`update_row`](https://docs.popcorn.ai/mcp/tools/update-row.md) needs the rev as `expected_rev`.
 
 ## Arguments
 

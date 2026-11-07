@@ -7,10 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  One of a Routine's settings in full: the whole value (a prompt or email
-  template's whole text), the template default, what it accepts, its
-  description, its options with the warning each one carries, and who may
-  change it.
+  Show one of a Routine's settings in full: its whole value, the template
+  default, what it accepts and who may change it.
 concepts: [routine-settings]
 used_with: [mcp/tools/list-routine-settings]
 ---
@@ -20,6 +18,8 @@ used_with: [mcp/tools/list-routine-settings]
 ```
 get_routine_setting(routine, key)
 ```
+
+It also shows the setting's description and its options, with the warning each one carries; a prompt or email template comes as its whole text.
 
 ## Arguments
 

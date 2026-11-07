@@ -10,7 +10,7 @@ summary: >
   Take one Action on one or more of a Routine's items, as a person pressing
   its button in Popcorn would.
 concepts: [actions-and-status]
-used_with: [mcp/tools/list-actions]
+used_with: [mcp/tools/list-actions, mcp/tools/get-run]
 ---
 
 [writes] [destructive] [dry run]
@@ -19,20 +19,20 @@ used_with: [mcp/tools/list-actions]
 take_action(routine_id, row_ids=None, action=None, confirm=False, run_key=None, plan_id=None)
 ```
 
-Refused, with the reason, for an item the Action isn't offered on now.
+One item the Action can't be taken on refuses the whole call, with the reason for each: the Action isn't offered on it now, or it's taken only in Popcorn ([`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) marks those). So does a Connection the Routine's Actions need but doesn't have. Drop those items and call again.
 
-Without `confirm=true` this is a dry run: it says what happens to each item and gives a `run_key`. To act, call again with the same items and action, `confirm=true` and that `run_key`. A `run_key` acts once: calling again with it finds the run it started. When the person named the items and the Action themselves, confirm at once, without a dry run or `run_key`; each such call starts its own run, so don't repeat one that timed out.
+Without `confirm=true` this is a dry run: it says what happens to each item and gives a `run_key`. To act, call again with the same items and action, `confirm=true` and that `run_key`. A `run_key` acts once: calling again with it finds the run it started. When the person named the items and the Action themselves, confirm at once, without a dry run or `run_key`; each such call starts its own run, so don't repeat one that timed out. The confirm returns at once with the Run: the Action applies in the background, and [`get_run`](https://docs.popcorn.ai/mcp/tools/get-run.md) shows how it went.
 
 ## Arguments
 
 | Argument | Type | Notes |
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
-| `row_ids` | `list[int]` | The items' row IDs in the Routine's main table. Required, but for a confirm with a `plan_id`. |
-| `action` | `str` | The Action, as [`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) names it (its "action"); its button label names it too. Required, but for a confirm with a `plan_id`. |
+| `row_ids` | `list[int]` | The items' row IDs in the Routine's main table, at most 50. Required, except on a confirm with a `plan_id`. |
+| `action` | `str` | The Action, as `list_actions` names it (its "action"); its button label names it too. Required, except on a confirm with a `plan_id`. |
 | `confirm` | `bool` | true to act: at once when the person named the items and the Action, otherwise after they agree to the dry run. Default `False`. |
 | `run_key` | `str` | The `run_key` the dry run gave, with `confirm=true`. |
-| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`. It stands in for `row_ids`, action and the `run_key`: leave them out and the confirm takes the dry run's, or send them and they must be the same. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`. It stands in for `row_ids`, action and the `run_key`: leave them out and the confirm takes the dry run's, or send them and they must be the same. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
 
 **Example** — “Close claim 4471 in #intake.”
 

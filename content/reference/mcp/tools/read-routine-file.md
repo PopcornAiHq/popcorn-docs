@@ -7,10 +7,9 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Read one file of the Routine Template version a Routine runs, exactly as
-  stored.
+  Read one file of a version of a Routine's template, exactly as stored.
 concepts: [copying-a-template, versions]
-used_with: [mcp/tools/list-routine-files]
+used_with: [mcp/tools/read-doc, mcp/tools/list-routine-files]
 ---
 
 [read-only]
@@ -19,7 +18,7 @@ used_with: [mcp/tools/list-routine-files]
 read_routine_file(routine, path, version=None, cursor=None)
 ```
 
-The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and `next_cursor` reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim.
+The content is never cut. A file too big for one response comes in byte ranges: the header says which bytes this is, and `next_cursor` reads the next range. Join the ranges in order to get the file, whose sha256 the header gives. Everything after the "Content:" line is the file's text, verbatim. [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) with `manifest-keys` or `flow-grammar` explains a manifest or a Flow file.
 
 ## Arguments
 
@@ -27,7 +26,7 @@ The content is never cut. A file too big for one response comes in byte ranges: 
 |---|---|---|
 | `routine` [required] | `str` | Routine name ("#intake") or ID. |
 | `path` [required] | `str` | The file's path, as [`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md) shows it. |
-| `version` | `int \| str` | An older version of the Routine's template: its number ("0.15.1") or its version id. Omit for the base for edits. |
+| `version` | `int \| str` | Another version of the Routine's template, such as an older one: its number ("0.15.1") or its version id. Omit for the base for edits. |
 | `cursor` | `str` | `next_cursor` from the previous range. |
 
 **Example** — “Show me #intake's app manifest.”

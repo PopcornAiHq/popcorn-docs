@@ -7,8 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Where a change to a Routine's Steps stands: still drafting, the proposal as
-  Steps before and after, refused and why, or installed.
+  Show where a change to a Routine's Steps stands: still drafting, the
+  proposal as Steps before and after, refused, failed or installed.
 concepts: [steps]
 used_with: [mcp/tools/change-routine]
 ---
@@ -19,7 +19,7 @@ used_with: [mcp/tools/change-routine]
 get_routine_change(routine, change_id, wait_seconds=0, detail=None)
 ```
 
-A proposal shows the Steps that change, what it would set on each Step (saying which part is a Routine Setting the person could change directly), the author's assumptions and open questions, and the checks it passed. An installed change names the version before it, which [`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)'s `revert_to` puts back.
+A proposal shows the Steps that change, what it would set on each Step (saying which part is a Routine Setting the person could change directly), the author's assumptions and open questions, and the checks it passed. An installed change names the version before it, which [`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)'s `revert_to` puts back. A revert's `change_id` shows its check and, once it passes, the `run_key` and `plan_id` to confirm it.
 
 ## Arguments
 

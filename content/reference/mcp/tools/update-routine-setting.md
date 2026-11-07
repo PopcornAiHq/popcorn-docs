@@ -18,9 +18,15 @@ used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings]
 update_routine_setting(routine_id, key, value="OMITTED", changes=None, confirm=False, plan_id=None)
 ```
 
-Without `confirm=true` this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value it also gives a `plan_id`: to change it, call again with the key, `confirm=true` and that `plan_id`, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here.
+Without `confirm=true` this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value, or one whose option carries a warning, it also gives a `plan_id`: to change it, call again with the key, `confirm=true` and that `plan_id`, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here. A switch, such as a send mode, can be changed by any member of the Routine; any other setting, prompts included, needs a workspace admin who is also a member. An archived Routine's settings can't be changed.
 
-For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)'s ops are. The anchor is the text exactly and must match once: {"op": "replace", "`old_string`": "Hi {{name}},", "`new_string`": "Hello {{name}},"}. Also `insert_before` and `insert_after` (anchor, text), prepend and append (text), and `replace_range` (from, to, `new_string`).
+For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)'s ops are. The anchor is the text exactly and must match once:
+
+```text
+{"op": "replace", "old_string": "Hi,", "new_string": "Hello,"}
+```
+
+Also `insert_before` and `insert_after` (anchor, text), prepend and append (text), and `replace_range` (from, to, `new_string`).
 
 A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
@@ -33,7 +39,7 @@ A value with credentials inside it shows them as [secret]. Keep [secret] exactly
 | `value` | `Any` | The whole new value: text, a number, a list, a mapping, or null. Omit it to pass changes instead. Default `OMITTED`. |
 | `changes` | `list[Op]` | Text ops on the current text, instead of value. |
 | `confirm` | `bool` | true to change it: at once when the person asked for this change, otherwise after they agree to the dry run. A new value whose option carries a warning (drafts to sending) is confirmed only with its dry run's `plan_id`. Default `False`. |
-| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`, in place of value and changes. Required for a warned value. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true`, in place of value and changes. Required for a warned value. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn needs it only for a warned value. |
 
 **Example** — “Stop chasing after five follow-ups on #chase-renewals.”
 

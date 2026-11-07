@@ -7,8 +7,8 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  List how work arrives in a Routine: each schedule with its cadence, each
-  webhook another system posts to, each message or document that starts work.
+  List how work arrives in a Routine: its schedules, the webhooks other
+  systems post to, and the messages and References that start work.
 concepts: [triggers]
 used_with: [mcp/tools/run-trigger]
 ---
@@ -19,7 +19,7 @@ used_with: [mcp/tools/run-trigger]
 list_triggers(routine)
 ```
 
-A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential.
+Each schedule shows its cadence. A Trigger that is paused or turned off says so. A webhook's address is never shown: it is a credential.
 
 [`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md) runs a schedule now.
 

@@ -18,7 +18,7 @@ used_with: [mcp/tools/get-user]
 list_workspace_members(query=None, include_bots=False, cursor=None)
 ```
 
-This workspace's members only: someone from another workspace who is in a shared Routine isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use [`get_user`](https://docs.popcorn.ai/mcp/tools/get-user.md).
+This workspace's members only: someone from another workspace who is in a shared Routine isn't listed here, and deactivated members never are. To look up one person by ID, email or @username (a bot included), use [`get_user`](https://docs.popcorn.ai/mcp/tools/get-user.md). Each row shows the name, @username, email, workspace role and ID, with bots marked [bot].
 
 ## Arguments
 

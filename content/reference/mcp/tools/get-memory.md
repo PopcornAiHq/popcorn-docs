@@ -7,7 +7,7 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  One memory whole: its text, its category and name, when it was saved and
+  One memory in full: its text, its category and name, when it was saved and
   last changed, and its metadata.
 concepts: []
 used_with: [mcp/tools/list-memories]
@@ -25,7 +25,7 @@ A very long one comes a range at a time, with a `next_cursor` for the rest.
 
 | Argument | Type | Notes |
 |---|---|---|
-| `memory` [required] | `str` | The memory's name as [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) shows it ("<category>/<key>", e.g. "autochat:channel/picture"), or its ID. |
+| `memory` [required] | `str` | The memory's name as [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) shows it (category/key, e.g. "autochat:channel/picture", or category/short ID), or its full ID. |
 | `routine` | `str` | Routine name ("#intake") or ID, for scope "routine". |
 | `scope` | `Scope` | "routine" (the default), "workspace" or "me", as for `list_memories`. Leave out routine for "workspace" and "me". |
 | `cursor` | `str` | `next_cursor` from the previous range of this memory. |

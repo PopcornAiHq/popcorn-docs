@@ -7,8 +7,7 @@ parent: mcp/tools
 generated: scripts/sync-mcp.py
 updated: 2026-11-06
 summary: >
-  Read one page of the Popcorn docs by its id (search_docs gives it), or one
-  section of it.
+  Read one page of the Popcorn docs by its id, or one section of it.
 concepts: []
 used_with: [mcp/tools/search-docs]
 ---
@@ -19,7 +18,7 @@ used_with: [mcp/tools/search-docs]
 read_doc(doc_id, section=None)
 ```
 
-A page too long to return whole (the activity and MCP references) comes back as an outline of its sections; read one with `section`.
+[`search_docs`](https://docs.popcorn.ai/mcp/tools/search-docs.md) gives the id. A page too long to return whole (the activity and MCP references) comes back as an outline of its sections; read one with `section`.
 
 ## Arguments
 

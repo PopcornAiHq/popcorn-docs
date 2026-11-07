@@ -27,8 +27,8 @@ Without `confirm=true` this is a dry run that deletes nothing: it lists the rows
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `table` [required] | `str` | The table's name, as [`list_tables`](https://docs.popcorn.ai/mcp/tools/list-tables.md) shows it. |
 | `row_ids` [required] | `list[int]` | The rows' IDs ("row 88" is 88). At most 50. |
-| `confirm` | `bool` | true to delete. With a person there, show them the dry run first. Default `False`. |
-| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same table and `row_ids`. Popcorn's channel agent must pass it; an OAuth client is given none and needn't. |
+| `confirm` | `bool` | true to delete. Default `False`. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same table and `row_ids`. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
 
 **Example** — “Delete the duplicate row 91 from #intake's claims.”
 
