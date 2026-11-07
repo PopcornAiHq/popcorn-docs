@@ -5,7 +5,7 @@ order: 325
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-07
 summary: >
   Install the newest version of a Routine's copy of its template, or move it
   onto a copy the workspace already has.
@@ -19,13 +19,13 @@ used_with: [mcp/tools/create-routine, mcp/tools/get-routine, mcp/tools/create-ro
 install_routine(routine_id, copy=None, confirm=False, plan_id=None)
 ```
 
-It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…).
+**Which template.** It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…).
 
-Without copy, this is a catch-up: a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. The install runs in the background; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows when it lands. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install waited on another install, or when `get_routine` shows the Routine behind its copy.
+**Catching up.** Without copy, this is a catch-up: a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. The install runs in the background; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows when it lands. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install waited on another install, or when `get_routine` shows the Routine behind its copy.
 
-With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. If the workspace has several copies, name one with copy. A move is a dry run that changes nothing unless `confirm=true`. Workspace admins and the Routine's members may call it.
+**Moving to a copy.** With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. If the workspace has several copies, name one with copy. A move is a dry run that changes nothing unless `confirm=true`. Workspace admins and the Routine's members may call it.
 
-It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. It is refused while the Routine's template updates are locked, and when another install is still running on the Routine. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
+**What it doesn't do.** It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. It is refused while the Routine's template updates are locked, and when another install is still running on the Routine. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
 
 ## Arguments
 

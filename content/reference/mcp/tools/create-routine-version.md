@@ -5,7 +5,7 @@ order: 309
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-07
 summary: >
   Save changes as the next version of the Routine's own copy of its Routine
   Template.
@@ -19,11 +19,11 @@ used_with: [mcp/tools/list-routine-settings, mcp/tools/copy-routine-template, mc
 create_routine_version(routine_id, base_version=None, changes=None, changelog=None, confirm=False, plan_id=None, diff="full")
 ```
 
-A new version reaches every Routine on that copy: this Routine installs it now (unless its template updates are locked or another install is running), and every other Routine on the copy updates at its daily check. Workspace admins only. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first, and make a version only for what settings can't express. Without `confirm=true` it's a dry run that changes nothing: the version it would create, each file's diff, every check it would fail, warnings and the reach, and, when every check passes on a copy, a `plan_id` that lasts 30 minutes. To create it, call again with `routine_id`, `confirm=true` and that `plan_id` alone: the changes needn't be sent again, and every check runs again. A Routine on Popcorn's template can dry-run changes, but needs its own copy ([`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)) before they can be made.
+**Reach and dry run.** A new version reaches every Routine on that copy: this Routine installs it now (unless its template updates are locked or another install is running), and every other Routine on the copy updates at its daily check. Workspace admins only. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first, and make a version only for what settings can't express. Without `confirm=true` it's a dry run that changes nothing: the version it would create, each file's diff, every check it would fail, warnings and the reach, and, when every check passes on a copy, a `plan_id` that lasts 30 minutes. To create it, call again with `routine_id`, `confirm=true` and that `plan_id` alone: the changes needn't be sent again, and every check runs again. A Routine on Popcorn's template can dry-run changes, but needs its own copy ([`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)) before they can be made.
 
-Before writing a change, [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) with `template-authoring`; `manifest-keys` and `flow-grammar` cover what a manifest and a Flow may hold.
+**Docs.** Before writing a change, [`read_doc`](https://docs.popcorn.ai/mcp/tools/read-doc.md) with `template-authoring`; `manifest-keys` and `flow-grammar` cover what a manifest and a Flow may hold.
 
-Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from [`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md) or [`read_routine_file`](https://docs.popcorn.ai/mcp/tools/read-routine-file.md).
+**Changes.** Each change is one file. A change to a file that exists carries the sha256 it was read at: copy it exactly from [`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md) or [`read_routine_file`](https://docs.popcorn.ai/mcp/tools/read-routine-file.md).
 
 ```text
 {"path": "manifest.yaml", "expected_sha256": "…", "ops": […]}
@@ -36,11 +36,11 @@ Each change is one file. A change to a file that exists carries the sha256 it wa
 
 Ops apply in order. To rewrite a whole file, delete it and create it again. Bump `version:` in manifest.yaml in every new version.
 
-Every op is a text op. The anchor is the file's exact text and must match once: `{"op": "replace", "old_string": "days: 3", "new_string": "days: 5"}`. Also `insert_before` and `insert_after` (anchor, text), prepend and append (text), and `replace_range` (from, to, `new_string`), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end `new_string` with it.
+**Text ops.** Every op is a text op. The anchor is the file's exact text and must match once: `{"op": "replace", "old_string": "days: 3", "new_string": "days: 5"}`. Also `insert_before` and `insert_after` (anchor, text), prepend and append (text), and `replace_range` (from, to, `new_string`), which replaces from `from` up to `to`: `to` is not replaced and stays in the file, so never end `new_string` with it.
 
-`from_url` has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per version. Pin a version in the URL. To replace an existing file, add its `expected_sha256`. The dry run shows each file's sha256, and the confirm takes exactly that content: a confirm by `plan_id` holds it, and a confirm that resends the changes must give each `from_url` change that sha256. Content that changed since the dry run is refused.
+**From a URL.** A `from_url` change has Popcorn fetch a public UTF-8 text file, so you needn't send its content: unpkg.com, cdn.jsdelivr.net, registry.npmjs.org, raw.githubusercontent.com or a github.com release download; at most 10 files and 4 MiB per version. Pin a version in the URL. To replace an existing file, add its `expected_sha256`. The dry run shows each file's sha256, and the confirm takes exactly that content: a confirm by `plan_id` holds it, and a confirm that resends the changes must give each `from_url` change that sha256. Content that changed since the dry run is refused.
 
-`from_upload` takes a file you uploaded with [`create_routine_file_upload`](https://docs.popcorn.ai/mcp/tools/create-routine-file-upload.md), for this Routine and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as `from_url`, and goes into one version only.
+**From an upload.** A `from_upload` change takes a file you uploaded with [`create_routine_file_upload`](https://docs.popcorn.ai/mcp/tools/create-routine-file-upload.md), for this Routine and path. Its size and sha256 were fixed when you created it, so it needs no sha256 here. It counts toward the same 10 files and 4 MiB as `from_url`, and goes into one version only.
 
 ## Arguments
 

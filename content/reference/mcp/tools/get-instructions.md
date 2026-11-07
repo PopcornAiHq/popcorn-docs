@@ -5,7 +5,7 @@ order: 313
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-07
 summary: >
   Show a Routine's Instructions, the guidance its agents work from,
   Routine-wide and for each Step.
@@ -21,9 +21,9 @@ get_instructions(routine, step=None, guide=False, cursor=None)
 
 Each layer comes with where it came from (the template's, or changed for this Routine) and what changes it. A Routine shared in from another workspace is refused.
 
-The layers: the Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown, each text cut past a few thousand characters with the call that shows it whole, and each Step is summarised; with step, that Step's are shown in full. The template's guide is shown as its size and first heading only. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) and [`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md) read them all.
+**Layers.** The Routine's guidance per agent, its prompt files, its agent notes, its guidelines for its agent, what people told the agent, each Step's note, copy, questions and deadlines, and the template's guide (AGENT.md). Without step, the Routine-wide layers are shown, each text cut past a few thousand characters with the call that shows it whole, and each Step is summarised; with step, that Step's are shown in full. The template's guide is shown as its size and first heading only. A Routine whose template has no Steps has no per-Step layers. What people told the agent shows the newest memories, each cut short; [`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md) and [`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md) read them all.
 
-With `guide=true` it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
+**Guide.** With `guide=true` it returns the template's guide instead: this Routine's AGENT.md, its text whole, a range at a time when it is long.
 
 ## Arguments
 
