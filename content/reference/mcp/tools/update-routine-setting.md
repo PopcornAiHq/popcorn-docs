@@ -22,13 +22,7 @@ Without `confirm=true` this is a dry run that changes nothing: it shows the old 
 
 For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)'s ops are. The anchor is the text exactly and must match once: {"op": "replace", "`old_string`": "Hi {{name}},", "`new_string`": "Hello {{name}},"}. Also `insert_before` and `insert_after` (anchor, text), prepend and append (text), and `replace_range` (from, to, `new_string`).
 
-A value with credentials inside it shows them as [secret]. Keep
-
-```text
-[secret] exactly where a read shows it; the stored credential stays
-```
-
-in place. Credentials, and what surrounds them, change in the app.
+A value with credentials inside it shows them as [secret]. Keep [secret] exactly where a read shows it; the stored credential stays in place. Credentials, and what surrounds them, change in the app.
 
 ## Arguments
 
