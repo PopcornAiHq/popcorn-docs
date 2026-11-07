@@ -314,8 +314,10 @@ def tool_id(name: str) -> str:
 
 _BULLET = re.compile(r"^[-*] ")
 # A line of example input, such as one of create_routine_version's change
-# shapes: JSON, shown as code rather than run into the prose around it.
-_CODE_LINE = re.compile(r"^[{\[]")
+# shapes: JSON, shown as code rather than run into the prose around it. It
+# opens as JSON does, `{"` or `[{` or `["`: a wrapped line of prose can start
+# with a bracketed marker ("[secret]. Keep it…") and is still prose.
+_CODE_LINE = re.compile(r'^(?:\{"|\[[{"])')
 # A JSON object written inline in a sentence, as an example argument. Shown
 # as code: in prose, the site would read a "* * *" in it as emphasis.
 _INLINE_JSON = re.compile(r'(?<!`)\{"[^{}`]*\}(?!`)')
