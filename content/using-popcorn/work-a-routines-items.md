@@ -5,11 +5,10 @@ order: 3
 group: Common tasks
 summary: >
   Reviewing what needs you: see what is waiting and why with get_status; find
-  the claims or other Items at a Review, or still open, with list_rows,
+  the recipients or other Items at a Review, or still open, with list_rows,
   filtering by Status; read one with get_row; see the choices it offers with
-  list_actions and take one with take_action; stop tracking an
-  Item; correct Rows with update_row; and run a scheduled Trigger now with
-  run_trigger.
+  list_actions and take one with take_action; correct Rows with update_row;
+  and run a scheduled Trigger now with run_trigger.
 lede: >
   See what is waiting on you in a Routine, make the call, and correct anything
   that's wrong.
@@ -18,16 +17,18 @@ concepts: [reviews, actions-and-status, tables]
 
 This guide covers the day-to-day: finding the Items waiting for someone,
 making the call at their [Review](https://docs.popcorn.ai/reviews.md), and
-fixing what is wrong on them. The example works `#intake`, a claims intake
-[Routine](https://docs.popcorn.ai/routines.md) whose main
-[Table](https://docs.popcorn.ai/tables.md) holds one Row per potential
-client.
+fixing what is wrong on them. The example works `#team-offsite`, the
+[Routine](https://docs.popcorn.ai/routines.md) from
+[Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md),
+whose `recipients` [Table](https://docs.popcorn.ai/tables.md) holds one Row
+per person asked. Its one Review is *No response*: someone who stopped
+answering, where a person decides what next.
 
 Each step below starts with a prompt you might give your assistant.
 
 ## Find what is waiting
 
-> "Who in #intake is waiting for us to review them?"
+> "Who in #team-offsite needs us to decide what to do next?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_status`.
@@ -39,7 +40,7 @@ reason and the Items it is about.
 
 ## List the Items at a Review
 
-> "List everyone in #intake waiting for retainer review."
+> "List everyone in #team-offsite with no response."
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_tables`, then `list_rows` with a `filter` on
@@ -49,22 +50,22 @@ Your assistant lists the Items, newest first. You can narrow the list in
 your request:
 
 - **by Status** — one Review, several, or every Item still open;
-- **by a name or any text** — "Dana Reyes" finds that Item whatever Column
+- **by a name or any text** — "Jane" finds that Item whatever Column
   holds the name;
 - **by what to show** — the order of the Rows, and which Columns each line
   shows.
 
 > [!NOTE] A Status's label and its value
 > Popcorn shows a Status by its label, and the Row holds its value:
-> *Needs retainer review* is `retainer_review`, so the filter is
-> `{"Status": "retainer_review"}`. For several, use `$in`. There is no "not
+> *No response* is `no_response`, so the filter is
+> `{"Status": "no_response"}`. For several, use `$in`. There is no "not
 > in", so every Item still open is `$in` the Statuses that aren't an
-> Outcome. The Status Column isn't always named "Status"; `get_table`
+> Outcome: in `#team-offsite`, `new`, `waiting` and `no_response`. The Status Column isn't always named "Status"; `get_table`
 > names it.
 
 ## Read one
 
-> "Show me everything on Dana Reyes."
+> "Show me everything on Jane."
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_row`.
@@ -72,7 +73,7 @@ your request:
 Your assistant shows the Row in full: every Column, its Status, and when it
 was created and last changed.
 
-> "What has happened with Dana so far?"
+> "What has happened with Jane so far?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_history`.
@@ -83,22 +84,30 @@ who or what made it and why, and the work that made it. See
 
 ## See what it offers
 
-> "What can I do with Dana's intake?"
+> "What can I do about Jane?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_actions`.
 
 Your assistant lists the Actions the Item offers now, given its Status, each
-with the Status it moves the Item to. At the retainer Review those are
-*Send retainer*, *Already signed* and *Do not send retainer*.
+with the Status it moves the Item to. At *No response* those are:
 
-> [!NOTE] Taken in Popcorn
-> *Send retainer* is taken in Popcorn, not by your assistant, because a
-> person checks every field of the agreement before it goes.
+- **Ask again** — back to *Waiting*, with the follow-ups starting over. The
+  next [Run](https://docs.popcorn.ai/history.md) follows up with the questions still open.
+- **Mark answered** — to *Answered*, for answers given outside email, by
+  phone or in person.
+- **Close** — to *Closed*, so nobody follows up.
+
+Someone not asked yet, or still *Waiting*, offers *Mark answered* and
+*Close*.
+
+> [!NOTE] Not while a Run holds it
+> While a Run is emailing someone or reading their replies, they offer no
+> Actions. Ask again once the Run has finished.
 
 ## Make the call
 
-> "Dana signed on paper. Mark Dana as already signed."
+> "Jane answered at standup. Mark Jane as answered."
 
 > [!TIP] MCP tool call
 > Your assistant calls `take_action`, then `get_run` to see it applied.
@@ -108,8 +117,9 @@ records happens. You named the Item and the Action, so your assistant takes
 it straight away. Otherwise it shows you first what happens to each Item,
 and acts once you agree.
 
-*Stop tracking* works the same way on any Item, to stop its follow-ups
-without closing it.
+Ask again after the reply-by date has passed and the next Run marks them
+*No response* again, so
+[change the date](https://docs.popcorn.ai/set-up-a-routine.md#set-the-reply-by-date) first.
 
 > [!NOTE] All or nothing
 > If one of the Items you name doesn't offer the Action now, nothing is done
@@ -117,7 +127,7 @@ without closing it.
 
 ## Fix what is wrong
 
-> "Dana's phone number is wrong: it's 555-0142."
+> "Jane's email is wrong: it's jane.doe@example.com."
 
 > [!TIP] MCP tool call
 > Your assistant calls `update_row`, `create_rows` or `delete_rows`.
@@ -128,12 +138,17 @@ without closing it.
 | **A missing Item** | Adds it: straight away for up to ten Rows you name, and otherwise once you agree to what it shows you. A Row that matches an existing one merges into it rather than adding a duplicate. |
 | **A duplicate** | Deletes it, once you agree to what it shows you. |
 
-None of these starts work by itself, and none can set a Status: that
-changes only by an Action. See
+None of these starts work by itself, and none can set a Status: the
+Routine's work and its Actions change that. See
 [Tables, Rows and Columns](https://docs.popcorn.ai/tables.md).
 
+> [!NOTE] A new address starts over
+> In `#team-offsite`, correcting the Email of someone *Waiting* starts them
+> over: the Routine emails the new address the whole questionnaire as a
+> new email, and keeps the answers already given.
+
 > [!WARNING] A new Item is real work
-> The Routine's next [Run](https://docs.popcorn.ai/history.md) picks up an
+> The Routine's next Run picks up an
 > added Item, and may send it an email.
 
 > [!CAUTION] Deleting is permanent
@@ -141,7 +156,7 @@ changes only by an Action. See
 
 ## Run the Routine's work now
 
-> "Send #intake's due follow-ups now, don't wait for the next check."
+> "Send #team-offsite's due follow-ups now, don't wait for the next check."
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_triggers`, then `run_trigger`, then `get_run`.

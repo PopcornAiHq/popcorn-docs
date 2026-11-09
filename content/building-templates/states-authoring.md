@@ -1,7 +1,7 @@
 ---
 id: states-authoring
 title: Author a States tier
-order: 12
+order: 13
 group: Tables and Status
 summary: >
   Writing the State graph behind a Routine's Status and Actions, in

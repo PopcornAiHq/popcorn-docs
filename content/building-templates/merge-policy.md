@@ -1,7 +1,7 @@
 ---
 id: merge-policy
 title: Column Merge Policy
-order: 11
+order: 12
 group: Tables and Status
 summary: >
   A Column's Merge Policy decides what an upsert does to an existing Row:

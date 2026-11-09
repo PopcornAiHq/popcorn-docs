@@ -4,30 +4,39 @@ title: Reviews
 order: 13
 group: Day to day
 summary: >
-  A Review is the kind of Step where a person makes the call instead of
-  Popcorn: the Item waits, says why, and gives a few choices of where it goes
-  next. Approval is one kind of Review, and its passing Outcome. get_status
-  lists what is waiting and why; take_action takes a choice, except one that
-  opens a form in Popcorn.
+  A Review is where a person makes the call instead of Popcorn: the Item
+  waits, says why, and gives a few choices of where it goes next. In a
+  Routine with Steps it is one kind of Step. Approval is one kind of Review,
+  and its passing Outcome. get_status lists what is waiting and why;
+  take_action takes a choice, except one that opens a form in Popcorn.
 lede: >
   A Review is where a person, not Popcorn, makes the call: the Item waits,
   says why, and offers a few choices of where it goes next.
 concepts: [steps, actions-and-status, routine-settings]
 ---
 
-A **Review** is a [Step](https://docs.popcorn.ai/steps.md) where the
-[Routine](https://docs.popcorn.ai/routines.md) stops and waits for a person.
-The [Item](https://docs.popcorn.ai/work-a-routines-items.md) says why it is
+A **Review** is where the [Routine](https://docs.popcorn.ai/routines.md)
+stops and waits for a person. The
+[Item](https://docs.popcorn.ai/work-a-routines-items.md) says why it is
 waiting and offers a few choices, each an
-[Action](https://docs.popcorn.ai/actions-and-status.md) that leads somewhere:
+[Action](https://docs.popcorn.ai/actions-and-status.md) that leads somewhere.
 
-- on to the next Step;
-- straight to an Outcome;
-- or past work already done.
+`#team-offsite`, the Routine from
+[Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md), has
+one Review, *No response*: someone stopped answering, after the last
+follow-up or once the reply-by date passed. Its choices are:
 
-In a claims intake Routine, the Review after the questions says: "Intake is
-done. Send the document for signature, record it as already signed, or do
-not send the retainer." Its choices are:
+| Choice | What happens |
+|---|---|
+| **Ask again** | Back to *Waiting*, with the follow-ups starting over; the next [Run](https://docs.popcorn.ai/history.md) follows up with the questions still open. |
+| **Mark answered** | To *Answered*, for answers given outside email, such as by phone. |
+| **Close** | To *Closed*, so nobody follows up. |
+
+In a Routine with [Steps](https://docs.popcorn.ai/steps.md), a Review is one
+kind of Step, and its choices lead on to the next Step, straight to an
+Outcome, or past work already done. In a claims intake Routine, the Review
+after the questions says: "Intake is done. Send the document for signature,
+record it as already signed, or do not send the retainer." Its choices are:
 
 | Choice | What happens |
 |---|---|
@@ -41,7 +50,7 @@ a fit" or "already done".
 
 ## What is waiting
 
-> "Who in #intake is waiting for us to review them?"
+> "Who in #team-offsite needs us to decide what to do next?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_status`, then `list_rows` with a filter on the
@@ -52,11 +61,11 @@ a person, and lists what is waiting, newest first, with why and which Items.
 
 > [!TIP] In Popcorn
 > Items at a Review show as needing review. Each one's Status names its
-> Review, such as *Needs retainer review*.
+> Review, such as *No response*.
 
 ## Making the choice
 
-> "Dana signed on paper. Mark Dana as already signed."
+> "Jane answered at standup. Mark Jane as answered."
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_actions` to see the choices, then
@@ -74,21 +83,25 @@ it shows you.
 ## Work done outside Popcorn
 
 Some work happens without the Routine: an answer given on the phone, a call
-already held. When the Routine's **Step forward**
-[setting](https://docs.popcorn.ai/routine-settings.md) is on, an Item offers
-choices such as *Already answered* or *Call already held*, which move it
-past a Step without waiting for it.
+already held. In `#team-offsite`, *Mark answered* covers it, and is offered
+before anyone has stopped answering too. In a Routine with Steps, when its
+**Step forward** [setting](https://docs.popcorn.ai/routine-settings.md) is
+on, an Item offers choices such as *Already answered* or *Call already
+held*, which move it past a Step without waiting for it.
 
 ## Adding or removing a Review
 
-A Review is a Step, so you add or remove one the way you change any Step:
-by asking your assistant or telling the Routine's
+In a Routine with Steps, a Review is a Step, so you add or remove one the
+way you change any Step: by asking your assistant or telling the Routine's
 [Agent](https://docs.popcorn.ai/agent.md) in Popcorn, for
 example "check with me before booking the meeting" (see
 [changing its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md)).
 The change stays with this Routine and survives the template's
 improvements; it doesn't give the Routine a Copy of its own. Without a
-Review, the Routine moves the Item on by itself.
+Review, the Routine moves the Item on by itself. In a Routine without Steps,
+such as `#team-offsite`, its Reviews are part of its template, and changing
+them gives it a
+[Copy of its own](https://docs.popcorn.ai/customizing-a-routine.md).
 
 > [!TIP] Building a template
 > In the template, a Review is a State that warns, with the Transitions

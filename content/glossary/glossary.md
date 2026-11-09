@@ -471,10 +471,10 @@ never meets this refusal. *Not to be confused with* a Version's id.
 
 ### Review
 
-The kind of Step where a person decides instead of Popcorn. The Item waits,
-says why, and offers the Actions that decide where it goes next. *Not to be
-confused with* an Action: a Review is the Step that waits, and an Action is the
-button that ends it.
+Where a person decides instead of Popcorn. The Item waits at a Status that
+says why, and offers the Actions that decide where it goes next; in a Routine
+with Steps, a Review is one kind of Step. *Not to be confused with* an Action:
+a Review is where the Item waits, and an Action is the button that ends it.
 
 Learn more: [Reviews](https://docs.popcorn.ai/reviews.md)
 

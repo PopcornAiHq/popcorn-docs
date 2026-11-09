@@ -1,7 +1,7 @@
 ---
 id: table-columns
 title: Table Columns
-order: 10
+order: 11
 group: Tables and Status
 summary: >
   A Routine's Tables and Columns are declared in its template: a Column has a

@@ -526,3 +526,8 @@
   concept: members
   pass: a switch can be changed by any Member of the Routine, but any other Routine Setting, prompts and email wording included, needs a Workspace admin who is also a Member; the assistant acts with the person's Roles
   trap: says the assistant has its own permissions, or that any Member can change any setting
+
+- q: How is the Questionnaire template built, and why can't Ask again land while a pass is checking a recipient?
+  concept: questionnaire-template
+  pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, since the pass writes Stage from the Row it read
+  trap: says the Actions write Status directly, or that a pass waits for an Action to finish

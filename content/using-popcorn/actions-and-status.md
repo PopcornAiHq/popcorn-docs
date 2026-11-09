@@ -4,10 +4,10 @@ title: Actions and Status
 order: 14
 group: Day to day
 summary: >
-  An Item's Status says where it stands, such as Waiting on documents, and
+  An Item's Status says where it stands, such as Waiting or No response, and
   Popcorn works it out from what has happened, so it is never written
-  directly. Actions are what a person does to move an Item on: approve, send,
-  close. list_actions shows the Actions an Item offers now; take_action takes
+  directly. Actions are what a person does to move an Item on: ask again,
+  mark answered, approve, send, close. list_actions shows the Actions an Item offers now; take_action takes
   one, as pressing its button would.
 lede: >
   An Item's Status says where it stands, and its Actions are what a person
@@ -16,37 +16,38 @@ concepts: [tables, work-a-routines-items, triggers]
 ---
 
 An [Item](https://docs.popcorn.ai/work-a-routines-items.md)'s **Status** says
-where it stands. In a claims intake
-[Routine](https://docs.popcorn.ai/routines.md), the Statuses include:
+where it stands. In `#team-offsite`, the
+[Routine](https://docs.popcorn.ai/routines.md) from
+[Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md),
+each person asked is at one of:
 
-- *Collecting info*
-- *Needs retainer review*
-- *Getting signatures*
-- *Retained*
+- *Not asked yet*
+- *Waiting*
+- *No response*
+- *Answered*
+- *Closed*
 
 Popcorn works a Status out from what has happened to the Item, so it changes
 only when someone takes an Action or the Routine moves the Item on. It is
 never written directly. A Status is about the Item, not about whether one
 piece of the Routine's work finished.
 
-An **Action** is something a person does to move an Item on:
-
-- *Send retainer* or *Already signed* at a
-  [Review](https://docs.popcorn.ai/reviews.md);
-- *Stop tracking* and *Resume tracking* on any Item;
-- *Try again* after an error.
+An **Action** is something a person does to move an Item on. At
+`#team-offsite`'s [Review](https://docs.popcorn.ai/reviews.md), *No
+response*, those are *Ask again*, *Mark answered* and *Close*. A claims
+intake Routine offers others, such as *Send retainer* at a Review, *Stop
+tracking* on any Item, and *Try again* after an error.
 
 An Item offers only the Actions that make sense for where it stands, so the
 buttons and the Status can't disagree.
 
 > [!NOTE] No archive Action
-> No Action archives an Item. An Item closes for a reason the Routine
-> records, such as *No response* when the follow-ups run out, or because a
-> person stops tracking it.
+> No Action archives an Item. It ends at an Outcome the Routine records,
+> such as *Answered* or *Closed*, and its Row stays.
 
 ## Seeing what an Item offers
 
-> "What can I do with Dana's intake?"
+> "What can I do about Jane?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_actions`.
@@ -59,18 +60,18 @@ assistant lists them and says so.
 
 ## Counting the Items at each Status
 
-> "Where do things stand in #intake?"
+> "Where do things stand in #team-offsite?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_status`, then `list_rows` with a filter on the
-> Status Column, such as `{"Status": "open"}`.
+> Status Column, such as `{"Status": "waiting"}`.
 
 Your assistant counts the Items at each Status, and can list the Items at
 any one of them.
 
 ## Taking one
 
-> "Dana signed on paper. Mark Dana as already signed."
+> "Jane answered at standup. Mark Jane as answered."
 
 > [!TIP] MCP tool call
 > Your assistant calls `take_action`.
