@@ -30,9 +30,9 @@ happened in it:
 - **its conversation** — the messages people and its
   [Agent](https://docs.popcorn.ai/agent.md) posted in it.
 
-History answers "did the reminder go out?", "why is this claim closed?" and
-"who sent the retainer?". An Item's History is the audit log kept for its
-Row.
+History answers "did Jane's follow-up go out?", "why is Sam closed?" and
+"when was Priya marked answered?". An Item's History is the audit log kept
+for its Row.
 
 > [!TIP] From the CLI
 > Each Run in a History is a Run of one of the template's Flows, which the
@@ -42,7 +42,7 @@ Row.
 
 ## One Item's History
 
-> "What happened with Ben Garrett's intake?"
+> "What happened with Jane in #team-offsite?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_history` with the Item's Row ID.
@@ -55,8 +55,8 @@ Your assistant lists what happened to the Item, newest first, as the Item's
   it
   was doing; or "Popcorn, for a person" when someone's button started the
   work, since a Run doesn't record who pressed it;
-- **what happened**, such as *Send retainer* or *Answered all 5 intake
-  questions*;
+- **what happened**, such as *Sent the questionnaire* or *Marked answered
+  by a person*;
 - the Item's **Status** move and its new **Why**, then the other fields that
   changed.
 
@@ -65,7 +65,7 @@ A long History comes a page at a time.
 
 ## One entry in full
 
-> "Show me the retainer entry in full: what changed and what the Run did."
+> "Show me the entry where Jane was marked answered, in full."
 
 > [!TIP] MCP tool call
 > Your assistant calls `read_history_entry` with an `entry_id` from
@@ -80,7 +80,7 @@ its Row, not in its History.
 
 ## One Run
 
-> "What did this morning's follow-up Run change?"
+> "What did #team-offsite's last Run change?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_history` with the Run instead of a Row ID.

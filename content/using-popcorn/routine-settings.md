@@ -35,17 +35,20 @@ A setting:
 
 ## An example
 
-A claims intake Routine's settings include:
+`#team-offsite`'s settings include:
 
 | Setting | What it decides |
 |---|---|
-| Email sending | *Off*, *Draft* (each email is written for a person to send) or *Send* |
-| Agreement sending | the same three, for sending agreements through the Signing Provider |
-| Reply matching | whether a reply is matched to its [Item](https://docs.popcorn.ai/work-a-routines-items.md) by the sender's address, or by the email thread (for an inbox several Routines share) |
-| Save signed agreements to Google Drive | whether each signed agreement is filed in a folder for its client |
-| Booking confirmation | whether someone who books a meeting gets a short note confirming it |
-| Step forward | whether people can move an Item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/reviews.md)) |
-| Reminder schedule, outreach hours | when follow-ups go out, and the hours emails may be sent in |
+| Email sending | *Off* (nobody is asked), *Draft* (each first email waits in Gmail's Drafts for a person to send) or *Send* |
+| Days between follow-ups | how long it waits before following up, 3 by default |
+| Follow-ups before giving up | how many follow-ups it sends before someone is *No response*, 3 by default |
+| `prompts.read_questionnaire`, `prompts.read_answers` | the prompts it reads the questionnaire and each reply with |
+
+A claims intake Routine has more, such as *Agreement sending* for the
+Signing Provider, *Reply matching* for an inbox several Routines share, and
+*Step forward* for moving an
+[Item](https://docs.popcorn.ai/work-a-routines-items.md) past a Step done
+outside Popcorn (see [Reviews](https://docs.popcorn.ai/reviews.md)).
 
 The names follow the Routine's own words, so a Routine that sends a retainer
 says "Retainer sending".

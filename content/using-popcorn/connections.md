@@ -18,12 +18,13 @@ concepts: [routines, set-up-a-routine]
 
 A Connection is an account Popcorn uses on a
 [Routine](https://docs.popcorn.ai/routines.md)'s behalf: the mailbox it
-reads new claims from, the calendar it books into, the drive it files
-documents in. The Routine's template says which Connections it needs.
+sends from and reads replies in, the calendar it books into, the drive it
+files documents in. The Routine's template says which Connections it needs:
+`#team-offsite` has one, the Gmail its questions go out from.
 
 ## Finding what is missing
 
-> "Why hasn't #intake booked any inspections?"
+> "Why hasn't #team-offsite emailed anyone?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_connections`.
@@ -31,12 +32,11 @@ documents in. The Routine's template says which Connections it needs.
 Your assistant lists every Connection the Routine needs:
 
 ```text
-2 Connections, 1 not connected:
-- Claims inbox (email): connected
-  Uses: claims@acme.example (google), connected by Dana Smith
-  Without it: the Routine's automations are paused, and claim intake can't run.
-- Adjuster calendar (calendar): NOT CONNECTED
-  Without it: book inspection can't run; the rest of the Routine keeps working.
+1 Connection, 1 not connected:
+- Gmail (email): NOT CONNECTED
+  Without it: the Routine's automations are paused, and ask recipient, check
+  recipient, on auth change, questionnaire load, questionnaire tick, reply by
+  set can't run.
 ```
 
 Each Connection says whose account it uses, who connected it, and what
@@ -58,7 +58,7 @@ ones.
 
 ## Making one
 
-> "Connect my work calendar to #intake as the adjuster calendar."
+> "Connect my Gmail to #team-offsite."
 
 > [!TIP] MCP tool call
 > Your assistant calls `make_connection`.

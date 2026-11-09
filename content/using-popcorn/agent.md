@@ -41,7 +41,7 @@ talking to it.
 
 ## Talking to it
 
-> "Ask #intake's Agent whether Dana's agreement went out."
+> "Ask #team-offsite's Agent whether Jane has answered yet."
 
 > [!TIP] MCP tool call
 > Your assistant calls `send_message`, then `list_messages` to read the
@@ -62,8 +62,9 @@ The people in the Routine talk to it the same way, in Popcorn.
 
 ## What it remembers
 
-When people tell the Agent a preference or a decision — "always copy the
-adjuster", "ask me before sending anything to the carrier" — it keeps it,
+When people tell the Agent a preference or a decision — "add people by
+their full name", "ask me before adding anyone outside the company" — it
+keeps it,
 and acts on it from then on. That is one part of the Routine's Instructions,
 and [Instructions](https://docs.popcorn.ai/instructions.md#reading-them) says
 how your assistant reads it.
@@ -74,10 +75,14 @@ The Agent follows the Routine's Instructions, so changing how it acts means
 changing them:
 
 - **Tell it**, in the Routine, for a preference or a decision.
-- **Change a Routine Setting**, for the wording of its emails and prompts:
-  see [Change how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).
-- **Change the Routine's Steps**, for what each Step asks and when it acts:
-  see [Change its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
+- **Change a Routine Setting**, for the prompts it writes from: see
+  [Change how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).
+- **Replace a [Reference](https://docs.popcorn.ai/reference-documents.md)**,
+  for wording that comes from one: `#team-offsite`'s emails are worded by
+  its questionnaire.
+- **Change the Routine's Steps**, in a Routine that has them, for what each
+  Step asks and when it acts: see
+  [Change its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
 
 > [!TIP] In the template
 > Building a template, the Routine's Agent is its **channel agent**, and a
