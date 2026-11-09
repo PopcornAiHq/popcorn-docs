@@ -196,8 +196,5 @@ question is *Answered*. Anyone still *Waiting* gets a follow-up about the
 questions they left open, every three days and up to three times, until the
 reply-by date.
 
-## Change how it behaves
-
-To tune how long `#team-offsite` waits before following up, or how many
-follow-ups it sends, see
+To change how often it follows up, or how many times, see
 [changing how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).
