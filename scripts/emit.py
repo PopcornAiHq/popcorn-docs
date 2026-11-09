@@ -295,8 +295,8 @@ def tabs(pages: list[dict], current: str | None) -> list[render.Link]:
 def sidebar(pages: list[dict], current: str | None) -> str:
     """The site sidebar: the current tab's `group:`s, each under its heading.
 
-    A group holds every page about one topic, whether it explains a thing or
-    walks through a task; pages without one are listed with no heading, and
+    A group holds the pages about one topic, or a part's tasks, such as
+    Common tasks; pages without one are listed with no heading, and
     a page with a `parent:` is listed under its parent when in focus. On
     the Reference tab a page's group, such as the CLI's, is its section, and
     a page without one sits under its kind. The

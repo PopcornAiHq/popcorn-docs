@@ -1,7 +1,7 @@
 ---
 id: members
 title: Members and Roles
-order: 10
+order: 12
 group: How a Routine works
 summary: >
   Who may do what in a Routine. A Workspace Role and a Routine Role are

@@ -1,7 +1,7 @@
 ---
 id: actions-and-status
 title: Actions and Status
-order: 13
+order: 14
 group: Day to day
 summary: >
   An Item's Status says where it stands, such as Waiting on documents, and

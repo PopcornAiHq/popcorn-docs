@@ -1,7 +1,7 @@
 ---
 id: history
 title: History
-order: 14
+order: 15
 group: Day to day
 summary: >
   A Routine's History is what has happened in it — did the reminder emails go

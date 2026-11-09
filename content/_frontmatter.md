@@ -68,9 +68,9 @@ local backend checkout. Omit a page from it when no single symbol owns what
 it describes; do not invent one.
 
 **`order`** is the page's place in its part's reading path, starting at 1.
-A part's pages are numbered in one sequence, so a task sits beside the
-pages about what it puts to work, and no two pages in a part share a
-number. The sidebar, the previous/next links on every page and `llms.txt` all
+A part's pages are numbered in one sequence, and no two pages in a part
+share a number. Tasks come first, so a reader finds what they came to do
+before the pages about one thing that the tasks link to. The sidebar, the previous/next links on every page and `llms.txt` all
 follow it. The glossary and the references have no part and are numbered
 within their kind. Filenames sort alphabetically, which is no reading order
 at all — it once put an advanced task ahead of the one it builds on. Number by what a reader

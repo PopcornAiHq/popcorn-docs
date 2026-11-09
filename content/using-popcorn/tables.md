@@ -1,7 +1,7 @@
 ---
 id: tables
 title: Tables, Rows and Columns
-order: 9
+order: 11
 group: How a Routine works
 summary: >
   A Routine's Tables hold its Items — claims, orders, contacts — as Rows and

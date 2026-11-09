@@ -1,7 +1,7 @@
 ---
 id: routine-settings
 title: Routine Settings
-order: 16
+order: 17
 group: Customizing a Routine
 summary: >
   Routine Settings tune one Routine without changing what it does: whether

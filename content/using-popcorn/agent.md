@@ -1,7 +1,7 @@
 ---
 id: agent
 title: The Routine's Agent
-order: 4
+order: 6
 group: How a Routine works
 summary: >
   A Routine's Agent works inside it: it does the Routine's work, follows its

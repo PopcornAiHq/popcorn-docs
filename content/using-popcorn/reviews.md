@@ -1,7 +1,7 @@
 ---
 id: reviews
 title: Reviews
-order: 12
+order: 13
 group: Day to day
 summary: >
   A Review is the kind of Step where a person makes the call instead of

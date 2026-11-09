@@ -84,6 +84,10 @@ its own page only when it crosses several things, and links to each one's
 page rather than repeating it. When a task page and a thing's page overlap,
 the thing's page is authoritative.
 
+**Order:** tasks first, then things. In Using Popcorn the sidebar opens with
+Getting started and Common tasks, and the pages about one thing follow,
+grouped by topic.
+
 **Shape:** frontmatter with a `summary` under 400 characters, then the body.
 The summary is the answer; the body is the explanation. A page whose body is
 three times its summary is probably two pages. A task page is ordered, with
