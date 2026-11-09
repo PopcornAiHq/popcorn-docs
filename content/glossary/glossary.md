@@ -74,7 +74,8 @@ for itself under `agents/<name>/` (`agent.yaml`, `prompt.md`,
 `schemas/*.json`), which a Flow runs with `foundation.agent.invoke`; with
 `chat: true` in `agent.yaml` it can also serve as the Routine's Agent.
 
-Learn more: [App Bundles](https://docs.popcorn.ai/app-bundle.md) and [Platform
+Learn more: [The Routine's Agent](https://docs.popcorn.ai/agent.md), [App
+Bundles](https://docs.popcorn.ai/app-bundle.md) and [Platform
 tools](https://docs.popcorn.ai/platform-tools.md)
 
 ### agent store
@@ -350,6 +351,9 @@ One thing a Routine works on, such as a potential client in an intake Routine
 or an order on its way to a customer. Each Item is a Row in one of the
 Routine's Tables. An Item is not always a person.
 
+Learn more: [Work a Routine's
+Items](https://docs.popcorn.ai/work-a-routines-items.md)
+
 ## M
 
 ### Manifest
@@ -374,6 +378,8 @@ whatever their Workspace Role. A Routine's admin actions are open to its owners
 and admins and to Workspace admins, and only a Workspace admin can publish a
 Version of a template. `get_user` and `list_workspace_members` report the
 Workspace Role.
+
+Learn more: [Members and Roles](https://docs.popcorn.ai/members.md)
 
 ### Merge Policy, Merge Key
 
@@ -518,7 +524,7 @@ its `workflow_id` (`popcorn flow runs get <workflow-id>`). A Run is started by
 `flow run`, a Schedule, a Webhook, a Message Trigger, a document, a State
 Machine, an Agent or another Flow.
 
-Learn more: [Debug a failed
+Learn more: [History](https://docs.popcorn.ai/history.md) and [Debug a failed
 Run](https://docs.popcorn.ai/debugging-a-failed-run.md)
 
 ## S
@@ -544,7 +550,8 @@ can move a daily cron off the declared minute. `popcorn app status` compares
 armed with declared, and uses intended to tell a deliberate difference from
 drift.
 
-Learn more: [Schedules in a Manifest](https://docs.popcorn.ai/schedules.md)
+Learn more: [Triggers](https://docs.popcorn.ai/triggers.md) and [Schedules in a
+Manifest](https://docs.popcorn.ai/schedules.md)
 
 ### Signing Provider
 

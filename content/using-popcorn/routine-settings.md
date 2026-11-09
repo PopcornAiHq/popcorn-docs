@@ -1,7 +1,7 @@
 ---
 id: routine-settings
 title: Routine Settings
-order: 14
+order: 17
 group: Customizing a Routine
 summary: >
   Routine Settings tune one Routine without changing what it does: whether
@@ -15,11 +15,17 @@ lede: >
 concepts: [customizing-a-routine, change-how-a-routine-behaves, triggers]
 ---
 
-Routine Settings are the values that tune a Routine without changing what it
-does: switches that turn a behaviour on or off, values such as a reminder
-interval, a follow-up limit or a Schedule's cadence, and the prompts and email
-wording its Agent uses. They are the first place to look when a Routine
-should behave differently.
+Routine Settings are the values that tune a
+[Routine](https://docs.popcorn.ai/routines.md) without changing what it
+does. They are the first place to look when a Routine should behave
+differently, and come in three kinds:
+
+- **Switches** that turn a behaviour on or off, or pick one of a few modes.
+- **Values** such as a reminder interval, a follow-up limit or a
+  [Schedule](https://docs.popcorn.ai/triggers.md)'s cadence.
+- **Wording**: the prompts and email text the Routine's
+  [Agent](https://docs.popcorn.ai/agent.md) writes from.
+  Each prompt or email is its own setting.
 
 A setting:
 
@@ -27,13 +33,15 @@ A setting:
 - can be set back, by setting it to the template's default;
 - is kept through the template's improvements.
 
+## An example
+
 A claims intake Routine's settings include:
 
 | Setting | What it decides |
 |---|---|
 | Email sending | *Off*, *Draft* (each email is written for a person to send) or *Send* |
 | Agreement sending | the same three, for sending agreements through the Signing Provider |
-| Reply matching | whether a reply is matched to its Item by the sender's address, or by the email thread (for an inbox several Routines share) |
+| Reply matching | whether a reply is matched to its [Item](https://docs.popcorn.ai/work-a-routines-items.md) by the sender's address, or by the email thread (for an inbox several Routines share) |
 | Save signed agreements to Google Drive | whether each signed agreement is filed in a folder for its client |
 | Booking confirmation | whether someone who books a meeting gets a short note confirming it |
 | Step forward | whether people can move an Item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/reviews.md)) |
@@ -42,32 +50,27 @@ A claims intake Routine's settings include:
 The names follow the Routine's own words, so a Routine that sends a retainer
 says "Retainer sending".
 
-## Reading them
+## Finding and changing one
 
-`list_routine_settings` lists every setting the Routine's template offers,
-set or not. Each row shows its value; an unset one says what unset means, and
-one changed from the template's default says so. A `query` narrows the list
-by key or label ("chase", "reminder"). A secret shows only whether it is set.
+Ask your assistant what you can change about a Routine, and it lists the
+settings that match: each one's value, and whether it was changed from the
+template's default. It can show one in full, with its options and the
+warning each carries, and change it for you.
+[Change how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md)
+walks through it.
 
-`get_routine_setting` shows one setting in full: its whole value — a prompt
-or email's whole text — the template's default, what it accepts, its options
-with the warning each carries, and who may change it.
+> [!TIP] MCP tool call
+> `list_routine_settings` finds a setting, `get_routine_setting` shows one
+> in full, and `update_routine_setting` changes one.
 
-## Changing one
+> [!NOTE] Not settings
+> A secret shows only whether it is set, and is changed in Popcorn. The
+> Routine's [Instructions](https://docs.popcorn.ai/instructions.md), apart
+> from the wording that is a setting, change elsewhere: that page says
+> where.
 
-`update_routine_setting` changes one setting on one Routine: at once when
-you named the setting and its new value, and otherwise after a dry run that
-shows the old and new value and what the setting does. A switch to sending
-email without review is always a dry run first. A switch takes one of its options; any other
-setting keeps the shape of its default, so a list stays a list. A long text is
-changed with edits to the current text rather than resent whole. Work already
-under way keeps the value it started with.
-
-Secrets, and the Routine's [Instructions](https://docs.popcorn.ai/instructions.md),
-are not changed here; they change in Popcorn. The walkthrough is
-[changing how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md).
-
-In the template, many settings are the Routine's Scalars or its
-`channel_parameters:`, and the prompts and email templates are files the template
-seeds; [Scalar tiers and Routine Settings](https://docs.popcorn.ai/scalar-tiers.md)
-says which declarations become settings.
+> [!TIP] In the template
+> Many settings are the template's Scalars or its `channel_parameters:`,
+> and the prompts and email templates are files the template seeds.
+> [Scalar tiers and Routine Settings](https://docs.popcorn.ai/scalar-tiers.md)
+> says which declarations become settings.
