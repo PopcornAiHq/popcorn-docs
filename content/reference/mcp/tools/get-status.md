@@ -5,10 +5,10 @@ order: 321
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-09
 summary: >
-  Where a Routine's items stand: how many are at each Status, and what is
-  waiting for a person, with why and the Actions that settle it.
+  Where a Routine stands: what its template reports, how many items are at
+  each Status, and what is waiting for a person.
 concepts: [actions-and-status]
 used_with: [mcp/tools/take-action, mcp/tools/list-actions, mcp/tools/list-rows, mcp/tools/get-table]
 ---
@@ -19,11 +19,13 @@ used_with: [mcp/tools/take-action, mcp/tools/list-actions, mcp/tools/list-rows, 
 get_status(routine)
 ```
 
+Start here for "where are we": a template that keeps its own summary of the work (a project brief, say) reports it first, under what it means. Each item waiting for a person comes with why, and the Actions that settle it.
+
 [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one of an item's Actions on the row it names; [`list_actions`](https://docs.popcorn.ai/mcp/tools/list-actions.md) shows what can be done with an item.
 
 Each Status shows its label (what Popcorn shows) and its stored value. [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) shows the items at one Status with a filter on the Status column's stored value ([`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md) names the column; it isn't always "Status").
 
-It counts up to 40 Statuses (those needing a person first) and lists the 10 newest items waiting. A Routine whose template has no Statuses is refused; `list_rows` reads its rows.
+It counts up to 40 Statuses (those needing a person first) and lists the 10 newest items waiting. A Routine whose template has no Statuses and reports nothing is refused; `list_rows` reads its rows.
 
 ## Arguments
 

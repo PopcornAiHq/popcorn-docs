@@ -5,7 +5,7 @@ order: 312
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-09
 summary: >
   Create a new Routine in this workspace that copies an existing one's setup.
 concepts: [set-up-a-routine]
@@ -18,13 +18,13 @@ used_with: [mcp/tools/get-routine, mcp/tools/create-routine]
 duplicate_routine(routine_id, name, private=None, members=None, confirm=False, plan_id=None)
 ```
 
-It copies the original's Routine Template at its latest version from the same place (Popcorn, or this workspace's same copy, which the new Routine then follows for good), the Routine Settings changed from the template's, its own Steps, its guidelines for its agent, and the References it has added.
+**What it copies.** It copies the original's Routine Template at its latest version from the same place (Popcorn, or this workspace's same copy, which the new Routine then follows for good), the Routine Settings changed from the template's, its own Steps, its guidelines for its agent, and the References it has added.
 
-Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection.
+**What it doesn't.** Nothing is copied that belongs to the work or the people: not its items, History, messages or members, not what people told its agent, and not its Connections or credentials, which sign in as someone. A Reference picked from Google Drive is picked again in Popcorn once the new Routine has a Google Drive connection.
 
-The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with `confirm=true` to create the Routine. The template installs in the background, then the copy runs; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md)'s Copied from: field shows each part as it lands, and any that didn't, with why.
+**Dry run.** The first call is a dry run that changes nothing: it lists every part that will be copied and every part left out. Call again with `confirm=true` to create the Routine. The template installs in the background, then the copy runs; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md)'s Copied from: field shows each part as it lands, and any that didn't, with why.
 
-A name already used in this workspace is refused, with the ID of the Routine that has it. A Routine that runs no Routine Template (use [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)), one whose template new Routines here can't start from, and one shared in from another workspace can't be duplicated. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
+**Refused.** A name already used in this workspace is refused, with the ID of the Routine that has it. A Routine that runs no Routine Template (use [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)), one whose template new Routines here can't start from, and one shared in from another workspace can't be duplicated. You need to be a workspace admin or a member of the Routine you copy, and able to create Routines here.
 
 ## Arguments
 

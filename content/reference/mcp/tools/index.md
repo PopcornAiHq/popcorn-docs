@@ -5,7 +5,7 @@ order: 301
 group: MCP
 layout: lookup
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-09
 summary: >
   Every tool the hosted server offers and what it does, with what its badges
   mean and which tools preview a change before making it.
@@ -66,7 +66,7 @@ declares to your assistant, helping it decide what to ask before a call:
 - **[`get_row`](https://docs.popcorn.ai/mcp/tools/get-row.md)** — [read-only] Show one row in full: every column, its rev, when it was created and last changed, and its state if the table has a state machine.
 - **[`get_run`](https://docs.popcorn.ai/mcp/tools/get-run.md)** — [read-only] One of a Routine's runs, by its reference: how it is going or how it ended, what started it, and its inputs and outputs.
 - **[`get_setup`](https://docs.popcorn.ai/mcp/tools/get-setup.md)** — [read-only] Show a Routine's setup checklist, the steps on its Today tab in Popcorn, in order, each with whether it's done and what it still needs.
-- **[`get_status`](https://docs.popcorn.ai/mcp/tools/get-status.md)** — [read-only] Where a Routine's items stand: how many are at each Status, and what is waiting for a person, with why and the Actions that settle it.
+- **[`get_status`](https://docs.popcorn.ai/mcp/tools/get-status.md)** — [read-only] Where a Routine stands: what its template reports, how many items are at each Status, and what is waiting for a person.
 - **[`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md)** — [read-only] Show a table's columns in order, with each one's type and merge policy, the table's merge key, and its state machine if it has one.
 - **[`get_user`](https://docs.popcorn.ai/mcp/tools/get-user.md)** — [read-only] Look up a person by handle: yourself, a member of this workspace, or someone from another workspace you share a Routine or direct message with.
 - **[`get_workspace`](https://docs.popcorn.ai/mcp/tools/get-workspace.md)** — [read-only] Show the Popcorn workspace this connection is bound to, and your role in it.

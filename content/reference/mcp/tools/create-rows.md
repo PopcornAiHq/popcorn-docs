@@ -5,7 +5,7 @@ order: 310
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-09
 summary: >
   Add rows to one of a Routine's tables.
 concepts: [tables]
@@ -18,13 +18,13 @@ used_with: [mcp/tools/update-row, mcp/tools/get-table, mcp/tools/list-rows, mcp/
 create_rows(routine_id, table, rows, merge_on=None, confirm=False, plan_id=None)
 ```
 
-For an outside assistant, a call without `confirm=true` is a dry run that adds nothing: it says which rows would be added and which would merge into an existing row, and what an added row starts. A new row on the table the Routine's Statuses run on is a new item, and the Routine's work acts on it for real (on a Routine that sends email, its first email goes out on the next run). Rows the person named themselves, up to 10, are added at once with `confirm=true`. For rows you composed (from a file, a page or a guess), or more than 10, show the person the dry run and confirm once they agree; more than 10 are added only with the `plan_id` that dry run gives.
+**Dry run.** For an outside assistant, a call without `confirm=true` is a dry run that adds nothing: it says which rows would be added and which would merge into an existing row, and what an added row starts. A new row on the table the Routine's Statuses run on is a new item, and the Routine's work acts on it for real (on a Routine that sends email, its first email goes out on the next run). Rows the person named themselves, up to 10, are added at once with `confirm=true`. For rows you composed (from a file, a page or a guess), or more than 10, show the person the dry run and confirm once they agree; more than 10 are added only with the `plan_id` that dry run gives.
 
-A Routine's own agent in Popcorn gets no dry run: every call of its adds the rows, confirm or not, as [`update_row`](https://docs.popcorn.ai/mcp/tools/update-row.md) does. Call it only for rows a member asked for.
+**A Routine's own agent.** A Routine's own agent in Popcorn gets no dry run: every call of its adds the rows, confirm or not, as [`update_row`](https://docs.popcorn.ai/mcp/tools/update-row.md) does. Call it only for rows a member asked for.
 
-A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one ([`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md) shows it), else the columns `merge_on` names. A merge on `merge_on` changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the row's state or a credential). The confirmed response says which rows were added and which merged.
+**Merging.** A row whose merge key matches an existing row merges into it instead of adding another: the table's own merge key if it has one ([`get_table`](https://docs.popcorn.ai/mcp/tools/get-table.md) shows it), else the columns `merge_on` names. A merge on `merge_on` changes only the columns the row carries, each by the column's merge policy. A merge on the table's own key follows that key's setting: merge works the same way, but replace overwrites the matched row whole, emptying every column the new row leaves out (refused where that would erase the row's state or a credential). The confirmed response says which rows were added and which merged.
 
-Columns the Routine's state machine owns are refused (they change only by an Action or the Routine's own work), and so are credential columns. Each confirm adds its rows: if one timed out, check with [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) before sending it again.
+**Refused columns.** Columns the Routine's state machine owns are refused (they change only by an Action or the Routine's own work), and so are credential columns. Each confirm adds its rows: if one timed out, check with [`list_rows`](https://docs.popcorn.ai/mcp/tools/list-rows.md) before sending it again.
 
 ## Arguments
 
