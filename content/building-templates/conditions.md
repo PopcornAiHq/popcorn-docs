@@ -1,7 +1,7 @@
 ---
 id: conditions
 title: Conditions and filters
-order: 16
+order: 17
 group: How a Flow runs
 summary: >
   A `when:` string routes to one of two parsers. A bare `$ref` or one `==`/`!=`

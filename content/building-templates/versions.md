@@ -1,7 +1,7 @@
 ---
 id: versions
 title: Versions: publishing and installing
-order: 3
+order: 4
 group: Making a change
 summary: >
   A change reaches a Routine in two steps: publishing mints an immutable

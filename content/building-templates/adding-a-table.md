@@ -1,7 +1,7 @@
 ---
 id: adding-a-table
 title: Add a Table
-order: 9
+order: 10
 group: Tables and Status
 summary: >
   Adding a Table to a Routine Template that already exists: declare it under

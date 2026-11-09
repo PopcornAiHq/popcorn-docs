@@ -1,7 +1,7 @@
 ---
 id: copying-a-template
 title: Copying a template
-order: 2
+order: 3
 group: Making a change
 summary: >
   Customizing a Routine beyond what its settings reach gives it a Copy that
