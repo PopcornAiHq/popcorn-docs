@@ -43,6 +43,11 @@ Most "can it do X differently" requests are one of these:
 - a [Schedule](https://docs.popcorn.ai/triggers.md)'s cadence;
 - the wording of an email or a prompt.
 
+Not every Routine has all of these. In `#team-offsite`, the email's wording
+is its questionnaire
+[Reference](https://docs.popcorn.ai/reference-documents.md), which you
+replace with the new text.
+
 If nothing matches, skip to
 [When no setting covers it](#when-no-setting-covers-it).
 

@@ -33,10 +33,12 @@ Each step below starts with a prompt you might give your assistant.
 > [!TIP] MCP tool call
 > Your assistant calls `get_status`.
 
-Your assistant answers in one go: how many Items are at each
+Your assistant answers with how many Items are at each
 [Status](https://docs.popcorn.ai/actions-and-status.md), with the ones that
-need a person marked, then what is waiting, newest first, each with its
-reason and the Items it is about.
+need a person marked. A Routine that keeps a list of what is waiting, such
+as a claims intake Routine, adds it, newest first, each with its reason and
+the Items it is about. `#team-offsite` keeps none, so the next step lists
+them.
 
 ## List the Items at a Review
 
@@ -99,7 +101,8 @@ with the Status it moves the Item to. At *No response* those are:
 - **Close** — to *Closed*, so nobody follows up.
 
 Someone not asked yet, or still *Waiting*, offers *Mark answered* and
-*Close*.
+*Close*. Someone added since the last Run offers nothing yet: they have no
+Status until the next Run picks them up.
 
 > [!NOTE] Not while a Run holds it
 > While a Run is emailing someone or reading their replies, they offer no
@@ -117,8 +120,8 @@ records happens. You named the Item and the Action, so your assistant takes
 it straight away. Otherwise it shows you first what happens to each Item,
 and acts once you agree.
 
-Ask again after the reply-by date has passed and the next Run marks them
-*No response* again, so
+If you ask again after the reply-by date has passed, the next Run marks
+them *No response* again, so
 [change the date](https://docs.popcorn.ai/set-up-a-routine.md#set-the-reply-by-date) first.
 
 > [!NOTE] All or nothing

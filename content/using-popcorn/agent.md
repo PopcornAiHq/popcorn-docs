@@ -31,7 +31,7 @@ These guides talk about two assistants, and they are not the same:
 |---|---|---|
 | **What it is** | Claude, ChatGPT or another assistant you use | part of the Routine, in Popcorn |
 | **Where it works** | in your own app, across every Routine you can reach | inside one Routine |
-| **Who it acts as** | you, with your permissions | itself, posting as the Routine's bot |
+| **Who it acts as** | you, with your permissions | itself, posting as *Popcorn*, the Workspace's bot |
 | **How it reaches Popcorn** | the [MCP server](https://docs.popcorn.ai/mcp.md) | it runs there |
 | **What starts it** | you asking it | the Routine's [Triggers](https://docs.popcorn.ai/triggers.md), and people's messages |
 

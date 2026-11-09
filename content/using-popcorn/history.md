@@ -88,10 +88,19 @@ its Row, not in its History.
 Your assistant follows one Run: how it is going or how it ended, and the
 Items it changed, or what it did if it changed none.
 
+> [!NOTE] Work handed to other Runs
+> A Run that hands each Item to a Run of its own, as `#team-offsite`'s
+> Schedule does, lists only what it changed itself. The Items each of those
+> Runs changed are in that Run, or in the Item's own History.
+
 ## What it leaves out
 
 - **Runs that only read an Item.** An Item's History lists only work that
-  changed it.
+  changed it. A Routine that marks an Item while it works on it, as
+  `#team-offsite` does each time it checks for a reply, changes it, so
+  those checks are listed.
+- **An Action that failed.** It changed nothing, so it shows on its Run,
+  not in the Item's History.
 - **The Routine's conversation and email bodies.** Both are read in Popcorn,
   and email turns have no entry to read in full.
 - **A timeline for the whole Routine.** History is read one Item, or one

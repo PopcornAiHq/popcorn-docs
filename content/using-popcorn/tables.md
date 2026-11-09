@@ -76,8 +76,9 @@ It can also sort by one Column and pick which Columns to show.
 > [!IMPORTANT] An added Row can start work
 > Writing a Row starts nothing by itself, except on the Table a Routine's
 > [Statuses](https://docs.popcorn.ai/actions-and-status.md) run on. There an
-> added Row is a new Item: it starts at its first Status, and the Routine's
-> next [Run](https://docs.popcorn.ai/history.md) acts on it for real. On a
+> added Row is a new Item, and the Routine's next
+> [Run](https://docs.popcorn.ai/history.md) acts on it for real, giving it
+> its first Status if the Routine hasn't yet. On a
 > Routine that sends email, that means
 > the Item's first email.
 

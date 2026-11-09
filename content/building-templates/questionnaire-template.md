@@ -55,8 +55,8 @@ questionnaire_tick
 Each recipient is a [Run](https://docs.popcorn.ai/history.md) of its own, so one failed send or unreadable thread
 skips that recipient and leaves the rest of the pass alone. Nothing fires
 when a Row is added: a recipient added by your assistant is asked on the
-next pass. Adding or replacing the questionnaire, and connecting Gmail,
-start a pass at once.
+next pass, and has no Status or Actions until then. Adding or replacing
+the questionnaire, and connecting Gmail, start a pass at once.
 
 ## A recipient's Stage
 

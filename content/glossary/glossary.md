@@ -37,7 +37,7 @@ listed under its entry. **Version** is close behind.
 
 ### Action
 
-Something a person does to move an Item on: approve, send, archive, retry. A
+Something a person does to move an Item on: approve, send, close, try again. A
 Routine offers an Item the Actions that make sense for where it stands, so the
 buttons and the Status cannot disagree.
 
@@ -632,8 +632,9 @@ templates also name their main Table `tracker`.
 ### Trigger
 
 How work arrives in a Routine: on a Schedule, from a message in the Routine,
-from a document added to it, from a booking made through its calendar link, or
-from another system posting to it. A Routine can have several. In this sense it
+from a document added to it, or from another system posting to it; a booking
+made through its calendar link arrives through a Schedule. A Routine can have
+several. In this sense it
 needs no qualifier. Building a template, qualify it: a **Message Trigger** is a
 Manifest `triggers:` entry that runs a Flow for each message in the Routine,
 and its `enabled` is written once, by the Install that first brings the Trigger
