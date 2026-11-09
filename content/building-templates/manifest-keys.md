@@ -29,6 +29,7 @@ it is worth reading once in full.
 | `tables` | additive reconcile — Tables and Columns added, attributes fixed, never dropped or renamed; see `table-columns` |
 | `channel_parameters` | upsert; on an update, a value a Member edited is kept; types preserved; read as `$channel.<name>` |
 | `channel_parameter_fields` | nothing written: the Routine Settings tools read each parameter's `label` and `description` from the Version the Routine runs |
+| `stored_values` | nothing written: names the Scalars the Bundle's Flows keep, and which of them `get_status` reports; see below |
 | `scalars` | upsert — `scalar-tiers` says when an update keeps the Routine's value |
 | `default_scalars` | **write once**, on first Install only |
 | `schedules` | replace the Schedules the Bundle manages, by (Flow, slug) — see `schedules` |
@@ -92,6 +93,36 @@ Routine read as drifted. Publish refuses an entry for a name not declared
 under `channel_parameters:`, an entry for `prompts` or `templates` (each file
 there is a setting of its own), a key other than `label` or `description`,
 and a present key with no mapping under it.
+
+## Declaring stored values
+
+`stored_values:` names the Scalars a Bundle's Flows keep, each with a
+`description` (up to 400 characters). An entry marked `readable: true` is
+reported by the `get_status` tool, ahead of the Routine's Statuses, with its
+description beside the value. That is how a Routine shares a view it keeps
+current, such as a project brief, with an assistant connected over MCP:
+
+```yaml
+stored_values:
+  project.brief:
+    description: The project at a glance, rebuilt on every change
+    readable: true
+```
+
+A Scalar that is not declared readable stays private to the Bundle's Flows:
+no tool an assistant gets reads it by key. A readable key no Flow has written
+yet reads as not set, and a Workspace that guards personal data withholds the
+values.
+
+Install writes nothing for it. Publish refuses:
+
+- more than 10 readable entries, since `get_status` reads each one on every
+  call;
+- a key with anything but letters, digits and `._:@-`;
+- a `popcorn.*` key, which is a setting: declare it in `strings.yaml`;
+- a key named like a credential, which is never shown;
+- an entry with no `description`, or a field other than `description` and
+  `readable`.
 
 ## Two specific traps
 
