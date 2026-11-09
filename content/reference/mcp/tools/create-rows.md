@@ -48,7 +48,7 @@ Routine: #intake (c7d2…5b) · table: claims
 Add 2 rows to claims; each row sent, in order:
 - 1: added
 - 2: merges into row 88 (on claim_no)
-- Each added row is a new item: it starts at its first Status, and the Routine's own work picks it up on its next run (list_triggers shows what runs and when). What that work does with it is real: on a Routine that sends email, the item's first email.
+- Each added row is a new item: the Routine's own work picks it up on its next run (list_triggers shows what runs and when), and until then it may have no Status or Actions. What that work does with it is real: on a Routine that sends email, the item's first email.
 - A merge changes an existing item's columns; its Status changes only by an Action or the Routine's own work.
 
 Call again with `confirm=true` to add them, sending the same rows.
