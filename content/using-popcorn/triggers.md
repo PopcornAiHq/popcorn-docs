@@ -49,8 +49,8 @@ the Item starts its first Step.
 Your assistant can add them too, as Rows. A Row starts nothing by itself,
 but on the [Table](https://docs.popcorn.ai/tables.md) the Routine's
 Statuses run on, it is a new Item, and the Routine's next
-[Run](https://docs.popcorn.ai/history.md) acts on it.
-Your assistant shows you that before anything is written.
+[Run](https://docs.popcorn.ai/history.md) acts on it. Your assistant adds
+up to ten people you name at once; more, it shows you first.
 
 > [!NOTE] A second arrival updates the Item
 > In a claims intake Routine, a second arrival for someone already there,

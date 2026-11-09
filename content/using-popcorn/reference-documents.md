@@ -86,7 +86,7 @@ it, and, once added, when and by whom, with its file.
 > [!TIP] MCP tool call
 > Your assistant calls `read_reference`.
 
-A text document comes back as its text, cut if it is long, with a link to
+A text document comes back as its text; a long one is cut, with a link to
 the whole file. Any other file, such as a PDF, comes back as a download link
 that works for a limited time.
 

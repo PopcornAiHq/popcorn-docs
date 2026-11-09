@@ -56,8 +56,10 @@ a fit" or "already done".
 > Your assistant calls `get_status`, then `list_rows` with a filter on the
 > Status Column for the Items at one Review in full.
 
-Your assistant counts the Items at each Status, marks the Statuses that need
-a person, and lists what is waiting, newest first, with why and which Items.
+Your assistant counts the Items at each Status and marks the Statuses that
+need a person. Where the Routine keeps a list of what is waiting, it lists
+that too, newest first, with why and which Items; otherwise it lists the
+Items at those Statuses from the Table.
 
 > [!TIP] In Popcorn
 > Items at a Review show as needing review. Each one's Status names its

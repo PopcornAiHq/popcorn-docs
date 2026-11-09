@@ -33,6 +33,9 @@ Instructions come from more than one place:
 - **Wording that is a
   [Routine Setting](https://docs.popcorn.ai/routine-settings.md)** — the
   text of a reminder email, a prompt the Agent writes from.
+- **A [Reference](https://docs.popcorn.ai/reference-documents.md)**, in a
+  Routine whose emails are written from one: `#team-offsite`'s questionnaire
+  sets its email's subject, opening and closing as well as the questions.
 - **What people tell the Routine's Agent** in the Routine itself — "always
   copy the adjuster", "ask me before sending anything to the carrier". The
   Agent keeps the preferences and decisions it is given.

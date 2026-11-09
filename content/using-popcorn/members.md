@@ -27,6 +27,10 @@ The two Roles are separate. A Workspace admin isn't a Member of every
 Routine, and someone invited into a Routine from another Workspace is a
 guest there, whatever their Role at home.
 
+Popcorn's own accounts have Roles of their own: the Workspace's Bot, which
+the Routine's [Agent](https://docs.popcorn.ai/agent.md) posts as, is
+`workspace_agent`, and lists of Members mark it as a bot.
+
 ## Joining a Routine
 
 Who is in a Routine depends on how it was created:
@@ -63,7 +67,7 @@ admin. Some need more:
 |---|---|
 | see a Routine's [Connections](https://docs.popcorn.ai/connections.md) | a Member of the Routine, or a Workspace admin |
 | make a Connection, add a [Reference](https://docs.popcorn.ai/reference-documents.md), run a [Schedule](https://docs.popcorn.ai/triggers.md), finish a setup step | a Member of the Routine, or a Workspace admin |
-| change a switch, such as whether emails are sent | a Member of the Routine |
+| change a switch, such as whether emails are sent, or the notes the Routine's Agent works from | a Member of the Routine |
 | change any other [Routine Setting](https://docs.popcorn.ai/routine-settings.md), prompts and email wording included | a Workspace admin who is also a Member of the Routine |
 | replace a Webhook someone else made | an admin of the Routine, or a Workspace admin |
 | post in a Routine set to announcements only | an admin of the Routine, or a Workspace admin |

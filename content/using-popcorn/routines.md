@@ -121,8 +121,9 @@ First it shows you what it copies and what it leaves out:
 | its Agent's guidelines | what people told its Agent |
 | References added from a file | its Items, [History](https://docs.popcorn.ai/history.md), messages and Members |
 
-Once you agree, it creates the Routine, private or open to the Workspace,
-without the original's Members. The template installs in the background, and
+Once you agree, it creates the Routine without the original's Members:
+open to the whole Workspace unless you ask for it private, even when the
+original is private. The template installs in the background, and
 the copy runs once it lands. The Routine's **Copied from** field shows each
 part as it lands, and names any part that didn't, with what to do about it.
 
