@@ -19,6 +19,7 @@ concepts: [triggers, customizing-a-routine]
 A **Reference** is a document a
 [Routine](https://docs.popcorn.ai/routines.md) works from:
 
+- the questionnaire `#team-offsite` asks its questions from;
 - the agreement it sends for signature;
 - the sample email a [Step](https://docs.popcorn.ai/steps.md)'s questions
   and wording come from;
@@ -43,18 +44,16 @@ and survives the template's improvements.
 
 Adding some documents also starts work, and a Routine's
 [Triggers](https://docs.popcorn.ai/triggers.md) list those under
-**Documents**. In a claims intake Routine:
-
-- adding the sample email sets up the first Step's questions and its first
-  email;
-- adding the agreement, a Google Doc or a Word file, makes it the one sent
-  for signature.
-
-The sample email is the one Reference that Routine requires.
+**Documents**. In `#team-offsite`, adding the questionnaire reads its
+questions, and the email's subject, opening and closing, and starts a Run
+that asks anyone waiting to be asked. It is the one Reference the Routine
+requires. In a claims intake Routine, adding the sample email sets up the
+first Step's questions, and adding the agreement makes it the one sent for
+signature.
 
 ## Which References a Routine has
 
-> "What documents does #intake work from?"
+> "What documents does #team-offsite work from?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_references`.
@@ -62,13 +61,11 @@ The sample email is the one Reference that Routine requires.
 Your assistant lists every Reference the Routine's template expects:
 
 ```text
-3 References: 2 added, 1 still waiting.
-- Questions and first email  reference "questions"  [required]
-  Used for: The questions, validation instructions and email wording for intake.
-  Added 2026-10-02 12:05 by Dana Reyes · file Intake questions.txt · text
-- Fee schedule  reference "fee_schedule"
-  Used for: The fees quoted when a claimant asks what it costs.
-  Still waiting: nobody has added it yet.
+1 Reference: 1 added, 0 still waiting.
+- Questionnaire  reference "questionnaire"  [required]
+  Used for: The questions every recipient is asked, and the email's subject,
+  opening and closing around them.
+  Added 2026-11-05 19:18 by Jane Doe · file questionnaire.txt · text
 ```
 
 Each one says what the Routine uses it for, whether the Routine requires
@@ -76,12 +73,11 @@ it, and, once added, when and by whom, with its file.
 
 > [!NOTE] Drive picks don't say who
 > A Reference picked from Google Drive shows when it was picked, but not who
-> picked it: Popcorn doesn't record that. In a claims intake Routine, whose
-> agreement is always a Drive pick, most listings say so.
+> picked it: Popcorn doesn't record that.
 
 ## Reading one
 
-> "Show me #intake's fee schedule."
+> "Show me #team-offsite's questionnaire."
 
 > [!TIP] MCP tool call
 > Your assistant calls `read_reference`.
@@ -92,7 +88,7 @@ that works for a limited time.
 
 ## Adding or replacing one
 
-> "Add a fourth question to #intake's questions: the claim number."
+> "Add a question to #team-offsite's questionnaire: any dietary needs?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `add_reference`, with the text or with a file it

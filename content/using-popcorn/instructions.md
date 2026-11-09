@@ -36,8 +36,9 @@ Instructions come from more than one place:
 - **A [Reference](https://docs.popcorn.ai/reference-documents.md)**, in a
   Routine whose emails are written from one: `#team-offsite`'s questionnaire
   sets its email's subject, opening and closing as well as the questions.
-- **What people tell the Routine's Agent** in the Routine itself — "always
-  copy the adjuster", "ask me before sending anything to the carrier". The
+- **What people tell the Routine's Agent** in the Routine itself — "add
+  people by their full name", "always ask me before emailing anyone outside
+  the company". The
   Agent keeps the preferences and decisions it is given.
 - **Each [Step](https://docs.popcorn.ai/steps.md)'s own Instructions**, in a
   Routine that has Steps: the questions a Step asks and what a complete
@@ -52,7 +53,7 @@ Instructions come from more than one place:
 
 ## Reading them
 
-> "What instructions is #intake working from?"
+> "What instructions is #team-offsite working from?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_instructions`.
@@ -71,9 +72,13 @@ changed for this Routine, and how to change it:
 | Each Step's note, wording, questions and deadlines | a change to its Steps, or the Agent in Popcorn |
 | The template's guide | a Routine [Member](https://docs.popcorn.ai/members.md), in Popcorn |
 
+For `#team-offsite`, that is two prompt files, one for reading the
+questionnaire and one for reading each reply, and the template's guide. Its
+template reads no notes for an Agent and has no Steps.
+
 > [!TIP] One Step in full
-> Each Step is summarised. Name one Step, by its name or its Status value,
-> to see its Instructions in full.
+> In a Routine with Steps, each Step is summarised. Name one Step, by its
+> name or its Status value, to see its Instructions in full.
 
 > [!NOTE] Personal data
 > On a Workspace that guards personal data, what people told the Agent
@@ -90,6 +95,9 @@ No single change rewrites the Instructions; each part changes its own way:
 - **A Routine's Steps, with their own Instructions** — your assistant
   drafts the change and shows it before anything is installed: see
   [Change its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
+- **Wording that comes from a Reference** — replace the document, as
+  `#team-offsite`'s questionnaire: see
+  [References](https://docs.popcorn.ai/reference-documents.md).
 - **Everything else** — tell the Routine's Agent, in Popcorn.
 
 > [!TIP] For template authors

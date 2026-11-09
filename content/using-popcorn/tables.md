@@ -16,15 +16,16 @@ lede: >
 concepts: [actions-and-status, work-a-routines-items]
 ---
 
-A Routine's **Tables** hold what it keeps: one Table of claims, one of
-contacts. Each **Row** is one
+A Routine's **Tables** hold what it keeps. `#team-offsite` has one,
+`recipients`, with a Row for each person asked; a claims intake Routine
+keeps one of claims and one of contacts. Each **Row** is one
 [Item](https://docs.popcorn.ai/work-a-routines-items.md), each **Column** one
 kind of information
 every Row has, and a **Cell** is one Row's value in one Column.
 
 ## Reading
 
-> "Show me the claims in #intake that are waiting on a signature."
+> "Show me who in #team-offsite is still waiting to answer."
 
 > [!TIP] MCP tool call
 > Your assistant calls `list_tables`, `get_table`, then `list_rows` with a
@@ -39,7 +40,7 @@ every Row has, and a **Cell** is one Row's value in one Column.
 
 Your assistant finds Rows in two ways:
 
-- **By text in any Column.** "4471" finds the Row whatever Column holds it.
+- **By text in any Column.** "jane" finds the Row whatever Column holds it.
 - **By conditions on Columns:** equal to, greater or less than, one of a
   list, containing a text, present or absent. All conditions must hold;
   there is no "or".
@@ -52,7 +53,7 @@ It can also sort by one Column and pick which Columns to show.
 
 ## Writing
 
-> "Add Dana Reyes, dana@example.com, to #intake."
+> "Add Sam Lee, sam@example.com, to #team-offsite."
 
 > [!TIP] MCP tool call
 > Your assistant calls `create_rows`, `update_row` or `delete_rows`.

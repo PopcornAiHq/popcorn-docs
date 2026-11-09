@@ -62,7 +62,7 @@ Routine whose template needs an account nobody has connected is marked
 
 ## Reading one
 
-> "What state is #intake in?"
+> "What state is #team-offsite in?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_routine`.
