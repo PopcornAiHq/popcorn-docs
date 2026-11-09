@@ -16,36 +16,49 @@ lede: >
 concepts: [triggers, customizing-a-routine]
 ---
 
-A **Reference** is a document a Routine works from: the agreement it sends
-for signature, the sample email a Step's questions and wording come from,
-the policy it checks claims against, an example of a good reply. A Reference informs the Routine. It is not one of the
-Items the Routine tracks, which live in its
-[Tables](https://docs.popcorn.ai/tables.md).
+A **Reference** is a document a
+[Routine](https://docs.popcorn.ai/routines.md) works from:
+
+- the agreement it sends for signature;
+- the sample email a [Step](https://docs.popcorn.ai/steps.md)'s questions
+  and wording come from;
+- the policy it checks claims against;
+- an example of a good reply.
+
+A Reference informs the Routine. It is not one of the Items the Routine
+tracks, which live in its [Tables](https://docs.popcorn.ai/tables.md).
 
 A Routine's template says which References it expects, and the Routine works
-without one it is still waiting for until someone adds it. A Reference belongs
-to its Routine: adding or replacing one changes that Routine only, and survives
-the template's improvements. The References a template expects are its
-Manifest's `documents:` key, where a document that starts work names the Flow
-it starts (see
-[Manifest keys](https://docs.popcorn.ai/manifest-keys.md)).
+without one it is still waiting for until someone adds it. A Reference
+belongs to its Routine: adding or replacing one changes that Routine only,
+and survives the template's improvements.
 
-## Where they live today
+> [!TIP] In the template
+> The References a template expects are its Manifest's `documents:` key,
+> where a document that starts work names the Flow it starts. See
+> [Manifest keys](https://docs.popcorn.ai/manifest-keys.md).
 
-People add and replace References in the Routine, in Popcorn or through an
-assistant (below). Adding some documents also starts work, and
-`list_triggers` shows those under **Documents** (see
-[Triggers](https://docs.popcorn.ai/triggers.md)). In a claims intake
-Routine, adding the sample email sets up the first Step's questions and its
-first email, and adding the agreement, a Google Doc or a Word file, makes it
-the one sent for signature. The sample email is the one Reference that
-Routine requires.
+## Adding one can start work
+
+Adding some documents also starts work, and a Routine's
+[Triggers](https://docs.popcorn.ai/triggers.md) list those under
+**Documents**. In a claims intake Routine:
+
+- adding the sample email sets up the first Step's questions and its first
+  email;
+- adding the agreement, a Google Doc or a Word file, makes it the one sent
+  for signature.
+
+The sample email is the one Reference that Routine requires.
 
 ## Which References a Routine has
 
 > "What documents does #intake work from?"
 
-`list_references` lists every Reference the Routine's template expects:
+> [!TIP] MCP tool call
+> Your assistant calls `list_references`.
+
+Your assistant lists every Reference the Routine's template expects:
 
 ```text
 3 References: 2 added, 1 still waiting.
@@ -58,47 +71,61 @@ Routine requires.
 ```
 
 Each one says what the Routine uses it for, whether the Routine requires
-it, and, once added, when and by whom, with its file. A Reference picked
-from Google Drive shows when it was picked, but not who picked it: Popcorn
-doesn't record that. In a claims intake Routine, whose agreement is always
-a Drive pick, most listings say so.
+it, and, once added, when and by whom, with its file.
+
+> [!NOTE] Drive picks don't say who
+> A Reference picked from Google Drive shows when it was picked, but not who
+> picked it: Popcorn doesn't record that. In a claims intake Routine, whose
+> agreement is always a Drive pick, most listings say so.
 
 ## Reading one
 
-`read_reference` takes a Reference as `list_references` names it. A text
-document comes back as its text, cut if it is long, with a link to the
-whole file; any other file, such as a PDF, comes back as a download link
+> "Show me #intake's fee schedule."
+
+> [!TIP] MCP tool call
+> Your assistant calls `read_reference`.
+
+A text document comes back as its text, cut if it is long, with a link to
+the whole file. Any other file, such as a PDF, comes back as a download link
 that works for a limited time.
 
 ## Adding or replacing one
 
-`add_reference` adds or replaces a Reference from text, or from a file sent
-with `create_reference_upload`. A first add the person asked for happens at
-once. Replacing a document the Reference already has is a dry run first: it
-says what the Routine uses the document for and what it replaces, and the
-call with `confirm=true` and the dry run's plan starts the same work
-Popcorn's **Replace** button starts. A file the Reference doesn't take is
-refused either way.
-An assistant whose network access is restricted may not reach the upload,
-and sends a text document as `text` instead.
+> "Add a fourth question to #intake's questions: the claim number."
 
-Two kinds of Reference stay in Popcorn, and `list_references` marks each
-one with why:
+> [!TIP] MCP tool call
+> Your assistant calls `add_reference`, with the text or with a file it
+> sent with `create_reference_upload`.
+
+A first add you asked for happens at once. Replacing a document the
+Reference already has shows you first what the Routine uses it for and what
+it replaces; once you agree, it starts the same work Popcorn's **Replace**
+button starts. A file the Reference doesn't take is refused either way.
+
+> [!TIP] No upload access
+> An assistant whose network access is restricted may not reach the upload,
+> and sends a text document as text instead.
+
+Two kinds of Reference stay in Popcorn, and the listing marks each one with
+why:
 
 - **A Reference picked from Google Drive.** A person picks it in Popcorn.
-- **The Routine's Steps.** `change_routine` changes them, with a preview
-  and a way back; `add_reference` won't replace them wholesale.
+- **The Routine's Steps.** They change by describing the change, with a
+  preview and a way back (see
+  [Change how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md)),
+  not by replacing the document wholesale.
 
-Any other Reference an assistant adds with `add_reference`, such as the
-Questionnaire template's questionnaire in
+Your assistant adds any other Reference, such as the Questionnaire
+template's questionnaire in
 [Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md).
 
-The same people can add a Reference as in Popcorn: a Workspace admin, or a
-Member of the Routine who isn't a guest.
+> [!NOTE] Who can add one
+> The same people as in Popcorn: a Workspace admin, or a Member of the
+> Routine who isn't a guest.
 
 ## On a Workspace that guards personal data
 
 A Reference is free text, which no Column marking can vouch for. So on a
-Workspace that guards personal data, `list_references` leaves out file
-names, and `read_reference` returns neither the text nor a link: it says
-when the Reference was added and by whom, and that Popcorn shows it.
+Workspace that guards personal data, the listing leaves out file names, and
+reading a Reference returns neither the text nor a link: it says when the
+Reference was added and by whom, and that Popcorn shows it.
