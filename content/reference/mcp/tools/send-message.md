@@ -5,7 +5,7 @@ order: 351
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-09
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []
@@ -18,13 +18,13 @@ used_with: [mcp/tools/list-messages, mcp/tools/get-routine]
 send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None)
 ```
 
-You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving.
+**Who posts.** You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving.
 
-It is refused in an archived Routine, and in one in announcement mode unless you are its admin or a workspace admin.
+**Refused.** It is refused in an archived Routine, and in one in announcement mode unless you are its admin or a workspace admin.
 
-Whether the Routine's agent answers: an @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need an answer, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace. While the agent is already running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting a reply of its own.
+**Answers.** An @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need an answer, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace. While the agent is already running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting a reply of its own.
 
-Replies arrive asynchronously: to a top-level message, in a thread under it or, in a Routine that answers top-level (many do), after it; inside a thread, in that thread. The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) calls that read the answer.
+**Replies.** A reply arrives asynchronously: to a top-level message, in a thread under it or, in a Routine that answers top-level (many do), after it; inside a thread, in that thread. The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) calls that read the answer.
 
 ## Arguments
 
