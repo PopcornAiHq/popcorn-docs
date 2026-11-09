@@ -1,7 +1,7 @@
 ---
 id: history
 title: History
-order: 12
+order: 14
 group: Day to day
 summary: >
   A Routine's History is what has happened in it — did the reminder emails go
@@ -19,14 +19,16 @@ concepts: [actions-and-status, triggers, tables]
 A [Routine](https://docs.popcorn.ai/routines.md)'s **History** is what has
 happened in it:
 
-- **changes to its Items** — what changed on an Item, who or what changed
+- **changes to its [Items](https://docs.popcorn.ai/work-a-routines-items.md)**
+  — what changed on an Item, who or what changed
   it, and why;
 - **its work** — each Run that changed an Item, what started it, and how it
   ended;
 - **its email turns** — in a Routine with
   [Steps](https://docs.popcorn.ai/steps.md), each email it sent or reply it
   assessed;
-- **its conversation** — the messages people and its Agent posted in it.
+- **its conversation** — the messages people and its
+  [Agent](https://docs.popcorn.ai/agent.md) posted in it.
 
 History answers "did the reminder go out?", "why is this claim closed?" and
 "who sent the retainer?". An Item's History is the audit log kept for its
@@ -48,7 +50,9 @@ Row.
 Your assistant lists what happened to the Item, newest first, as the Item's
 **Activity** tab in Popcorn does. Each entry has:
 
-- **when**, and **who or what**: a Member by name; Popcorn, with the work it
+- **when**, and **who or what**: a
+  [Member](https://docs.popcorn.ai/members.md) by name; Popcorn, with the work
+  it
   was doing; or "Popcorn, for a person" when someone's button started the
   work, since a Run doesn't record who pressed it;
 - **what happened**, such as *Send retainer* or *Answered all 5 intake

@@ -1,7 +1,7 @@
 ---
 id: reference-documents
 title: References
-order: 6
+order: 7
 group: How a Routine works
 summary: >
   A Reference is a document a Routine works from: a policy, a price list, a
@@ -25,7 +25,8 @@ A **Reference** is a document a
 - the policy it checks claims against;
 - an example of a good reply.
 
-A Reference informs the Routine. It is not one of the Items the Routine
+A Reference informs the Routine. It is not one of the
+[Items](https://docs.popcorn.ai/work-a-routines-items.md) the Routine
 tracks, which live in its [Tables](https://docs.popcorn.ai/tables.md).
 
 A Routine's template says which References it expects, and the Routine works
@@ -120,7 +121,8 @@ template's questionnaire in
 [Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md).
 
 > [!NOTE] Who can add one
-> The same people as in Popcorn: a Workspace admin, or a Member of the
+> The same people as in Popcorn: a Workspace admin, or a
+> [Member](https://docs.popcorn.ai/members.md) of the
 > Routine who isn't a guest.
 
 ## On a Workspace that guards personal data

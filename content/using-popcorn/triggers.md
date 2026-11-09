@@ -1,7 +1,7 @@
 ---
 id: triggers
 title: Triggers
-order: 4
+order: 5
 group: How a Routine works
 summary: >
   A Trigger is how work arrives in a Routine: on a Schedule, from a message
@@ -35,18 +35,21 @@ A claims intake Routine has every kind but messages:
   up its [Steps](https://docs.popcorn.ai/steps.md) when they are added.
 
 > [!NOTE] Not a Trigger
-> Work that a person starts on one Item is an
+> Work that a person starts on one
+> [Item](https://docs.popcorn.ai/work-a-routines-items.md) is an
 > [Action](https://docs.popcorn.ai/actions-and-status.md).
 
 ## Adding Items by hand
 
-A person can also add Items without a Trigger: by asking the Routine's Agent
+A person can also add Items without a Trigger: by asking the Routine's
+[Agent](https://docs.popcorn.ai/agent.md)
 in Popcorn to add someone, or by giving it a spreadsheet of them. Either way
 the Item starts its first Step.
 
 Your assistant can add them too, as Rows. A Row starts nothing by itself,
 but on the [Table](https://docs.popcorn.ai/tables.md) the Routine's
-Statuses run on, it is a new Item, and the Routine's next Run acts on it.
+Statuses run on, it is a new Item, and the Routine's next
+[Run](https://docs.popcorn.ai/history.md) acts on it.
 Your assistant shows you that before anything is written.
 
 > [!NOTE] A second arrival updates the Item

@@ -1,7 +1,7 @@
 ---
 id: change-how-a-routine-behaves
 title: Change how a Routine behaves
-order: 13
+order: 15
 group: Customizing a Routine
 summary: >
   Changing how one Routine behaves: find the Routine Setting that covers it
@@ -40,7 +40,7 @@ Most "can it do X differently" requests are one of these:
 
 - a reminder interval or a follow-up limit;
 - whether emails are sent or saved as drafts;
-- a [Schedule](https://docs.popcorn.ai/schedules.md)'s cadence;
+- a [Schedule](https://docs.popcorn.ai/triggers.md)'s cadence;
 - the wording of an email or a prompt.
 
 If nothing matches, skip to
@@ -79,11 +79,13 @@ How a value changes depends on its kind:
 - **A long text**, such as an email's wording, is changed with edits to the
   current text, so the rest of it stays exactly as it was.
 
-Work already under way keeps the value it started with; the next Run uses
+Work already under way keeps the value it started with; the next
+[Run](https://docs.popcorn.ai/history.md) uses
 the new one.
 
 > [!NOTE] Who can change a setting
-> Any Member of the Routine can change a switch, such as whether emails are
+> Any [Member](https://docs.popcorn.ai/members.md) of the Routine can change a
+> switch, such as whether emails are
 > sent. Any other setting, prompts and email wording included, needs a
 > Workspace admin who is also a Member.
 
@@ -94,7 +96,8 @@ the new one.
 
 Three other kinds of change remain:
 
-- **How the Routine's Agent acts** — "ask me before sending anything to the
+- **How the Routine's [Agent](https://docs.popcorn.ai/agent.md) acts** — "ask
+  me before sending anything to the
   carrier", "always copy the adjuster". That is its
   [Instructions](https://docs.popcorn.ai/instructions.md), which you give
   the Routine's Agent in Popcorn.
@@ -132,7 +135,8 @@ Three other kinds of change remain:
    to draft the change.
 2. **It reads you the proposal.** The proposal shows the Steps before and
    after, what it sets on each Step, what the Agent assumed, any questions
-   it left open, and the checks against the Routine's Items. If part of it
+   it left open, and the checks against the Routine's
+   [Items](https://docs.popcorn.ai/work-a-routines-items.md). If part of it
    is a Routine Setting, it says which, so that part can be changed as a
    setting instead.
 3. **You agree, and it installs.** Your assistant installs the proposal

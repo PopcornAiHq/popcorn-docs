@@ -1,7 +1,7 @@
 ---
 id: work-a-routines-items
 title: Review what needs you
-order: 9
+order: 11
 group: Day to day
 summary: >
   Reviewing what needs you: see what is waiting and why with get_status; find
@@ -133,7 +133,8 @@ changes only by an Action. See
 [Tables, Rows and Columns](https://docs.popcorn.ai/tables.md).
 
 > [!WARNING] A new Item is real work
-> The Routine's next Run picks up an added Item, and may send it an email.
+> The Routine's next [Run](https://docs.popcorn.ai/history.md) picks up an
+> added Item, and may send it an email.
 
 > [!CAUTION] Deleting is permanent
 > A deleted Row can't be restored with these tools.
@@ -146,7 +147,7 @@ changes only by an Action. See
 > Your assistant calls `list_triggers`, then `run_trigger`, then `get_run`.
 
 Your assistant finds the Routine's
-[Schedule](https://docs.popcorn.ai/schedules.md) and runs it now: straight
+[Schedule](https://docs.popcorn.ai/triggers.md) and runs it now: straight
 away when you asked for that Schedule, and otherwise once you agree. Its
 next scheduled Run still happens, and your assistant can show how the Run
 is going or how it ended.

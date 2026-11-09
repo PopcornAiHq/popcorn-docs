@@ -159,7 +159,7 @@ the whole list; a list of more than ten is shown to you before it's added.
 > Your assistant calls `list_triggers`.
 
 Your assistant shows how work arrives: the Routine's
-[Schedules](https://docs.popcorn.ai/schedules.md) and when they run, the
+[Schedules](https://docs.popcorn.ai/triggers.md) and when they run, the
 messages and documents that start work, and any other system that posts to
 it.
 
@@ -177,6 +177,10 @@ questions.
 Your assistant runs it straight away, with the same work as a scheduled
 Run, so Jane is emailed within a minute instead of at the next
 quarter-hour. See [Triggers](https://docs.popcorn.ai/triggers.md).
+
+> [!NOTE] One Run at a time
+> If a Run of that Schedule is already going, nothing new starts. Ask again
+> once it has finished.
 
 ## See the replies
 

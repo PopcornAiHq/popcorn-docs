@@ -1,7 +1,7 @@
 ---
 id: routine-settings
 title: Routine Settings
-order: 14
+order: 16
 group: Customizing a Routine
 summary: >
   Routine Settings tune one Routine without changing what it does: whether
@@ -22,8 +22,9 @@ differently, and come in three kinds:
 
 - **Switches** that turn a behaviour on or off, or pick one of a few modes.
 - **Values** such as a reminder interval, a follow-up limit or a
-  [Schedule](https://docs.popcorn.ai/schedules.md)'s cadence.
-- **Wording**: the prompts and email text the Routine's Agent writes from.
+  [Schedule](https://docs.popcorn.ai/triggers.md)'s cadence.
+- **Wording**: the prompts and email text the Routine's
+  [Agent](https://docs.popcorn.ai/agent.md) writes from.
   Each prompt or email is its own setting.
 
 A setting:
@@ -40,7 +41,7 @@ A claims intake Routine's settings include:
 |---|---|
 | Email sending | *Off*, *Draft* (each email is written for a person to send) or *Send* |
 | Agreement sending | the same three, for sending agreements through the Signing Provider |
-| Reply matching | whether a reply is matched to its Item by the sender's address, or by the email thread (for an inbox several Routines share) |
+| Reply matching | whether a reply is matched to its [Item](https://docs.popcorn.ai/work-a-routines-items.md) by the sender's address, or by the email thread (for an inbox several Routines share) |
 | Save signed agreements to Google Drive | whether each signed agreement is filed in a folder for its client |
 | Booking confirmation | whether someone who books a meeting gets a short note confirming it |
 | Step forward | whether people can move an Item past a Step done outside Popcorn (see [Reviews](https://docs.popcorn.ai/reviews.md)) |

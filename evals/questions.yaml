@@ -516,3 +516,13 @@
   concept: platform-tools
   pass: only if its agent.yaml names them under platform_tools (ask_user, set_reminder), which needs chat: true; without that it has only the flows it maps and the channel's memory
   trap: says an app agent gets every tool the channel agent has, or that a headless agent can name them
+
+- q: How do I ask my intake Routine's agent whether an agreement went out, and read what it says?
+  concept: agent
+  pass: send_message posts the question in the Routine as the person; the Routine's Agent answers later, in a thread under it or after it, and list_messages reads the answer; an @mention of the agent always gets one
+  trap: says the assistant and the Routine's Agent are the same, or that the answer comes back in send_message's response
+
+- q: Why was I refused when I tried to change the email wording on a Routine I'm in?
+  concept: members
+  pass: a switch can be changed by any Member of the Routine, but any other Routine Setting, prompts and email wording included, needs a Workspace admin who is also a Member; the assistant acts with the person's Roles
+  trap: says the assistant has its own permissions, or that any Member can change any setting

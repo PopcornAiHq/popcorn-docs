@@ -1,7 +1,7 @@
 ---
 id: actions-and-status
 title: Actions and Status
-order: 11
+order: 13
 group: Day to day
 summary: >
   An Item's Status says where it stands, such as Waiting on documents, and
@@ -15,7 +15,8 @@ lede: >
 concepts: [tables, work-a-routines-items, triggers]
 ---
 
-An Item's **Status** says where it stands. In a claims intake
+An [Item](https://docs.popcorn.ai/work-a-routines-items.md)'s **Status** says
+where it stands. In a claims intake
 [Routine](https://docs.popcorn.ai/routines.md), the Statuses include:
 
 - *Collecting info*
@@ -52,7 +53,8 @@ buttons and the Status can't disagree.
 
 Your assistant lists the Actions the Item offers now, each with the Status
 it moves the Item to. Some Actions are taken only in Popcorn, such as a form
-to fill in, a document to sign or a request to the Routine's Agent; your
+to fill in, a document to sign or a request to the Routine's
+[Agent](https://docs.popcorn.ai/agent.md); your
 assistant lists them and says so.
 
 ## Counting the Items at each Status

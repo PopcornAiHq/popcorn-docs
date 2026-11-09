@@ -1,11 +1,12 @@
 ---
 id: instructions
 title: Instructions
-order: 15
+order: 17
 group: Customizing a Routine
 summary: >
-  A Routine's Instructions say in plain language what it should do and how:
-  how to word a follow-up, when to ask a person first, what each Step asks.
+  A Routine's Instructions say in plain language what its Agent should do
+  and how: how to word a follow-up, when to ask a person first, what each
+  Step asks.
   get_instructions reads them all at once, each part with where it came from
   and what changes it: update_routine_setting for wording that is a setting,
   change_routine for its Steps, Popcorn for the rest.
@@ -18,7 +19,8 @@ concepts: [routine-settings, customizing-a-routine]
 A [Routine](https://docs.popcorn.ai/routines.md)'s **Instructions** are what
 it should do and how, in plain language: how to word a follow-up, when to ask
 a person before acting, which deadlines matter, when to send a reminder. The
-Routine's Agent follows them, and asks before the Steps they say need a
+Routine's [Agent](https://docs.popcorn.ai/agent.md) follows them, and asks
+before the Steps they say need a
 person. Changing them changes how the Routine behaves from then on, for that
 Routine only, and the change survives the template's improvements.
 
@@ -64,7 +66,7 @@ changed for this Routine, and how to change it:
 | The Routine's own guidelines for its Agent | Popcorn |
 | What people told the Agent | telling the Agent, in Popcorn |
 | Each Step's note, wording, questions and deadlines | a change to its Steps, or the Agent in Popcorn |
-| The template's guide | a Routine Member, in Popcorn |
+| The template's guide | a Routine [Member](https://docs.popcorn.ai/members.md), in Popcorn |
 
 > [!TIP] One Step in full
 > Each Step is summarised. Name one Step, by its name or its Status value,

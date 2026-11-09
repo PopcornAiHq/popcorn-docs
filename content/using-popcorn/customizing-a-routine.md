@@ -1,7 +1,7 @@
 ---
 id: customizing-a-routine
 title: Customizing a Routine
-order: 16
+order: 18
 group: Customizing a Routine
 summary: >
   Customizing a Routine changes it alone. Its Routine Settings, Connections,
@@ -28,16 +28,17 @@ leave them in place:
 
 | Change | What it covers |
 |---|---|
-| [Routine Settings](https://docs.popcorn.ai/routine-settings.md) | a reminder interval, a sending mode, a [Schedule](https://docs.popcorn.ai/schedules.md)'s cadence, the wording of an email; each can be set back |
+| [Routine Settings](https://docs.popcorn.ai/routine-settings.md) | a reminder interval, a sending mode, a [Schedule](https://docs.popcorn.ai/triggers.md)'s cadence, the wording of an email; each can be set back |
 | [Connections](https://docs.popcorn.ai/connections.md) | the accounts it reads from and books into |
-| [Instructions](https://docs.popcorn.ai/instructions.md) | what its Agent should do and how |
+| [Instructions](https://docs.popcorn.ai/instructions.md) | what its [Agent](https://docs.popcorn.ai/agent.md) should do and how |
 | [References](https://docs.popcorn.ai/reference-documents.md) | the documents it works from |
 | [Steps](https://docs.popcorn.ai/steps.md), where its template keeps them with the Routine | what each Step asks for, their order, their wording, and where the Routine stops for a person's [Review](https://docs.popcorn.ai/reviews.md) |
 
 A person changes the Steps by describing the change, to the Routine's Agent
 in Popcorn or to an assistant, and an earlier
 [Version](https://docs.popcorn.ai/versions.md), or the template's own, can
-be put back. Popcorn refuses a change that would remove a Step Items are
+be put back. Popcorn refuses a change that would remove a Step
+[Items](https://docs.popcorn.ai/work-a-routines-items.md) are
 still at.
 
 > [!TIP] Check the settings first
@@ -73,6 +74,7 @@ a Copy of its own is always a dry run first, and the dry run says so.
 A Copy of its own is the Workspace's own series of Versions of the template
 (the CLI calls it a *fork line*), and a change reaches it by publishing a
 new Version.
-[Copying a template](https://docs.popcorn.ai/copying-a-template.md) says what a Copy costs and how to make one, and
+[Copying a template](https://docs.popcorn.ai/copying-a-template.md) says what
+a Copy costs and how to make one, and
 [changing a Routine Template](https://docs.popcorn.ai/template-authoring.md)
 how to make the change itself.

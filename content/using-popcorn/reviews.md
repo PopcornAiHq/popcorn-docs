@@ -1,7 +1,7 @@
 ---
 id: reviews
 title: Reviews
-order: 10
+order: 12
 group: Day to day
 summary: >
   A Review is the kind of Step where a person makes the call instead of
@@ -17,7 +17,8 @@ concepts: [steps, actions-and-status, routine-settings]
 
 A **Review** is a [Step](https://docs.popcorn.ai/steps.md) where the
 [Routine](https://docs.popcorn.ai/routines.md) stops and waits for a person.
-The Item says why it is waiting and offers a few choices, each an
+The [Item](https://docs.popcorn.ai/work-a-routines-items.md) says why it is
+waiting and offers a few choices, each an
 [Action](https://docs.popcorn.ai/actions-and-status.md) that leads somewhere:
 
 - on to the next Step;
@@ -81,7 +82,8 @@ past a Step without waiting for it.
 ## Adding or removing a Review
 
 A Review is a Step, so you add or remove one the way you change any Step:
-by asking your assistant or telling the Routine's Agent in Popcorn, for
+by asking your assistant or telling the Routine's
+[Agent](https://docs.popcorn.ai/agent.md) in Popcorn, for
 example "check with me before booking the meeting" (see
 [changing its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md)).
 The change stays with this Routine and survives the template's
@@ -92,5 +94,6 @@ Review, the Routine moves the Item on by itself.
 > In the template, a Review is a State that warns, with the Transitions
 > people can take from it (see
 > [State Machines in a Bundle](https://docs.popcorn.ai/state-machine.md)).
-> It is not a Flow's `await_approval`, which pauses one Run until someone
+> It is not a Flow's `await_approval`, which pauses one
+> [Run](https://docs.popcorn.ai/history.md) until someone
 > replies.

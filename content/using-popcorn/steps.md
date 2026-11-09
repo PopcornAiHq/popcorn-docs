@@ -1,7 +1,7 @@
 ---
 id: steps
 title: Steps
-order: 7
+order: 8
 group: How a Routine works
 summary: >
   A Routine's Steps are its work on each Item, in order: what each one asks
@@ -16,7 +16,8 @@ lede: >
 concepts: [reviews, customizing-a-routine, routine-settings]
 ---
 
-A Routine's **Steps** are the work it does on each Item, in order. Each Step
+A Routine's **Steps** are the work it does on each
+[Item](https://docs.popcorn.ai/work-a-routines-items.md), in order. Each Step
 asks for one thing and follows up until it has it. Then the Item moves on to
 the next Step, or stops at a [Review](https://docs.popcorn.ai/reviews.md)
 for a person to decide.
@@ -85,7 +86,8 @@ Popcorn does:
 
 > "In #intake, check with me before the agreement goes out."
 
-A person changes the Steps by describing the change: to the Routine's Agent
+A person changes the Steps by describing the change: to the Routine's
+[Agent](https://docs.popcorn.ai/agent.md)
 in Popcorn, or to their assistant. The Agent takes a few minutes to draft
 it, and the proposal shows the Steps before and after before anything is
 installed. The walkthrough is

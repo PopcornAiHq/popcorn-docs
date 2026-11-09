@@ -1,7 +1,7 @@
 ---
 id: connections
 title: Connections
-order: 5
+order: 6
 group: How a Routine works
 summary: >
   A Connection is an account Popcorn uses on a Routine's behalf, such as the
@@ -86,7 +86,8 @@ What it shows depends on the kind of Connection:
 
 > [!WARNING] A Webhook's address is a credential
 > Anyone who has the address can post to the Routine, and it isn't shown
-> again. When the Routine's own Agent makes the Webhook, the address isn't
+> again. When the Routine's own [Agent](https://docs.popcorn.ai/agent.md)
+> makes the Webhook, the address isn't
 > posted in the Routine, where everyone would see it: read it on the
 > Connection's card in Popcorn.
 
@@ -101,7 +102,8 @@ What it shows depends on the kind of Connection:
 > saved there by a Workspace admin or owner.
 
 > [!NOTE] Who can make one
-> Making a Connection needs a Workspace admin, or a Member of the Routine.
+> Making a Connection needs a Workspace admin, or a
+> [Member](https://docs.popcorn.ai/members.md) of the Routine.
 > Replacing a Webhook someone else made needs an admin of the Routine or the
 > Workspace.
 

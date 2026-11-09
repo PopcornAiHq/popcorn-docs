@@ -18,8 +18,10 @@ concepts: [customizing-a-routine, connections, set-up-a-routine]
 
 A Routine is one piece of ongoing work that Popcorn runs for you: claims
 intake, order follow-up, renewals chasing. It reads across email, messages and
-files, catches every update and decision, and keeps its Items current. People
-talk to its Agent like a member of the team, and a person's assistant works
+files, catches every update and decision, and keeps its
+[Items](https://docs.popcorn.ai/work-a-routines-items.md) current. People
+talk to its [Agent](https://docs.popcorn.ai/agent.md) like a member of the
+team, and a person's assistant works
 with it through the
 [Popcorn MCP server](https://docs.popcorn.ai/add-the-mcp-server.md).
 
@@ -77,7 +79,8 @@ Your assistant shows one Routine in full:
 | Steps | for a template with [Steps](https://docs.popcorn.ai/steps.md), each in order, and which version of them is installed |
 | Copied from | for a duplicate, the Routine it copies and how far the copy has got |
 
-Only the Routine's Members and Workspace admins see its Connections. A
+Only the Routine's [Members](https://docs.popcorn.ai/members.md) and Workspace
+admins see its Connections. A
 Routine shared in from another Workspace shows no Version, Connections or
 Steps, because its home Workspace manages them.
 

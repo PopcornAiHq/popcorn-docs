@@ -1,7 +1,7 @@
 ---
 id: tables
 title: Tables, Rows and Columns
-order: 8
+order: 9
 group: How a Routine works
 summary: >
   A Routine's Tables hold its Items — claims, orders, contacts — as Rows and
@@ -17,7 +17,9 @@ concepts: [actions-and-status, work-a-routines-items]
 ---
 
 A Routine's **Tables** hold what it keeps: one Table of claims, one of
-contacts. Each **Row** is one Item, each **Column** one kind of information
+contacts. Each **Row** is one
+[Item](https://docs.popcorn.ai/work-a-routines-items.md), each **Column** one
+kind of information
 every Row has, and a **Cell** is one Row's value in one Column.
 
 ## Reading
@@ -75,7 +77,8 @@ It can also sort by one Column and pick which Columns to show.
 > Writing a Row starts nothing by itself, except on the Table a Routine's
 > [Statuses](https://docs.popcorn.ai/actions-and-status.md) run on. There an
 > added Row is a new Item: it starts at its first Status, and the Routine's
-> next Run acts on it for real. On a Routine that sends email, that means
+> next [Run](https://docs.popcorn.ai/history.md) acts on it for real. On a
+> Routine that sends email, that means
 > the Item's first email.
 
 A Row's Status can't be written at all: it changes when an
