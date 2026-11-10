@@ -59,7 +59,8 @@ sets `on_error` by what a second attempt would do:
 | `send`, `draft` in `ask_recipient`; `send_follow_up` in `check_recipient` | `{ policy: skip, retry: 0 }` | a send that timed out may still have gone, and a retry would email the recipient twice |
 | `compose`, `decide`, `found`: code-block calls in the child Flows | `{ policy: skip, retry: 0 }` | a failure is the block refusing, which another attempt would repeat |
 | `thread` (`feature.email.get_thread`), `read` (`foundation.agent.transform`) | `{ policy: skip }` | a read is safe to retry, and a failed one leaves the Row to be read on the next pass |
-| `claim`, `record`, `release` (`foundation.store.patch_row`) | none | writing the same cells again changes nothing, and a refused claim fails at once |
+| `claim`, `release`, `record` in `ask_recipient`, `record_follow_up` (`foundation.store.patch_row`) | none | writing the same cells again changes nothing, and a refused claim fails at once |
+| `record` in `check_recipient` | `{ policy: skip }` | after its retries, a failed write releases the Row and the Run still fails by `record`'s error |
 | `ask`, `check`, `adopt`: the tick's `foreach` Steps | `{ policy: skip }` | one recipient's failure is a null item, and the rest of the pass carries on |
 | `plan` in the tick | `{ retry: 0 }` | with no plan there is nothing to do, so the pass fails |
 | `project`, `latch_onboarding`, `probe`, the `kick` that starts a pass | `{ policy: skip, retry: 1 }` | the next pass or Run repeats them |
@@ -88,6 +89,39 @@ email went; a later pass reads the Row and does.
 > So every Step between them that reaches outside the Run — the code
 > block, the thread, the model, the send — is skipped on error: one that
 > failed the Run instead would end it with the Row still held.
+
+`check_recipient`'s own `record` is skipped on error too. When it fails,
+`release_unrecorded` empties `Sending`, then `fail_unrecorded` fails the Run
+by `record`'s error, so the failure still shows and the next pass checks the
+recipient again:
+
+```yaml title="check_recipient.yaml"
+  - id: release_unrecorded
+    when: $steps.record.error
+    activity: foundation.store.patch_row
+    args:
+      conversation_id: $inputs.conversation_id
+      table_name: recipients
+      record_id: $inputs.record_id
+      patch:
+        Sending: ""
+      change_kind: questionnaire_not_recorded
+      change_action: Couldn't record the check; will try again
+
+  # The Run still fails, by `record`'s own error, once the claim is free.
+  - id: fail_unrecorded
+    when: $steps.record.error
+    activity: foundation.workflow.fail
+    args:
+      code: $steps.record.error.type
+      reason: $steps.record.error.message
+```
+
+> [!NOTE] Where a held claim is the safer failure
+> `record` in `ask_recipient` and `record_follow_up` run after an email
+> went out, before the Row says so. Releasing the Row there would have the
+> next pass email the recipient again, so a failed write keeps the Row held
+> instead.
 
 To see which recipients a pass skipped, ask for the failed Runs:
 
