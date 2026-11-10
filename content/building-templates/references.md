@@ -1,7 +1,7 @@
 ---
 id: references
 title: Value references
-order: 16
+order: 18
 group: How a Flow runs
 summary: >
   A `$` reference reads a value — `$inputs`, `$steps.<id>.output`, `$channel`,

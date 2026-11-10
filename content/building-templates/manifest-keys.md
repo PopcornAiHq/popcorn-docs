@@ -55,10 +55,10 @@ Manifest, which `#team-offsite` runs, declares under each key.
 A top-level key the parser does not know is ignored without a word. A typo
 such as `schedule:` does nothing, and nothing tells you.
 
-`scalars.agent_runnable_flows` lists the Flows the Routine's
-[Agent](https://docs.popcorn.ai/agent.md) may run: in Questionnaire,
-`questionnaire_tick`, `cta_apply`, `on_auth_change` and `reply_by_set`. It
-is a Scalar, not a top-level key, so it follows the Scalar rules.
+`scalars.agent_runnable_flows`, `scalars.agent_summary` and
+`scalars.coordinator_name` are Scalars, not top-level keys, so they follow
+the Scalar rules; [the Agent's keys](#the-agent-s-keys) says what each
+does.
 
 ## An absent key is not an empty one
 
@@ -151,6 +151,302 @@ Install writes nothing for it. Publish refuses:
 - a key named like a credential, which is never shown;
 - an entry with no `description`, or a field other than `description` and
   `readable`.
+
+## Declaring Connections
+
+`connections:` lists the accounts a Routine needs, each one a
+[Connection](https://docs.popcorn.ai/connections.md) a person makes on the
+Routine's behalf. Questionnaire needs one, the Gmail its questions go out
+from and its replies are read in:
+
+```yaml title="manifest.yaml"
+connections:
+  - id: gmail
+    kind: email
+    label: Gmail
+    config_name: inbox
+    providers: [gmail, google]
+    scopes:
+      - https://www.googleapis.com/auth/gmail.readonly
+      - https://www.googleapis.com/auth/gmail.send
+      - https://www.googleapis.com/auth/gmail.compose
+    min: 1
+    max: 1
+    halts_workflow: true
+```
+
+| Field | What it says | Default |
+|---|---|---|
+| `id` | the entry's name, unique in the list | required |
+| `kind` | one of `email`, `calendar`, `files`, `sms`, `webhook`, `esign`, `documents` | required |
+| `label` | what people see the Connection called | the `id` |
+| `config_name` | the name Flows read the account by, as `$channel.integrations.<name>` | the `id` |
+| `providers` | which providers' accounts may back it | none |
+| `scopes` | the OAuth scopes the Routine needs on the account, as full URLs | none |
+| `min`, `max` | how many accounts: at least `min` (1 or more), at most `max` (no limit when absent) | `min: 1` |
+| `halts_workflow` | whether people are told the whole Routine waits on it (below) | `true` |
+| `flow` | a `webhook` entry only: the Flow its Webhook starts | none |
+
+**`config_name` is how Flows find the account.** Questionnaire's entry is
+`gmail`, but its Flows read the account as
+`$channel.integrations.inbox`, and its Activities take
+`integration_name: inbox`, because `config_name: inbox` binds the
+Connection under that name: see
+[value references](https://docs.popcorn.ai/references.md). Declare it
+whenever the name the Flows use differs from the `id`. It is allowed only
+on a `max: 1` entry, never on a `webhook`, and no two entries may bind the
+same name.
+
+**`scopes` decide whether an account is enough.** An account
+whose grant to the Routine lacks one of them is listed as needing more
+access, and the work that uses it can't run. Questionnaire asks Gmail for
+reading, sending and drafting, the three things its Flows do with the
+mailbox. `providers` lists both `gmail` and `google` because Popcorn names
+a Google account either way, depending on how it was connected.
+
+**`min` and `max` count accounts.** `min: 1, max: 1` is exactly one, as
+Questionnaire's one mailbox is; `min: 1` with no `max` is one or more,
+such as several calendars to book into. `min` is at least 1.
+
+> [!IMPORTANT] `halts_workflow` doesn't stop a Run
+> `halts_workflow: true` changes what people are told:
+> `list_connections` says the Routine's automations are paused until the
+> account is connected, and the summary of a new Routine says the same.
+> Nothing at run time reads it. What stops a Flow running without the
+> account is the Flow's own
+> [`required_integrations`](https://docs.popcorn.ai/flow-grammar.md), or a
+> check of its own: Questionnaire's Flows declare none, and probe Gmail
+> with `feature.email.check_connected`, so the tick asks nobody until the
+> mailbox can send.
+
+Publish refuses an unknown field, an unknown `kind` and a duplicate `id`.
+
+> "Which Connections does #team-offsite need?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_connections`.
+
+## Declaring References
+
+`documents:` lists the
+[References](https://docs.popcorn.ai/reference-documents.md) a Routine
+works from: a document a person adds that becomes part of the Routine's
+configuration, kept for as long as the Routine lives and replaceable at
+any time. Questionnaire has one, the questionnaire itself:
+
+```yaml title="manifest.yaml"
+documents:
+  - id: questionnaire
+    flow: questionnaire_load
+    scalar: questionnaire_file
+    status_kind: questionnaire_load_progress
+    store_file_key_stem: onboarding/questionnaire
+    accept: [text]
+    required: true
+    sources: [upload]
+```
+
+| Field | What it says |
+|---|---|
+| `id` | the Reference's name, unique in the list; required |
+| `flow` | the Flow that reads a new file in; required, and installed by the same Bundle |
+| `scalar` | the Scalar that Flow writes to say where the file is kept; required |
+| `status_kind` | the [progress kind](#showing-progress) the Reference's card shows while that Flow runs; required |
+| `store_file_key_stem` | where the Flow keeps the file; required |
+| `accept` | the kinds of file the picker offers, such as `text` |
+| `required` | whether people are told the Routine needs it; `false` when absent |
+| `sources` | how a person supplies it: `upload`, `google_drive`, or both |
+| `drive_mime_types` | which Google Drive files the picker lets be picked; derived from `accept` when absent |
+
+What a card calls the Reference and says it is for comes from
+`strings.yaml`, under `documents.<id>`: see
+[strings.yaml](https://docs.popcorn.ai/strings-yaml.md).
+
+**The `flow` runs on every add and every replace.** Adding the file, from
+its card in Popcorn or with `add_reference`, starts the Flow with the
+upload as its `conversation_file_key` input, so the Flow must take one.
+Replacing it starts the same Flow again with the new file.
+`questionnaire_load` reads the questions out of the document, fails the
+Run if it finds none, and only then stores anything:
+
+```yaml title="questionnaire_load.yaml"
+inputs:
+  conversation_id: { type: string }
+  conversation_file_key: { type: string }
+```
+
+**The `scalar` is the envelope a card reads.** Popcorn reads the file as
+added once that Scalar holds a JSON object with a `store_file_key` and a
+`filename`, and `v` absent or 1; anything else reads as still waiting.
+The Flow builds it with `foundation.store.merge_json_scalar`, after copying
+the file into the Routine's own storage under `store_file_key_stem`:
+
+```yaml title="questionnaire_load.yaml"
+  - id: record_location
+    activity: foundation.store.merge_json_scalar
+    args:
+      conversation_id: $inputs.conversation_id
+      key: questionnaire_file
+      patch:
+        v: 1
+        source: upload
+        drive_file_id: ""
+        file_key: $inputs.conversation_file_key
+        filename: $steps.detect.output.filename
+        kind: $steps.detect.output.kind
+        uploaded_at: $steps.now.output.unix
+        store_file_key: $steps.copy_to_store.output.file_key
+        sha256: $steps.copy_to_store.output.sha256
+        size_bytes: $steps.copy_to_store.output.size_bytes
+      source_file_key: $inputs.conversation_file_key
+      source_filename: $steps.detect.output.filename
+```
+
+The Reference's card, `list_references` and the setup step that asks for
+the file all read this envelope: `file_key` says who added it,
+`uploaded_at` when. Since its existence means "added", a Flow writes it
+only for a file it has accepted, which is why `questionnaire_load` checks
+the questions first. What the Flow reads out of the file goes in a Scalar
+of its own: Questionnaire's questions are the `questionnaire` Scalar,
+which its tick reads.
+
+**A setup step for the same Flow must agree with it.** When an
+`upload_file` step of the
+[setup checklist](https://docs.popcorn.ai/setup-checklist.md) names the
+same `flow`, Publish refuses the Bundle unless the two declare the same
+`status_kind`, `accept` and `drive_mime_types`, and the same `sources`
+when both declare them. Questionnaire's `questionnaire` step says
+`flow: questionnaire_load`, `status_kind: questionnaire_load_progress`,
+`accept: [text]` and `sources: [upload]`, as its Reference does. The step
+says when the file is first asked for; the Reference is what it becomes.
+
+> [!NOTE] `required` is advice
+> `required: true` marks a Reference the Routine's work degrades without,
+> and changes only what people are shown. Nothing refuses a Run for want
+> of it: Questionnaire's tick asks nobody while the `questionnaire` Scalar
+> is empty, because its own Flow checks.
+
+> "What is #team-offsite's questionnaire?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_references`, then `read_reference`.
+
+## Showing progress
+
+`status_kinds:` declares the progress a Flow shows while it works, such as
+the chip on a Reference's card while the file is read in. Each kind is a
+list of `phases` in the order a Run passes through them:
+
+```yaml title="manifest.yaml"
+status_kinds:
+  questionnaire_load_progress:
+    phases:
+      - { state: reading,  pct: 0,  label: "Reading the questionnaire…" }
+      - { state: saving,   pct: 80, label: "Saving the questions…" }
+      - { state: complete, pct: 100, terminal: true, ok: true,
+          label: "Questionnaire added" }
+```
+
+| Field | What it says |
+|---|---|
+| `state` | the phase's name, unique in the kind; what a Flow sets |
+| `pct` | where the bar stands, 0 to 100: one number, or a `[start, end]` band an Activity climbs through |
+| `label` | what the chip says |
+| `terminal` | the finished phase; exactly one, and it must reach 100 |
+| `ok` | on the finished phase, whether it finished well |
+
+The first phase starts at 0, the last ends at 100, and the bar only moves
+forward: a phase may not start before the one above it ends. A failed
+phase is not declared, since a Flow's `failure_status` writes it. An Install
+refuses a kind that breaks one of these rules.
+
+A Flow moves the chip with `foundation.status.set`, naming the kind and a
+`state`, and the Run fills in `pct`, `label`, `terminal` and `ok` from the
+matching phase; a value the Step sets itself wins. `questionnaire_load`
+sets `reading` first, `saving` once the questions are out, and
+`complete` before it marks the setup step done:
+
+```yaml title="questionnaire_load.yaml"
+  - id: status_reading
+    activity: foundation.status.set
+    on_error: { policy: skip, retry: 0 }
+    args:
+      conversation_id: $inputs.conversation_id
+      kind: questionnaire_load_progress
+      state: reading
+      data:
+        file_key: $inputs.conversation_file_key
+```
+
+Every write in one Run updates the same chip. Progress is a courtesy,
+so each `foundation.status.set` Step skips its own errors rather than fail
+the Run. When the Run fails, the Flow's `failure_status`, of kind
+`questionnaire_load_progress` with the label "Questionnaire not added",
+turns the chip into the failure.
+
+## The Agent's keys
+
+Four keys say who answers people in the Routine and what that
+[Agent](https://docs.popcorn.ai/agent.md) knows and may run. Questionnaire
+declares all four:
+
+```yaml title="manifest.yaml"
+channel_agent: workflowmcp
+
+scalars:
+  coordinator_name: Questionnaire
+  agent_runnable_flows:
+    - questionnaire_tick
+    - cta_apply
+    - on_auth_change
+    - reply_by_set
+  agent_summary: |
+    This Routine emails each recipient the questions in its questionnaire
+    and follows up until they've answered.
+    `recipients` has one row per recipient, keyed by `Email`. …
+```
+
+**`channel_agent`** names the Agent that answers Members: `workflowmcp`
+or `channelmcp`, Popcorn's own Agents, which work the Routine with the
+same tools and differ in persona; or `appspecialagent:<name>`, an App
+Agent the Bundle defines under `agents/<name>/` with `chat: true` (see
+[Platform tools](https://docs.popcorn.ai/platform-tools.md)). An operator's
+override for one Routine wins over it, and a name Popcorn doesn't
+recognise is ignored, so the Workspace's default Agent answers instead.
+An App Agent that doesn't resolve is refused in the Routine rather than
+replaced.
+
+**`agent_summary`** is the brief Popcorn's own Agents get on every turn:
+what the Routine does, its Tables and the Columns they may write, and the
+Flows to run. Keep it short, since it costs every turn. `AGENT.md` is the
+longer guide, which the Agent reads when the work needs it. Questionnaire's
+summary names the `recipients` Columns its Agent may write and the Actions
+`cta_apply` takes; its `AGENT.md` adds what each Column means and how to
+answer "Who hasn't answered?". An App Agent doesn't get the summary: its
+own prompt is its brief.
+
+> "What does #team-offsite's Agent know about this template?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `get_instructions` with `guide: true`, which reads
+> `AGENT.md`.
+
+**`agent_runnable_flows`** lists the Flows Popcorn's own Agent may start.
+A Flow not listed is refused, and so is every Flow when the list can't be
+read; a person can still run one from the Routine in Popcorn.
+Questionnaire lists its tick, `cta_apply` for Actions taken from chat, `on_auth_change` and
+`reply_by_set`; `questionnaire_load`, `ask_recipient` and
+`check_recipient` start only from a Reference or a pass. A listed Flow
+still runs as a dry run that Members confirm, unless its file says
+otherwise: `read_only: true` runs at once, and
+[`confirm: when_asked`](https://docs.popcorn.ai/flow-grammar.md) takes a
+Member's own message asking for it as the confirmation. `reply_by_set`
+is `confirm: when_asked`, so a Member who tells the Agent the date has
+it set without a second question.
+
+**`coordinator_name`** is meant for the Agent's prompt rather than the
+template picker, which reads `display_name`. Nothing in Popcorn reads it,
+though: Install writes it like any other Scalar, and that is all it does.
 
 ## Two specific traps
 

@@ -1,7 +1,7 @@
 ---
 id: adding-a-table
 title: Add a Table or a Column
-order: 10
+order: 12
 group: Tables and Status
 summary: >
   Adding a Column or a Table to a Routine Template: copy it

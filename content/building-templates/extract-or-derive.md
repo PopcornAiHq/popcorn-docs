@@ -1,7 +1,7 @@
 ---
 id: extract-or-derive
 title: Extracting fields or deriving them
-order: 18
+order: 20
 group: How a Flow runs
 summary: >
   `foundation.fields.extract` reads fields by path, uses no model, and fails

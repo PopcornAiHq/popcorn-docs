@@ -40,7 +40,12 @@ Your assistant lists every Connection the Routine needs:
 ```
 
 Each Connection says whose account it uses, who connected it, and what
-stops while it is missing. The response ends with how to make the missing
+stops while it is missing.
+
+> [!NOTE] What "paused" means
+> Popcorn says the Routine's work is paused while a Connection it relies on
+> is missing. What actually stops is up to each piece of work:
+> `#team-offsite` asks nobody until its Gmail can send. The response ends with how to make the missing
 ones.
 
 > [!WARNING] A missing Connection stops work

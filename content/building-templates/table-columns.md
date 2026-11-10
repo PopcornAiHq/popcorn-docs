@@ -1,7 +1,7 @@
 ---
 id: table-columns
 title: Table Columns
-order: 11
+order: 13
 group: Tables and Status
 summary: >
   A Routine's Tables and Columns are declared in its template's Manifest, as
