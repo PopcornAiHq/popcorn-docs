@@ -24,6 +24,97 @@ and an **Install** brings one Routine onto it. A Version can exist while no
 Routine runs it, and that gap is where most confusion about "did my change
 go out" lives.
 
+This guide publishes a Version of the `offsite` Copy of the
+[Questionnaire](https://docs.popcorn.ai/questionnaire-template.md)
+template, which `#team-offsite` runs, adding a `Team`
+[Column](https://docs.popcorn.ai/table-columns.md) to its `recipients`
+[Table](https://docs.popcorn.ai/tables.md). Each step starts with a prompt
+you might give your assistant, or the CLI command that does the same.
+
+## Read the files
+
+> "Show me the Manifest of #team-offsite's template."
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_routine_files`, then `read_routine_file` for
+> `manifest.yaml`.
+
+The listing's header names the Copy and the Version edits are based on,
+the Copy's Head, with each file's sha256, which an edit must carry. With
+the CLI, check the Head out to disk:
+
+```bash
+popcorn app checkout --channel team-offsite
+cd questionnaire
+```
+
+## Make the change
+
+Add the Column to `recipients`, after `Name`:
+
+```yaml title="manifest.yaml"
+      - name: Name
+        type: string
+        pii: true
+      - name: Team
+        type: string
+```
+
+A Column is added at Install and never dropped, so a later rename leaves
+this one behind with its data: see
+[Manifest keys](https://docs.popcorn.ai/manifest-keys.md). Nothing in
+Questionnaire writes `Team`; people and the Routine's
+[Agent](https://docs.popcorn.ai/agent.md) fill it in.
+
+Every Version also needs a higher `version:`. The Copy's series is its own,
+so `offsite` goes from `0.2.1` to whatever you choose, such as `0.3.0`.
+
+## Publish it
+
+> "Publish that as the next version of #team-offsite's copy: add a Team
+> column to recipients."
+
+> [!TIP] MCP tool call
+> Your assistant calls `create_routine_version` with the change and
+> `changelog`, which is a dry run, then again with `confirm=true` and the
+> dry run's `plan_id` once you agree.
+
+The dry run shows the Version it would publish, each file's diff, every
+check it would fail, and how many other Routines on `offsite` it will
+update. With the CLI, from the Checkout's directory:
+
+```bash
+popcorn app validate
+popcorn app publish --bump minor -m "Add a Team column to recipients"
+```
+
+`--bump minor` writes `version: "0.3.0"` into `manifest.yaml` once the
+Version exists; `-m` is the note recorded on it.
+
+> [!WARNING] A Publish reaches every Routine on the Copy
+> `#team-offsite` installs `0.3.0` at once, and every other Routine on
+> `offsite` takes it on its next Daily Update.
+
+## Check that it landed
+
+> "Is #team-offsite on the new version yet?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `get_routine`, and `install_routine` only if the
+> Install did not land.
+
+`get_routine`'s **Version** line says what the Routine runs and its
+**Install** line whether the last Install landed. With the CLI:
+
+```bash
+popcorn app status
+```
+
+If it shows the Install blocked or failed, `install_routine` (`popcorn app
+apply`) retries it: see [Installing](#installing).
+
+The same steps, by surface:
+
 | To | Over MCP | With the CLI |
 |---|---|---|
 | read the files edits are based on | `list_routine_files`, `read_routine_file` | `popcorn app checkout --channel <routine>` |
