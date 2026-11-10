@@ -8,7 +8,11 @@ summary: >
   Routine's memory, unless it opts in to platform tools under
   platform_tools: — ask_user, set_reminder, show_setup_step,
   workspace_memory_read, and Popcorn's MCP tools by name. Only chat: true
-  agents may; an unknown name fails validation.
+  agents may; an unknown name fails validation. Questionnaire has no App
+  Agent.
+lede: >
+  Which tools an agent defined in a template can call, and how it opts in
+  to the ones Popcorn's own agents have.
 concepts: [app-bundle, versions, tables]
 ---
 
@@ -17,11 +21,22 @@ An App Agent is defined under `agents/<name>/` in a Bundle (see
 it can call is decided by its `agent.yaml` and nothing else: nothing a Member
 writes, and nothing a tool returns, can add a tool.
 
+> [!NOTE] Questionnaire has no App Agent
+> The [Questionnaire](https://docs.popcorn.ai/questionnaire-template.md)
+> template has no `agents/` directory, so nothing on this page applies to
+> it, and the examples here are not Questionnaire's. Its Manifest names
+> one of Popcorn's own Agents as `channel_agent: workflowmcp`, and
+> `scalars.agent_runnable_flows` lists the four Flows that
+> [Agent](https://docs.popcorn.ai/agent.md) may run: see
+> [Manifest keys](https://docs.popcorn.ai/manifest-keys.md). A Copy that
+> wants an agent of its own adds one under `agents/`.
+
 ## By default
 
-- **Its Flow tools.** Each `tools:` entry maps a tool name to a Flow of the
-  same Bundle. A call starts that Flow, pinned to the Version the turn Runs
-  under, and returns the Flow's `outputs:`. No Flow is a tool unless an entry
+- **Its Flow tools.** Each `tools:` entry maps a tool name to a
+  [Flow](https://docs.popcorn.ai/flow-grammar.md) of the same Bundle. A
+  call starts that Flow, pinned to the Version the turn Runs under, and
+  returns the Flow's `outputs:`. No Flow is a tool unless an entry
   maps it.
 - **Its terminal tool**, when a Flow invokes it headless: the `submit:` tool
   whose accepted call is the agent's result.
@@ -30,10 +45,10 @@ writes, and nothing a tool returns, can add a tool.
 
 ## Opting in to platform tools
 
-A `chat: true` agent may also have tools the platform's own Routine Agents
-have, each with the same rules, by naming them:
+A `chat: true` agent may also have tools the platform's own Routine
+Agents have, each with the same rules, by naming them:
 
-```yaml
+```yaml title="agent.yaml"
 chat: true
 platform_tools:
   - ask_user

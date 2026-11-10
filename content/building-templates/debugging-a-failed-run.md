@@ -4,38 +4,126 @@ title: Debug a failed Run
 order: 20
 group: How a Flow runs
 summary: >
-  When a Routine's History shows work gone wrong: read it over MCP with
-  `list_history` and `read_history_entry`, then find the Flow Run, read its
-  `outcome` rather than its status, read the failure with `flow runs get
-  --include-errors` and the Steps with `flow runs timeline`, fix, publish,
-  and run again once the Install lands. Also Runs that succeed
-  having done nothing, and ones that never start.
+  When a Routine's work goes wrong: find the failed Run with list_runs and
+  read it with get_run, or read an Item's History with list_history; then,
+  in the CLI, read the Run's `outcome`, its failure with `flow runs get
+  --include-errors` and its Steps with `flow runs timeline`; fix, publish,
+  and run again once the Install lands. Also Runs that succeed doing nothing.
 lede: >
   Find out why a Routine's work went wrong, fix it, and run it again.
-concepts: [versions, flow-grammar, template-authoring]
+concepts: [versions, flow-grammar, template-authoring, on-error]
 ---
 
-This guide starts from a Flow Run that did the wrong thing, or from one you
-expected and cannot find, and ends with a fixed Version running. Editing and
-publishing are the loop in
+This guide starts from a Run that did the wrong thing, or one you expected
+and cannot find, and ends with a fixed
+[Version](https://docs.popcorn.ai/versions.md) running. Its example is
+`#team-offsite`, the [Routine](https://docs.popcorn.ai/routines.md) from
+[Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md),
+whose [Flows](https://docs.popcorn.ai/flow-grammar.md) are those of the
+[Questionnaire template](https://docs.popcorn.ai/questionnaire-template.md).
+Editing and publishing are the loop in
 [changing a Routine Template](https://docs.popcorn.ai/template-authoring.md);
 this page is the reading half of it.
 
-A Routine's Runs are part of its **History** (see the
-[glossary](https://docs.popcorn.ai/glossary.md)). The CLI calls a Routine a
-*channel*: its commands take one as `--channel`, a `#name` or a UUID, and the
-examples write `<channel>`.
+A Routine's Runs are part of its
+[History](https://docs.popcorn.ai/history.md). Each step below starts with
+a prompt you might give your assistant; past what the MCP tools show, the
+page goes on in the CLI.
 
-## Start in History, over MCP
+## Find the failed Run
 
-An assistant connected to Popcorn over MCP is not given the Flow-run tools,
-but it can read Runs in the Routine's History: an Item's History lists the
-Runs that changed it, and a Run it started can be followed whether or not it
-changed any Item:
+> "Why did #team-offsite's last Run fail?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_runs` with `status: failed`, then `get_run`
+> with the newest one's reference.
+
+`list_runs` lists the Routine's Runs, newest first, whatever started them:
+each pass of the Schedule, each recipient's child Run, and each Action a
+person took. `get_run` shows one: what started it, its inputs and outputs,
+its newest Steps and the error it failed with. Here is one from a Copy
+whose Ask again Transition wrote `Last Asked: ""`, a mistake easy to make
+in your own Copy:
+
+```
+- cta apply: failed · started by a person's button
+Failed with: StoreApplyFailed: store write 0 (patch_rows from
+  'state_patches') failed after 0 write(s) applied: agent_store 422
+  validation_failed: Last Asked: not a valid ISO 8601 datetime
+Inputs: {"action": "ask_again", "payload": {}, "record_ids": [1292020]}
+Steps, newest first:
+- apply · failed · 0.2s · StoreApplyFailed: …
+```
+
+Read it from the bottom up. The Flow is `cta_apply`, the
+[Action](https://docs.popcorn.ai/actions-and-status.md) is `ask_again`,
+and the failed Step is `apply`, which calls `feature.state.transition`. The
+store refused one Cell: `Last Asked` is a `datetime`
+[Column](https://docs.popcorn.ai/table-columns.md), and something wrote a
+value to it that is not a date. Besides `Stage` and the Status, Why and Actions
+projected from it, `apply` writes only what the Transition's `writes:`
+names, so that is where to look. Questionnaire's own Transition empties
+the Column the way the store takes:
+
+```yaml title="manifest.yaml"
+    - on: staff.ask_again
+      from: no_response
+      to: waiting
+      writes: {Follow Ups: 0, Last Asked: null}
+```
+
+A datetime Column is emptied with `null`; the store refuses `""`, so a
+`writes:` with `Last Asked: ""` fails every Ask again this way. `apply` is `{ policy: fail, retry: 0 }`, so the Run
+failed on its first attempt and changed nothing.
+
+> [!NOTE] A pass that succeeds can hide a failed recipient
+> The tick runs one `ask_recipient` or `check_recipient` per recipient,
+> under `on_error: skip`, so a recipient whose Run failed leaves the pass
+> `succeeded`. `list_runs` lists that child Run as failed, started by
+> another Run. See [errors and retries](https://docs.popcorn.ai/on-error.md).
+
+## Read what a pass did
+
+> "What did #team-offsite's last pass do?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_runs` with `status: ended`, then `get_run` on
+> the newest `questionnaire tick`.
+
+The pass's outputs say what it did, one item per child Run that finished:
+
+```
+Outputs: {"asked": [],
+  "checked": [{"flow_name": "check_recipient",
+               "outputs": {"followed_up": null, "record_id": 1292020,
+                           "replies": 0, "status": "waiting"},
+               "workflow_id": "…-questionnaire_tick-…-check[0]"}, …],
+  "ready": true, "waiting": 0}
+```
+
+- **`ready: false`** means the code block's `plan` found no questions, or
+  Gmail could not send, and asked and checked nobody.
+- **`asked` and `checked`** hold one item per child that finished; a
+  recipient whose child failed is missing from them, not listed as null.
+- **`waiting`** counts recipients past this pass's cap of first emails, who
+  are asked on the next pass.
+- A child's `workflow_id` is the pass's, then the Step id and the item's
+  index: `check[0]` is the first recipient `check` ran.
+
+## Read one Item's History
+
+> "What happened to Jane in #team-offsite?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_rows` to find Jane's Row, `list_history` with
+> its `row_id`, then `read_history_entry` on the change it wants to show.
 
 - **`list_history`**, with the `routine` and an Item's `row_id`, lists that
   Item's changes newest first, each with who or what made it and its
   `entry_id`, and under them the Runs that changed it and how each ended.
+  Questionnaire names each change: "Started emailing the questionnaire",
+  "Sent the questionnaire", "Couldn't email the questionnaire; will try
+  again".
 - **`read_history_entry`**, with an `entry_id`, shows that one change in
   full: every field it changed, before and after, and, when a Run made it,
   what the Run did, step by step in order, each with its outcome and any
@@ -43,21 +131,21 @@ changed any Item:
 - **`list_history` with `run`** in place of `row_id` follows one Run: how it
   is going or how it ended, with its failure message, and the Items it
   changed, or what it did when it changed none. It takes the Run reference
-  `run_trigger` returns, so it follows a Run the assistant started.
-- **`list_runs`** lists the Routine's Runs, newest first, whatever started
-  them, including ones that changed no Item; `get_run` shows one: what
-  started it, its inputs and outputs, its newest steps and the error it
-  failed with.
+  `run_trigger` and `list_runs` return.
 
-History has limits that send you to the CLI. A Run is listed under an Item
-only when it wrote to that Item, so a Run that failed before writing anything
-is in no Item's History, though `list_runs` finds it. In a Workspace that guards personal data, a failure
-shows only that a Step failed, not its message. And History names a Run by
-the work it did, never by its `workflow_id`, which is how the CLI addresses
-a Run. For the Activity failures, the full timeline and the inputs to run it
-again, go on.
+> [!NOTE] Where History stops
+> A Run is listed under an Item only when it wrote to that Item, so a Run
+> that failed before writing anything is in no Item's History, though
+> `list_runs` finds it. In a Workspace that guards personal data, a failure
+> shows only that a Step failed, not its message. And the MCP tools name a
+> Run by a reference of their own, never by its `workflow_id`, which is how
+> the CLI addresses a Run. For the Activity failures, the full timeline and
+> the inputs to run it again, go on in the CLI.
 
-## Find the Run
+The CLI calls a Routine a *channel*: its commands take one as `--channel`, a
+`#name` or a UUID, and the examples write `<channel>`.
+
+## Find the Run in the CLI
 
 A Run is addressed by its `workflow_id`. Where you get one depends on what
 started it:
@@ -66,11 +154,12 @@ started it:
 |---|---|
 | `popcorn flow run` | printed as `workflow_id:`. With `--wait` nothing is printed until the Run succeeds; a failure or timeout names the id in its error, and stderr shows `Waiting for <workflow-id>...` unless `--quiet` or agent mode |
 | a Webhook Delivery | `wh-<delivery id>` — the `id` that `popcorn webhook deliveries` lists |
+| a `call_flow` Step | the parent's `workflow_id`, then `-<step id>`, and under `foreach` the item's index: `…-check[0]` |
 | anything else | `popcorn flow runs list` |
 
 ```bash
-popcorn flow runs list --channel <channel> --flow <name>                  # newest first
-popcorn flow runs list --channel <channel> --flow <name> --status failed --json
+popcorn flow runs list --channel <channel> --flow check_recipient           # newest first
+popcorn flow runs list --channel <channel> --flow cta_apply --status failed --json
 ```
 
 `--flow` takes the Flow's `name:`, which is also what the list prints last on
@@ -133,8 +222,8 @@ omits them. What each part says:
 | `inputs` | The inputs the Run was started with — what to pass to run it again. A child started by `call_flow` may lack a large input it reads from its parent's history instead. |
 | `version_id` | The Version of the template the Run pinned, printed as `version:`. Null (`-`) until the Run has pinned, and on Runs older than the field. |
 
-The detail names **Activities, not Step ids** — `foundation.store.upsert_rows`,
-not `record_alert`. The timeline names both:
+The detail names **Activities, not Step ids** — `foundation.store.patch_row`,
+not `record` or `release`, which in `check_recipient` call the same one. The timeline names both:
 
 ```bash
 popcorn flow runs timeline <workflow-id> --channel <channel>
@@ -185,13 +274,34 @@ is accepted but runs as `fail`.
 
 ## A Run that succeeded and did nothing
 
+**A Step failed and was skipped.** Under `on_error: skip` the Run goes on
+with the Step's output null, and ends `succeeded`. `--include-errors` lists
+the failure even though the Run succeeded. In `ask_recipient`, a `send`
+that failed is skipped, `release` empties `Sending`, and the Row's History
+says "Couldn't email the questionnaire; will try again": the next pass asks
+the recipient again.
+
+**A child failed under the pass.** The tick's `ask` and `check` Steps skip
+a failed child, so the pass succeeds without it; see "Read what a pass did"
+above. Find the child with `flow runs list --flow ask_recipient` or
+`--flow check_recipient`.
+
+**The code block decided there was nothing to do.** Questionnaire's
+`plan` asks nobody while the questionnaire has no questions or Gmail cannot
+send, and reports `ready: false`; it asks nobody new before the reply-by
+date is set or after it has passed, or while `popcorn.email_send_mode` is
+`off`. Those are the template's rules, not failures, and
+[the Questionnaire template](https://docs.popcorn.ai/questionnaire-template.md)
+lists them.
+
 **A required Integration is not connected.** A Flow's
 `required_integrations:` is checked when a Run starts. When one is not among
-the Routine's Connections — or is connected to an account of a different
-provider than the Flow declares — the Run stops before its first Step and ends `Completed`,
-`succeeded`, with empty `outputs`. That is deliberate: a scheduled tick on a
-Routine nobody has configured yet must not fail every interval. The Run
-detail does not say why it did nothing, so ask the Routine:
+the Routine's [Connections](https://docs.popcorn.ai/connections.md) — or is
+connected to an account of a different provider than the Flow declares —
+the Run stops before its first Step and ends `Completed`, `succeeded`, with
+empty `outputs`. That is deliberate: a scheduled tick on a Routine nobody
+has configured yet must not fail every interval. The Run detail does not say
+why it did nothing, so ask the Routine:
 
 ```bash
 popcorn channel-config show --channel <channel> --strict
@@ -205,17 +315,19 @@ with what the Routine has. `missing_integrations`, `missing_parameters` and
 
 A Run started by a person or an agent — `popcorn flow run` among them — is
 refused at the start instead: HTTP 409 `missing_integrations` with the names,
-which the CLI exits 3 on. So
-this quiet ending belongs to Schedules, Webhooks, Message Triggers and Flows
-started by other Flows.
+which the CLI exits 3 on. So this quiet ending belongs to Schedules,
+Webhooks, Message Triggers and Flows started by other Flows.
 
-**A Step failed and was skipped.** Under `on_error: skip` the Run goes on
-with the Step's output null. `--include-errors` lists the failure even though
-the Run succeeded.
+> [!NOTE] Questionnaire checks Gmail itself
+> Questionnaire's Flows declare no `required_integrations`: the tick's
+> `probe` Step asks `feature.email.check_connected` whether Gmail can send,
+> and `plan` reports `ready: false` when it cannot. So a pass on a Routine
+> without Gmail runs its Steps and asks nobody.
 
 **It launched a Run and finished.** `foundation.workflow.start_flow` starts a
 separate Run and returns at once, so the parent succeeds whatever the child
-does; so does a `call_flow` Step with `mode: detach`. Find the child in
+does; so does a `call_flow` Step with `mode: detach`. `questionnaire_load`
+ends this way, by starting a pass with its `kick` Step. Find the child in
 `flow runs list --flow <child>`. When the parent needs the child's result, a
 `call_flow` Step with `mode: wait` fails with it.
 
@@ -225,32 +337,40 @@ does; so does a `call_flow` Step with `mode: detach`. Find the child in
 
 ```bash
 popcorn schedule list --channel <channel>
-popcorn schedule get <slug> --channel <channel>
+popcorn schedule get questionnaire-tick --channel <channel>
 popcorn app status --channel <channel>
 ```
 
 `schedule get` shows whether the Schedule is paused, its next and last Run,
 and counts of fires skipped because the previous Run was still going
-(`skipped (overlap)`) and fires missed (`missed (catchup)`). Its `note` is
-written by whatever last rewrote the Schedule, and is usually the only
-explanation of a cadence that differs from the Manifest. `app status` compares
-the Routine's armed Schedules with the Manifest's. It prints a difference the
-platform explains — a `set_app_mode` retune, a spread offset — as a `note`,
-and exits non-zero only on one it cannot: a cadence or a pause nothing
-explains, or a declared Schedule that was never installed. A Schedule whose Flow was renamed is dropped at Install, with no error
-— see [a Flow's identity is its name](https://docs.popcorn.ai/flow-grammar.md#a-flow-s-identity-is-its-name).
+(`skipped (overlap)`) and fires missed (`missed (catchup)`). Questionnaire's
+tick is `overlap: skip`, so a pass that runs past fifteen minutes skips the
+next fire. Its `note` is written by whatever last rewrote the Schedule, and
+is usually the only explanation of a cadence that differs from the
+Manifest. `app status` compares the Routine's armed Schedules with the
+Manifest's. It prints a difference the platform explains — a
+`set_app_mode` retune, a spread offset — as a `note`, and exits non-zero
+only on one it cannot: a cadence or a pause nothing explains, or a declared
+Schedule that was never installed. A Schedule whose Flow was renamed is
+dropped at Install, with no error — see
+[a Flow's identity is its name](https://docs.popcorn.ai/flow-grammar.md#a-flow-s-identity-is-its-name).
 
-To re-run a scheduled Flow without waiting for its next fire,
-`popcorn schedule trigger <slug> --channel <channel>` runs it once now, with
-the inputs the Schedule stores (over MCP, `run_trigger`). It takes the same slug, Flow id or
-`schedule_id` as `schedule get`, and runs only a Schedule the Routine's bound
-Manifest declares. It prints the Run's `workflow_id` and the `flow runs get`
-command to follow it. When a Run is already in flight and the Schedule's
-overlap policy drops this one, it says `Not run`; `--overlap-policy allow_all`
-runs it anyway. `Triggered …, but no run was seen starting yet` is not a
-failure: the Run may be deferred behind a running one, or slow to record.
+> "Run #team-offsite's Schedule now."
 
-**From a Webhook.**
+> [!TIP] MCP tool call
+> Your assistant calls `list_triggers`, then `run_trigger`.
+
+In the CLI, `popcorn schedule trigger questionnaire-tick --channel
+<channel>` runs it once now, with the inputs the Schedule stores. It takes
+the same slug, Flow id or `schedule_id` as `schedule get`, and runs only a
+Schedule the Routine's bound Manifest declares. It prints the Run's
+`workflow_id` and the `flow runs get` command to follow it. When a Run is
+already in flight and the Schedule's overlap policy drops this one, it says
+`Not run`; `--overlap-policy allow_all` runs it anyway. `Triggered …, but no
+run was seen starting yet` is not a failure: the Run may be deferred behind
+a running one, or slow to record.
+
+**From a Webhook.** Questionnaire has none; for a template that does:
 
 ```bash
 popcorn webhook deliveries --channel <channel> --status failed --json
@@ -353,24 +473,34 @@ version …`. Its `--json` carries the same `install` block, but no
    ```
 
    A cancel lands at the Run's next Activity boundary; `--force` terminates on
-   the spot, for a Run that will not cancel.
+   the spot, for a Run that will not cancel. Over MCP, `stop_run` stops one.
 2. Fix the Bundle, then run the checks:
    `popcorn app validate .` and `popcorn flow validate <flow>.yaml`. Neither
-   catches a reference that is absent only at runtime — that is what the Run
-   just told you.
+   catches a reference that is absent only at runtime, or a value the store
+   refuses, such as the `""` above — that is what the Run just told you.
 3. Publish: `popcorn app publish . --bump patch -m "..." --yes`. A Publish
    reaches every Routine on the Copy, not only this one.
 4. Wait until `install.state` is `current` — `Install: CURRENT` from
    `popcorn app status --channel <channel>` — so the next Run gets the fix.
    `FAILED`, `SKIPPED`, `LOCKED` or `BEHIND` will not clear by waiting: follow
    its `Next:` line (see "Which Version the Run ran").
-5. Run it again the way it failed. For a direct Run, pass the failed Run's
-   `inputs` from `flow runs get --json` to
+5. Run it again the way it failed. For an Action, take it again:
+
+   > "Ask Jane again in #team-offsite."
+
+   > [!TIP] MCP tool call
+   > Your assistant calls `list_actions`, then `take_action`.
+
+   For a direct Run, pass the failed Run's `inputs` from
+   `flow runs get --json` to
    `popcorn flow run <name> --channel <channel> --inputs '...'` — without
    `--wait` it prints the Version at once; then read the Run with
    `flow runs get` and check its `version:` is the one you just published.
-   For a scheduled Flow, `popcorn schedule trigger <slug> --channel <channel>` (see "A Run that never started"). For a Webhook Flow, `popcorn webhook send <webhook> @payload.json
-   --channel <channel>` with a body that differs from the last one (see "A Run that never started").
+   For a scheduled Flow, run the Schedule now (see "A Run that never
+   started"). For a Webhook Flow, `popcorn webhook send <webhook>
+   @payload.json --channel <channel>` with a body that differs from the
+   last one.
 6. Confirm the effect, not the Outcome: read the Rows the Run should have
-   written (`popcorn table rows <table> --channel <channel>`), since "A Run that succeeded and did nothing" is a list of
-   Runs that succeeded without writing any.
+   written. For Ask again, Jane's Row should be back at *Waiting*, with
+   `Follow Ups` at 0, and the next pass should follow up. A Run can succeed
+   without writing any; see "A Run that succeeded and did nothing".
