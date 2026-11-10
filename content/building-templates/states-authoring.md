@@ -4,270 +4,566 @@ title: Author a States tier
 order: 13
 group: Tables and Status
 summary: >
-  Writing the State graph behind a Routine's Status and Actions, in
-  `recipe.yaml` or `states:`: stored, derived and mirrored machines; States, Events, Transitions and buttons;
-  Guards; and the Flows that fire an edge, which must start its `flow` and
-  `then` launches themselves. Every Publish check is listed with its exact
-  error — `no expected edge enters`, a terminal left by staff — and its fix.
+  Writing the State graph behind a Routine's Status and Actions, on
+  Questionnaire's `states:` section: Flows that write Stage, the Actions'
+  Flow `cta_apply`, which must start an edge's `flow` and `then` launches
+  itself, a guard against a pass, adopting older Rows, and STATE CHANGE.
+  Every Publish check is listed with its exact error and fix.
 lede: >
-  Write the States and Transitions behind a Routine's Status and Actions, and
-  get them past the Publish checks.
-concepts: [state-machine, manifest-keys, app-bundle]
+  Write the States and Transitions behind a Routine's Status and Actions,
+  using the Questionnaire template's own graph.
+concepts: [state-machine, questionnaire-template, manifest-keys, app-bundle]
 ---
 
-This guide takes one State graph from design to a published, wired graph.
-What a State Machine *is* — the tuple, the projection, why a button is an
-edge — is [the State Machine](https://docs.popcorn.ai/state-machine.md),
-and where the two overlap that page is authoritative. In the product, the
-projected Status is an Item's **Status**, and each staff edge's button is an
-**Action** (see the [glossary](https://docs.popcorn.ai/glossary.md)).
+This guide builds a States tier the way Popcorn's Questionnaire template
+does, from its `manifest.yaml` to a change you publish to a Copy of it.
+What a [State Machine](https://docs.popcorn.ai/state-machine.md) *is*, and
+why each Action is an edge, is that page's subject, and where the two
+overlap it is authoritative. What Questionnaire does as a whole is
+[the Questionnaire template](https://docs.popcorn.ai/questionnaire-template.md).
 
-A Routine Template ships its graph in one of two places. The keys and the
-engine are the same for both, and so are the graph's Publish checks; a Recipe
-adds a few checks of its own (see "The Publish checks that trip authors"). Everything after this section applies to
-either:
+Questionnaire uses a small part of the tier: one machine, stored in a
+Column, with three [Actions](https://docs.popcorn.ai/actions-and-status.md).
+Where a key it doesn't use needs an example, such as an overlay, a derived
+machine or an edge that launches a Flow, the example comes from another
+graph, and the text says so.
 
-- **A Recipe**: `recipe:` in `manifest.yaml`, and the graph as `recipe.yaml`
-  at the Bundle's root. This is what gives a Routine Steps it can change on
-  its own. The template's Recipe is in force until a Routine installs a
-  revision of its own. Over MCP, an assistant changes a Routine's Steps with
-  `change_routine`, which refuses a Routine whose template declares no
-  `recipe:`. It drafts the change by starting the template's own
-  `recipe_build` Flow as a dry run, installs it by starting `recipe_build`
-  again for real, and goes back to an earlier revision through the
-  template's `recipe_install` Flow.
-- **A `states:` section** in `manifest.yaml`, holding the same keys. Its
-  graph is fixed by the template Version: every Routine on that Version runs
-  the same one, and changing it means publishing a new Version.
+> [!NOTE] Checked only by the server
+> The CLI's own checks don't look inside a graph. It is checked when the
+> server parses the [Bundle](https://docs.popcorn.ai/app-bundle.md): by
+> `create_routine_version`'s dry run, by `popcorn app validate` run logged
+> in from a Checkout of a Copy with edits, and by every
+> [Publish](https://docs.popcorn.ai/versions.md). The check stops at the
+> first problem, so a new graph takes a few rounds, one error at a time.
 
-A template declares one or the other, never both. What else a Recipe carries,
-and how a Routine's own revision is installed and kept, is in
-[the Recipe](https://docs.popcorn.ai/state-machine.md#the-recipe-a-graph-each-routine-can-replace).
+## Questionnaire's graph
 
-The loop is the ordinary one from
-[changing a Routine Template](https://docs.popcorn.ai/template-authoring.md):
-edit the graph, check it, read the error, repeat. One thing is
-different. The CLI's own checks do not look inside the graph, in
-`recipe.yaml` or under `states:`; it is checked only when the server parses
-the Bundle. `popcorn app validate`
-sends it there when run logged in from a fork Checkout with edits, and
-`app publish` (or `create_routine_version`'s dry run) always does. The check
-stops at the first problem, so a new graph usually takes several rounds to
-pass, one error at a time. Run those rounds with `app validate`, which mints no Version.
+Each recipient is a Row of the `recipients`
+[Table](https://docs.popcorn.ai/tables.md). Where they stand is the
+`Stage` [Column](https://docs.popcorn.ai/table-columns.md), and the
+[Manifest](https://docs.popcorn.ai/manifest-keys.md)'s `states:` section
+turns it into the Row's Status, its Why and the Actions it offers. This is
+the section as Questionnaire ships it, without its comments:
 
-## The worked example
-
-A Table of requests that someone reviews. Most graph blocks later in this
-guide are changes to it, and every one was parsed by the engine. As a Recipe,
-the Manifest declares the Table and `recipe:`:
-
-```yaml
-# manifest.yaml
-tables:
-  tracker:
-    columns:
-      - {name: Title, type: string}
-      - {name: Owner, type: string}
-      - {name: Decision, type: string}
-      - {name: Decision Note, type: string}
-      - {name: Stage, type: string}
-      - {name: Hold, type: string}
-      - {name: Tracking, type: string}
-      - {name: Status, type: string}
-      - {name: CTAs, type: json}
-      - {name: Why, type: string}
-
-recipe: {}   # the graph is recipe.yaml
+```yaml title="manifest.yaml"
+states:
+  table: recipients
+  status:
+    column: Status
+    ctas_column: CTAs
+    why_column: Why
+  machines:
+    recipient:
+      column: Stage
+      initial: new
+      states:
+        new:
+          label: Not asked yet
+          tone: gray
+          why: Asked on the next pass, once the questionnaire, Gmail and the reply-by date are in.
+        waiting:
+          label: Waiting
+          why: Asked, with questions still open.
+        answered:
+          label: Answered
+          tone: black
+          terminal: true
+          why: Every question is answered, or a person marked them answered.
+        no_response:
+          label: No response
+          warn: true
+          why: No answer after the last follow-up, or the reply-by date passed.
+        closed:
+          label: Closed
+          tone: gray
+          terminal: true
+          why: Closed by a person; nobody follows up.
+  events:
+    staff: [ask_again, mark_answered, close]
+    world: [asked, answered, gave_up, restarted]
+  guards:
+    not_held:
+      all: [{column: Sending, empty: true}]
+  transitions:
+    - on: world.asked
+      from: new
+      to: waiting
+      expected: true
+      description: Sent the questionnaire
+    - on: world.answered
+      from: waiting
+      to: answered
+      expected: true
+      description: Every question is answered
+    - on: world.gave_up
+      from: waiting
+      to: no_response
+      expected: true
+      description: Stopped following up
+    - on: world.restarted
+      from: waiting
+      to: new
+      description: Started over at a corrected address
+    - on: staff.ask_again
+      from: no_response
+      to: waiting
+      writes: {Follow Ups: 0, Last Asked: null}
+      guard: [not_held]
+      expected: true
+      description: Asked again, with the follow-ups starting over
+      cta:
+        kind: ask-again
+        label: Ask again
+        message: "Ask {Name|this recipient} again."
+    - on: staff.mark_answered
+      from: [new, waiting, no_response]
+      to: answered
+      guard: [not_held]
+      expected: true
+      description: Marked answered by a person
+      cta:
+        kind: mark-answered
+        label: Mark answered
+        message: "Mark {Name|this recipient} as answered."
+    - on: staff.close
+      from: [new, waiting, no_response]
+      to: closed
+      guard: [not_held]
+      expected: true
+      description: Closed, so nobody follows up
+      cta:
+        kind: close
+        label: Close
+        prominence: quiet
+        message: "Close {Name|this recipient}."
 ```
 
-and `recipe.yaml` holds the graph:
+Read it top to bottom:
 
-```yaml
-# recipe.yaml
-table: tracker
-status: {column: Status, ctas_column: CTAs, why_column: Why}
-machines:
-  review:
-    column: Stage
-    states:
-      received: {label: Received}
-      in_review: {label: In review}
-      approved: {label: Approved, tone: green, terminal: true}
-      declined: {label: Declined, tone: gray, terminal: reopenable}
-    groups: {open: [received, in_review]}
-  blocker:
-    overlay: true
-    states:
-      missing_info: {label: Missing information, warn: true}
-  hold:
-    column: Hold
-    overlay: true
-    states:
-      on_hold: {label: On hold, tone: gray}
-  tracking:
-    column: Tracking
-    overlay: true
-    states:
-      not_tracking: {label: Not tracking, tone: gray}
-events:
-  staff: [start_review, approve, decline, reopen, hold, release, stop_tracking]
-  world: [withdrawn, info_missing, info_received]
-guards:
-  has_owner: [{column: Owner, empty: false}]
-transitions:
-  - on: staff.start_review
-    from: received
-    to: in_review
-    expected: true
-    cta: {kind: start-review, label: Start review}
-  - on: staff.approve
-    from: in_review
-    to: approved
-    expected: true
-    guard: [has_owner]
-    writes: {Decision: approve}
-    cta: {kind: approve, label: Approve}
-  - on: staff.decline
-    from: open
-    to: declined
-    expected: [in_review]
-    writes: {Decision: decline}
-    also: {hold: none}
-    cta: {kind: decline, label: Decline, prominence: quiet}
-  - on: staff.reopen
-    from: declined
-    to: in_review
-    writes: {Decision: ""}
-    cta: {kind: reopen, label: Reopen}
-  - on: staff.hold
-    from: hold.none
-    to: hold.on_hold
-    expected: true
-    when: [{machine: review, group: open}]
-    cta: {kind: hold, label: Put on hold}
-  - on: staff.release
-    from: hold.on_hold
-    to: hold.none
-    cta: {kind: release, label: Release}
-  - on: world.withdrawn
-    from: open
-    to: declined
-    writes: {Decision: withdrawn}
-    payload_writes: {Decision Note: note}
-    also: {hold: none}
-  - on: world.info_missing
-    from: blocker.none
-    to: blocker.missing_info
-    expected: true
-  - on: world.info_received
-    from: blocker.missing_info
-    to: blocker.none
-  - on: staff.stop_tracking
-    from: tracking.none
-    to: not_tracking
-    expected: true
-    cta:
-      kind: stop-tracking
-      label: Stop tracking
-      prominence: quiet
-      direct_only: true
-      when: [{shown: true, is: missing_info}]
-```
+- **One machine, `recipient`, stored in `Stage`.** A blank Column reads as
+  the machine's initial State, so a Row added with no `Stage` is `new`,
+  shown as *Not asked yet*. Rows stay blank there until they are asked;
+  only `Status` holds the word `new`.
+- **Five States.** `answered` and `closed` are `terminal: true`, so no
+  person's Action leaves them. `no_response` warns, which makes it
+  Questionnaire's one [Review](https://docs.popcorn.ai/reviews.md).
+- **Two Event families.** The `world` Transitions are the moves a pass
+  makes. The three `staff` Transitions are people's decisions, and each
+  carries a `cta:`, the button that is its Action.
+- **One guard, `not_held`.** Every Action needs `Sending` empty; see
+  [The guard that keeps an Action from landing under a pass](#the-guard-that-keeps-an-action-from-landing-under-a-pass).
+- **Every Column it names is on the Table:** `Status`, `Why` and `CTAs`
+  for the projection, `Stage` for the machine, `Follow Ups` and
+  `Last Asked` for Ask again's `writes`, and `Sending` for the guard.
 
-As a `states:` section, the same graph is the Manifest's `states:` key, with
-everything in `recipe.yaml` indented under it, in place of `recipe:`.
+> [!IMPORTANT] Empty a date with null
+> Ask again empties `Last Asked` with `null`. `Last Asked` is a `datetime`
+> Column, and the store refuses `""` there, so a write of `""` fails the
+> Action on every Row.
 
-It has four machines. `review` is the Funnel, stored in `Stage`. `blocker`
-is an Overlay with no Column, so the Bundle's own code decides it from the
-Row's facts. `hold` is an Overlay stored in `Hold`. `tracking` is the one a
-Recipe needs once its graph has a work item: `missing_info` warns, so a Row
-showing it opens an action item, and a Recipe is refused unless that item
-can stop tracking its Row (see "The Publish checks that trip authors"). Its button's `when:` keeps Stop tracking to
-the Rows showing `missing_info`, which get it as action items anyway.
-Publish renders display hints onto `Status`, `Stage`, `Hold` and `Tracking`.
-The one on `Status` lists the whole vocabulary and marks `missing_info` as a
-warning:
+Publish renders a display hint onto `Status` and `Stage` from the States,
+so the Table carries none of its own. Questionnaire's is:
 
 ```text
-status:received,in_review,approved,declined,missing_info,on_hold,not_tracking;warn=missing_info;labels=…;tone=…
+status:new,waiting,answered,no_response,closed;warn=no_response;labels=new:Not asked yet|waiting:Waiting|answered:Answered|no_response:No response|closed:Closed;tone=new:gray|answered:black|closed:gray
 ```
 
-A Row in review, with an owner and nothing blocking it, shows `in_review` and
-offers Approve, Decline and Put on hold. Put it on hold and it shows `on_hold`.
-Now Approve is still offered but Put on hold is not, because its edge leaves
-only `hold.none`.
+### Read a Routine's graph
+
+> "What Statuses can a recipient in #team-offsite have?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `get_table` on the `recipients` Table.
+
+Your assistant lists the Table's Columns, with `Status` and `Stage` marked
+as changed only by Transitions, and the machine with its States. For the
+whole file, ask it to read `manifest.yaml` from the
+[Routine](https://docs.popcorn.ai/routines.md).
+
+## How the Flows move a recipient
+
+Questionnaire's [Flows](https://docs.popcorn.ai/flow-grammar.md) never fire
+a `world` Event. They write `Stage` as a plain fact, then project. Here is
+the end of `ask_recipient`, which records the first email and projects the
+Row:
+
+```yaml title="ask_recipient.yaml"
+  - id: record
+    when: $steps.thread.output.value != 'none'
+    activity: foundation.store.patch_row
+    args:
+      conversation_id: $inputs.conversation_id
+      table_name: recipients
+      record_id: $inputs.record_id
+      patch:
+        Stage: waiting
+        Thread: $steps.thread.output.value
+        Asked: $steps.now.output.iso
+        Last Asked: $steps.now.output.iso
+        Follow Ups: 0
+        Message Id: $steps.send.output.rfc822_message_id
+        Asked Address: $steps.compose.output.to
+        Sending: ""
+      change_kind: questionnaire_asked
+      change_action: $steps.compose.output.asked
+
+  - id: project
+    when: $steps.thread.output.value != 'none'
+    activity: feature.state.project
+    on_error: { policy: skip, retry: 1 }
+    args:
+      record_ids: [$inputs.record_id]
+```
+
+`check_recipient` does the same with whatever its code block settles:
+`answered`, `no_response`, or a blank `Stage` when the Email was corrected,
+which reads as `new` again. `feature.state.project` reads each Row's
+`Stage`, composes its Status, and writes `Status`, `Why` and `CTAs`. The
+[Schedule](https://docs.popcorn.ai/schedules.md)'s Flow, `questionnaire_tick`,
+ends every pass by projecting every Row. That covers Rows added since the
+last pass and any Row whose own projection failed:
+
+```yaml title="questionnaire_tick.yaml"
+  - id: project
+    activity: feature.state.project
+    timeout_seconds: 180
+    on_error: { policy: skip, retry: 1 }
+    args:
+      results: changed
+```
+
+With no `record_ids` it projects the whole Table. `results` narrows only
+what the Step returns (`all`, `changed` or `warn`), not what it writes.
+
+So the `world` Transitions are a record of the moves, kept so the graph is
+whole. The Publish checks need them, because `waiting` and `no_response`
+are reachable only through them, and a rendered graph draws them. They are
+not what moves a Row.
+
+> [!WARNING] A direct write isn't judged
+> A Flow that writes a stored Column itself skips the engine's judgement of
+> the move. A value that isn't a declared State leaves the Row out of
+> projection: `feature.state.project` reports it as `unknown_state` and
+> writes nothing for it. Keep the values a Flow writes to the graph's own
+> names, and hold the Rows to the graph with `feature.state.check` (see
+> [Check it](#check-it)).
+
+A template that wants the engine to judge each move fires the Event
+instead, with `feature.state.transition`. Questionnaire's `check_recipient`
+doesn't; if it did, giving up would be:
+
+```yaml title="check_recipient.yaml"
+- id: give_up
+  activity: feature.state.transition
+  args:
+    event: world.gave_up
+    record_ids: [$inputs.record_id]
+```
+
+Then an illegal move is refused, as an Action is, rather than written.
+
+`create_rows` and `update_row` refuse a state Column, so neither your
+assistant nor the Routine's [Agent](https://docs.popcorn.ai/agent.md) can
+set `Stage` or `Status` by hand. A person moves a recipient with an Action.
+
+## How an Action runs
+
+A press of a button, in Popcorn or through `take_action`, starts the Bundle
+Flow named `cta_apply` with the Action's `action`, the Rows' `record_ids`
+and a `payload`. Questionnaire's is two Steps:
+
+```yaml title="cta_apply.yaml"
+name: cta_apply
+version: 1
+inputs:
+  action: { type: string }
+  record_ids: { type: array }
+  payload: { type: object, default: {} }
+
+steps:
+  - id: apply
+    activity: feature.state.transition
+    timeout_seconds: 120
+    on_error: { policy: fail, retry: 0 }
+    args:
+      event: $inputs.action
+      record_ids: $inputs.record_ids
+      payload: $inputs.payload
+      operation_key: $trigger.run_id
+      conversation_id: $trigger.conversation_id
+
+  - id: refused
+    when: "$steps.apply.output.applied == 0"
+    activity: foundation.workflow.fail
+    args:
+      code: $steps.apply.output.first_refusal.code
+      reason: $steps.apply.output.first_refusal.reason
+
+outputs:
+  applied: $steps.apply.output.applied
+  refused: $steps.apply.output.refused
+  results: $steps.apply.output.results
+```
+
+`action` arrives as the bare Event name, `ask_again`, and the engine finds
+it in the `staff` family. For each Row it reads `Stage`, finds the one
+legal edge, and writes, in one patch at the Row's read-time revision:
+
+- the edge's `writes`, here `Follow Ups: 0` and `Last Asked: null`;
+- the landing State in `Stage`, here `waiting`;
+- the recomposed `Status`, `Why` and `CTAs`.
+
+A Row changed since it was read comes back refused as `StaleRev`, and
+nothing overwrites it. Each applied edge records a change on the Row in its
+[History](https://docs.popcorn.ai/history.md), with the Transition's
+`description` as the line: "Asked again, with the follow-ups starting
+over". Nothing is sent here. A recipient asked again is followed up by the
+next pass, because a blank `Last Asked` is due at once.
+
+> [!IMPORTANT] The name is fixed
+> Popcorn and `take_action` both start the Flow by the literal name
+> `cta_apply`, with those three inputs. Publish doesn't check that a Bundle
+> with buttons ships it.
+
+### Take one from your assistant
+
+> "Jane answered at standup. Mark Jane as answered."
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_rows` to find Jane's Row, `list_actions` to
+> see what it offers, then `take_action`.
+
+`list_actions` reads the Row's `CTAs` Column, the buttons the last
+projection offered, and names the Status each one lands on. An assistant
+can take only an Action that a press completes: `route: deterministic`
+with `ui: button`, which all three of Questionnaire's are. Others are
+listed and marked "in Popcorn", and `take_action` refuses them.
+
+## The guard that keeps an Action from landing under a pass
+
+`ask_recipient` and `check_recipient` start by claiming the Row: they write
+their Run's id into `Sending`, and clear it in the same patch that writes
+the new `Stage`. In between, they decide from the Row as the claim read
+it. An Action that landed in that window would be overwritten when the
+pass writes `Stage`, so every Action carries `not_held`:
+
+```yaml title="manifest.yaml"
+  guards:
+    not_held:
+      all: [{column: Sending, empty: true}]
+```
+
+The guard is judged when the Action is taken, against the Row as it is
+then. The buttons were projected earlier, so a held Row may still show
+them, and a press while it is held is refused:
+
+```text
+staff.ask_again is not legal here: guard not_held refused
+```
+
+`cta_apply` then fails the Run with that reason and the code `NoEdge`,
+since the guard declares no code of its own. Once the pass releases the
+Row, the Action can be taken again.
+
+> [!TIP] Give a guard words
+> A guard may carry `code:` and `message:`, which a refusal reports in
+> place of the generic ones, and which `take_action` quotes when it
+> explains why an Action isn't offered. Questionnaire's `not_held` has
+> neither.
+
+## Adopting Rows from before the States tier
+
+Questionnaire added `states:` in 0.2.0. Before that, its Flows wrote the
+recipient's state straight into `Status`, and there was no `Stage`. A
+Routine upgraded from 0.1.x has Rows with a `Status` such as `waiting` and
+a blank `Stage`, which would read as `new` and be asked again.
+
+The template carries them over itself, on the first pass after the
+upgrade. Its code block's `plan` operation lists every Row that has a
+`Status` it knows, no `Stage`, and no `CTAs`. A Row with no `CTAs` has
+never been projected, so its `Status` was written by the old Flows and is
+a fact. Once projected, a Row's `Status` is the projection's and is never
+read back. The tick writes each one's `Stage` before it asks or checks
+anyone:
+
+```yaml title="questionnaire_tick.yaml"
+  - id: adopt
+    foreach: $steps.plan.output.adopt
+    as: row
+    max_parallel: 3
+    on_error: { policy: skip }
+    activity: foundation.store.patch_row
+    args:
+      conversation_id: $inputs.conversation_id
+      table_name: recipients
+      record_id: $row.record_id
+      patch:
+        Stage: $row.stage
+      change_kind: questionnaire_stage_adopted
+      change_action: Carried the recipient's Status into Stage
+```
+
+On every later pass the list is empty. The pass's last Step projects every
+Row, adopted ones included.
+
+> [!NOTE] Nothing adopts for you
+> Publish judges the graph, not the Rows a Routine already holds. A
+> template that moves existing Rows onto a States tier, or drops a State
+> some Row is on, has to move those Rows itself, as Questionnaire does.
+
+## Announce a change to the graph
+
+Popcorn's own templates name every change to the graph in their changelog
+with the words `STATE CHANGE`. Questionnaire's 0.2.0 entry begins:
+
+```yaml title="manifest.yaml"
+changelog: >-
+  0.2.0 — STATE CHANGE: a recipient's state moves to a new `Stage` column
+  and `Status` becomes its projection, declared as a `states:` graph, so
+  No response is a Review with three Actions: …
+```
+
+A check in Popcorn's own repository refuses a change to a template's
+`states:` section, or its removal, without that sentence, so a State added,
+renamed or dropped is something a reviewer reads rather than a line inside
+a YAML block. Nothing checks a Copy's changelog. Write the sentence anyway:
+it is what tells the people on your Copy that their Rows can show
+something new.
+
+## Change the graph: add a Snoozed State
+
+> "In my questionnaire Copy, add a Snoozed state: a waiting recipient can
+> be snoozed so nobody follows up, and resumed later."
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_routine_files` and `read_routine_file` for
+> `manifest.yaml`, then `create_routine_version` without `confirm` to
+> check the change, and again with `confirm=true` once you agree.
+
+The change is the State, two Events and two Transitions:
+
+```yaml title="manifest.yaml"
+      states:
+        # … new, waiting, answered, no_response, closed as before
+        snoozed:
+          label: Snoozed
+          tone: gray
+          why: Snoozed by a person; nobody follows up until it is resumed.
+  events:
+    staff: [ask_again, mark_answered, close, snooze, resume]
+    world: [asked, answered, gave_up, restarted]
+  transitions:
+    # … the existing Transitions
+    - on: staff.snooze
+      from: waiting
+      to: snoozed
+      guard: [not_held]
+      expected: true
+      description: Snoozed by a person
+      cta: {kind: snooze, label: Snooze, prominence: quiet}
+    - on: staff.resume
+      from: snoozed
+      to: waiting
+      guard: [not_held]
+      expected: true
+      description: Resumed, followed up when due
+      cta: {kind: resume, label: Resume}
+```
+
+No Flow changes. Questionnaire's `plan` asks only Rows with a blank
+`Stage` and checks only `waiting` ones, so a snoozed recipient is left
+alone until Resume puts them back to `waiting`. A State your Flows must
+act on needs its Flows or code block changed too. The Manifest's
+`agent_summary` lists the Stage values for the Routine's Agent, so add
+`snoozed` there as well.
+
+A dry run of this change with a step missing fails one check at a time.
+These are the errors in the order a first draft usually meets them:
+
+```text
+states: 'recipient': no edge reaches ['snoozed']; a state nothing enters is either dead or missing its world event
+states: 'recipient': no expected edge enters ['snoozed']; mark the edge that is the normal way in with expected: (an `also:` needs a when: [{machine: recipient, …}] naming where it leaves)
+states: recipient.snoozed has no way out and is not terminal
+```
+
+The first is the State with no Snooze edge, the second the Snooze edge
+without `expected: true`, the third Snooze without Resume. Then bump
+`version:` and say what changed:
+
+```yaml title="manifest.yaml"
+version: "0.3.0"
+changelog: >-
+  0.3.0 — STATE CHANGE: a new Snoozed state. Snooze stops following up on
+  a waiting recipient, and Resume puts them back to Waiting.
+  …
+```
+
+> [!WARNING] Every Routine on the Copy
+> A new Version reaches every Routine on the Copy, not only the one you
+> asked about. The dry run says which.
 
 ## Design the machines
 
+Questionnaire needs one machine. A graph that tracks more than one thing
+about a Row adds machines, and these rules decide how.
+
 **One Funnel, then Overlays.** The Funnel is the milestone that moves
-forward. An Overlay is something true *alongside* it: blocked, parked,
-waiting on a side document. An Overlay has an implicit `none` State, and you
-never declare it. Test each candidate State against this: can it hold at the
-same time as a Funnel State? If it can, it belongs in an Overlay. The first
-machine with no `overlay: true` is the **primary**. When no Overlay is
-active, Status shows the primary.
+forward, as `recipient` does. An Overlay is something true *alongside* it:
+blocked, parked, waiting on a side document. Test each candidate State:
+can it hold at the same time as a Funnel State? If it can, it belongs in an
+Overlay, declared with `overlay: true`. An Overlay has an implicit `none`
+State, which you never declare. The first machine without `overlay: true`
+is the primary, and Status shows it when no Overlay is set.
 
 **Declaration order is precedence.** With no `status.compose` rules, Status
-shows the first Overlay, in declaration order, that is not `none`. The
-example declares `blocker` before `hold`, so a Row that is held *and* missing
-information shows the warning, not the parking.
+shows the first Overlay, in declaration order, that is not `none`. Declare
+the one that matters most first.
 
 **Where each value comes from:**
 
 | Shape | Declared as | Its value comes from | Moves by |
 |---|---|---|---|
-| stored | `column: Stage` | the Column | Events: the engine writes the Column when an edge lands |
+| stored | `column: Stage` | the Column | a Transition, or a Flow writing the Column |
 | derived | no `column` | the Bundle's code, handed in per Row | the Bundle's derivation changing |
 | mirror | `column:` plus `derive: true` | the Bundle's code; the engine writes it into the Column | the same, recorded in a Column clients can read |
 
-A derived value reaches the engine as `machines`, keyed by each Row's id (its
-`record_id`) as a string. That input goes to `feature.state.project`,
+`recipient` is stored. A derived value reaches the engine as `machines`,
+keyed by each Row's id as a string, on `feature.state.project`,
 `feature.state.transition` and `feature.state.check`:
 
 ```yaml
 machines: {"12": {blocker: missing_info}, "13": {blocker: none}}
 ```
 
-A block can also carry the value on its own Row patch. In a
-`patch_rows … project_states: true` write from `foundation.code.execute`,
-each patch carries `states: {machines: {blocker: missing_info}}` for its own
-Row. A machine you leave out reads as its Column, or as its initial State. A
-stored machine cannot be supplied: its value is its Column, and a caller that
-could hand one in could make an illegal edge legal. The Step fails with
-`MachinesInvalid`:
+A `patch_rows … project_states: true` write from `foundation.code.execute`
+can carry the same per Row, as `states: {machines: {blocker: missing_info}}`
+on its patch. A machine left out reads as its Column, or as its initial
+State. A stored machine can't be supplied: its value is its Column, and a
+caller that could hand one in could make an illegal edge legal. The Step
+fails with `MachinesInvalid`:
 
 ```text
-machines: stored machines ['review'] are read from their columns, not supplied
+machines: stored machines ['recipient'] are read from their columns, not supplied
 ```
 
 A mirror suits a value that is computed but must still be readable as a
-Column, for filtering or for a client:
-
-```yaml
-machines:
-  payment:
-    column: Payment
-    derive: true
-    states:
-      unpaid: {label: Unpaid}
-      paid: {label: Paid, tone: green, terminal: true}
-```
-
-A mirror's Column belongs to the projection, the same as `Status`. A Bundle
-patch that writes it is refused.
-
-**A derived machine still needs edges.** The graph checks walk Transitions,
-so `blocker` declares `world.info_missing` and `world.info_received` even
-though nothing fires them. The Bundle simply starts supplying
-`missing_info`. The edges say how the value moves, and they are what a
-rendered graph draws.
+Column, for filtering or for a client. Its Column belongs to the
+projection, as `Status` does, and a Bundle write to it is refused. A
+derived machine still needs its edges, as Questionnaire's `world` edges
+are needed: the checks walk Transitions, and a rendered graph draws them.
 
 **The initial State is the first one declared** unless `initial:` names
-another. Put the entry State first, and keep that order in any tool that
-rewrites YAML: one that sorts keys changes the initial State without a
-word. An Overlay's initial State is `none`.
+another. Questionnaire names `new` explicitly. Without that, a tool that
+sorts YAML keys would make `answered` the initial State, and the graph
+would fail:
 
-## States, Events, Transitions and Status
+```text
+states: 'recipient': no edge reaches ['closed', 'new', 'no_response', 'waiting']; a state nothing enters is either dead or missing its world event
+```
+
+An Overlay's initial State is `none`.
+
+## The keys
 
 ### States
 
@@ -276,33 +572,35 @@ word. An Overlay's initial State is `none`.
 | `label` | the chip text; the State name humanised when absent |
 | `tone` | `green`, `red`, `gray` or `black` |
 | `warn` | the chip is a warning, and a Row showing it is a work item |
-| `terminal` | `true`: only a `system` Event may leave it. `reopenable`: an ending that a later Event may undo |
+| `terminal` | `true`: only a `system` Event may leave it. `reopenable`: an ending a later Event may undo |
 | `stored_as` | the Column value when it is not the State name |
-| `why` | the default Why prose while a Row shows this State |
+| `why` | the default Why while a Row shows this State |
+| `why_from` | a Column whose text is the Why while a Row shows this State, ahead of `why` |
 | `work_item` | overrides `warn` for the worklist: `true` opens an item without warning, `false` warns without one |
-| `detail` | `{column, values, labels, tone}`: a qualifier Column for this State — one State, many reasons — that an edge landing here may stamp |
+| `error` | a Row showing it stopped because something went wrong, not for a decision |
+| `detail` | `{column, values, labels, tone}`: a qualifier Column for this State, one State with many reasons, that an edge landing here may stamp |
 
-State names may not contain `,`, `;` or `|`, and labels may not contain `;`,
-`:` or `|`. Hints are built from both, and those characters are the hint's
-separators. `groups:` names sets of States. `from:` and the predicates accept
-a group wherever they accept a State.
+State names may not contain `,`, `;` or `|`, and labels may not contain
+`;`, `:` or `|`: those are the display hint's separators. `groups:` names
+sets of States, and `from:` and the predicates accept a group wherever they
+accept a State.
 
 ### Events
 
-`events:` maps a **family** to its Event names. Two family names mean
-something to the platform:
+`events:` maps a family to its Event names. Two families mean something to
+the platform:
 
 - `staff` Events are people's decisions. Only a `staff` edge may carry a
   `cta:`, so these are the buttons.
-- `system` Events are the only ones allowed to leave a `terminal: true`
-  State. Keep them for corrections the Bundle's own machinery makes, such as
-  a failed Step that has to move a finished Row, never for a decision.
+- `system` Events are the only ones that may leave a `terminal: true`
+  State. Keep them for corrections the Bundle's own machinery makes, never
+  for a decision.
 
-Every other family name is yours; `world` and `agent` are the usual ones. A
-Transition names its Event as `family.event`. `feature.state.transition`
-also accepts the bare Event name when only one family has it, which is how
-a button's `action` arrives. A bare `on:` key is safe. YAML reads it as the
-boolean `true`, and the parser turns it back.
+Every other family name is yours; Questionnaire's `world` is the usual one.
+A Transition names its Event as `family.event`, and
+`feature.state.transition` also takes the bare name when only one family
+has it. A bare `on:` key is safe: YAML reads it as `true`, and the parser
+turns it back.
 
 ### Transitions
 
@@ -310,60 +608,44 @@ boolean `true`, and the parser turns it back.
 |---|---|
 | `on` | `family.event` |
 | `from` | a State, a group, a list of them, or `*`; qualify as `hold.none` when the name is ambiguous |
-| `to` | one State; several, when a Flow or a written value decides; or `same` |
+| `to` | one State; several, when a Flow decides; or `same` |
 | `expected` | `true`, or the list of `from` States it is the normal move out of |
-| `writes` | Column → literal, written when the edge lands |
+| `writes` | Column → literal, written when the edge lands; `null` empties a Column |
 | `payload_writes` | Column → payload key, from the Event's `payload` |
 | `also` | other machine → State, moved at the same time |
 | `when` | predicates on the Row and the tuple; all must hold |
-| `guard` | named Guards; all must hold |
+| `guard` | named guards; all must hold |
 | `cta` | the button, on `staff` edges only |
 | `flow` | a Bundle Flow that *is* the edge; the edge writes nothing itself |
 | `then` | Bundle Flows to launch per Row after the writes land |
 | `effects` | names of Bundle-side work, echoed back per applied Row |
-| `detail` / `detail_from` | the landing State's detail value, literal or read from that payload key; mutually exclusive, and the landing State must declare `detail:` |
-| `importance` | 1–10, how loudly a client draws the edge, on one scale across every machine; display only. An int, or a map of source State to rank with an optional `default` |
-| `description` | free text |
+| `detail` / `detail_from` | the landing State's detail value, literal or from that payload key; the landing State must declare `detail:` |
+| `importance` | 1–10, how loudly a client draws the edge; display only. An int, or a map of source State to rank with an optional `default` |
+| `description` | the line the Row's History records when the edge lands |
 
-The machine is inferred. A qualified reference (`hold.none`) names it;
-otherwise it is the one machine that owns every `from` reference. If that
-is ambiguous, Publish says `cannot infer its machine … set machine:`, and a
-`machine:` key settles it.
+The machine is inferred: a qualified reference names it, or else it is the
+one machine that owns every `from`. When that is ambiguous, Publish says
+`cannot infer its machine … set machine:`, and a `machine:` key settles it.
 
-**`importance:` is all or nothing.** A spec ranks every edge or none. With
-none, an expected edge draws at 6 and the rest at 3. Rank rarity with
-`importance`, not by dropping `expected`: a rare failure can be the one way
-into its State and still draw quietly.
+**`expected:` marks the normal way in, not the likely one.** Every State
+but the initial needs one. All three of Questionnaire's Actions are
+expected, and so are three of its four `world` edges; `world.restarted` is
+not, because `new` is the initial State and needs no way in.
 
-**`expected:` marks the normal way in, not the likely one.** Every edge is
-legal, and most are shortcuts. A client that draws only the expected edges
-must still show every State, which is why every State but the initial needs
-one (see "The Publish checks that trip authors"). `staff.decline` is `from: open` but `expected: [in_review]`:
-declining from review is the normal path, and declining an unread request
-is a shortcut.
+**`importance:` is all or nothing.** A graph ranks every edge or none. With
+none, an expected edge draws at 6 and the rest at 3.
 
-**`to: same`** records something without moving the machine: a nudge, a
-snooze. It may write other Columns, but not its own machine's.
+**`to: same`** records something without moving the machine, such as a
+nudge. It may write other Columns, but not its own machine's, and it
+counts as neither a way in nor a way out for the checks.
 
-```yaml
-- on: staff.nudge
-  from: open
-  to: same
-  writes: {Nudged At: now}
-  cta: {kind: nudge, label: Nudge}
-```
+**`flow:` and `then:`** hand work to the Bundle, and Questionnaire uses
+neither. A `flow:` edge is legal like any other, but
+`feature.state.transition` writes nothing for it and returns the Flow to
+launch, whose own writes move the Row. That is how a staff edge can land on
+more than one State. From a document-sending graph:
 
-A `same` edge counts as neither a way in nor a way out, so it cannot
-satisfy the reachability, expected or exit checks. This one also needs
-`nudge` added to `events.staff` and a `Nudged At` Column.
-
-**`flow:` and `then:`** hand work to the Bundle. A Flow edge is legal like
-any other, but `feature.state.transition` writes nothing for it and returns
-the Flow to launch. The Flow's own writes move the Row, which is how a
-staff edge can land on more than one State. From a separate graph, a
-`document` machine whose `sent` is terminal:
-
-```yaml
+```yaml title="manifest.yaml"
 - on: staff.send
   from: draft
   to: [sent, failed]
@@ -380,47 +662,26 @@ staff edge can land on more than one State. From a separate graph, a
   cta: {kind: retry, label: Try again}
 ```
 
-A `then` input is a literal or one of `$payload.<key>`, `$row.<Column>`
-(read after the writes), `$record_id` or `$conversation_id`. A `then` entry
-may carry its own `when:`, judged against the Row after the writes.
+A `then` input is a literal, `$payload.<key>`, `$row.<Column>` (read after
+the writes), `$record_id` or `$conversation_id`, and an entry may carry
+its own `when:`. The Activity does not start either kind of Flow: it
+returns them as `launches`, and `cta_apply` must start them (see
+[When edges launch Flows](#when-edges-launch-flows)).
 
 ### The button
 
 `cta:` takes `kind` and `label`, which are required, and optional `ui`
 (`button`, the default, `input`, `contact-picker`, `contact-form` or
 `signing-modal`), `prominence` (`primary` or `quiet`), `route`
-(`deterministic`, `agent` or `noop`), `message` and `when`. The `kind` names
-the button, and one kind belongs to one Event. `route` defaults to
-`deterministic`: a click runs your `cta_apply` Flow directly (see "Wire the Flows") and posts
-nothing. `message` is the chat line, templated on Columns as
-`{Title}` or `{Title|this request}`.
+(`deterministic`, the default, `agent` or `noop`), `direct_only`,
+`message` and `when`. One `kind` belongs to one Event. `message` is the
+chat line, templated on Columns as `{Name|this recipient}`, as
+Questionnaire's are.
 
-**Choose `ui` and `route` knowing who presses the button.** The Popcorn client
-draws every one. An assistant over MCP can take only an Action that the press
-completes: `route: deterministic` with `ui: button`. `list_actions` shows the
-others marked "in the Popcorn app", and `take_action` refuses them. Both the
-client and `take_action` start the Flow by the literal name `cta_apply`, so a
-Bundle with buttons must ship a Flow by that name.
-
-A button's `when` can offer *less* than the edge allows. Approve is legal
-while a Row is on hold, but a held card should not invite it:
-
-```yaml
-- on: staff.approve
-  from: in_review
-  to: approved
-  expected: true
-  guard: [has_owner]
-  writes: {Decision: approve}
-  cta:
-    kind: approve
-    label: Approve
-    when: [{machine: hold, is: none}]
-```
-
-Held, the Row now offers Decline and Release. An Event with more than one
-legal edge for a Row is not offered at all, because the click would be
-refused as `Ambiguous`.
+A button's `when` can offer *less* than the edge allows. It may use a
+`shown: true` predicate on the displayed Status, which a guard may not. An
+Event with more than one legal edge for a Row is not offered at all,
+because the press would be refused as `Ambiguous`.
 
 ### Status
 
@@ -428,276 +689,72 @@ refused as `Ambiguous`.
 |---|---|---|
 | `column` | `Status` | the projected chip |
 | `ctas_column` | `CTAs` | the offered buttons; `null` for none |
-| `why_column` | `Why` | the reason prose; `null` for none |
+| `why_column` | `Why` | the reason; `null` for none |
 | `sub` | none | a machine Column a client shows under the chip |
 | `compose` | none | precedence rules, first match wins |
 | `row_ctas` | `all` | `unless_warn` leaves a warning Row's buttons to its worklist item |
 | `worklist` | none | an action-item Table the projection keeps |
 
-The defaults are Columns too. A section with no `status:` key still needs
-`Status`, `CTAs` and `Why` declared on the Table.
+The defaults are Columns too, so a `states:` section with no `status:` key
+still needs `Status`, `CTAs` and `Why` on its Table. Questionnaire spells
+all three out.
 
-`compose` overrides the Overlay fall-through. A rule's `show:` names a
-machine, meaning its current State, or a literal State, and a rule may carry
-its own `why`.
-To let a decided request show its decision even while a stale blocker is
-still derived:
+`compose` overrides the overlay fall-through. A rule's `show:` names a
+machine, meaning its current State, or a literal State, and may carry its
+own `why`:
 
-```yaml
+```yaml title="manifest.yaml"
 status:
-  column: Status
-  ctas_column: CTAs
-  why_column: Why
   compose:
     - when: [{machine: review, in: [approved, declined]}]
       show: review
 ```
 
-With no unconditional rule, anything the rules do not match falls through as
-before. With one, every machine no rule shows drops out of the Status
-vocabulary and its hint.
+With an unconditional rule, every machine no rule shows drops out of the
+Status vocabulary. `worklist: {table: issues, key: cause}` keeps one open
+Row per Row whose shown Status is a work item; the worklist Table must
+declare every Column the reconcile writes (`cause`, `Issue`, `Stage`,
+`Why`, `ctas`, `Status`, `Opened`, `Resolved` and `affected_record_ids`,
+or the names set on `worklist:`).
 
-`worklist: {table: issues, key: cause}` keeps one open Row per `tracker` Row
-whose shown Status is a work item. The worklist Table must declare every
-Column the reconcile writes: `cause`, `Issue`, `Stage`, `Why`, `ctas`,
-`Status`, `Opened`, `Resolved` and `affected_record_ids`, or the names you
-set on `worklist:` instead.
+### Guards
 
-## The Publish checks that trip authors
-
-Each check refuses the Publish with one message. A check on the graph is
-prefixed `states:`, in a Recipe too; a Recipe's own checks, last in this
-section, name the block or the file they looked at. The wording is the
-engine's, and these are the messages the example's variants produce.
-
-**Every State but the initial needs an `expected:` edge in.** This is the
-one new graphs hit first. Here `expected: true` was left off
-`staff.start_review`:
-
-```text
-states: 'review': no expected edge enters ['in_review']; mark the edge that is the normal way in with expected: (an `also:` needs a when: [{machine: review, …}] naming where it leaves)
-```
-
-Mark the edge that is the State's normal way in. An `also:` counts only
-when its Transition's `when:` names the machine and State it leaves from;
-otherwise its source is unknown and no spine can draw it.
-
-**Every State must be reachable** from the initial State, through edges or
-through `also:`. A State nothing enters is dead, or its world Event is
-missing:
-
-```text
-states: 'review': no edge reaches ['escalated']; a state nothing enters is either dead or missing its world event
-```
-
-**A Funnel State with no way out must be terminal.** Overlays are exempt,
-because an Overlay may simply stay set until it clears. Here `approved`
-lost its `terminal: true`:
-
-```text
-states: review.approved has no way out and is not terminal
-```
-
-**Only `system` leaves a `terminal: true` State.** Letting `staff.reopen`
-leave `approved` as well as `declined`:
-
-```text
-states: review.approved is terminal but ['staff.reopen'] leave it
-```
-
-If people should be able to undo the ending, declare it
-`terminal: reopenable`, as `declined` is. Another machine's edge that
-moves this machine through `also:` needs a `when:` that rules the terminal
-State out.
-
-**No two machines share a State name.** Status holds their union, so a
-value must name its machine on its own:
-
-```text
-states: state 'received' is declared by both 'review' and 'blocker'; the Status vocabulary is their union
-```
-
-**Staff edges do something, and land somewhere definite.** A button that
-moves only a derived machine would be undone by the next derivation, so it
-must write a fact, launch a Flow, or declare an effect. A staff edge lands
-on one State unless a `flow:` decides. And only a `staff` edge carries a
-button:
-
-```text
-states: staff edge 'staff.dismiss' moves only the derived machine 'blocker' and writes nothing; add writes, a flow, a then or an effect
-states: staff edge 'staff.decline' must land on one state unless a flow decides the outcome
-states: 'world.info_missing' carries a cta but is not a staff event
-```
-
-**One `cta.kind`, one Event.** Two edges may share a kind only when they
-fire on the same Event:
-
-```text
-states: cta kind 'approve' is used by both 'staff.approve' and 'staff.reopen'
-```
-
-**A `same` edge does not write its own Column**, because the Row would move
-while the edge claims it does not:
-
-```text
-states: 'staff.snooze' is a `same` edge but writes its own column 'Stage'; say where it lands
-```
-
-**`importance:` ranks every edge or none**, and a map must cover every
-`from:` State or carry `default:`:
-
-```text
-states: importance ranks every edge or none; unranked: ['staff.reopen']
-states: transition on 'staff.decline' ranks no importance from ['received']; name them or add default:
-```
-
-**A detail stamp needs a landing State that declares one:**
-
-```text
-states: transition on 'staff.decline' stamps a detail but its landing state declares none
-```
-
-**`also:` names other machines.** The edge's own machine moves by `to:`:
-
-```text
-states: transition on 'staff.decline': also names its own machine 'review'; that is what to: is for
-```
-
-**Transition Flows must be in the Bundle.** Every `flow:` and `then:` has to
-name a Flow the Bundle installs. Otherwise the Row would move and then
-launch nothing:
-
-```text
-states: transitions name flows ['notify_requester'] that this bundle does not install (flows: ['cta_apply'])
-```
-
-**The graph needs `tables:`**, and the Table it names must declare every
-Column the tier reads or writes. That means the Status, CTAs and Why
-Columns, every stored machine Column, every `writes` and `payload_writes`
-Column, and every Column a predicate reads. Otherwise the tier would write
-Columns the Table lacks, or read blanks:
-
-```text
-states: a tables: section declaring its table is required
-states: table 'tracker' lacks columns ['Decision'] the states tier writes
-states: predicates read columns ['Owner'] that table 'tracker' does not declare
-```
-
-The predicate check exists because a missing Column reads blank on every
-Row, which would quietly make `has_owner` never hold.
-
-**Drop hand-written `display:` hints.** The tier renders them from the
-spec. A Column that already carries a different one fails:
-
-```text
-states: column 'Stage' carries display hint 'status:received,in_review,approved,declined' but the states tier renders 'status:received,in_review,approved,declined;labels=received:Received|in_review:In review|approved:Approved|declined:Declined;tone=approved:green|declined:gray'; drop the literal or change the spec
-```
-
-A graph that moves from hand-kept hints onto the tier deletes those
-literals. There is no need to copy the rendered value back in.
-
-**A Recipe has checks of its own**, on the Bundle around the graph. The
-Manifest declares `recipe:` or `states:`, not both; `recipe:` needs
-`recipe.yaml` at the Bundle's root, and `recipe.yaml` needs `recipe:`; and
-`recipe:` needs `tables:`, as `states:` does:
-
-```text
-recipe: a bundle declares states: or recipe:, not both
-recipe: the bundle ships no recipe.yaml at its root
-recipe.yaml is present but the manifest declares no recipe: section
-recipe: a tables: section declaring the graph's table is required
-```
-
-**A Recipe's action items must be able to stop tracking.** When the graph
-has a work item, it needs a `staff.stop_tracking` edge from `tracking.none`
-to `not_tracking` carrying a `cta` of kind `stop-tracking`, as the example's
-`tracking` machine does. A `states:` section has no such check. Without the
-edge:
-
-```text
-recipe.yaml: the recipe opens action items (missing_info) but declares no staff.stop_tracking transition with a `cta: {kind: stop-tracking}`; every action item must be able to stop tracking its row (e.g. `on: staff.stop_tracking`, `from: tracking.none`, `to: not_tracking`, `cta: {kind: stop-tracking, prominence: quiet, direct_only: true}`)
-```
-
-## Guards
-
-A Guard is a named condition a Transition lists under `guard:`. It is
-`all:` or `any:` of predicates, and a bare list means `all:`. Each predicate
-names exactly one subject and one operator:
+A guard is `all:` or `any:` of predicates, and a bare list means `all:`,
+as `not_held` shows. Each predicate names one subject and one operator:
 
 | Subject | Operators |
 |---|---|
 | `column: X` | `empty: true` or `false`, `equals:`, `in:`, `not_in:` (case-insensitive) |
 | `machine: M` | `is:`, `in:`, `not_in:` (States or groups), `group:` |
 | `guard: G` | none; add `holds: false` to negate |
-| `shown: true` | `is:`, `in:`, `not_in:` against the displayed Status |
+| `shown: true` | `is:`, `in:`, `not_in:`, on a button's `when:` only |
 
-```yaml
-guards:
-  has_owner: [{column: Owner, empty: false}]
-  unowned:
-    all: [{guard: has_owner, holds: false}]
-  decided:
-    any:
-      - {column: Decision, in: [approve, decline]}
-      - {machine: review, is: approved}
-```
+A guard may build on another guard, but not on itself through a cycle.
 
-A Guard may build on another Guard, but not on itself through a cycle. A
-Guard can carry `code:` and `message:`, and a refusal it causes reports
-them, so a client can key its copy on the code. Without them, a refusal
-reads `staff.approve is not legal here: guard has_owner refused`.
+**A Routine Setting.** `{scalar: <key>, equals: <value>}` holds while that
+[Scalar](https://docs.popcorn.ai/scalar-tiers.md) equals the value, unset
+reading as `""`. The engine reads it once per call. Use it for a switch
+that gates an edge.
 
-**`shown:` belongs only on a button's `when:`.** What a Row displays may
-decide what a person is offered. It may not decide what is legal:
+**External guards** are rules only the Bundle's code can answer, such as a
+budget lookup. Declare one as `{external: true, description: …}` so the
+graph still shows it. The platform never evaluates it: the caller vouches
+for it per Row, by passing `guards: {"12": [budget_ok]}` to
+`feature.state.transition` or `feature.state.project`. An edge behind one
+that wasn't vouched for is refused for that Row
+(`external guard budget_ok was not vouched for`), and a result that relied
+on one carries `delegated: true`. Vouching for a guard the platform
+evaluates fails with `guards: ['not_held'] are not external guards of this
+graph`.
 
-```text
-states: guard 'shows_hold': a shown predicate belongs on a cta's when: only what a row displays decides what a person is offered
-```
+## When edges launch Flows
 
-**External Guards** are rules only the Bundle's code can answer: a budget
-lookup, a document check. Declare one so the graph still shows it:
+Questionnaire's `cta_apply` is the whole of it because its machine is
+stored and its edges launch nothing. A graph with a derived machine, or
+with `flow:` and `then:` edges, needs two more Steps. This one is from a
+template that reviews requests, with a derived `blocker` machine:
 
-```yaml
-guards:
-  has_owner: [{column: Owner, empty: false}]
-  budget_ok: {external: true, description: The bundle checks the budget}
-```
-
-List it under `guard:` like any other. The platform never evaluates it. The
-caller **vouches** for it per Row, by passing
-`guards: {"12": [budget_ok]}` to `feature.state.transition` or
-`feature.state.project`. An edge behind an external Guard that was not
-vouched for is refused for that Row (`external guard budget_ok was not
-vouched for`), and a Row's buttons leave it out. A result that relied on a
-vouched Guard carries `delegated: true`. Vouching for a Guard the platform
-evaluates itself fails with
-`guards: ['has_owner'] are not external guards of this graph`. A predicate
-cannot name an external Guard at all:
-
-```text
-states: guard 'can_approve': predicate names external guard 'budget_ok'; only the bundle can evaluate it — vouch for it instead
-```
-
-## Wire the Flows
-
-The graph does nothing until a Flow calls it. There are three places.
-
-**Buttons.** A deterministic button starts the Bundle Flow named
-`cta_apply` with `action`, `record_ids` and `payload`. That Flow fires the
-Event through `feature.state.transition`. The Activity does **not** start
-the Flows that `flow:` edges and `then:` entries name. It returns them as
-`launches`, and the Flow must start them:
-
-```yaml
-name: cta_apply
-version: 1
-description: >
-  Apply one button: fire its event on the targeted rows, start whatever
-  the edges launch, and fail by name when nothing applied.
-inputs:
-  action: { type: string }
-  record_ids: { type: array }
-  payload: { type: object, default: {} }
+```yaml title="cta_apply.yaml"
 steps:
   - id: derive
     activity: foundation.code.execute
@@ -733,98 +790,190 @@ steps:
     args:
       code: $steps.apply.output.first_refusal.code
       reason: $steps.apply.output.first_refusal.reason
-outputs:
-  applied: $steps.apply.output.applied
-  results: $steps.apply.output.results
 ```
 
-The `derive` Step exists because this graph has a derived machine. The
-Transition recomposes Status after the edge lands, and a `blocker` left out
-of `machines` reads as `none`, so a click would clear a warning the facts
-still support. A graph whose machines are all stored skips that Step and
-passes no `machines`.
-
-**Events from the world.** A Webhook, Schedule or turn that learns
-something fires the Event the same way. `payload` feeds `payload_writes`:
-
-```yaml
-- id: land
-  activity: feature.state.transition
-  args:
-    event: world.withdrawn
-    record_ids: [$inputs.record_id]
-    payload: { note: $inputs.note }
-```
-
-**The sweep.** `feature.state.project` recomposes Rows from their tuple.
-With no `record_ids` it projects every Row and reconciles the whole
-worklist. A tick usually ends with it, so the derived machines follow the
-facts:
-
-```yaml
-- id: derive
-  activity: foundation.code.execute
-  args:
-    code_name: request_rules
-    reads:
-      - { type: list_rows, name: rows, table_name: tracker, all_pages: true }
-    inputs: { op: machines }
-- id: project
-  activity: feature.state.project
-  args:
-    machines: $steps.derive.output.machines
-    why: $steps.derive.output.why
-    results: warn
-```
-
-**What an applied edge writes**, in one patch at the Row's read-time
-revision:
-
-- the edge's `writes` and `payload_writes`
-- the landing State's value in its machine's Column, and each `also` machine's
-- the `detail` stamp
-- the recomposed `Status`, `CTAs`, `Why`, mirrors and policy
-
-A Row that changed since it was read comes back `refused` with `StaleRev`,
-and nothing overwrites it. Each applied edge also records a change on the
-Row: `cta_applied` for a staff Event, `state_transition` for any other,
-with the old and new Status. The Bundle's own `writes` input may not touch
-the projection Columns:
+`derive` exists because the Transition recomposes Status after the edge
+lands, and a derived machine left out of `machines` reads as its initial
+State, so a press would clear a warning the facts still support. `launch`
+starts what the edges returned, and `launch` in the last Step counts the
+Rows whose edge is a Flow, which is not a refusal. The Bundle's own
+`writes` input to `feature.state.transition` may not touch the projection
+Columns:
 
 ```text
 writes for record 12 touch projection columns ['Status']; the engine writes them from the tuple
 ```
 
-That is the rule from the concept, enforced on the Transition path: change a
-Row's Status by firing an Event. A plain store write to the Column is not
-refused, but the next projection overwrites it.
+## The Publish checks
+
+Each check refuses the Publish with one message, prefixed `states:`. The
+ones with Questionnaire's names were produced from variants of its graph.
+
+**Every State must be reachable** from the initial State, and **every State
+but the initial needs an `expected:` edge in**. An `also:` counts only when
+its Transition's `when:` names the machine and State it leaves from. See
+[the Snoozed change](#change-the-graph-add-a-snoozed-state) for both
+messages.
+
+**A State with no way out must be terminal**, except in an Overlay, which
+may stay set until it clears:
+
+```text
+states: recipient.snoozed has no way out and is not terminal
+```
+
+**Only `system` leaves a `terminal: true` State.** A Resume from `closed`:
+
+```text
+states: recipient.closed is terminal but ['staff.resume'] leave it
+```
+
+Declare the State `terminal: reopenable` if people may undo the ending.
+
+**One `cta.kind`, one Event:**
+
+```text
+states: cta kind 'ask-again' is used by both 'staff.ask_again' and 'staff.resume'
+```
+
+**Only a `staff` edge carries a button:**
+
+```text
+states: 'world.asked' carries a cta but is not a staff event
+```
+
+**No two machines share a State name**, because Status holds their union:
+
+```text
+states: state 'received' is declared by both 'review' and 'blocker'; the Status vocabulary is their union
+```
+
+**Staff edges do something and land somewhere definite.** A button that
+moves only a derived machine would be undone by the next derivation, so it
+must write a fact, launch a Flow or declare an effect; and a staff edge
+lands on one State unless a `flow:` decides:
+
+```text
+states: staff edge 'staff.dismiss' moves only the derived machine 'blocker' and writes nothing; add writes, a flow, a then or an effect
+states: staff edge 'staff.decline' must land on one state unless a flow decides the outcome
+```
+
+**A `same` edge does not write its own Column:**
+
+```text
+states: 'staff.snooze' is a `same` edge but writes its own column 'Stage'; say where it lands
+```
+
+**`importance:` ranks every edge or none**, and a map covers every `from:`
+State or carries `default:`:
+
+```text
+states: importance ranks every edge or none; unranked: ['staff.reopen']
+states: transition on 'staff.decline' ranks no importance from ['received']; name them or add default:
+```
+
+**A detail stamp needs a landing State that declares one, and `also:`
+names other machines:**
+
+```text
+states: transition on 'staff.decline' stamps a detail but its landing state declares none
+states: transition on 'staff.decline': also names its own machine 'review'; that is what to: is for
+```
+
+**A guard's `shown:` predicate belongs on a button's `when:`, and a
+predicate can't name an external guard:**
+
+```text
+states: guard 'shows_hold': a shown predicate belongs on a cta's when: only what a row displays decides what a person is offered
+states: guard 'can_approve': predicate names external guard 'budget_ok'; only the bundle can evaluate it — vouch for it instead
+```
+
+**Transition Flows must be in the Bundle.** Every `flow:` and `then:` names
+a Flow the Bundle installs:
+
+```text
+states: transitions name flows ['notify_requester'] that this bundle does not install (flows: ['cta_apply'])
+```
+
+**The Table declares every Column the tier touches.** The graph needs
+`tables:`, and its Table must declare the Status, CTAs and Why Columns,
+every stored machine Column, every `writes` and `payload_writes` Column,
+and every Column a predicate reads. Questionnaire without `Last Asked`, and
+then without `Sending`:
+
+```text
+states: a tables: section declaring its table is required
+states: table 'recipients' lacks columns ['Last Asked'] the states tier writes
+states: predicates read columns ['Sending'] that table 'recipients' does not declare
+```
+
+The predicate check exists because a missing Column reads blank on every
+Row, which would make `not_held` always hold.
+
+**Drop hand-written `display:` hints.** The tier renders them, and a
+Column carrying a different one fails:
+
+```text
+states: column 'Stage' carries display hint 'status:new,waiting,answered,no_response,closed' but the states tier renders 'status:new,waiting,answered,no_response,closed;warn=no_response;labels=new:Not asked yet|waiting:Waiting|answered:Answered|no_response:No response|closed:Closed;tone=new:gray|answered:black|closed:gray'; drop the literal or change the spec
+```
+
+A template moving from hand-kept hints onto the tier deletes them; there
+is no need to copy the rendered value back in.
+
+## A Recipe instead of `states:`
+
+Questionnaire's graph is fixed by its Version: every Routine on that
+Version runs the same one, and changing it is a Publish. A
+[Recipe](https://docs.popcorn.ai/state-machine.md#the-recipe-a-graph-each-routine-can-replace)
+holds the same keys in `recipe.yaml` at the Bundle's root, declared by
+`recipe:` in the Manifest, and each Routine can install a revision of its
+own. That is what lets an assistant change a Routine's
+[Steps](https://docs.popcorn.ai/steps.md) with `change_routine`, which
+refuses a Routine whose template declares no `recipe:`.
+
+A template declares one or the other. A Recipe adds checks of its own:
+
+```text
+recipe: a bundle declares states: or recipe:, not both
+recipe: the bundle ships no recipe.yaml at its root
+recipe.yaml is present but the manifest declares no recipe: section
+recipe: a tables: section declaring the graph's table is required
+```
+
+And a Recipe whose graph opens action items, through a State that warns,
+must let every item stop tracking its Row, with a `tracking` Overlay and a
+`staff.stop_tracking` edge. A `states:` section has no such check:
+
+```text
+recipe.yaml: the recipe opens action items (missing_info) but declares no staff.stop_tracking transition with a `cta: {kind: stop-tracking}`; every action item must be able to stop tracking its row (e.g. `on: staff.stop_tracking`, `from: tracking.none`, `to: not_tracking`, `cta: {kind: stop-tracking, prominence: quiet, direct_only: true}`)
+```
+
+The engine offers that button on every action item whose edge is legal,
+whatever its `when:` says.
 
 ## Check it
 
-A Publish that passes proves **structure**. Every reference resolves, every
-State is reachable and has an expected way in, no Funnel State is a dead
-end, terminals hold, and the Table declares what the tier touches.
+A Publish that passes proves **structure**: every reference resolves,
+every State is reachable with an expected way in, no Funnel State is a dead
+end, terminals hold, and the Table declares what the tier touches. It does
+not prove **intent**, which is still yours to check:
 
-It does not prove **intent**, which is still yours to check:
+- **Events nothing fires.** Questionnaire's `world` edges pass every check,
+  and nothing fires them: its Flows write `Stage`. That is by design there.
+  In your own graph, search the Flows for each non-staff Event and for
+  every value they write to a stored Column.
+- **Terminals reached too early.** Mark answered leaves `new`, so a
+  recipient can be marked answered before they are asked. Read each
+  terminal's incoming edges as a list of every way a Row can end there.
+- **Buttons that never show.** A guard on a Column nothing clears, or a
+  button `when:` that can't hold, publishes fine and offers nothing.
 
-- **States no Event fires in practice.** `world.info_missing` passes the
-  checks whether or not any Flow ever fires it. Search the Bundle's Flows
-  for each non-staff Event name, and for a derived machine, check that the
-  code actually produces every State.
-- **Terminals reached too early.** A `from: open` that should have been
-  `from: in_review` publishes fine and lets a request be approved unread.
-  Read each terminal's incoming edges as a list of every way a Row can end
-  there.
-- **Buttons that never show.** A Guard on a Column nothing writes, or a
-  button `when:` that cannot hold, publishes fine and offers nothing.
-
-`feature.state.spec` returns the resolved graph the Run judges Rows by. For
-a `states:` section that is the Version the Routine is bound to; for a
-Recipe it is the revision the Run pinned, which is the Routine's own once it
-has installed one, and the template's otherwise. It includes a Mermaid diagram per machine, and a
-`spine` of the expected edges alone, which is quick to read against what
-you meant. For the Rows themselves, `feature.state.check` holds every Row
-to the graph. Each stored value must be a declared State, each mirror must
-agree with the value the Bundle supplies, and each Status must be what its
-tuple composes to. With `fail_step: true`, any offender fails the Step as
-`StatesOutsideGraph`, which makes it a test Flow's assertion.
+`feature.state.spec` returns the graph a Run judges Rows by, with a Mermaid
+diagram per machine and a `spine` of the expected edges alone, which is
+quick to read against what you meant. For a `states:` section it is the
+Version the Routine is bound to; for a Recipe, the revision the Run pinned.
+`feature.state.check` holds every Row to the graph: each stored value must
+be a declared State, each mirror must agree with the value the Bundle
+supplies, and each Status must be what its tuple composes to. With
+`fail_step: true`, any offender fails the Step as `StatesOutsideGraph`,
+which makes it a test Flow's assertion.
