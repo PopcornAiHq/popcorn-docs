@@ -1,7 +1,7 @@
 ---
 id: on-error
 title: Errors and retries
-order: 19
+order: 21
 group: How a Flow runs
 summary: >
   Retry is the Flow's job: a Step with no `on_error` gets up to 4 attempts, so

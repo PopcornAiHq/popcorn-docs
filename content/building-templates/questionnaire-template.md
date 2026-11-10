@@ -67,7 +67,7 @@ questionnaire/
 
 | Part | Where |
 |---|---|
-| Gmail, which holds the Routine back while missing | `manifest.yaml` `connections:` |
+| Gmail, without which nothing is asked or read | `manifest.yaml` `connections:` |
 | The questionnaire [Reference](https://docs.popcorn.ai/reference-documents.md), required | `manifest.yaml` `documents:`, read by the `questionnaire_load` [Flow](https://docs.popcorn.ai/flow-grammar.md) |
 | `recipients`, one Row per address, in a [Table](https://docs.popcorn.ai/tables.md) | `manifest.yaml` `tables:` |
 | One [Schedule](https://docs.popcorn.ai/schedules.md), every fifteen minutes | `manifest.yaml` `schedules:`, running `questionnaire_tick` |

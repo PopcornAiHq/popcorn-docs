@@ -541,3 +541,23 @@
   concept: template-authoring
   pass: the pass's interval isn't a Routine Setting, so it needs a Copy; change the Schedule's interval in manifest.yaml, and the wording in strings.yaml, AGENT.md and agent_summary with it; dry-run create_routine_version, copy_routine_template, then publish a Version (a Workspace admin) and confirm the Install
   trap: says to change a setting, or to edit Popcorn's own template
+
+- q: I added a setup step to my copy but it never shows as done.
+  concept: setup-checklist
+  pass: an upload or value step is marked done only when its flow calls feature.onboarding.mark_step with a step_id equal to the step's id in strings.yaml; check the spelling, and add the id to required_steps in every feature.onboarding.evaluate
+  trap: suggests republishing, refreshing the client, or marking it done by hand
+
+- q: How does a value typed into a setup step reach my flow?
+  concept: setup-checklist
+  pass: the value is checked against the step's field, then the step's flow runs with it under field.name (Questionnaire's `value`); the flow's own refusal comes back in its words
+  trap: says the value is written straight to the step's scalar with no flow run
+
+- q: I changed the Schedule interval but the automations list still says every 15 minutes.
+  concept: strings-yaml
+  pass: today.automations `schedule` is display text in strings.yaml, not derived from the manifest's schedules; edit it in the same Version
+  trap: says the schedule didn't apply, or to reinstall
+
+- q: What does halts_workflow do on a manifest connection?
+  concept: manifest-keys
+  pass: it changes only what people are told (list_connections says the Routine's automations are paused); a Flow's required_integrations, or its own check such as check_connected, is what stops work
+  trap: says it pauses the Routine's Schedules

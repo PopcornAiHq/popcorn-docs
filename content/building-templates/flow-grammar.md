@@ -1,7 +1,7 @@
 ---
 id: flow-grammar
 title: The shape of a Flow
-order: 15
+order: 17
 group: How a Flow runs
 summary: >
   A Flow is one YAML file at the Bundle root, identified by the `name:`

@@ -1,7 +1,7 @@
 ---
 id: setup-checklist
 title: Give a template a setup checklist
-order: 99
+order: 7
 group: What a Bundle holds
 summary: >
   A Bundle's setup checklist is `today.onboarding_steps` in

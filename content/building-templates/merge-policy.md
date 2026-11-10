@@ -1,7 +1,7 @@
 ---
 id: merge-policy
 title: Column Merge Policy
-order: 12
+order: 14
 group: Tables and Status
 summary: >
   A Column's Merge Policy decides what a write does to an existing Row:

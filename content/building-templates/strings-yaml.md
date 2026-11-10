@@ -1,7 +1,7 @@
 ---
 id: strings-yaml
 title: The Bundle's strings.yaml
-order: 100
+order: 8
 group: What a Bundle holds
 summary: >
   `strings.yaml` holds the words Popcorn shows for a Routine Template,
