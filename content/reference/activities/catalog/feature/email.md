@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-10
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -322,7 +322,7 @@ email.extract.
 | `id` | string |  |
 | `thread_id` | string, optional |  |
 | `subject` | string |  |
-| `from` | string, optional |  |
+| `sender` | string, optional |  |
 | `received_at` | string, optional |  |
 | `body` | string |  |
 
@@ -351,7 +351,7 @@ email.list surfaced.
 | Field | Type | Notes |
 |---|---|---|
 | `thread_id` | string | The thread id that was fetched. |
-| `messages` | list of EmailMessage | All messages in the thread, oldest first. Reference them as $steps.<id>.output.messages[*].body. |
+| `messages` | list of EmailMessage | All messages in the thread, oldest first. Reference one by index, e.g. $steps.<id>.output.messages.0.body, or read each with foreach: $steps.<id>.output.messages. |
 
 `EmailMessage`:
 
@@ -360,7 +360,7 @@ email.list surfaced.
 | `id` | string |  |
 | `thread_id` | string, optional |  |
 | `subject` | string |  |
-| `from` | string, optional |  |
+| `sender` | string, optional |  |
 | `received_at` | string, optional |  |
 | `body` | string |  |
 
@@ -442,7 +442,7 @@ call email.get / email.get_thread.
 | `id` | string |  |
 | `thread_id` | string, optional |  |
 | `subject` | string |  |
-| `from` | string, optional |  |
+| `sender` | string, optional |  |
 | `received_at` | string, optional |  |
 | `body` | string |  |
 
