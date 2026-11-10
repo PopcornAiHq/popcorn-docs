@@ -55,6 +55,7 @@ states:
         waiting:
           label: Waiting
           why: Asked, with questions still open.
+          policy: {step: {type: questions}}   # the one Step, Answers
         answered:
           label: Answered
           tone: black
@@ -77,6 +78,8 @@ states:
     # the row as it read it: an Action landing then would be overwritten.
     not_held:
       all: [{column: Sending, empty: true}]
+      code: RecipientBusy
+      message: A pass is emailing or checking this recipient; try again once it has finished.
   transitions:
     - on: world.asked
       from: new
@@ -109,7 +112,17 @@ states:
         label: Ask again
         message: "Ask {Name|this recipient} again."
     - on: staff.mark_answered
-      from: [new, waiting, no_response]
+      from: no_response
+      to: answered
+      guard: [not_held]
+      expected: true
+      description: Marked answered by a person
+      cta:
+        kind: mark-answered
+        label: Mark answered
+        message: "Mark {Name|this recipient} as answered."
+    - on: staff.mark_answered
+      from: [new, waiting]
       to: answered
       guard: [not_held]
       expected: true
@@ -119,7 +132,18 @@ states:
         label: Mark answered
         message: "Mark {Name|this recipient} as answered."
     - on: staff.close
-      from: [new, waiting, no_response]
+      from: no_response
+      to: closed
+      guard: [not_held]
+      expected: true
+      description: Closed, so nobody follows up
+      cta:
+        kind: close
+        label: Close
+        prominence: quiet
+        message: "Close {Name|this recipient}."
+    - on: staff.close
+      from: [new, waiting]
       to: closed
       guard: [not_held]
       expected: true
@@ -218,12 +242,18 @@ Questionnaire's three:
 | Action | From | Writes |
 |---|---|---|
 | **Ask again** | `no_response` | `Follow Ups: 0`, `Last Asked: null`, so the next pass follows up at once |
-| **Mark answered** | `new`, `waiting`, `no_response` | nothing else |
-| **Close** (`prominence: quiet`) | `new`, `waiting`, `no_response` | nothing else |
+| **Mark answered** | `no_response`; and `new`, `waiting` | nothing else |
+| **Close** (`prominence: quiet`) | `no_response`; and `new`, `waiting` | nothing else |
 
 A `cta:` takes a `kind`, unique across the graph, a `label`, and a
 `message`: the line a chat posts, filled from the Row, where
 `{Name|this recipient}` falls back to its text when `Name` is blank.
+
+Mark answered and Close are each declared as two edges with the same
+`cta:`, one from the Review and one from the States before it, so the
+Steps list names them among the Review's choices (see
+[Which States are Steps](#which-states-are-steps)). A person sees one
+button either way.
 
 > [!IMPORTANT] Empty a datetime with null
 > Ask again writes `Last Asked: null`, not `""`: `Last Asked` is a
@@ -266,6 +296,56 @@ The whole spec is resolved when the Bundle is parsed. It fails when:
 > well-formed and wrong: States that no Event fires in practice, or a
 > terminal State reached too early. Questionnaire's world edges pass every
 > check whether or not its Flows really write those values.
+
+## Which States are Steps
+
+A Routine's [Steps](https://docs.popcorn.ai/steps.md), as `get_routine`
+and the **Routine steps** tab in Popcorn list them, are read off the
+first machine's States in the order they are declared. Two kinds make a
+row:
+
+- **A Step** is a State whose `policy:` names a Step type: `questions`
+  (shown as Answers), `signature`, `booking`, `reminder` or `shipment`
+  (Delivery). Under `policy.chase`, the stage engine of a
+  [Recipe](#the-recipe-a-graph-each-routine-can-replace) with the `chase`
+  contract runs it, sending and following up. Under `policy.step`, the
+  State is only named a Step, and the template's own Flows do the work.
+- **A Review** is a State that warns, is not terminal, and is not a Step,
+  such as `no_response`. Its choices are the buttons on its edges, each
+  listed with the State it leads to.
+
+Questionnaire's `waiting` carries the marker:
+
+```yaml title="manifest.yaml"
+        waiting:
+          label: Waiting
+          why: Asked, with questions still open.
+          policy: {step: {type: questions}}
+```
+
+A Step's ways out are its edges that are not buttons. A button also
+offered from a Step is one every open Item has, like an Archive, so it is
+not listed among a Review's choices. That is why Questionnaire declares
+Mark answered and Close twice. A graph with no Step lists no Steps, and
+Popcorn hides the tab.
+
+For `#team-offsite`, `get_routine` lists:
+
+```text
+Steps:
+1. Answers — Waiting (Status value: waiting)
+   - on its own: Every question is answered → Answered (outcome)
+2. Review — No response (Status value: no_response): "No answer after the last follow-up, or the reply-by date passed."
+   - Ask again → Waiting (step 1)
+   - Mark answered → Answered (outcome)
+   - Close → Closed (outcome)
+```
+
+> [!NOTE] A marker changes no behaviour
+> `policy.step` changes the list and nothing a Run does. Because the Steps
+> are part of the template's Version rather than a Recipe of the Routine's
+> own, they can't be changed by describing the change: they change with a
+> new Version, or a [Copy](https://docs.popcorn.ai/copying-a-template.md).
 
 ## The Recipe: a graph each Routine can replace
 

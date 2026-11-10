@@ -77,7 +77,7 @@ step that can't be undone.
 > `copy_routine_template` without `confirm`, and again with `confirm=true`
 > once you agree.
 
-The dry run names the Version being copied (Questionnaire 0.2.1), the new
+The dry run names the Version being copied (Questionnaire 0.2.3), the new
 Copy, and any other Copies of the template the Workspace already has. A
 Copy's name is lowercase letters, digits, `-` and `_`.
 

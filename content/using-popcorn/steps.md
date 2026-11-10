@@ -41,6 +41,9 @@ In a claims intake Routine, where each Item is a potential client:
   delivered.
 - **Review** — waits for a person on the team to decide what happens next.
 
+`#team-offsite` has two: **Answers**, at *Waiting*, and a Review, *No
+response*, whose choices are *Ask again*, *Mark answered* and *Close*.
+
 > [!NOTE] Every Step works by email
 > None collects files: a document is asked for as one of a Step's
 > questions.
@@ -64,7 +67,8 @@ retained*.
 
 ## Seeing them
 
-> "What are the Steps in #intake, and how many claims are at each?"
+> "What are the Steps in #team-offsite, and how many recipients are at
+> each?"
 
 > [!TIP] MCP tool call
 > Your assistant calls `get_routine`, then `get_status`.
@@ -75,7 +79,8 @@ Popcorn does:
 - each Step's kind and name, and the ways an Item leaves it on its own;
 - each Review's reason and choices, where each leads, and which are made
   only in Popcorn;
-- the Version of the Steps that is installed;
+- in a Routine whose Steps are its own, the Version of them that is
+  installed;
 - how many Items are at each Step.
 
 > [!TIP] Filtering by Step
@@ -101,14 +106,17 @@ installed. The walkthrough is
 - A change that would remove a Step Items are still at is refused.
 - One change is drafted at a time on a Routine.
 
-> [!NOTE] Only where the template allows it
+> [!NOTE] Only where the Steps are the Routine's own
 > A Routine's Steps can be changed this way only when its template keeps
-> its Steps with the Routine. Otherwise your assistant says what changes
-> them instead: a Routine Setting, or a Copy of the template.
+> its Steps with the Routine. `#team-offsite`'s come with its template, so
+> your assistant says what changes them instead: a Routine Setting, or a
+> Copy of the template.
 
 ## In the template
 
 A Routine's Steps are the States of its template's
 [State Machine](https://docs.popcorn.ai/state-machine.md), and a Routine
-with Steps of its own has them installed as a Recipe. A Step is not one of a
+with Steps of its own has them installed as a Recipe. A template whose
+Flows do a Step's work marks the State instead, as Questionnaire does. A
+Step is not one of a
 [Flow](https://docs.popcorn.ai/flow-grammar.md)'s `steps:`.

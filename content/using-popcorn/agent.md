@@ -80,8 +80,8 @@ changing them:
 - **Replace a [Reference](https://docs.popcorn.ai/reference-documents.md)**,
   for wording that comes from one: `#team-offsite`'s emails are worded by
   its questionnaire.
-- **Change the Routine's Steps**, in a Routine that has them, for what each
-  Step asks and when it acts: see
+- **Change the Routine's Steps**, in a Routine whose Steps are its own,
+  for what each Step asks and when it acts: see
   [Change its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
 
 > [!TIP] In the template
