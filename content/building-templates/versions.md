@@ -67,7 +67,7 @@ Questionnaire writes `Team`; people and the Routine's
 [Agent](https://docs.popcorn.ai/agent.md) fill it in.
 
 Every Version also needs a higher `version:`. The Copy's series is its own,
-so `offsite` goes from `0.2.1` to whatever you choose, such as `0.3.0`.
+so `offsite` goes from `0.2.3` to whatever you choose, such as `0.3.0`.
 
 ## Publish it
 

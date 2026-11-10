@@ -41,11 +41,11 @@ Instructions come from more than one place:
   the company". The
   Agent keeps the preferences and decisions it is given.
 - **Each [Step](https://docs.popcorn.ai/steps.md)'s own Instructions**, in a
-  Routine that has Steps: the questions a Step asks and what a complete
-  answer to each needs, the wording of its emails, and a note on how to
-  handle it. These are the Instructions people change most, by telling the
-  Routine's Agent: "ask when it happened, and accept a month if they don't
-  know the day".
+  Routine whose Steps are its own: the questions a Step asks and what a
+  complete answer to each needs, the wording of its emails, and a note on
+  how to handle it. These are the Instructions people change most, by
+  telling the Routine's Agent: "ask when it happened, and accept a month if
+  they don't know the day".
 
 > [!NOTE] A Step's emails keep one voice
 > A Step's first email uses the opening and closing of the sample email it
@@ -74,11 +74,12 @@ changed for this Routine, and how to change it:
 
 For `#team-offsite`, that is two prompt files, one for reading the
 questionnaire and one for reading each reply, and the template's guide. Its
-template reads no notes for an Agent and has no Steps.
+template reads no notes for an Agent, and its Steps come with the template
+and carry no Instructions of their own.
 
 > [!TIP] One Step in full
-> In a Routine with Steps, each Step is summarised. Name one Step, by its
-> name or its Status value, to see its Instructions in full.
+> In a Routine whose Steps are its own, each Step is summarised. Name one
+> Step, by its name or its Status value, to see its Instructions in full.
 
 > [!NOTE] Personal data
 > On a Workspace that guards personal data, what people told the Agent

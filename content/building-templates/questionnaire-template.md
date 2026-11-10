@@ -7,8 +7,8 @@ summary: >
   The Questionnaire Bundle, read part by part: a Gmail Connection, a
   questionnaire Reference, one Table and one Schedule, whose pass asks,
   reads replies and follows up. A code block holds every rule (plan,
-  compose, replies, decide), and a States tier makes No response a Review
-  with Ask again, Mark answered and Close.
+  compose, replies, decide), and a States tier makes Waiting its one Step,
+  Answers, and No response a Review with Ask again, Mark answered and Close.
 lede: >
   How Popcorn's starter template is built: its parts, what one pass does,
   and the rules that keep it from asking anyone twice.
@@ -133,7 +133,11 @@ whole. The three Actions are `staff` Transitions, each a button:
 | **Mark answered** | `new`, `waiting`, `no_response` | Nothing else: `Answers` keeps what the replies gave |
 | **Close** | `new`, `waiting`, `no_response` | Nothing else |
 
-*No response* is the template's one Review: the State that warns.
+So the Routine has two [Steps](https://docs.popcorn.ai/steps.md):
+*Waiting* is Answers, marked with `policy.step` and run by the template's
+own Flows, and *No response* is the one Review, the State that warns. They
+come with the template's Version, so a description can't change them; see
+[Which States are Steps](https://docs.popcorn.ai/state-machine.md#which-states-are-steps).
 
 ## Rules worth knowing
 

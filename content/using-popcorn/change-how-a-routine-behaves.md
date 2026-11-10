@@ -150,6 +150,11 @@ Three other kinds of change remain:
    [Version](https://docs.popcorn.ai/versions.md) the Routine ran before it.
 
 One change drafts at a time: a new request while one is drafting is refused.
+
+> [!NOTE] Only where the Steps are the Routine's own
+> `#team-offsite`'s Steps come with its template, so a request to change
+> them is refused with what changes them instead: a Routine Setting, or a
+> Copy.
 To answer a proposal's open questions, make a new request.
 
 > [!TIP] Going back

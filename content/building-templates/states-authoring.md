@@ -64,6 +64,7 @@ states:
         waiting:
           label: Waiting
           why: Asked, with questions still open.
+          policy: {step: {type: questions}}   # the one Step, Answers
         answered:
           label: Answered
           tone: black
@@ -84,6 +85,8 @@ states:
   guards:
     not_held:
       all: [{column: Sending, empty: true}]
+      code: RecipientBusy
+      message: A pass is emailing or checking this recipient; try again once it has finished.
   transitions:
     - on: world.asked
       from: new
@@ -116,7 +119,17 @@ states:
         label: Ask again
         message: "Ask {Name|this recipient} again."
     - on: staff.mark_answered
-      from: [new, waiting, no_response]
+      from: no_response
+      to: answered
+      guard: [not_held]
+      expected: true
+      description: Marked answered by a person
+      cta:
+        kind: mark-answered
+        label: Mark answered
+        message: "Mark {Name|this recipient} as answered."
+    - on: staff.mark_answered
+      from: [new, waiting]
       to: answered
       guard: [not_held]
       expected: true
@@ -126,7 +139,18 @@ states:
         label: Mark answered
         message: "Mark {Name|this recipient} as answered."
     - on: staff.close
-      from: [new, waiting, no_response]
+      from: no_response
+      to: closed
+      guard: [not_held]
+      expected: true
+      description: Closed, so nobody follows up
+      cta:
+        kind: close
+        label: Close
+        prominence: quiet
+        message: "Close {Name|this recipient}."
+    - on: staff.close
+      from: [new, waiting]
       to: closed
       guard: [not_held]
       expected: true
@@ -145,11 +169,16 @@ Read it top to bottom:
   shown as *Not asked yet*. Rows stay blank there until they are asked;
   only `Status` holds the word `new`.
 - **Five States.** `answered` and `closed` are `terminal: true`, so no
-  person's Action leaves them. `no_response` warns, which makes it
-  Questionnaire's one [Review](https://docs.popcorn.ai/reviews.md).
+  person's Action leaves them. `waiting` carries a `policy.step` marker,
+  which makes it Questionnaire's one [Step](https://docs.popcorn.ai/steps.md),
+  Answers. `no_response` warns, which makes it the one
+  [Review](https://docs.popcorn.ai/reviews.md).
 - **Two Event families.** The `world` Transitions are the moves a pass
-  makes. The three `staff` Transitions are people's decisions, and each
-  carries a `cta:`, the button that is its Action.
+  makes. The `staff` Transitions are people's decisions, and each carries
+  a `cta:`, the button that is its Action. Mark answered and Close are two
+  edges each, one from the Review and one from `new` and `waiting`, so the
+  Steps list names them among the Review's choices (see
+  [Which States are Steps](https://docs.popcorn.ai/state-machine.md#which-states-are-steps)).
 - **One guard, `not_held`.** Every Action needs `Sending` empty; see
   [The guard that keeps an Action from landing under a pass](#the-guard-that-keeps-an-action-from-landing-under-a-pass).
 - **Every Column it names is on the Table:** `Status`, `Why` and `CTAs`
@@ -351,25 +380,29 @@ pass writes `Stage`, so every Action carries `not_held`:
   guards:
     not_held:
       all: [{column: Sending, empty: true}]
+      code: RecipientBusy
+      message: A pass is emailing or checking this recipient; try again once it has finished.
 ```
 
 The guard is judged when the Action is taken, against the Row as it is
 then. The buttons were projected earlier, so a held Row may still show
-them, and a press while it is held is refused:
+them, and a press while it is held is refused. Closing a recipient a pass
+is checking reads:
 
 ```text
-staff.ask_again is not legal here: guard not_held refused
+staff.close is not legal here: recipient is waiting; A pass is emailing or checking this recipient; try again once it has finished.
 ```
 
-`cta_apply` then fails the Run with that reason and the code `NoEdge`,
-since the guard declares no code of its own. Once the pass releases the
-Row, the Action can be taken again.
+`cta_apply` fails the Run with that reason and the guard's code,
+`RecipientBusy`. The reason names every edge the Event has: Close's edge
+from the Review is refused because the recipient is `waiting`, and its
+edge from `waiting` by the guard. Once the pass releases the Row, the
+Action can be taken again.
 
 > [!TIP] Give a guard words
-> A guard may carry `code:` and `message:`, which a refusal reports in
-> place of the generic ones, and which `take_action` quotes when it
-> explains why an Action isn't offered. Questionnaire's `not_held` has
-> neither.
+> Without `code:` and `message:`, a refusal reads `guard not_held refused`
+> with the code `NoEdge`. `take_action` quotes the message when it
+> explains why an Action isn't offered.
 
 ## Adopting Rows from before the States tier
 

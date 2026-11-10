@@ -86,23 +86,23 @@ it shows you.
 
 Some work happens without the Routine: an answer given on the phone, a call
 already held. In `#team-offsite`, *Mark answered* covers it, and is offered
-before anyone has stopped answering too. In a Routine with Steps, when its
-**Step forward** [setting](https://docs.popcorn.ai/routine-settings.md) is
+before anyone has stopped answering too. In a claims intake Routine, when
+its **Step forward** [setting](https://docs.popcorn.ai/routine-settings.md) is
 on, an Item offers choices such as *Already answered* or *Call already
 held*, which move it past a Step without waiting for it.
 
 ## Adding or removing a Review
 
-In a Routine with Steps, a Review is a Step, so you add or remove one the
-way you change any Step: by asking your assistant or telling the Routine's
-[Agent](https://docs.popcorn.ai/agent.md) in Popcorn, for
-example "check with me before booking the meeting" (see
+In a Routine whose Steps are its own, a Review is a Step, so you add or
+remove one the way you change any Step: by asking your assistant or
+telling the Routine's [Agent](https://docs.popcorn.ai/agent.md) in Popcorn,
+for example "check with me before booking the meeting" (see
 [changing its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md)).
 The change stays with this Routine and survives the template's
 improvements; it doesn't give the Routine a Copy of its own. Without a
-Review, the Routine moves the Item on by itself. In a Routine without Steps,
-such as `#team-offsite`, its Reviews are part of its template, and changing
-them gives it a
+Review, the Routine moves the Item on by itself. In a Routine whose Steps
+come with its template, such as `#team-offsite`, its Reviews are part of
+the template too, and changing them gives it a
 [Copy of its own](https://docs.popcorn.ai/customizing-a-routine.md).
 
 > [!TIP] Building a template
