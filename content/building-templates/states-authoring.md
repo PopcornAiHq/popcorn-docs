@@ -491,9 +491,9 @@ without `expected: true`, the third Snooze without Resume. Then bump
 `version:` and say what changed:
 
 ```yaml title="manifest.yaml"
-version: "0.3.0"
+version: "0.4.0"
 changelog: >-
-  0.3.0 — STATE CHANGE: a new Snoozed state. Snooze stops following up on
+  0.4.0 — STATE CHANGE: a new Snoozed state. Snooze stops following up on
   a waiting recipient, and Resume puts them back to Waiting.
   …
 ```

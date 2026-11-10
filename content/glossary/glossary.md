@@ -455,8 +455,8 @@ per Workspace and defaulting to stable. It filters `popcorn app list` and
 `popcorn channel templates`, and the API never says which track a Workspace is
 on.
 
-Learn more: [Authoring an App
-Bundle](https://docs.popcorn.ai/template-authoring.md)
+Learn more: [Change a Routine
+Template](https://docs.popcorn.ai/template-authoring.md)
 
 ### rev, `If-Match`
 

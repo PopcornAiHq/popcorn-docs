@@ -169,7 +169,7 @@ popcorn app publish ./questionnaire --bump patch -m "Run the pass hourly" --yes
 popcorn app status ./questionnaire                      # has the Install landed?
 ```
 
-`--fork` takes an optional name for the Copy (`--fork=team-offsite`);
+`--fork` takes an optional name for the Copy (`--fork=offsite`);
 bare, it names the Copy it is about to use and asks, because a Workspace's
 single existing Copy can be far behind Popcorn's template. `popcorn app
 fork` makes the Copy without the Checkout. `app publish` refuses a

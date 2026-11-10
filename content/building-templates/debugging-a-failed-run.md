@@ -41,8 +41,9 @@ page goes on in the CLI.
 `list_runs` lists the Routine's Runs, newest first, whatever started them:
 each pass of the Schedule, each recipient's child Run, and each Action a
 person took. `get_run` shows one: what started it, its inputs and outputs,
-its newest Steps and the error it failed with. A failed Ask again looks like
-this:
+its newest Steps and the error it failed with. Here is one from a Copy
+whose Ask again Transition wrote `Last Asked: ""`, a mistake easy to make
+in your own Copy:
 
 ```
 - cta apply: failed · started by a person's button
@@ -61,7 +62,8 @@ store refused one Cell: `Last Asked` is a `datetime`
 [Column](https://docs.popcorn.ai/table-columns.md), and something wrote a
 value to it that is not a date. Besides `Stage` and the Status, Why and Actions
 projected from it, `apply` writes only what the Transition's `writes:`
-names, so that is where to look:
+names, so that is where to look. Questionnaire's own Transition empties
+the Column the way the store takes:
 
 ```yaml title="manifest.yaml"
     - on: staff.ask_again
@@ -70,9 +72,8 @@ names, so that is where to look:
       writes: {Follow Ups: 0, Last Asked: null}
 ```
 
-A datetime Column is emptied with `null`; the store refuses `""`. A
-`writes:` that has `Last Asked: ""` fails every Ask again this way, and
-`null` is the fix. `apply` is `{ policy: fail, retry: 0 }`, so the Run
+A datetime Column is emptied with `null`; the store refuses `""`, so a
+`writes:` with `Last Asked: ""` fails every Ask again this way. `apply` is `{ policy: fail, retry: 0 }`, so the Run
 failed on its first attempt and changed nothing.
 
 > [!NOTE] A pass that succeeds can hide a failed recipient

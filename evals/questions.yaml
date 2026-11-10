@@ -531,3 +531,13 @@
   concept: questionnaire-template
   pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, since the pass writes Stage from the Row it read
   trap: says the Actions write Status directly, or that a pass waits for an Action to finish
+
+- q: How do I clear a datetime column from a flow or a transition's writes?
+  concept: table-columns
+  pass: write null; the store refuses "" for a datetime column, or any column with a format
+  trap: says to write an empty string
+
+- q: How do I make my Questionnaire Routine check for replies every hour instead of every fifteen minutes?
+  concept: template-authoring
+  pass: the pass's interval isn't a Routine Setting, so it needs a Copy; change the Schedule's interval in manifest.yaml, and the wording in strings.yaml, AGENT.md and agent_summary with it; dry-run create_routine_version, copy_routine_template, then publish a Version (a Workspace admin) and confirm the Install
+  trap: says to change a setting, or to edit Popcorn's own template

@@ -97,9 +97,8 @@ What it shows depends on the kind of Connection:
 > haven't signed in to, or whose sign-in lacks access, your assistant may
 > give you a sign-in link. It works once, within minutes, and only for you;
 > you finish it in Popcorn in the browser. Any other account is signed in to
-> in Popcorn, and a
-> [Signing Provider](https://docs.popcorn.ai/state-machine.md)'s keys are
-> saved there by a Workspace admin or owner.
+> in Popcorn, and a Signing Provider's keys are saved there by a Workspace
+> admin or owner.
 
 > [!NOTE] Who can make one
 > Making a Connection needs a Workspace admin, or a
