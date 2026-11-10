@@ -95,7 +95,7 @@ Flow may set these keys:
 | Key | What it does | In Questionnaire |
 |---|---|---|
 | `failure_status: {kind, label}` | writes one terminal status update of that kind when a Step fails past every `on_error`, then fails the Run | `questionnaire_load`: "Questionnaire not added" on the Reference's card |
-| `confirm: when_asked` | a member's own message asking for the Run is its confirmation, so the Routine's Agent runs it without a dry run | `reply_by_set`: a member who names the date has asked for exactly this |
+| `confirm: when_asked` | a member's own message asking for the Run is its confirmation, so the Routine's Agent runs it without a dry run; a Run nobody's message started, and any other caller, still gets one. Not with `read_only` or `writes_channel_parameters` | `reply_by_set`: a member who names the date has asked for exactly this |
 | `required_integrations` | the Connections a Run needs; see below | none: the tick checks Gmail itself with `feature.email.check_connected` |
 | `best_effort: true` | every start goes to the batch tier, and the Flows it launches follow it; for a fan-out nobody waits on | none |
 | `trigger: message` | runs the Flow for every message in the Routine, with the message as `$inputs.message` | none |
