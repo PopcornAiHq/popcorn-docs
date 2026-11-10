@@ -4,34 +4,43 @@ title: Extracting fields or deriving them
 order: 18
 group: How a Flow runs
 summary: >
-  To read fields off an object input, a Flow needs an Activity that declares
-  its output schema. `foundation.fields.extract` names fields by path, uses no
-  model, and fails on a missing path. `foundation.agent.transform` derives what
-  the payload does not state, and given junk it invents a plausible object.
+  `foundation.fields.extract` reads fields by path, uses no model, and fails
+  on a missing path. `foundation.agent.transform` derives what the input does
+  not state, and given junk it invents a plausible answer, so guard it: fail
+  on an empty result and check its keys in code, as Questionnaire does.
   Extract whatever the input states; derive only the rest.
 lede: >
   When a Flow should read fields straight from its input, and when it should
   have a model work them out.
-concepts: [references, on-error]
+concepts: [references, on-error, questionnaire-template]
 ---
 
-The DSL cannot reach sub-fields of an `object` input — `$inputs.payload.name`
-is statically unreachable, because an input declaration has no way to
-describe an object's properties. To read fields off a Webhook payload a Flow
-must first obtain a **typed** shape, and the only mechanism is an Activity
-that declares its output schema at the call site. Two of those exist, and the
-choice between them is the most consequential one in a Webhook-backed
-Bundle. **Reach for the deterministic one first.**
+A [Flow](https://docs.popcorn.ai/flow-grammar.md) reads a value it can
+name by [reference](https://docs.popcorn.ai/references.md). When the value
+is inside something the Flow cannot name — a field of an `object` input, or
+an answer inside an email — it needs an
+[Activity](https://docs.popcorn.ai/activities.md) that returns a typed
+shape, and two of them do. The dividing line is worth applying literally:
+**extraction reads what is there, derivation works out what is not.**
+Reach for the deterministic one first.
 
-The dividing line is worth applying literally: extraction reads what is
-there, derivation invents what is not. A CloudWatch alarm body has no
-`severity` and no `env` key at all, so those must be derived; its `AlarmName`
-and `NewStateValue` are right there and should not be.
+| | extract | derive |
+|---|---|---|
+| Activity | `foundation.fields.extract` | `foundation.agent.transform` |
+| reads | named paths in structured data | prose, or several unrelated shapes |
+| cost | none | one model call |
+| junk input | fails, naming every missing path | invents a plausible answer unless something stops it |
+| example | `alerttracker`, one Webhook producer | Questionnaire, a questionnaire document and email replies |
 
-## `foundation.fields.extract` — when the fields are simply there
+## `foundation.fields.extract`: when the fields are simply there
 
-Names fields by path. No model, no prompt, and an absent path is an error
-rather than a guess:
+The [Questionnaire template](https://docs.popcorn.ai/questionnaire-template.md)
+reads only prose, so it never extracts. The example here is Popcorn's
+`alerttracker` template, whose one producer, Alertmanager, sends a JSON body
+with every field it needs. The DSL cannot reach sub-fields of an `object`
+input — `$inputs.payload.name` is statically unreachable — so a
+[Webhook](https://docs.popcorn.ai/triggers.md)'s `payload` is read through
+this Activity:
 
 ```yaml
   - id: fields
@@ -68,49 +77,105 @@ checks it.
   (`ExtractSchemaViolation`), so a value contradicting the type you declared
   fails here rather than in whichever later Step consumes it.
 
-The shipped `alerttracker` Routine Template is built this way: a single producer
-(Alertmanager), every field read by path, and not one model call in it.
+## `foundation.agent.transform`: when the answer must be derived
 
-## `foundation.agent.transform` — when the answer must be derived
+The right tool when the input does not *state* what you need: a list of
+questions inside a sample email, which question a reply answers, a severity
+no field carries, one Flow normalising several unrelated producers.
+Questionnaire derives twice, each with a prompt from its `prompts/` folder.
 
-The right tool when the payload does not *state* what you need — one Flow
-normalising several unrelated producers, a severity no field carries, a
-human-readable title, prose. Judgement, not lookup.
+`questionnaire_load` reads the questions out of the Reference a person
+added, which may be a plain list or a sample email:
 
-| | extract (`alerttracker`) | derive (several producers) |
-|---|---|---|
-| producers | one (Alertmanager) | several, unrelated |
-| identity | Alertmanager's `fingerprint`, stated | composed from fields that differ per producer |
-| environment | the `cluster` label, stated | absent from a CloudWatch body — derived |
-| tool | `fields.extract` | `agent.transform` |
-| cost | none | one LLM call per Delivery |
-| junk input | fails, names every missing path | invents a plausible alert unless a `recognized` guard stops it |
+```yaml title="questionnaire_load.yaml"
+  - id: extract
+    activity: foundation.agent.transform
+    args:
+      prompt: $channel.prompts.read_questionnaire
+      prompt_format: jinja
+      data:
+        text: $steps.read.output.text
+      max_tokens: 4096
+      output_schema:
+        type: object
+        required: [questions, subject, intro, closing]
+        additionalProperties: false
+        properties:
+          questions:
+            type: array
+            items: { type: string }
+          subject: { type: string }
+          intro: { type: string }
+          closing: { type: string }
 
-Narrowing a Bundle to one producer is therefore not just a scope decision —
-it is what makes the deterministic tool available at all. When you do need
-the model, three rules, each paid for in a live failure:
+  - id: fail_no_questions
+    when: "!$steps.extract.output.questions"
+    activity: foundation.workflow.fail
+    args:
+      reason: >-
+        No questions found in the document. Add a document that lists the
+        questions to ask, or a sample email with them in it.
+      code: NoQuestionsFound
+```
+
+`check_recipient` reads which questions a reply answers, into an object
+keyed by question:
+
+```yaml title="check_recipient.yaml"
+  - id: read
+    when: $steps.found.output.count
+    activity: foundation.agent.transform
+    on_error: { policy: skip }
+    args:
+      prompt: $channel.prompts.read_answers
+      prompt_format: jinja
+      data:
+        questions: $steps.found.output.questionnaire.questions
+        reply: $steps.found.output.text
+      max_tokens: 2048
+      output_schema:
+        type: object
+        required: [answers]
+        additionalProperties: false
+        properties:
+          answers:
+            type: object
+            additionalProperties: { type: string }
+```
+
+Each rule below is how those two Steps are kept honest.
 
 1. **A required output schema is a formatting contract, not a validation
    gate.** Given junk, the model *invents* a plausible object to satisfy
-   `required`, and `enum` merely constrains which lie it tells. Add an
-   explicit recognition flag and hard-stop on it:
+   `required`, and `enum` merely constrains which lie it tells. Give it a
+   way to say "nothing here" and hard-stop on it.
+   `read_questionnaire` tells the model to return an empty `questions` list
+   and never invent one, and `fail_no_questions` fails the Run on it before
+   anything is stored, so the Reference is refused rather than turned into
+   made-up questions.
+2. **Check what the model returns in code.** `read_answers` asks for keys
+   "copied exactly from the list above", and the code block's `decide`
+   takes an answer only under a key that equals one of the questions, and
+   only for a question still open. A key the model reworded is dropped, and
+   an answer already recorded is never overwritten.
+3. **Every property you dereference must be in `required:`.** A declared
+   but optional property is genuinely optional: the model may return it on
+   one Run and omit it on the next, and a missing key is a hard failure
+   such as `ReferenceError: $steps.extract.output.intro: key not found`.
+   That is why all four of `questionnaire_load`'s properties are required,
+   with `""` for one the document lacks.
+4. **Keep the prompt and the schema consistent.** Telling the model to blank
+   a field whose `enum` excludes `""` is a contradiction, and it does not
+   fail cleanly: the model reasons about the conflict *in its output* and
+   breaks JSON parsing.
 
-   ```yaml
-     - id: guard
-       activity: foundation.workflow.fail
-       when: $steps.normalize.output.recognized == false
-       args: { reason: ..., code: UnrecognizedPayload }
-   ```
-
-2. **Every property you dereference must be in `required:`.** A declared but
-   optional property is genuinely optional — the model returned `details` on
-   one Run and omitted it on the next, and a missing key is a hard failure:
-   `ReferenceError: $steps.normalize.output.details: key not found`.
-3. **Keep the prompt and the schema consistent.** Telling the model to blank a
-   field whose `enum` excludes `""` is a contradiction, and it does not fail
-   cleanly — the model reasons about the conflict *in its output* and breaks
-   JSON parsing.
+> [!NOTE] A failed read is read again
+> `read` is skipped on error, and `decide` treats a reply it could not read
+> as unread: it leaves the Row as it was, so the next pass reads the same
+> reply again rather than following up past it.
 
 Finally, know which kind of transform you are writing. Mapping fields is
 risky; **writing prose is not**. A digest whose wording drifts costs nothing,
-because nothing downstream parses it.
+because nothing downstream parses it. Questionnaire's emails are not
+written by a model at all: the code block's `compose` builds them from the
+stored questions.
