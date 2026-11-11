@@ -88,6 +88,8 @@ describes. A Step can also carry `when:` (see
 `timeout_seconds:` and `heartbeat_seconds:`, which override the default
 per-attempt timeout. The tick gives its `plan` Step `timeout_seconds: 180`;
 a heartbeat only matters for an Activity that sends one.
+`commits_leases: true` marks the Step after which a failed Run keeps the
+Rows it holds; see [Row leases](https://docs.popcorn.ai/row-leases.md).
 
 Beside `name`, `version`, `description`, `inputs`, `steps` and `outputs`, a
 Flow may set these keys:
