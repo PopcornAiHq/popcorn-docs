@@ -4,7 +4,7 @@ title: CLI overview
 order: 200
 group: CLI
 generated: scripts/sync-cli.py
-version: 0.63.1
+version: 0.63.3
 summary: >
   The `popcorn` CLI works with Popcorn from a terminal or a script. It
   installs from its GitHub repository, not PyPI, and `popcorn auth login`

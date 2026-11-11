@@ -6,7 +6,7 @@ group: CLI
 parent: cli/commands
 layout: lookup
 generated: scripts/sync-cli.py
-version: 0.63.1
+version: 0.63.3
 summary: >
   The CLI's commands that have no subcommands, each with what it does, its
   Usage line and its arguments.
@@ -16,7 +16,7 @@ lede: >
 concepts: [cli]
 ---
 
-The commands in `popcorn` 0.63.1 that have no subcommands.
+The commands in `popcorn` 0.63.3 that have no subcommands.
 Global flags still go before them, as in `popcorn --json whoami`; the
 [CLI overview](https://docs.popcorn.ai/cli.md) page lists them.
 

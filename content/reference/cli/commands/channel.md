@@ -6,7 +6,7 @@ group: CLI
 parent: cli/commands
 layout: lookup
 generated: scripts/sync-cli.py
-version: 0.63.1
+version: 0.63.3
 summary: >
   The channel command and its subcommands, each with its Usage line and
   arguments.
@@ -15,7 +15,7 @@ lede: >
 concepts: [cli]
 ---
 
-`popcorn channel` in `popcorn` 0.63.1. Global flags go before the command, as
+`popcorn channel` in `popcorn` 0.63.3. Global flags go before the command, as
 in `popcorn --json app status`; the
 [CLI overview](https://docs.popcorn.ai/cli.md) page lists them, with the
 `--json` envelope and the exit codes every command shares.
