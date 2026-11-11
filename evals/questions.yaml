@@ -636,3 +636,18 @@
   concept: debugging-a-failed-run
   pass: not directly — list_triggers lists the webhooks and list_runs shows runs a webhook started; a delivery that started no run is read only with popcorn webhook deliveries
   trap: names an MCP tool that lists webhook deliveries
+
+- q: How do I make sure a Row my Flow claimed is released even when the Run fails or times out?
+  concept: row-leases
+  pass: claim with foundation.store.claim_row and no holder:, which makes it a lease; the platform frees it when the Run ends however it ends, compare-and-set on the holder, and a later claim takes over a lease whose Run timed out or was terminated (lease_lapsed); no release Step is needed
+  trap: says to add a release Step on every path, or an on_failure hook, or a TTL
+
+- q: My Flow sends an email and then records it; if the record fails, how do I stop the next pass emailing again?
+  concept: row-leases
+  pass: mark the send Step commits_leases: true; once it succeeds, a Run that fails or times out keeps its lease, so the Row stays held; leave on_error off the record Step so its failure fails the Run instead of succeeding and freeing the Row; a skipped send commits nothing
+  trap: says to retry the send, or to skip the record Step's errors, or that the lease is always freed on failure
+
+- q: Can a claim refuse a Row the State Machine says isn't ready, without writing refuse_when rules?
+  concept: row-leases
+  pass: when_legal names an Event of the Table's states graph; the claim is refused with the graph's own code unless a Transition for that Event leaves from the Row's State, judged with the holder Column empty; refuse_when still works beside it
+  trap: says claim_row can't read the graph, or that a guard on the Transition is the only way
