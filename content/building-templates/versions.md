@@ -133,8 +133,8 @@ A Publish is refused when:
 - a Flow does not parse strictly — a misspelled key, a `call_flow` naming its
   own Flow or one the Bundle does not have, or a `foreach` asking for more
   `max_parallel` than the platform allows
-- the Manifest has no `version:`, a Version that does not advance, or a
-  different `app_type` from its Copy
+- the Manifest has no `version:`, a Version that does not advance, or no
+  `app_type:` or a different one from its Copy's
 - a Flow name is not a slug, or a Flow declares its own `trigger:`
 - a `tables:` entry would be refused by the store at Install — an unknown
   `type` or `display` kind, a `format` that does not suit its type, a merge
@@ -148,13 +148,6 @@ A Publish is refused when:
   names each finding by its rule: `transition_write_type`,
   `cta_apply_missing` and `status_kind_invalid`
 - the Version or its content already exists (below)
-
-> [!WARNING] Keep `app_type:`
-> A Manifest with no `app_type:` is not refused: Publish treats it as the
-> Copy's own template. Every Install of that Version then clears `app_type`
-> and `channel_agent` on each Routine it reaches, which is every Routine on
-> the Copy, and the dry run does not warn about it. Keep both keys in
-> every Version.
 
 ### What a dry run warns about
 
@@ -286,16 +279,20 @@ directory:
 ```bash
 popcorn app checkout --channel team-offsite
 cd questionnaire
-popcorn app validate
-popcorn app publish --bump minor -m "Add a Team column to recipients"
+popcorn app validate .
+popcorn app publish -m "Add a Team column to recipients"
 popcorn app status
 ```
 
-`--bump minor` writes `version: "0.4.0"` into `manifest.yaml` once the
-Version exists; `-m` is the note recorded on it, as `changelog` is over
-MCP. `app validate` checks offline that the new semver is higher than the
-Copy's newest before anything is sent, and warns `clears-app-type` on a
-Manifest that has lost `app_type:`; treat that warning as an error.
+`-m` is the note recorded on the Version, as `changelog` is over MCP.
+`app validate` checks offline, before anything is sent, that `version:` is
+higher than the checked-out Version's, and reports `clears-app-type` as an
+error on a Manifest that has lost `app_type:`. Instead of editing
+`version:` yourself, `popcorn app publish --bump minor` writes
+`version: "0.4.0"` into `manifest.yaml` once the Version exists; it is
+refused on a Manifest that already advances past the Head, and
+`app validate` reports the unbumped `version:` as an error, so use one or
+the other.
 
 `popcorn app publish` asks before it publishes, naming the Copy rather
 than a count, and reports the count only once the Version exists. Like

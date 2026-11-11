@@ -81,15 +81,10 @@ A Column needs a `name` and a `type`.
 `format`, which belongs to one type and is checked on every write,
 `display`, `label`, the governance flags, `index` and `unique`.
 
-Choose the name now, because an
-[Install](https://docs.popcorn.ai/versions.md) never renames a Column. The
-`name` is the key every Row is stored under, so a changed `name` adds a new
-Column next to the old one. A change of case alone adds nothing: the
-installed spelling stays, and a Flow that writes the new spelling is
-refused with a "did you mean". A Column that any `$` reference reads, such
-as `$row.Emails_Sent`, needs a name made only of letters, digits and
-underscores that does not start with a digit. `Emails Sent` is only ever
-written, so its space does no harm.
+Choose the name now: an [Install](https://docs.popcorn.ai/versions.md)
+never renames a Column, and a Flow that dereferences one needs it
+space-free
+([Table Columns](https://docs.popcorn.ai/table-columns.md#names-are-permanent-and-a-flow-may-need-them-space-free)).
 
 ## Decide what a repeat write does
 
@@ -158,16 +153,12 @@ Row's `Sending` Column instead, with `foundation.store.claim_row`, so two
 passes can't both email the same recipient; see
 [Row leases](https://docs.popcorn.ai/row-leases.md).
 
-> [!IMPORTANT] Empty a datetime Column with null
-> The store checks each value against its Column's `type`, `format` and
-> `required`, and on a merging write it checks the whole merged Row, not
-> only the Cells the write sent. `""` is not a date, so a `datetime`
-> Column, or one with a `format`, is emptied with `null`: Questionnaire's
-> **Ask again** writes `Last Asked: null`.
+A merging write checks the whole merged Row, not only the Cells it sent.
+`Last Asked` is a `datetime`, so it is emptied with `null`, not `""`
+([Table Columns](https://docs.popcorn.ai/table-columns.md#type-format-display)).
 
-The store trims whitespace from keys, but it does not check that a key
-names a Column: an unknown key is stored silently, unless it differs from a
-declared Column only by case.
+An unknown key is stored silently; see
+[The store accepts undeclared Columns](https://docs.popcorn.ai/table-columns.md#the-store-accepts-undeclared-columns).
 
 ## Validate it
 
@@ -299,13 +290,8 @@ adds to it:
   replaces the installed one; `merge_key: null` removes it; leaving
   `merge_key` out keeps it. A bare `merge_key:` with nothing after it is
   YAML for `null`, so it removes the Merge Key too.
-- **Merge Policy follows a declared `merge:`.** A `merge:` that differs
-  from the installed one replaces it, and the old policy's
-  `merge_separator` or `merge_when` is dropped unless the Manifest
-  restates one. An omitted `merge:` keeps the installed policy, unless the
-  same Publish retypes the Column out of what that policy requires
-  (`concat` off `string`, `increment_on_change` off `number`); then the
-  Column becomes `replace`.
+- **Merge Policy follows a declared `merge:`**: see
+  [Changing a Column's policy](https://docs.popcorn.ai/merge-policy.md#changing-a-column-s-policy).
 - **Never changes:** a Column is never removed or renamed. Columns are
   matched by name, ignoring case and extra whitespace, and a matched
   Column keeps its installed spelling.

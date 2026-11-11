@@ -73,8 +73,8 @@ scheduled Run, say) resolves to null rather than erroring.
 its inputs, reads the Routine as `$trigger.conversation_id`. A claim needs
 no reference to the Run: `foundation.store.claim_row` with no `holder:`
 writes the Run's own identity (see
-[Row leases](https://docs.popcorn.ai/row-leases.md)). `workspace_id` is never an
-input; it rides the auth context.
+[Row leases](https://docs.popcorn.ai/row-leases.md)). A Flow needs no
+`workspace_id` input; the Workspace rides the auth context.
 
 **A `foreach` alias shadows `$channel` and `$trigger`**, deliberately, so
 `as: channel` or `as: trigger` keeps working. It does not shadow `$inputs` or

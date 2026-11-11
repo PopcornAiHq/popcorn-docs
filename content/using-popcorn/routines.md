@@ -107,11 +107,11 @@ installs and the Connections someone has to set up. The walkthrough is
 > "Make a copy of #team-offsite for the spring offsite, called spring-offsite."
 
 > [!TIP] MCP tool call
-> Your assistant calls `duplicate_routine`, then calls it again with
-> `confirm=true`.
+> Your assistant calls `duplicate_routine`.
 
 Your assistant makes a new Routine that starts as a copy of an existing one.
-First it shows you what it copies and what it leaves out:
+You asked for the copy, so it makes it straight away. Otherwise it first
+shows you what it copies and what it leaves out:
 
 | Copied | Not copied |
 |---|---|
@@ -121,7 +121,7 @@ First it shows you what it copies and what it leaves out:
 | its Agent's guidelines | what people told its Agent |
 | References added from a file | its Items, [History](https://docs.popcorn.ai/history.md), messages and Members |
 
-Once you agree, it creates the Routine without the original's Members:
+It creates the Routine without the original's Members:
 open to the whole Workspace unless you ask for it private, even when the
 original is private. The template installs in the background, and
 the copy runs once it lands. The Routine's **Copied from** field shows each

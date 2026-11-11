@@ -8,7 +8,7 @@ summary: >
   key, and an absent key is not the same as an empty one — omitting Schedules
   leaves them alone, while `schedules: []` deletes every Schedule the Bundle
   manages. An unknown key, such as the typo `schedule:`, is ignored without a
-  warning, and a Manifest with no app_type clears the Routine's.
+  warning, and a Publish refuses a Manifest with no app_type.
 lede: >
   What installing a template does to a Routine, key by key, and why leaving a
   key out differs from leaving it empty.
@@ -37,7 +37,7 @@ Manifest, which `#team-offsite` runs, declares under each key.
 | `display_name`, `description` | catalog copy for the template picker | `Questionnaire`, and one sentence |
 | `changelog` | documentation only on a Copy of the template (the CLI calls it a *fork line*); the Version's note comes from `app publish -m` | one entry per Version |
 | `tables` | additive reconcile — Tables and Columns added, attributes fixed, never dropped or renamed; see [Table Columns](https://docs.popcorn.ai/table-columns.md) | `recipients`, one Row per `Email` |
-| `channel_parameters` | upsert; on an update, a value a Member edited is kept; types preserved; read as `$channel.<name>` | `follow_up_days: 3`, `max_follow_ups: 3` |
+| `channel_parameters` | nothing written: read from the Version the Routine runs, so a value the Routine changed itself stands over it; types preserved; read as `$channel.<name>` | `follow_up_days: 3`, `max_follow_ups: 3` |
 | `channel_parameter_fields` | nothing written: the Routine Settings tools read each parameter's `label` and `description` from the Version the Routine runs | a label and description for each (below) |
 | `stored_values` | nothing written: names the Scalars the Bundle's Flows keep, and which of them `get_status` reports; see below | none |
 | `scalars` | upsert — [Scalar tiers](https://docs.popcorn.ai/scalar-tiers.md) says when an update keeps the Routine's value | `coordinator_name`, `agent_runnable_flows`, `agent_summary` |
@@ -46,10 +46,10 @@ Manifest, which `#team-offsite` runs, declares under each key.
 | `webhooks` | create if missing; never updated, never deleted | none |
 | `triggers` | the set is replaced; a Trigger's `enabled` is written the first time only, so a Member's toggle survives upgrades | none |
 | `connections`, `documents`, `required_connections` | replaced on first Install; on an update, kept where the Routine's value was edited (see [Scalar tiers](https://docs.popcorn.ai/scalar-tiers.md)). `required_connections` is the legacy flat list | Gmail (`halts_workflow: true`); the `questionnaire` Reference, which starts `questionnaire_load` |
-| `status_kinds` | merge per kind — kinds the Bundle stops declaring stay; on an update, a value a Member edited is kept | `questionnaire_load_progress` |
+| `status_kinds` | nothing written: read from the Version the Routine runs, so a kind the Bundle stops declaring is gone unless the Routine holds its own; a value the Routine changed itself stands over the Version's | `questionnaire_load_progress` |
 | `states` | validated as a graph at Publish, read at run time from the bound Version. A Bundle declares `states` or `recipe`, never both | the `recipient` machine on `Stage` |
 | `recipe` | declares that the graph ships as `recipe.yaml`, which Publish then requires and validates like `states`; `document` (the config key, default `recipe`) and an optional `contract`. Install never overwrites a revision the Routine installed itself: it checks that revision against the new Version and refuses the update if it no longer fits. `process` is the legacy name — see [the Recipe](https://docs.popcorn.ai/state-machine.md) | none |
-| `app_type` | sets the Routine's `app_type`; **absent clears it** | `questionnaire` |
+| `app_type` | sets the Routine's `app_type`; **required: a Publish refuses a Manifest without it** | `questionnaire` |
 | `channel_agent` | sets which Agent answers Members; **absent clears it** | `workflowmcp` |
 
 A top-level key the parser does not know is ignored without a word. A typo
@@ -71,11 +71,14 @@ and no pass runs on a clock again. Omitting `schedules:` deletes none. The same 
 documents.
 
 Keys that only add never remove anything, even when declared empty:
-`tables: {}`, `channel_parameters: {}`, `status_kinds: {}` and `webhooks: []`
-are all no-ops.
+`tables: {}` and `webhooks: []` are no-ops. `channel_parameters:` and
+`status_kinds:` are read from the Version the Routine runs, so omitting
+them and declaring them empty are the same: the Version supplies none, and
+only values the Routine holds itself remain.
 
 "The Schedules the Bundle manages" means those keyed by Flow name — the ones a
-Manifest creates. A Schedule created some other way is left alone. On an
+Manifest creates, and also one a Member created on one of the Routine's
+Flows, which a full Install deletes when the Manifest does not declare it. On an
 automatic update the rule narrows again: only Schedules the previous Version
 declared and this one does not are deleted, and a declaration that did not
 change is not touched at all, so a Member's pause survives.
@@ -120,8 +123,9 @@ the value. Install writes nothing for `channel_parameter_fields:`, and
 adding it does not make an installed Routine read as drifted. Publish
 refuses an entry for a name not declared under `channel_parameters:`, an
 entry for `prompts` or `templates` (each file there is a setting of its
-own), a key other than `label` or `description`, and a present key with no
-mapping under it.
+own), a key other than `label`, `description` or `hidden`, and a present
+key with no mapping under it. `hidden: true` keeps a parameter out of the
+Routine Settings tools while the Flows still read it.
 
 ## Declaring stored values
 
@@ -459,12 +463,13 @@ though: Install writes it like any other Scalar, and that is all it does.
 
 ## Two specific traps
 
-**An untyped Bundle clears `app_type` and `channel_agent`.** A Manifest with
-no `app_type:` strips whatever the Routine had (`questionnaire`, for
-`#team-offsite`), which changes the client's entire interface; one with no
-`channel_agent:` hands Members back to the default Agent instead of
-`workflowmcp`. Never install an untyped Bundle into a Routine whose template
-sets `app_type`. `app validate` warns with `clears-app-type`.
+**A dropped `app_type:` or `channel_agent:` is not a no-op.** A Publish
+refuses a Manifest with no `app_type:`, and `app validate` reports it in a
+Checkout as the error `clears-app-type`: installed, it would strip the
+Routine's `app_type` (`questionnaire`, for `#team-offsite`) and with it the
+client's entire interface. `channel_agent:` is optional, but every Install
+writes it or clears it, so a Manifest that drops it hands Members back to the
+default Agent instead of `workflowmcp`.
 
 **Table changes are additive, so a rename is not a rename.** The reconcile adds
 the new Column and orphans the old one, with the data still in the old:

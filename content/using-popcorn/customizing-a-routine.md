@@ -34,12 +34,8 @@ leave them in place:
 | [References](https://docs.popcorn.ai/reference-documents.md) | the documents it works from |
 | [Steps](https://docs.popcorn.ai/steps.md), where its template keeps them with the Routine | what each Step asks for, their order, their wording, and where the Routine stops for a person's [Review](https://docs.popcorn.ai/reviews.md) |
 
-A person changes the Steps by describing the change, to the Routine's Agent
-in Popcorn or to an assistant, and an earlier
-[Version](https://docs.popcorn.ai/versions.md), or the template's own, can
-be put back. Popcorn refuses a change that would remove a Step
-[Items](https://docs.popcorn.ai/work-a-routines-items.md) are
-still at.
+A person changes the Steps by describing the change: see
+[Change its Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
 
 > [!TIP] Check the settings first
 > Most "can it do X differently" questions are a setting.
@@ -71,7 +67,8 @@ a Copy of its own is always a dry run first, and the dry run says so.
 > A Routine's details show it as **Updates from**: Popcorn, or this
 > Workspace's own Copy.
 
-A Copy of its own is the Workspace's own series of Versions of the template
+A Copy of its own is the Workspace's own series of
+[Versions](https://docs.popcorn.ai/versions.md) of the template
 (the CLI calls it a *fork line*), and a change reaches it by publishing a
 new Version.
 [Copying a template](https://docs.popcorn.ai/copying-a-template.md) says what

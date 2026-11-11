@@ -9,7 +9,7 @@ summary: >
   each and why, the Runs that made them and how they ended, and its email
   turns. list_history shows an assistant one Item's, newest first, and
   read_history_entry shows one entry in full. The Routine's conversation is
-  read in Popcorn.
+  read with list_messages.
 lede: >
   A Routine's History records what happened in it: each change to its Items,
   who or what made it and why, and the Runs behind it.
@@ -101,8 +101,10 @@ Items it changed, or what it did if it changed none.
   those checks are listed.
 - **An Action that failed.** It changed nothing, so it shows on its Run,
   not in the Item's History.
-- **The Routine's conversation and email bodies.** Both are read in Popcorn,
-  and email turns have no entry to read in full.
+- **The Routine's conversation and email bodies.** Your assistant reads the
+  conversation as the Routine's messages, as it reads the
+  [Agent](https://docs.popcorn.ai/agent.md#talking-to-it)'s answers. Email
+  bodies are read in Popcorn, and email turns have no entry to read in full.
 - **A timeline for the whole Routine.** History is read one Item, or one
   Run, at a time.
 

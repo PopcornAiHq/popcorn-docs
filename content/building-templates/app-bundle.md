@@ -56,7 +56,9 @@ questionnaire/
 A Bundle can also hold a `templates/` directory, seeded as settings like
 `prompts/`; a `recipe.yaml`, when the Manifest declares `recipe:`; and
 `agents/<name>/` for an App Agent (`agent.yaml`, `prompt.md` and
-`schemas/*.json`, nothing else). Questionnaire has none of these.
+`schemas/*.json`, nothing else). It can also hold `ui/<view>.yaml` views,
+`web/<page>/` pages and `memory/<name>.schema.json` schemas. Questionnaire
+has none of these.
 
 A Bundle needs a Manifest carrying `version:` to be published. Everything
 else is optional.
@@ -65,7 +67,8 @@ else is optional.
 
 `manifest.yaml`, `AGENT.md`, `README.md` and `strings.yaml` are read for what
 they are. `config.yaml` is the legacy name for the Manifest and is reserved
-too — a Flow saved under that name becomes the Manifest instead.
+too — a Flow saved under that name becomes the Manifest instead, or is
+ignored when `manifest.yaml` is also present.
 
 `recipe.yaml`, and its legacy name `process.yaml`, are reserved for the
 [Recipe](https://docs.popcorn.ai/state-machine.md): a

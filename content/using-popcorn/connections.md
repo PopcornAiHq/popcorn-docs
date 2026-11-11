@@ -35,8 +35,7 @@ Your assistant lists every Connection the Routine needs:
 1 Connection, 1 not connected:
 - Gmail (email): NOT CONNECTED
   Without it: the Routine's automations are paused, and ask recipient, check
-  recipient, on auth change, questionnaire load, questionnaire tick, reply by
-  set can't run.
+  recipient can't run.
 ```
 
 Each Connection says whose account it uses, who connected it, and what

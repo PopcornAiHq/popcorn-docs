@@ -83,7 +83,7 @@ It can also sort by one Column and pick which Columns to show.
 > Routine that sends email, that means
 > the Item's first email.
 
-A Row's Status can't be written at all: it changes when an
+Your assistant can't write a Row's Status: it changes when an
 [Action](https://docs.popcorn.ai/actions-and-status.md) is taken or the
 Routine moves the Item on.
 

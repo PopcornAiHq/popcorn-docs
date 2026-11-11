@@ -42,108 +42,11 @@ Each recipient is a Row of the `recipients`
 [Table](https://docs.popcorn.ai/tables.md). Where they stand is the
 `Stage` [Column](https://docs.popcorn.ai/table-columns.md), and the
 [Manifest](https://docs.popcorn.ai/manifest-keys.md)'s `states:` section
-turns it into the Row's Status, its Why and the Actions it offers. This is
-the section as Questionnaire ships it, without its comments:
+turns it into the Row's Status, its Why and the Actions it offers. The
+section as Questionnaire ships it is in
+[State Machines in a Bundle](https://docs.popcorn.ai/state-machine.md#questionnaire-s-machine).
 
-```yaml title="manifest.yaml"
-states:
-  table: recipients
-  status:
-    column: Status
-    ctas_column: CTAs
-    why_column: Why
-  machines:
-    recipient:
-      column: Stage
-      initial: new
-      states:
-        new:
-          label: Not asked yet
-          tone: gray
-          why: Asked on the next pass, once the questionnaire, Gmail and the reply-by date are in.
-        waiting:
-          label: Waiting
-          why: Asked, with questions still open.
-          policy: {step: {type: questions}}   # the one Step, Answers
-        answered:
-          label: Answered
-          tone: black
-          terminal: true
-          why: Every question is answered, or a person marked them answered.
-        no_response:
-          label: No response
-          warn: true
-          why: No answer after the last follow-up, or the reply-by date passed.
-        closed:
-          label: Closed
-          tone: gray
-          terminal: true
-          why: Closed by a person; nobody follows up.
-  events:
-    staff: [ask_again, mark_answered, close]
-    world: [asked, answered, gave_up, restarted]
-  guards:
-    not_held:
-      all: [{column: Sending, empty: true}]
-      code: RecipientBusy
-      message: A pass is emailing or checking this recipient; try again once it has finished.
-  transitions:
-    - on: world.asked
-      from: new
-      to: waiting
-      expected: true
-      description: Sent the questionnaire
-    - on: world.answered
-      from: waiting
-      to: answered
-      expected: true
-      description: Every question is answered
-    - on: world.gave_up
-      from: waiting
-      to: no_response
-      expected: true
-      description: Stopped following up
-    - on: world.restarted
-      from: waiting
-      to: new
-      description: Started over at a corrected address
-    - on: staff.ask_again
-      from: no_response
-      to: waiting
-      writes: {Follow Ups: 0, Last Asked: null}
-      guard: [not_held]
-      expected: true
-      description: Asked again, with the follow-ups starting over
-      cta:
-        kind: ask-again
-        label: Ask again
-        message: "Ask {Name|this recipient} again."
-    - on: staff.mark_answered
-      from: [new, waiting, no_response]
-      review: true
-      to: answered
-      guard: [not_held]
-      expected: true
-      description: Marked answered by a person
-      cta:
-        kind: mark-answered
-        label: Mark answered
-        message: "Mark {Name|this recipient} as answered."
-    - on: staff.close
-      from: [new, waiting, no_response]
-      review: true
-      to: closed
-      guard: [not_held]
-      expected: true
-      description: Closed, so nobody follows up
-      cta:
-        kind: close
-        label: Close
-        prominence: quiet
-        message: "Close {Name|this recipient}."
-```
-
-Read it top to bottom:
+Read that section top to bottom:
 
 - **One machine, `recipient`, stored in `Stage`.** A blank Column reads as
   the machine's initial State, so a Row added with no `Stage` is `new`,
@@ -166,10 +69,8 @@ Read it top to bottom:
   for the projection, `Stage` for the machine, `Follow Ups` and
   `Last Asked` for Ask again's `writes`, and `Sending` for the guard.
 
-> [!IMPORTANT] Empty a date with null
-> Ask again empties `Last Asked` with `null`. `Last Asked` is a `datetime`
-> Column, and the store refuses `""` there, so a write of `""` fails the
-> Action on every Row.
+`Last Asked` is a `datetime`, so it is emptied with `null`, not `""`
+([Table Columns](https://docs.popcorn.ai/table-columns.md#type-format-display)).
 
 Publish renders a display hint onto `Status` and `Stage` from the States,
 so the Table carries none of its own. Questionnaire's is:
@@ -868,7 +769,7 @@ states: 'world.asked' carries a cta but is not a staff event
 ```
 
 **`review: true` lists a button among a Review's choices**, so it needs a
-`cta:`, an edge of the first machine, and a Review among its `from:`
+`cta:`, an edge of the primary machine, and a Review among its `from:`
 States. Questionnaire's Close without `no_response` in its `from:`:
 
 ```text
