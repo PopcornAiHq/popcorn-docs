@@ -123,6 +123,12 @@ recipient again:
 > next pass email the recipient again, so a failed write keeps the Row held
 > instead.
 
+> [!TIP] A lease frees the Row for you
+> A `claim_row` with no `holder:` is a lease the platform frees when the
+> Run ends, however it ends, so no release Step is needed, and
+> `commits_leases` keeps the hold once a send has gone. See
+> [Row leases](https://docs.popcorn.ai/row-leases.md).
+
 To see which recipients a pass skipped, ask for the failed Runs:
 
 > "Did any of #team-offsite's recipients fail on the last pass?"
