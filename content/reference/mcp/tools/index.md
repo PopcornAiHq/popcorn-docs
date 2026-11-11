@@ -5,7 +5,7 @@ order: 301
 group: MCP
 layout: lookup
 generated: scripts/sync-mcp.py
-updated: 2026-11-09
+updated: 2026-11-11
 summary: >
   Every tool the hosted server offers and what it does, with what its badges
   mean and which tools preview a change before making it.
@@ -48,6 +48,7 @@ declares to your assistant, helping it decide what to ask before a call:
 - **[`create_reference_upload`](https://docs.popcorn.ai/mcp/tools/create-reference-upload.md)** — [writes] Get a URL to upload one file for one of a Routine's References.
 - **[`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)** — [writes] Create a Routine in this workspace, optionally from a Routine Template.
 - **[`create_routine_file_upload`](https://docs.popcorn.ai/mcp/tools/create-routine-file-upload.md)** — [writes] Get a URL to upload one file you made, for the next version of a Routine's template.
+- **[`create_routine_template`](https://docs.popcorn.ai/mcp/tools/create-routine-template.md)** — [writes] [dry run] Create a new Routine Template, owned by this workspace, from files you write, with its first Version.
 - **[`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)** — [writes] [destructive] [dry run] Save changes as the next version of the Routine's own copy of its Routine Template.
 - **[`create_rows`](https://docs.popcorn.ai/mcp/tools/create-rows.md)** — [writes] [dry run] Add rows to one of a Routine's tables.
 
@@ -105,6 +106,7 @@ declares to your assistant, helping it decide what to ask before a call:
 - **[`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md)** — [read-only] One message in a Routine, in full: its whole text, a line per attachment or other part, its reply count and its reactions.
 - **[`read_reference`](https://docs.popcorn.ai/mcp/tools/read-reference.md)** — [read-only] Read one of a Routine's References: its text, or a download link for a file that isn't text, such as a PDF.
 - **[`read_routine_file`](https://docs.popcorn.ai/mcp/tools/read-routine-file.md)** — [read-only] Read one file of a version of a Routine's template, exactly as stored.
+- **[`run_code_block`](https://docs.popcorn.ai/mcp/tools/run-code-block.md)** — [writes] Run one code block of a Routine's template on Popcorn's code runner, with inputs you give, and return what its run(inputs) returns, without publishing anything.
 - **[`run_trigger`](https://docs.popcorn.ai/mcp/tools/run-trigger.md)** — [writes] [destructive] [dry run] Run one of a Routine's schedules now, with the inputs it runs with on schedule.
 
 ## S

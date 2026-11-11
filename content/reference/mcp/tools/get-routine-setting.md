@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-routine-setting
 title: get_routine_setting
-order: 317
+order: 318
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Show one of a Routine's settings in full: its whole value, the template
   default, what it accepts and who may change it.

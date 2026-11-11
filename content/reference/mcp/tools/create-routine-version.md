@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/create-routine-version
 title: create_routine_version
-order: 309
+order: 310
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-09
+updated: 2026-11-11
 summary: >
   Save changes as the next version of the Routine's own copy of its Routine
   Template.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/delete-rows
 title: delete_rows
-order: 311
+order: 312
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Delete rows from one of a Routine's tables, by ID.
 concepts: [tables]

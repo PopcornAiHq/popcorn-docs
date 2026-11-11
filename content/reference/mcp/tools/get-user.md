@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-user
 title: get_user
-order: 323
+order: 324
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Look up a person by handle: yourself, a member of this workspace, or someone
   from another workspace you share a Routine or direct message with.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/search-messages
 title: search_messages
-order: 350
+order: 352
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Search message text across the Routines you can see, ranked by relevance or
   newest first.

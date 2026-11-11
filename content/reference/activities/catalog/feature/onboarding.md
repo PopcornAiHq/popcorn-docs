@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-11
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -40,7 +40,7 @@ flags are never re-evaluated or rewritten.
 |---|---|---|---|
 | `conversation_id` | string | yes |  |
 | `email_connected` | boolean, optional | no |  |
-| `required_steps` | list of string | no |  |
+| `required_steps` | list of string, optional | no | Ignored: the Routine's checklist says which steps setup waits on. Only an engine-composed checklist (Chase's) still reads its own required list here. |
 | `ready_scalar` | string, optional | no |  |
 | `fully_live` | boolean, optional | no |  |
 | `client_owned_setup` | boolean | no | Let the client's Continue action own setup_fulfilled. Only latch the fully-live safety net here. Exclusive with required_steps and ready_scalar. Default `false`. |

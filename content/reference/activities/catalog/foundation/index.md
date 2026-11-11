@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-11
 summary: >
   The foundation tier: the platform operations every Flow is built from, each
   with the Step that calls it, its arguments and what it returns.
@@ -16,7 +16,7 @@ lede: >
 concepts: [activities, flow-grammar]
 ---
 
-The 72 `foundation` activities at `release` or `beta` status, a page for
+The 73 `foundation` activities at `release` or `beta` status, a page for
 each domain. Each activity also takes the optional `integration_id` and
 `integration_name` arguments, which the
 [Activities](https://docs.popcorn.ai/activities.md) page explains with the
@@ -39,7 +39,7 @@ rest of what every activity shares.
 - **[`foundation.s3`](https://docs.popcorn.ai/activities/catalog/foundation/s3.md)** — 2 activities
 - **[`foundation.search`](https://docs.popcorn.ai/activities/catalog/foundation/search.md)** — 1 activity
 - **[`foundation.status`](https://docs.popcorn.ai/activities/catalog/foundation/status.md)** — 1 activity
-- **[`foundation.store`](https://docs.popcorn.ai/activities/catalog/foundation/store.md)** — 15 activities
+- **[`foundation.store`](https://docs.popcorn.ai/activities/catalog/foundation/store.md)** — 16 activities
 - **[`foundation.testing`](https://docs.popcorn.ai/activities/catalog/foundation/testing.md)** — 1 activity
 - **[`foundation.users`](https://docs.popcorn.ai/activities/catalog/foundation/users.md)** — 2 activities
 - **[`foundation.workflow`](https://docs.popcorn.ai/activities/catalog/foundation/workflow.md)** — 13 activities
