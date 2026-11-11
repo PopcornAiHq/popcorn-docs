@@ -29,8 +29,7 @@ them.
 > Your assistant calls `list_routine_files`, then `read_routine_file` for
 > any file you want to read.
 
-`popcorn app checkout --channel team-offsite` writes the same files to
-disk. The [Questionnaire](https://docs.popcorn.ai/questionnaire-template.md)
+The [Questionnaire](https://docs.popcorn.ai/questionnaire-template.md)
 template that `#team-offsite` runs is this Bundle:
 
 ```
@@ -101,27 +100,40 @@ extension (a `.yaml` there is block source, not a Flow), and a block has a
 file-count and a size cap, which the refusal names.
 
 The block name is a slug, because it rides inside Flow YAML as `code_name:`,
-and every segment below it must be visible: the server refuses a hidden entry
-there, while `app publish` drops dotfiles under `code/` before upload, so from
-the CLI a hidden file is silently left behind. `app validate` reports
-`code-file-outside-block` for a loose file directly under `code/` and
-`code-block-name-invalid` for a name that is not a slug.
+and every segment below it must be visible: the server refuses a Publish
+with a hidden entry there.
 
 `agents/<name>/` holds an App Agent's definition (see
 [platform tools](https://docs.popcorn.ai/platform-tools.md)): `agent.yaml` and
 `prompt.md` directly inside it, and JSON schemas under `schemas/`. It
-publishes like the rest of the Bundle — a Checkout writes the served agent
-files, and `app publish` sends what you add, edit or delete there. Any other
+publishes like the rest of the Bundle. Any other
 file under `agents/` is not part of the Bundle, and the server parses each
 agent at Publish and refuses one it could not run.
 
-Anything outside that shape is not part of the Bundle. The server refuses a
-Publish containing an unrecognised path; the CLI leaves such paths behind
-before uploading and lists what it left. `app validate` reports them as
-`path-not-published`, which fails `--strict`. Only dotfiles and `__pycache__`
-are dropped without comment.
+Anything outside that shape is not part of the Bundle, and the server
+refuses a Publish containing an unrecognised path.
 
 > [!WARNING] Keep sample payloads outside the Bundle
 > A sample reply saved as `questionnaire/reply.yaml` installs as a Flow, and
 > a `fixtures/` folder inside the Bundle is an unrecognised path whatever
-> its files are called. Keep them beside the Checkout, not in it.
+> its files are called. Keep them outside the Bundle.
+
+## With the CLI
+
+The CLI works on the Bundle as files on disk, and its offline checks have
+no MCP equivalent today.
+
+`popcorn app checkout --channel team-offsite` writes the Bundle's files to
+disk; a Checkout includes the served agent files, and `app publish` sends
+what you add, edit or delete there. Keep sample payloads beside the
+Checkout, not in it.
+
+The CLI filters a Bundle before upload. `app publish` drops dotfiles under
+`code/`, so from the CLI a hidden file is silently left behind rather than
+refused. It leaves an unrecognised path behind and lists what it left; only
+dotfiles and `__pycache__` are dropped without comment.
+
+`app validate` reports `code-file-outside-block` for a loose file directly
+under `code/`, `code-block-name-invalid` for a block name that is not a
+slug, and `path-not-published` for a path outside the Bundle's shape, which
+fails `--strict`.
