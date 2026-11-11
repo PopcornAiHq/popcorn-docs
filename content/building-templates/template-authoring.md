@@ -4,12 +4,12 @@ title: Change a Routine Template
 order: 1
 group: Making a change
 summary: >
-  Changing an existing Routine Template, as a Copy of Questionnaire does:
-  check its settings, read its files, dry-run the edit, copy it, publish a
-  Version, confirm the Install landed — over MCP with
-  `copy_routine_template` and `create_routine_version`, or with the CLI's
-  `app checkout`, `validate`, `publish` (`--yes` in agent mode) and
-  `status`. Adding a template to the catalog is not self-serve.
+  Changing a Routine Template, as a Copy of Questionnaire does, over MCP
+  (`copy_routine_template`, `create_routine_version`) or the CLI
+  (`app checkout`, `validate`, `publish --yes`, `status`); creating a
+  Workspace's own template with `create_routine_template`; testing a code
+  block unpublished with `run_code_block`. Popcorn's catalog is not
+  self-serve.
 lede: >
   Change what a Routine Template does: copy it, edit it, publish a new
   Version and confirm it installed.
@@ -32,10 +32,11 @@ template an *app*, so the commands keep those names.
 
 > [!IMPORTANT] New or changed template
 > *Changing* a template that already exists is a loop you run yourself,
-> with no deploy in it. A *new* template (a new `app_type`) is not
-> self-serve: the set of installable templates is fixed on the server, and
-> adding to it takes an internal change and a deploy. See
-> [A new Routine Template](#a-new-routine-template-not-self-serve).
+> with no deploy in it. A *new* template your Workspace owns is the same
+> loop, started from empty files: see
+> [A template of your own](#a-template-of-your-own). A new template in
+> Popcorn's catalog, offered to every Workspace, is not self-serve: see
+> [A template in Popcorn's catalog](#a-template-in-popcorn-s-catalog-not-self-serve).
 
 ## Change #team-offsite's template
 
@@ -250,7 +251,39 @@ tells a coding agent that an edit is not a release until `app validate` and
 > that exists and is refused once there are two: name one with
 > `--name`.
 
-## A new Routine Template — not self-serve
+## A template of your own
+
+> "Make a new template for this Workspace called intake: one Table of
+> claims and a Flow that reads each new email into it."
+
+> [!TIP] MCP tool call
+> Your assistant calls `create_routine_template` without `confirm`, shows
+> you the dry run, then calls it again with `confirm=true` and the
+> `plan_id` that dry run gave. Then it calls `create_routine` with
+> `template="ws_intake"`.
+
+Your assistant writes every file of the [App Bundle](#what-a-bundle-is),
+each as a `create` change over an empty template, and the dry run runs
+the checks a Publish runs. The template's key is `ws_` and its name, so
+`manifest.yaml` says `app_type: ws_intake`. Confirming creates it with
+its first [Version](https://docs.popcorn.ai/versions.md), and
+`create_routine` makes a Routine that installs it.
+
+From then on the template changes as a Copy does: `create_routine_version`
+on any of its Routines publishes its next Version, and every Routine on
+it installs that Version.
+
+> [!IMPORTANT] Workspace admins only
+> Only a Workspace admin can create a template, and only that Workspace
+> sees it. It is never in Popcorn's catalog and takes none of Popcorn's
+> updates.
+
+> [!NOTE] No upload for a first Version
+> `create_routine_template` takes a file's content or a `from_url`, not an
+> upload from `create_routine_file_upload`, which belongs to a Routine. Add
+> a generated file in a later Version instead.
+
+## A template in Popcorn's catalog — not self-serve
 
 Only the first and last steps are yours. The two in the middle happen on
 the Popcorn side and are not exposed through the CLI or the public API:
@@ -370,6 +403,24 @@ Three loops, and picking the right one is most of the speed. The
 needs a Routine only to know who you are and never writes; from a Checkout
 it takes the Checkout's Routine, and anywhere else it takes `--channel`.
 
+A code block, the code under `code/<block>/` that a Flow calls with
+`code.execute`, can be run in the inner loop too:
+
+> "Run #team-offsite's questionnaire block on this reply and show me what
+> it decides, with my change to the follow-up rule."
+
+> [!TIP] MCP tool call
+> Your assistant calls `run_code_block` with the block's name, the inputs,
+> and its edits as `changes`.
+
+The block runs on the runner and in the sandbox a Flow's step uses, so its
+output is what the step's would be; `tests=true` runs its `tests/` instead.
+Nothing is published or written: the block can't read or write the
+Routine's Tables and gets no secrets, so pass as inputs what the step's
+`reads` would. Once the output is right, the same `changes` go to
+`create_routine_version`. Only Workspace admins can run one, one at a
+time per Routine.
+
 The **middle** loop is the Copy above: a Publish and an Install, seconds
 per turn, no deploy. These help while it runs:
 
@@ -394,7 +445,7 @@ not `status`, as `--wait` does. A `#name` that matches more than one
 Routine is refused with each candidate's id; pass the id instead.
 
 The **outer** loop is only for a new template, and costs a deploy (see
-[A new Routine Template](#a-new-routine-template-not-self-serve)), so a
+[A template in Popcorn's catalog](#a-template-in-popcorn-s-catalog-not-self-serve)), so a
 Bundle that installs but is wrong costs a whole deploy cycle to correct.
 For a template fed by a [Webhook](https://docs.popcorn.ai/triggers.md),
 such as `alerttracker`, it continues:
