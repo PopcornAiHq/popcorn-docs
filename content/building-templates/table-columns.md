@@ -140,10 +140,20 @@ case-insensitively is rejected with a "did you mean" naming it. Anything
 further off is not: writing `Follow Up` when the schema says `Follow Ups`
 silently succeeds and produces a Column no `$ref` can reach. Renaming a
 Column means renaming every write site, and only reading a Row back catches
-a miss. `app validate` reports a Flow writing an undeclared Column
-(`undeclared-column`) for the Tables its Manifest declares.
+a miss.
 
 > [!TIP] What is installed
-> `popcorn table schema recipients --channel '#team-offsite'` prints what a
-> Routine has; add `--json` for the policies, `format`, `display`, `label`
-> and the Merge Key. Over MCP, your assistant calls `get_table`.
+> Ask your assistant for a Table's Columns: it calls `get_table`, which
+> shows each Column's type, `label` and Merge Policy, whether it is
+> `required` or `unique`, and the Table's Merge Key.
+
+## With the CLI
+
+Two things here have no MCP equivalent today: catching an undeclared
+Column before a Run, and reading a Column's `format`, `display` and index.
+
+`app validate` reports a Flow writing an undeclared Column
+(`undeclared-column`) for the Tables its Manifest declares.
+`popcorn table schema recipients --channel '#team-offsite'` prints what a
+Routine has; add `--json` for the policies, `format`, `display`, `label`
+and the Merge Key.

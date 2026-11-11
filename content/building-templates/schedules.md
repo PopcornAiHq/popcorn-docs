@@ -68,11 +68,11 @@ inputs.
 
 ## One cadence, and a class that routes it
 
-Each entry names exactly one of `interval:` or `cron:`. `app validate`
-reports one naming both (`schedule-two-triggers`). If it reaches the server,
-the Install fails for a new Schedule; a Schedule that already exists is
-instead skipped and kept exactly as it was, and the Install reports it as
-skipped. The same rule applies to an unknown `class:`.
+Each entry names exactly one of `interval:` or `cron:`. Publish does not
+refuse one naming both: the Install fails for a new Schedule, while a
+Schedule that already exists is instead skipped and kept exactly as it was,
+and the Install reports it as skipped. The same rule applies to an unknown
+`class:`.
 
 `class:` is routing, not decoration: it picks the queue and how the fire time
 is spread — `periodic` (the default) for an interval, `deadline` for a daily
@@ -117,6 +117,24 @@ template's own `set_app_mode` Flow, where it has one, compresses them for
 `popcorn.app_mode: test` and pauses them for `off`, and the platform offsets
 a plain daily cron away from the top of the hour. Questionnaire has no
 `set_app_mode` Flow, so its Schedule matches its Manifest.
+
+> "Do #team-offsite's live schedules match its template?"
+
+> [!TIP] MCP tool call
+> Your assistant calls `list_triggers`, then `read_routine_file` for
+> `manifest.yaml`.
+
+Your assistant reads each live Schedule's cadence, and whether it is
+paused, against the Manifest's. It sees that they differ, not which
+differences the platform made.
+
+## With the CLI
+
+Two checks here have no MCP equivalent today: an offline check of the
+Manifest's Schedules, and a comparison that explains each live difference.
+
+`app validate` reports an entry naming both `interval:` and `cron:` as
+`schedule-two-triggers`, before anything reaches the server.
 
 ```bash
 popcorn app status --channel team-offsite

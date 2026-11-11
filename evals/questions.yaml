@@ -606,3 +606,33 @@
   concept: manifest-keys, strings-yaml
   pass: yes, a documents: entry's title and used_for are what list_references shows when strings.yaml has no documents.<id>.title or body; strings.yaml still wins
   trap: says only strings.yaml can name a Reference
+
+- q: A scheduled run in my Routine failed. Can my assistant tell me why?
+  concept: debugging-a-failed-run, history
+  pass: yes — list_runs with status failed finds it, and get_run shows the error it failed with, its inputs and its newest steps, each failed step with its message
+  trap: says only the CLI can read a run's failure, or sends the user to the Routine's messages
+
+- q: My flow's run says succeeded but nothing changed.
+  concept: debugging-a-failed-run, on-error
+  pass: succeeded only means no error — a step failed under on_error skip (get_run still lists it as failed), a child run failed under the pass, the code block decided there was nothing to do, a required integration is not connected (get_routine, list_connections), or it launched another run and finished
+  trap: says succeeded means the work was done, or to re-publish the bundle
+
+- q: I published a fix. How do I know the Routine is running it?
+  concept: debugging-a-failed-run, versions
+  pass: get_routine says whether the latest install landed (Install installed) or why not — installing, retrying, locked, failed, skipped or behind — and can wait for a running install; a run already going keeps the version it started on
+  trap: says a publish takes effect at once, or that a run in flight picks up the fix
+
+- q: Will the publish dry run catch a flow writing a column the table doesn't declare?
+  concept: adding-a-table, table-columns
+  pass: no — the store stores an undeclared key silently and the create_routine_version dry run does not compare a flow's writes with the columns; only the CLI's app validate reports undeclared-column
+  trap: says the dry run or the publish refuses the undeclared column
+
+- q: Can my assistant show me a table's merge policies and merge key?
+  concept: adding-a-table, table-columns, tables
+  pass: get_table lists each column's type, label and merge policy, flags required and unique, and names the merge key; format, display and index come from the CLI's table schema --json
+  trap: says the assistant can only read manifest.yaml, or that get_table shows only names and types
+
+- q: Can my assistant see a webhook's failed deliveries?
+  concept: debugging-a-failed-run
+  pass: not directly — list_triggers lists the webhooks and list_runs shows runs a webhook started; a delivery that started no run is read only with popcorn webhook deliveries
+  trap: names an MCP tool that lists webhook deliveries
