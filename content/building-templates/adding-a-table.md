@@ -6,9 +6,10 @@ group: Tables and Status
 summary: >
   Adding a Column or a Table to a Routine Template: copy it
   (copy_routine_template), declare it under `tables:`, write it from a Flow
-  with `foundation.store.*`, check and publish (create_routine_version, or
-  `app validate` and `app publish`). Install adds, never removes or
-  renames. Publish refuses a Column the store would reject.
+  with `foundation.store.*`, dry-run and publish with
+  create_routine_version, and read it back with get_table. Install adds,
+  never removes or renames. Publish refuses a Column the store would reject;
+  only the CLI's `app validate` catches an undeclared Column.
 lede: >
   Add a Column or a Table to your Workspace's Copy of a template, write to
   it from a Flow, and publish the change.
@@ -27,8 +28,8 @@ The loop around it (copy, edit, check, publish) is the one in
 and [Table Columns](https://docs.popcorn.ai/table-columns.md) is the Column
 reference. This page is the order to do things in, and the choices you
 cannot take back afterwards. Each step starts with a prompt you might give
-your assistant; the CLI calls a Routine a *channel* and its template an
-*app*, so its commands keep those names.
+your assistant; [With the CLI](#with-the-cli) at the end has each step's
+CLI form, and the checks only the CLI makes.
 
 ## Copy the template
 
@@ -42,16 +43,8 @@ A new Column is a change to what the template is built from, so no
 [Routine Setting](https://docs.popcorn.ai/routine-settings.md) can stand in
 for it, and a new [Version](https://docs.popcorn.ai/versions.md) lands only
 on a [Copy](https://docs.popcorn.ai/copying-a-template.md) your Workspace
-owns (the CLI calls it a *fork line*). The Copy starts identical to the
-Version the Routine runs, and the Routine moves onto it. From the CLI:
-
-```bash
-popcorn app checkout --channel '#team-offsite' --fork
-cd <app>
-```
-
-If the Routine is already on a Copy, `app checkout --channel
-'#team-offsite'` is enough.
+owns. The Copy starts identical to the Version the Routine runs, and the
+Routine moves onto it. If the Routine is already on a Copy, skip this step.
 
 > [!CAUTION] A Copy is permanent
 > The Routine never goes back to Popcorn's template and stops receiving its
@@ -184,33 +177,19 @@ declared Column only by case.
 > Your assistant calls `create_routine_version` without `confirm`. Its dry
 > run shows each file's diff and every check the Version would fail.
 
-From a Checkout, run:
-
-```bash
-popcorn app validate .
-```
-
-`app validate` reads the Manifest and the Flows together. Run from a
-Checkout of the Copy's Head, logged in, with a Routine (`--channel`, else
-the Checkout's), and with edits since the Checkout, it also sends them to
-the server, which runs the checks `app publish` runs without publishing
-anything. It does not check everything, and a problem it misses shows up
-at a later stage:
+The dry run runs the checks a Publish runs, without publishing anything.
+It does not check everything, and a problem it misses shows up at a later
+stage:
 
 | Mistake | Caught by |
 |---|---|
-| a Flow writing a Column the Table does not declare | `app validate`: `undeclared-column` |
-| a filter on an undeclared Column | `app validate`, as a warning: `unknown-filter-column` |
-| an invalid Column definition: a merge-key Column that is undeclared, not a string or not indexed, `merge: concat` on a Column that is not a string, an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing Column or its own Column, or a `from` equal to its `to`, two Column names that differ only by case, two Table names that differ only by case, a Table or Column name containing U+FDD0 or U+FDD1 | `app validate`'s server checks; `app publish` refuses it either way |
+| an invalid Column definition: a merge-key Column that is undeclared, not a string or not indexed, `merge: concat` on a Column that is not a string, an unknown `type` or `display` kind, a `format` that does not suit the type, an index on `boolean` or `json`, a `merge_separator` or `merge_when` without the policy that takes it, a `merge_when` naming a missing Column or its own Column, or a `from` equal to its `to`, two Column names that differ only by case, two Table names that differ only by case, a Table or Column name containing U+FDD0 or U+FDD1 | the dry run; the Publish refuses it either way |
+| a Flow writing a Column the Table does not declare | nothing before the Run, which stores it silently; the CLI's `app validate` reports it (see [With the CLI](#with-the-cli)) |
 | a `table_name` misspelled in a Flow | the Run: a write fails the Step, while a `list_rows` with `missing_ok: true` reads the missing Table as empty |
 
-Without its server checks, `app validate` cannot report the third row: it
-runs the other checks and prints `server checks: skipped` with the reason.
-`app publish` still refuses such a Table before any Version exists.
-
-> [!TIP] Check `table_name` by eye
-> `app validate` compares Columns only for Tables the Manifest declares, so
-> a misspelled `table_name` passes it.
+> [!TIP] Check Column names and `table_name` by eye
+> Nothing on the server compares a Flow's writes with the Table's Columns,
+> so a misspelled Column or `table_name` passes the dry run.
 
 ## Publish
 
@@ -220,13 +199,8 @@ runs the other checks and prints `server checks: skipped` with the reason.
 > Your assistant calls `create_routine_version` with `confirm=true` and
 > the `plan_id` from its dry run.
 
-From a Checkout:
-
-```bash
-popcorn app publish . --bump patch -m "Emails Sent: a line per email" --yes
-```
-
-Publishing needs Workspace-admin rights. The Publish mints the next
+Publishing needs Workspace-admin rights, and every new Version bumps
+`version:` in `manifest.yaml`. The Publish mints the next
 Version of the Copy and starts an Install on this Routine, which adds the
 Column before it binds the Routine to the new Version, so no
 [Run](https://docs.popcorn.ai/history.md) on the new Version can reach a
@@ -234,26 +208,23 @@ Routine without it. The other Routines on the Copy get it at their own
 Daily Update, apart from the ones that take no updates.
 
 > [!WARNING] A Publish reaches every Routine on the Copy
-> The CLI prints how many Routines will update, but only after the Version
-> exists. The assistant's dry run says so before.
+> The assistant's dry run says how many Routines will update before the
+> Version exists.
 
 Publish runs every `tables:` entry through the same validation the store
 applies at Install, and refuses the whole Publish if any would be
-rejected. Nothing is written: no Version is minted, and a `--bump` is not
-saved to `manifest.yaml`, so re-running the same command after the fix is
-the retry. The CLI prints the refusal to stderr and exits 3:
+rejected. Nothing is written and no Version is minted, so the retry is the
+same Publish after the fix. Each finding names the Table and, where there
+is one, the Column:
 
 ```
-Error: manifest tables: the agent store would refuse these at install, so the bundle cannot be published:
-  tables.recipients: column 'Emails Sent': merge='concat' requires a string column, got type 'datetime'
+tables.recipients: column 'Emails Sent': merge='concat' requires a string column, got type 'datetime'
 ```
 
-Each line names the Table and, where there is one, the Column. The
-findings for every Table come back in one refusal, although the checks
+The findings for every Table come back in one refusal, although the checks
 that compare Columns with each other (a `merge_when` Reference, duplicate
 names, the Merge Key) run only once each Column of that Table is valid on
-its own. With `--json`, the same text is the `error` field, with
-`status: 422` and `error_code: validation`.
+its own.
 
 Publish checks the Manifest's Columns on their own. It cannot see a
 Routine's Table, and the Install validates the schema it builds by merging
@@ -278,24 +249,12 @@ Column the Routine's own Merge Key uses, such as `Email`.
 > Your assistant calls `get_routine` for the Version it runs, then
 > `get_table` for `recipients`.
 
-From the CLI:
-
-```bash
-popcorn app status .
-popcorn table schema recipients --channel '#team-offsite'
-```
-
-Inside a Checkout, `app status` says either that the Routine runs the
-Copy's Head, or that it is behind, and then why: an Install still running
-or retrying, or one that failed, was skipped or is locked out. A failed
-Install shows its error and error code, and a `Next:` line says what moves
-the Routine on, usually `app apply`. In `--json`, from a Checkout or from
-outside one with `--channel`, branch on `install.state`.
-
-`table schema` prints each Column's name and type, and flags `unique`,
-`required`, `internal`, `pii`, `restricted` and `concat`. Add `--json` for
-everything else, including the other policies, `format`, `display`,
-`label` and the Merge Key.
+`get_routine` says whether the latest Install landed, and when it has not,
+why: an Install still running or retrying, or one that failed, was skipped
+or is locked out, with its error and what moves the Routine on. It can wait
+for an Install that is running. `get_table` lists each Column in order with
+its type, `label` and Merge Policy, flags `required` and `unique` Columns,
+and names the Merge Key, so `Emails Sent` shows as `merge: concat`.
 
 The Rows show the Column working once Questionnaire's next pass emails
 someone:
@@ -360,3 +319,79 @@ adds to it:
 > A Column you stop declaring stays on the Table with its data, after the
 > declared ones. Removing `Emails Sent` from the Manifest does not remove
 > it from `recipients`.
+
+## With the CLI
+
+Two things on this page have no MCP equivalent today: `app validate`'s
+check of a Flow's writes against the Table's Columns, and reading a
+Column's `format`, `display` and index from the Routine. The rest is the
+CLI form of the steps above. The CLI calls a Routine a *channel*, its
+template an *app*, and a Copy a *fork line*, so its commands keep those
+names.
+
+**Copy and check out.** `--fork` makes the Copy; on a Routine already on a
+Copy, leave it out.
+
+```bash
+popcorn app checkout --channel '#team-offsite' --fork
+cd <app>
+```
+
+**Validate.** From the Checkout:
+
+```bash
+popcorn app validate .
+```
+
+`app validate` reads the Manifest and the Flows together, offline:
+
+- **`undeclared-column`**: a Flow writing a Column the Table does not
+  declare.
+- **`unknown-filter-column`**, as a warning: a filter on an undeclared
+  Column.
+
+It compares Columns only for Tables the Manifest declares, so a misspelled
+`table_name` passes it. Run from a Checkout of the Copy's Head, logged in,
+with a Routine (`--channel`, else the Checkout's), and with edits since the
+Checkout, it also sends them to the server, which runs the checks the dry
+run runs. Without those server checks it cannot report an invalid Column
+definition: it runs the rest and prints `server checks: skipped` with the
+reason, and `app publish` still refuses such a Table before any Version
+exists.
+
+**Publish.**
+
+```bash
+popcorn app publish . --bump patch -m "Emails Sent: a line per email" --yes
+```
+
+The CLI prints how many Routines will update, but only after the Version
+exists. A refused Publish saves no `--bump` to `manifest.yaml`, so
+re-running the same command after the fix is the retry. The refusal goes
+to stderr and the CLI exits 3:
+
+```
+Error: manifest tables: the agent store would refuse these at install, so the bundle cannot be published:
+  tables.recipients: column 'Emails Sent': merge='concat' requires a string column, got type 'datetime'
+```
+
+With `--json`, the same text is the `error` field, with `status: 422` and
+`error_code: validation`.
+
+**Confirm it landed.**
+
+```bash
+popcorn app status .
+popcorn table schema recipients --channel '#team-offsite'
+```
+
+Inside a Checkout, `app status` says either that the Routine runs the
+Copy's Head, or that it is behind, and why. A failed Install shows its
+error and error code, and a `Next:` line says what moves the Routine on,
+usually `app apply`. In `--json`, from a Checkout or from outside one with
+`--channel`, branch on `install.state`.
+
+`table schema` prints each Column's name and type, and flags `unique`,
+`required`, `internal`, `pii`, `restricted` and `concat`. Add `--json` for
+everything else, including the other policies, `format`, `display`,
+`label` and the Merge Key.
