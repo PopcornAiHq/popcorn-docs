@@ -27,7 +27,8 @@ This guide gives `#team-offsite`, the
 [Set up your first Routine](https://docs.popcorn.ai/set-up-a-routine.md),
 a Copy of its template named `offsite`, so that a later Version can add a
 `Team` Column to its `recipients` Table. Each step starts with a prompt you
-might give your assistant.
+might give your assistant, followed by the MCP tools it calls; the CLI's
+form of each is in [With the CLI](#with-the-cli).
 
 ## Check its settings first
 
@@ -45,8 +46,7 @@ and the replies, `prompts.read_questionnaire` and `prompts.read_answers`.
 The questions themselves are the questionnaire
 [Reference](https://docs.popcorn.ai/reference-documents.md). A change any
 of these covers needs no Copy: a setting reaches one Routine, can be set
-back, and survives the template's updates. In the CLI, `popcorn
-channel-config params` and `popcorn table scalar` read the same values.
+back, and survives the template's updates.
 
 A new Column is not a setting, so it needs a Copy. Which changes do, and
 which stay with one Routine without one, is in
@@ -81,15 +81,6 @@ The dry run names the Version being copied (Questionnaire 0.2.3), the new
 Copy, and any other Copies of the template the Workspace already has. A
 Copy's name is lowercase letters, digits, `-` and `_`.
 
-With the CLI, copy and check out the Copy's files in one step:
-
-```bash
-popcorn app checkout --channel team-offsite --fork=offsite
-```
-
-`popcorn app fork --channel team-offsite --name offsite` copies without
-checking out.
-
 The Copy starts byte-identical to the Version the Routine runs, and the
 Routine moves onto it, so nothing it runs changes at that moment. Copying
 needs a Routine Role of `member` or above, or a Workspace admin, so a guest
@@ -112,9 +103,7 @@ Column from here.
 Its **Updates from** line now names this Workspace's Copy `offsite`
 instead of Popcorn. `list_routines` says the same for every Routine
 (`· Popcorn's` or `· copy "offsite"`), and `list_routines` with `template`
-and `copy` lists the Routines on the Copy that you can see. In the CLI,
-`popcorn app list --channel team-offsite` says what one Routine runs, and
-`popcorn app lines` lists the Workspace's Copies.
+and `copy` lists the Routines on the Copy that you can see.
 
 ## Moving another Routine onto the Copy
 
@@ -126,7 +115,6 @@ and `copy` lists the Routines on the Copy that you can see. In the CLI,
 
 `copy_routine_template` only ever starts a new Copy. Joining one the
 Workspace already has is an Install that names it, which is a dry run too.
-With the CLI it is `popcorn app fork` with the existing Copy's name.
 
 ## A Copy reaches every Routine on it
 
@@ -147,8 +135,8 @@ meant to reach some Routines and not their siblings needs a second, named
 Copy, started from a different Routine that is still on Popcorn's version;
 a second Copy can only be started from such a Routine. Once a Workspace has
 two Copies of a template, a Routine still on Popcorn's version is refused
-as ambiguous when it is copied or installed without naming one: the CLI's
-`popcorn app fork` without `--name`, or an Install that names no Copy. A
+as ambiguous when it joins one without naming it: an `install_routine`
+with no `copy`. A
 Routine already on a Copy is unaffected; an Install there catches it up to
 its own Copy's Head.
 
@@ -168,3 +156,22 @@ to publish it forward as a new Version.
 > that Install is a dry run first, and says so.
 
 So copying is a decision about the Workspace, not a step in an edit.
+
+## With the CLI
+
+Only `popcorn app lines`, which lists the Workspace's Copies, and a
+Checkout of a new Copy's files written to disk have no MCP equivalent
+today; the rest is the CLI's form of the steps above.
+
+| To | Over MCP | With the CLI |
+|---|---|---|
+| read a Routine's settings | `list_routine_settings` | `popcorn channel-config params`, `popcorn table scalar` |
+| make a Copy | `copy_routine_template` | `popcorn app fork --channel team-offsite --name offsite` |
+| make a Copy and check out its files | — | `popcorn app checkout --channel team-offsite --fork=offsite` |
+| see what one Routine runs | `get_routine` | `popcorn app list --channel team-offsite` |
+| list the Workspace's Copies | — (`copy_routine_template`'s dry run names the others) | `popcorn app lines` |
+| move a Routine onto a Copy that exists | `install_routine` with `copy` | `popcorn app fork` with the existing Copy's name |
+
+`popcorn app fork` without `--name` adopts the single Copy that exists,
+and once a Workspace has two Copies of a template it is refused as
+ambiguous, like an Install that names no Copy.
