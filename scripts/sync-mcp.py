@@ -98,6 +98,7 @@ CONCEPTS: dict[str, tuple[str, ...] | None] = {
     "messages": None,
     "search_messages": None,
     "app_bundle": ("copying-a-template", "versions"),
+    "code_blocks": ("template-authoring",),
     "flows": ("flow-grammar",),
     "setup": ("set-up-a-routine",),
     "settings": ("routine-settings",),
