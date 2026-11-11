@@ -122,7 +122,7 @@ steps:
     on_error: { policy: skip, retry: 1 }
     args:
       conversation_id: $inputs.conversation_id
-      required_steps: [questionnaire, reply_by]
+      # Needs the send scope, which the checklist's Connection read doesn't.
       email_connected: $steps.probe.output.connected
 
   - id: kick
@@ -259,7 +259,7 @@ clears it again.
     on_error: { policy: skip, retry: 1 }
     args:
       conversation_id: $inputs.conversation_id
-      required_steps: [questionnaire, reply_by]
+      # Needs the send scope, which the checklist's Connection read doesn't.
       email_connected: $steps.probe.output.connected
 ```
 
@@ -269,13 +269,16 @@ evaluates in every Flow that completes one (`questionnaire_load`,
 `questionnaire_tick`. Popcorn sets the same Scalar when a value step
 completed through it or an assistant leaves no required step open.
 
-On a checklist written in `strings.yaml`, `required_steps` is accepted and
-ignored: the checklist says what setup waits on. A dry run warns
-(`required_steps_mismatch`) when a Flow's list differs from the
-checklist's required steps, leaving out Connection steps, which is why
-Questionnaire's lists its upload and value steps and not
-`connect_inbox`. `email_connected` is the Flow's own probe: `false` holds
-the latch, and when it is left out the rule reads the Connection itself.
+The checklist says what setup waits on: every `required: true` step, read
+live, so Questionnaire's Flows pass no list of steps. On a checklist
+written in `strings.yaml`, a `required_steps` argument is accepted and
+ignored, and a dry run warns (`required_steps_mismatch`) when it differs
+from the checklist's required steps, leaving out Connection steps.
+
+`email_connected` is the Flow's own probe: `false` holds the latch, and
+when it is left out the rule reads the Connection itself. Questionnaire
+passes it because the rule counts the Gmail Connection as made even on a
+sign-in without the send scope, which its passes would never send from.
 
 Once `setup_fulfilled` is set, Popcorn stops showing the checklist on the
 Today tab, and a later Gmail disconnect asks the person to reconnect
@@ -358,7 +361,7 @@ Flow's reason for refusing it, then the checklist as it now reads.
 > Your assistant calls `create_routine_version` without `confirm`, shows
 > you the dry run, then calls it with `confirm=true`.
 
-On a Copy, your assistant drafts three changes. The step itself, in
+On a Copy, your assistant drafts two changes. The step itself, in
 `strings.yaml`:
 
 ```yaml title="strings.yaml"
@@ -379,10 +382,8 @@ On a Copy, your assistant drafts three changes. The step itself, in
 A Flow named `sender_name_set` that takes `value`, stores it in
 `questionnaire.sender_name` with `foundation.store.set_scalar`, marks
 `sender_name` done with `feature.onboarding.mark_step`, and evaluates the
-setup as `reply_by_set` does. And `sender_name` added to `required_steps`
-in every Flow that evaluates. The step holds setup either way, because it
-says `required: true`; the edit keeps the lists agreeing with the
-checklist, so the dry run doesn't warn `required_steps_mismatch`.
+setup as `reply_by_set` does. The Flows that already evaluate need no
+change: the step holds setup because it says `required: true`.
 
 The step only asks for the name. For the emails to be signed with it,
 the template's code block has to read `questionnaire.sender_name` when it

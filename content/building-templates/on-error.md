@@ -57,10 +57,10 @@ sets `on_error` by what a second attempt would do:
 | Step | `on_error` | Why |
 |---|---|---|
 | `send`, `draft` in `ask_recipient`; `send_follow_up` in `check_recipient` | `{ policy: skip, retry: 0 }` | a send that timed out may still have gone, and a retry would email the recipient twice |
-| `compose`, `decide`, `found`: code-block calls in the child Flows | `{ policy: skip, retry: 0 }` | a failure is the block refusing, which another attempt would repeat |
+| `compose`, `decide`, `found`, `compose_follow_up`: code-block calls in the child Flows | `{ policy: skip, retry: 0 }` | a failure is the block refusing, which another attempt would repeat |
 | `thread` (`feature.email.get_thread`), `read` (`foundation.agent.transform`) | `{ policy: skip }` | a read is safe to retry, and a failed one leaves the Row to be read on the next pass |
-| `claim`, `release`, `record` in `ask_recipient`, `record_follow_up` (`foundation.store.patch_row`) | none | writing the same cells again changes nothing, and a refused claim fails at once |
-| `record` in `check_recipient` | `{ policy: skip }` | after its retries, a failed write releases the Row and the Run still fails by `record`'s error |
+| `claim` (`foundation.store.claim_row`) in both child Flows | none | a refused claim is a typed refusal, which fails at once |
+| `record` in both child Flows, `record_follow_up` (`foundation.store.patch_row`) | none | writing the same cells again changes nothing, and a write that still fails must fail the Run, so the Row is held or freed as the next section says |
 | `ask`, `check`, `adopt`: the tick's `foreach` Steps | `{ policy: skip }` | one recipient's failure is a null item, and the rest of the pass carries on |
 | `plan` in the tick | `{ retry: 0 }` | with no plan there is nothing to do, so the pass fails |
 | `project`, `latch_onboarding`, `probe`, the `kick` that starts a pass | `{ policy: skip, retry: 1 }` | the next pass or Run repeats them |
@@ -68,66 +68,71 @@ sets `on_error` by what a second attempt would do:
 
 ```yaml title="ask_recipient.yaml"
   # No retry: a send that timed out may still have gone, and a second
-  # attempt would email the recipient twice. The next pass retries instead,
-  # once the row is released below.
+  # attempt would email the recipient twice. A send that fails is skipped,
+  # which commits nothing, so the Run frees the row and the next pass
+  # asks again.
   - id: send
     when: $inputs.send_mode == 'send'
     activity: feature.email.send
     on_error: { policy: skip, retry: 0 }
+    commits_leases: true
 ```
 
 A send that fails here is not lost. `record` writes `Stage: waiting` only
-when a thread came back; otherwise `release` empties `Sending`, so the
-recipient is still unasked and the next pass, fifteen minutes on, asks
-them. A retry inside the Run could not know whether the first attempt's
-email went; a later pass reads the Row and does.
+when a thread came back, so the Run ends with the recipient still unasked,
+and the [Row lease](https://docs.popcorn.ai/row-leases.md) its `claim` took
+is freed when it ends. The next pass, fifteen minutes on, asks them. A
+retry inside the Run could not know whether the first attempt's email
+went; a later pass reads the Row and does.
 
-> [!WARNING] Release a claim on every path
-> `ask_recipient` and `check_recipient` hold the Row's `Sending` Column
-> from their `claim` until `record` or `release` empties it, and while it
-> is held the tick passes the Row by and every Action on it is refused.
-> So every Step between them that reaches outside the Run — the code
-> block, the thread, the model, the send — is skipped on error: one that
-> failed the Run instead would end it with the Row still held.
+## Skip before the send, fail after it
 
-`check_recipient`'s own `record` is skipped on error too. When it fails,
-`release_unrecorded` empties `Sending`, then `fail_unrecorded` fails the Run
-by `record`'s error, so the failure still shows and the next pass checks the
-recipient again:
+`ask_recipient` and `check_recipient` claim the Row's `Sending` Column as a
+lease, and while it is held the tick passes the Row by and every Action on
+it is refused. The platform frees it when the Run ends, so no Step has to
+release it, and what `on_error` decides is which way the Run ends:
+
+- **Before an email goes out**, a failure frees the Row whether the Run
+  fails or succeeds. The Steps that reach outside the Run (the code block,
+  the thread, the model) are skipped on error, so one recipient's bad read
+  ends their Run quietly and the next pass tries again.
+- **Once an email has gone**, the Run's lease is committed: `send`,
+  `draft` and `send_follow_up` carry `commits_leases: true`. The Steps
+  that record the send have no `on_error`, so a write that fails fails the
+  Run, and a failed Run that committed keeps the Row held rather than free
+  it to be emailed again. A skipped `record` would let the Run succeed and
+  free the Row with the send unrecorded.
+
+`check_recipient` writes what it found before it follows up, for the same
+reason. Its `record` has no `on_error` either, and when it fails, nothing
+has been sent: the Run fails by `record`'s own error, the lease frees the
+Row, and the next pass checks the recipient again.
 
 ```yaml title="check_recipient.yaml"
-  - id: release_unrecorded
-    when: $steps.record.error
+  - id: record
+    when: $steps.decide.output.patch
     activity: foundation.store.patch_row
     args:
       conversation_id: $inputs.conversation_id
       table_name: recipients
       record_id: $inputs.record_id
-      patch:
-        Sending: ""
-      change_kind: questionnaire_not_recorded
-      change_action: Couldn't record the check; will try again
+      patch: $steps.decide.output.patch
+      change_kind: questionnaire_reply
+      change_action: Checked for the recipient's reply
 
-  # The Run still fails, by `record`'s own error, once the claim is free.
-  - id: fail_unrecorded
-    when: $steps.record.error
-    activity: foundation.workflow.fail
-    args:
-      code: $steps.record.error.type
-      reason: $steps.record.error.message
+  - id: follow_up
+    when: $steps.decide.output.follow_up
+    steps:
+      # … compose_follow_up, send_follow_up (commits_leases: true),
+      # and record_follow_up, which has no on_error
 ```
 
-> [!NOTE] Where a held claim is the safer failure
-> `record` in `ask_recipient` and `record_follow_up` run after an email
-> went out, before the Row says so. Releasing the Row there would have the
-> next pass email the recipient again, so a failed write keeps the Row held
-> instead.
-
-> [!TIP] A lease frees the Row for you
-> A `claim_row` with no `holder:` is a lease the platform frees when the
-> Run ends, however it ends, so no release Step is needed, and
-> `commits_leases` keeps the hold once a send has gone. See
-> [Row leases](https://docs.popcorn.ai/row-leases.md).
+> [!WARNING] A skipped record frees what it should hold
+> On a Step that records a committed send, `on_error: { policy: skip }`
+> lets the Run succeed, and a Run that succeeds frees its Rows, so the
+> next pass sends again. Leave `on_error` off it. See
+> [Row leases](https://docs.popcorn.ai/row-leases.md) for what a committed
+> lease does on each outcome.
 
 To see which recipients a pass skipped, ask for the failed Runs:
 

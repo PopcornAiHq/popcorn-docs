@@ -29,7 +29,8 @@ This guide publishes a Version of the `offsite` Copy of the
 template, which `#team-offsite` runs, adding a `Team`
 [Column](https://docs.popcorn.ai/table-columns.md) to its `recipients`
 [Table](https://docs.popcorn.ai/tables.md). Each step starts with a prompt
-you might give your assistant, or the CLI command that does the same.
+you might give your assistant, followed by the MCP tools it calls; the
+CLI's form of each is in [With the CLI](#with-the-cli).
 
 ## Read the files
 
@@ -40,13 +41,7 @@ you might give your assistant, or the CLI command that does the same.
 > `manifest.yaml`.
 
 The listing's header names the Copy and the Version edits are based on,
-the Copy's Head, with each file's sha256, which an edit must carry. With
-the CLI, check the Head out to disk:
-
-```bash
-popcorn app checkout --channel team-offsite
-cd questionnaire
-```
+the Copy's Head, with each file's sha256, which an edit must carry.
 
 ## Make the change
 
@@ -66,8 +61,9 @@ this one behind with its data: see
 Questionnaire writes `Team`; people and the Routine's
 [Agent](https://docs.popcorn.ai/agent.md) fill it in.
 
-Every Version also needs a higher `version:`. The Copy's series is its own,
-so `offsite` goes from `0.2.3` to whatever you choose, such as `0.3.0`.
+Every Version also needs a higher `version:`, edited in the same change.
+The Copy's series is its own, so `offsite` goes from `0.3.0` to whatever
+you choose, such as `0.4.0`.
 
 ## Publish it
 
@@ -81,18 +77,10 @@ so `offsite` goes from `0.2.3` to whatever you choose, such as `0.3.0`.
 
 The dry run shows the Version it would publish, each file's diff, every
 check it would fail, and how many other Routines on `offsite` it will
-update. With the CLI, from the Checkout's directory:
-
-```bash
-popcorn app validate
-popcorn app publish --bump minor -m "Add a Team column to recipients"
-```
-
-`--bump minor` writes `version: "0.3.0"` into `manifest.yaml` once the
-Version exists; `-m` is the note recorded on it.
+update. `changelog` is the note recorded on the Version.
 
 > [!WARNING] A Publish reaches every Routine on the Copy
-> `#team-offsite` installs `0.3.0` at once, and every other Routine on
+> `#team-offsite` installs `0.4.0` at once, and every other Routine on
 > `offsite` takes it on its next Daily Update.
 
 ## Check that it landed
@@ -104,23 +92,9 @@ Version exists; `-m` is the note recorded on it.
 > Install did not land.
 
 `get_routine`'s **Version** line says what the Routine runs and its
-**Install** line whether the last Install landed. With the CLI:
-
-```bash
-popcorn app status
-```
-
-If it shows the Install blocked or failed, `install_routine` (`popcorn app
-apply`) retries it: see [Installing](#installing).
-
-The same steps, by surface:
-
-| To | Over MCP | With the CLI |
-|---|---|---|
-| read the files edits are based on | `list_routine_files`, `read_routine_file` | `popcorn app checkout --channel <routine>` |
-| publish the next Version | `create_routine_version` | `popcorn app publish` |
-| see what a Routine runs, and whether its Install landed | `get_routine` (**Version** and **Install**) | `popcorn app status` |
-| retry an Install that did not land | `install_routine` | `popcorn app apply` |
+**Install** line whether the last Install landed. If it shows the Install
+blocked or failed, `install_routine` retries it: see
+[Installing](#installing).
 
 ## Publishing
 
@@ -132,9 +106,7 @@ needs a Workspace admin.
 `create_routine_version` is a dry run first. It shows the Version it would
 publish, each file's diff, every check it would fail, and the reach: how
 many other Routines on the Copy will update. `confirm=true` with the dry
-run's `plan_id` publishes, running every check again. `popcorn app publish`
-asks before it publishes, naming the Copy rather than a count, and reports
-the count only once the Version exists.
+run's `plan_id` publishes, running every check again.
 
 A Publish is based on the Copy's newest Version, its **Head**. A Publish
 whose base is not the Head is refused, unless the files it would publish
@@ -143,8 +115,7 @@ computed against an older Version would drop whatever the Versions in
 between changed. A
 Routine's own Version lags the Head while an Install has not landed, and
 for good on a Routine that takes no updates; that is why
-`list_routine_files` and `popcorn app checkout` read the Head of a Copy by
-default, and an edit based on what a lagging Routine runs has to be redone
+`list_routine_files` reads the Head of a Copy by default, and an edit based on what a lagging Routine runs has to be redone
 on a fresh read.
 
 ### What a Publish refuses
@@ -182,8 +153,8 @@ A Publish is refused when:
 > A Manifest with no `app_type:` is not refused: Publish treats it as the
 > Copy's own template. Every Install of that Version then clears `app_type`
 > and `channel_agent` on each Routine it reaches, which is every Routine on
-> the Copy. Keep both keys in every Version, and treat `app validate`'s
-> `clears-app-type` warning as an error.
+> the Copy, and the dry run does not warn about it. Keep both keys in
+> every Version.
 
 ### What a dry run warns about
 
@@ -196,6 +167,8 @@ rule's name, and a Publish accepts a Version that has them. Among them:
 | `integration_undeclared` | a Flow reading `$channel.integrations.<name>` that its `required_integrations` doesn't declare, outside a block gated on a probe of it; see [Flow grammar](https://docs.popcorn.ai/flow-grammar.md) |
 | `document_accept_mismatch` | a `documents:` entry whose `accept` differs from its Flow's `foundation.file.detect` |
 | `required_steps_mismatch` | a `feature.onboarding.evaluate` Step whose `required_steps` differs from the setup checklist's required steps; see [the setup checklist](https://docs.popcorn.ai/setup-checklist.md#how-the-routine-is-marked-set-up) |
+| `flow_invalid` | a Flow the change touches that fails the validation a Run's Flow gets, such as a reference to a key its Activity doesn't return |
+| `missing_parameter`, `missing_integration`, `provider_mismatch` | a `$channel.*` reference the Routine can't satisfy: a parameter (a Routine Setting) that is not set, a declared Integration that is not connected, or a Connection whose provider contradicts the declaration; each fails a Run |
 
 Every one of those checks asks *is this allowed and well-formed*. None asks
 **did you mean to do this to every Routine on the Copy**, and none refuses a
@@ -217,18 +190,17 @@ Publish has four outcomes:
 | the same semver, different content | refused — Versions are immutable |
 | a new semver, content identical to an earlier Version on the Copy | refused — the digest is taken |
 
-A new semver must also be higher than the Copy's newest. The CLI checks that
-before sending; the server enforces it regardless.
+A new semver must also be higher than the Copy's newest, which the server
+enforces.
 
 So a mistake is corrected by publishing forward, never by editing, and
 nothing moves a Routine back to an earlier Version. An old Version cannot be
 republished byte for byte, because its digest is taken: bump the Version and
 change something — the Manifest's `changelog:` saying why is the honest
-change. An old Version can be read back by its id, with `list_routine_files`
-and `read_routine_file`'s `version`, or `popcorn app checkout --version <id>`,
-which checks it out read-only: publishing from that Checkout is refused.
-Version ids are the numbers a Publish and `popcorn app status` print; nothing
-lists a Copy's past Versions. To make old content current again, take a
+change. An old Version can be read back, by its id or its semver, with
+`list_routine_files` and `read_routine_file`'s `version`. Version ids are
+the numbers a Publish and `list_routine_files` print; nothing lists a
+Copy's past Versions. To make old content current again, take a
 fresh read of the Head, put the old files over it — deleting any file the old
 Version lacked — and publish forward with a bump.
 
@@ -252,17 +224,15 @@ An Install can be blocked — another Install may be in progress, or the
 Routine locked against template updates — and that is reported separately
 from whether the Publish succeeded, because the Version publishes either way.
 An Install reported as started has not necessarily landed either: it
-re-checks when it runs, and can still skip. `get_routine`'s **Install** line
-and `popcorn app status` show what the Routine actually runs; `app status`
-says whether an Install is running, retrying, failed, skipped or locked,
-with a failed Install's error, a skipped one's reason, and a `Next:` line
-saying what moves the Routine on.
+re-checks when it runs, and can still skip. `get_routine`'s **Install**
+line shows what the Routine actually runs: whether an Install is running,
+retrying, failed, skipped or locked, with a failed Install's error, a
+skipped one's reason, and the next step that moves the Routine on.
 
-**`install_routine` (`popcorn app apply`) is the retry.** It brings one
+**`install_routine` is the retry.** It brings one
 Routine on a Copy up to the Copy's Head, takes no Version from you — there
 is no argument through which one Routine's content reaches another — and
-says there is nothing to install (in the CLI's JSON, `already_current`) when
-the Routine already runs the Head. It works from the
+says there is nothing to install when the Routine already runs the Head. It works from the
 server's state alone, so it still works after the session that published has
 ended, which re-running the Publish cannot cover. On a locked Routine it is
 refused rather than queued. It needs a Routine Role of `member` or above,
@@ -296,3 +266,45 @@ with `call_flow` inherits its parent's Version.
   an Install lands in between, a parent on Version *n* can launch a child on
   *n+1*. An App Agent's Flow tools are pinned to the Version of the turn that
   called them.
+
+## With the CLI
+
+Only the CLI's `--bump`, its offline `app validate` rules and a Checkout
+written to disk have no MCP equivalent today; everything else here is the
+CLI's form of a step above.
+
+| To | Over MCP | With the CLI |
+|---|---|---|
+| read the files edits are based on | `list_routine_files`, `read_routine_file` | `popcorn app checkout --channel <routine>` |
+| publish the next Version | `create_routine_version` | `popcorn app publish` |
+| see what a Routine runs, and whether its Install landed | `get_routine` (**Version** and **Install**) | `popcorn app status` |
+| retry an Install that did not land | `install_routine` | `popcorn app apply` |
+
+Check the Head out to disk, edit it, and publish from the Checkout's
+directory:
+
+```bash
+popcorn app checkout --channel team-offsite
+cd questionnaire
+popcorn app validate
+popcorn app publish --bump minor -m "Add a Team column to recipients"
+popcorn app status
+```
+
+`--bump minor` writes `version: "0.4.0"` into `manifest.yaml` once the
+Version exists; `-m` is the note recorded on it, as `changelog` is over
+MCP. `app validate` checks offline that the new semver is higher than the
+Copy's newest before anything is sent, and warns `clears-app-type` on a
+Manifest that has lost `app_type:`; treat that warning as an error.
+
+`popcorn app publish` asks before it publishes, naming the Copy rather
+than a count, and reports the count only once the Version exists. Like
+`list_routine_files`, `popcorn app checkout` reads the Head of a Copy by
+default; `popcorn app checkout --version <id>` checks an earlier Version
+out read-only, and publishing from that Checkout is refused.
+
+`popcorn app status` prints the Version id and says what the Routine runs
+and whether an Install is running, retrying, failed, skipped or locked,
+ending with a `Next:` line. `popcorn app apply` is `install_routine`'s
+form, the retry; in its JSON, a Routine that already runs the Head says
+`already_current`.

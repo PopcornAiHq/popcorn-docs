@@ -62,7 +62,7 @@
 
 - q: I published half an hour ago and the channel still runs the old version.
   concept: versions
-  pass: minting the version and installing it are separate; the install was blocked or skipped, so check what the channel runs and finish it with apply
+  pass: minting the version and installing it are separate; the install was blocked or skipped, so check what the channel runs (get_routine's Install line) and finish it with install_routine (app apply)
   trap: says to wait for a cache, redeploy, or republish
 
 - q: Can I fix a bad version by republishing the same version number with corrected files?
@@ -82,7 +82,7 @@
 
 - q: How do I undo a fork?
   concept: copying-a-template
-  pass: there is no unfork and no way to re-bind an earlier version; an old version can be read by id with app checkout --version and its content published forward; treat the fork as one-way
+  pass: there is no unfork and no way to re-bind an earlier version; an old version can be read by id or semver with read_routine_file's version (or app checkout --version) and its content published forward; treat the fork as one-way
   trap: invents an unfork or a rollback command
 
 - q: Which version should I base my edits on, the one the channel runs or the newest?
@@ -202,7 +202,7 @@
 
 - q: I published a bad version yesterday. Can I get the files from the version before it?
   concept: versions, copying-a-template
-  pass: yes — app checkout --version <id> reads an earlier version of the line read-only; to make it current, copy its files over a fresh checkout of the head and publish forward
+  pass: yes — list_routine_files and read_routine_file with version (or app checkout --version <id>) read an earlier version of the line; to make it current, put its files over a fresh read of the head and publish forward
   trap: says no version-addressed read exists, or that the old version can be re-bound or republished as-is
 
 - q: My fork's new manifest dropped app_type. Will publish stop me?
@@ -529,7 +529,7 @@
 
 - q: How is the Questionnaire template built, and why can't Ask again land while a pass is checking a recipient?
   concept: questionnaire-template
-  pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, since the pass writes Stage from the Row it read
+  pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, a lease freed when its Run ends, since the pass writes Stage from the Row it read
   trap: says the Actions write Status directly, or that a pass waits for an Action to finish
 
 - q: How do I clear a datetime column from a flow or a transition's writes?
@@ -606,6 +606,21 @@
   concept: manifest-keys, strings-yaml
   pass: yes, a documents: entry's title and used_for are what list_references shows when strings.yaml has no documents.<id>.title or body; strings.yaml still wins
   trap: says only strings.yaml can name a Reference
+
+- q: Without the CLI, how do I check that my Flow's references are real before I publish?
+  concept: template-authoring
+  pass: create_routine_version without confirm is a dry run that runs every Publish check and warns flow_invalid on a Flow the change touches; nothing is published
+  trap: says only popcorn flow validate can check a Flow, or that you must publish and run it to find out
+
+- q: Can my assistant tell me before I publish that #team-offsite is missing a setting or Connection its Flows need?
+  concept: template-authoring, versions
+  pass: yes — create_routine_version's dry run compares every $channel.* reference with the Routine and warns missing_parameter, missing_integration or provider_mismatch; list_routine_settings and list_connections show what it has now
+  trap: says only popcorn channel-config show can check, or that it shows up only when a Run fails
+
+- q: How does my assistant run my changed Flow now to test it, over MCP?
+  concept: template-authoring
+  pass: run_trigger runs a Schedule the template declares (a dry run, then confirm=true), get_run with wait_seconds follows the Run, list_rows shows what it wrote; a Flow run by name with your own inputs needs the CLI's flow run
+  trap: says MCP can run any Flow with arbitrary inputs, or that nothing over MCP can start a Run
 
 - q: A scheduled run in my Routine failed. Can my assistant tell me why?
   concept: debugging-a-failed-run, history

@@ -26,7 +26,7 @@ Flows gate on every form there is:
     activity: feature.email.send
 
   - id: record
-    when: $steps.thread.output.value != 'none'
+    when: $steps.thread.output.value       # truth-tested: empty when nothing went out
     activity: foundation.store.patch_row
 ```
 
@@ -81,10 +81,10 @@ And a string that routes to the expression rail but fails to parse is an
 be evaluated fails the Run with `PredicateError`.
 
 > [!TIP] Stay on the legacy rail when one comparison will do
-> `ask_recipient` and `check_recipient` gate their `record` and `release`
-> Steps on one comparison each against the word `none`, the last value
-> they hand `foundation.workflow.coalesce`, which it returns when nothing
-> before it has a value. Exactly one of the two runs.
+> `ask_recipient` gates its `record` Step on a bare reference to the
+> thread id `foundation.workflow.coalesce` returns from `send` or `draft`.
+> When neither sent anything the value is empty, so the test needs no
+> sentinel word and no comparison.
 
 `app validate` does not police any of this: mirroring the routing rule
 offline means reimplementing the predicate parser, and a near-miss
@@ -129,17 +129,16 @@ inside the claim that takes it:
     args:
       # …
       column: Sending
-      holder: $trigger.run_id
-      refuse_when:
-        - code: RecipientAlreadyAsked
-          message: This recipient has already been asked.
-          when:
-            - { column: Stage, test: set }
+      when_legal: world.asked
 ```
 
-`refuse_when` is checked against exactly the Row the claim reads and then
-writes, so two passes cannot both find `Stage` blank and both send. Its
-rules are column tests, not `when:` expressions; see
+`when_legal` is checked against exactly the Row the claim reads and then
+writes: the claim is refused as `NoEdge` unless the
+[State Machine](https://docs.popcorn.ai/state-machine.md) has a
+`world.asked` edge from the Row's State, which only `new` has. Two passes
+cannot both find the recipient unasked and both send. `check_recipient`
+claims with `when_legal: world.answered`, which leaves only `waiting`. A
+Table with no graph can still check Column values in the claim with
+`refuse_when:`; see [Row leases](https://docs.popcorn.ai/row-leases.md) and
 [`foundation.store`](https://docs.popcorn.ai/activities/catalog/foundation/store.md)
 in the Activity reference.
-`check_recipient` refuses the same way when `Stage` is no longer `waiting`.

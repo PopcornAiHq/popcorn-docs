@@ -29,7 +29,7 @@ through references. The
 | `$steps.<id>.<collect>` | a `foreach` Step's collected list, under the name `collect:` gave it | (in the tick: `$steps.check.checked`) |
 | `$steps.<id>.error` | a Step skipped under `on_error: skip`: its `type` and `message` | — |
 | `$channel.*` | the Routine's channel parameters, its prompts and its Connections | `$channel.integrations.inbox.id`, `$channel.prompts.read_answers` |
-| `$trigger.*` | what started the Run | `$trigger.run_id`, the claim's holder |
+| `$trigger.*` | what started the Run | (in `cta_apply`: `$trigger.run_id`, the Action's `operation_key`) |
 | `as:` name | the current item inside a `foreach` | (in the tick: `$recipient.record_id`) |
 
 ## What `$channel` holds
@@ -68,12 +68,12 @@ a closed set, so a typo in it is caught offline. Every key is always
 present; one that does not apply to the Run's Trigger kind (`user_id` on a
 scheduled Run, say) resolves to null rather than erroring.
 
-`run_id` identifies this one Run, which is why Questionnaire's claims use it
-as the holder: `ask_recipient` and `check_recipient` write
-`$trigger.run_id` into the Row's `Sending` Column, and a retry of the same
-claim recognises its own id. `cta_apply` passes it as `operation_key`, and,
-with only `action`, `record_ids` and `payload` as its inputs, reads the
-Routine as `$trigger.conversation_id`. `workspace_id` is never an
+`run_id` identifies this one Run. `cta_apply` passes it as
+`operation_key`, and, with only `action`, `record_ids` and `payload` as
+its inputs, reads the Routine as `$trigger.conversation_id`. A claim needs
+no reference to the Run: `foundation.store.claim_row` with no `holder:`
+writes the Run's own identity (see
+[Row leases](https://docs.popcorn.ai/row-leases.md)). `workspace_id` is never an
 input; it rides the auth context.
 
 **A `foreach` alias shadows `$channel` and `$trigger`**, deliberately, so
@@ -96,15 +96,14 @@ thread:
       values:
         - $steps.send.output.thread_id
         - $steps.draft.output.thread_id
-        - none
 ```
 
 `$steps.send.output.thread_id` is null when `send` did not run, so
-`coalesce` passes over it. The trailing `none` gives the two gates after it,
-`record` and `release`, a word to compare against when nothing was written.
-`check_recipient` does the same with its `decide` Step, and its `read` Step
-is gated on `$steps.found.output.count`, which is null when the code block
-failed.
+`coalesce` passes over it, and its value is empty when neither produced a
+thread. `record` is gated on that value alone, so it writes only once an
+email has gone out. `check_recipient` gates its `record` on
+`$steps.decide.output.patch` and its `read` Step on
+`$steps.found.output.count`, each null when the code block failed.
 
 ## A missing key fails the Run
 
@@ -127,8 +126,8 @@ results with `additionalProperties: true`. For those,
 `$steps.x.output.anything` passes `flow validate`, and at runtime a key the
 response lacks is the same `ReferenceError`. Verify against the real
 response, not the catalog. The code block's output is one of these: every
-key `decide` returns, such as `patch`, `follow_up` and `settled`, is one its
-`run()` always sets.
+key `decide` returns, such as `patch`, `follow_up` and `next_follow_ups`, is
+one its `run()` always sets.
 
 **The DSL cannot reach sub-fields of an `object` input.**
 `$inputs.payload.name` is statically unreachable, because an input
