@@ -4,12 +4,12 @@ title: Change a Routine Template
 order: 1
 group: Making a change
 summary: >
-  Changing a Routine Template, as a Copy of Questionnaire does, over MCP
-  (`copy_routine_template`, `create_routine_version`) or the CLI
-  (`app checkout`, `validate`, `publish --yes`, `status`); creating a
-  Workspace's own template with `create_routine_template`; testing a code
-  block unpublished with `run_code_block`. Popcorn's catalog is not
-  self-serve.
+  Changing an existing Routine Template, as a Copy of Questionnaire does:
+  check its settings, read its files, dry-run the edit, copy it, publish a
+  Version, confirm the Install landed, over MCP or the CLI (`app publish
+  --yes` in agent mode). A Workspace's
+  own template starts with `create_routine_template`; `run_code_block`
+  tests a code block unpublished. Popcorn's catalog is not self-serve.
 lede: >
   Change what a Routine Template does: copy it, edit it, publish a new
   Version and confirm it installed.
