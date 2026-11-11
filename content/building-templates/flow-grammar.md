@@ -113,11 +113,23 @@ Flow directly is refused instead: `popcorn flow run` and a Flow's
 `call_flow` Step waiting on it fails, under its own `on_error`; a `detach`
 child just ends empty.
 
+A Flow that reads `$channel.integrations.<name>` without declaring it
+draws an `integration_undeclared` warning in a Publish's dry run, since a
+Run on a Routine without that Connection would fail at the Step that
+reads it. A read inside a block whose `when:` tests a probe of the same
+Connection, such as `feature.email.check_connected` with
+`integration_name: inbox`, or a Step derived from one, doesn't count. A
+probe in another Flow, such as a tick that starts this one only once
+connected, can't be seen, so a read behind it still warns; declaring it
+then costs nothing.
+
 > [!NOTE] Gmail in Questionnaire
 > Questionnaire's Flows read Gmail as `$channel.integrations.inbox`, the
 > `config_name` of its Manifest's one Connection, without declaring it
 > under `required_integrations`. The tick's `probe` Step asks whether the
 > Connection can send, and the code block's `plan` asks nobody until it can.
+> Its `ask_recipient` and `check_recipient` read Gmail behind the tick's
+> probe, so a dry run of a Copy warns `integration_undeclared` for both.
 
 **A Webhook-started Flow** gets `{conversation_id, payload, headers,
 source_hint, delivery_id, webhook_id}` as its inputs, and only from a

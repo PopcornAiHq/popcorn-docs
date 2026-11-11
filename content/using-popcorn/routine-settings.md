@@ -57,7 +57,8 @@ says "Retainer sending".
 
 Ask your assistant what you can change about a Routine, and it lists the
 settings that match: each one's value, and whether it was changed from the
-template's default. It can show one in full, with its options and the
+template's default. Of Popcorn's own switches, it lists those the Routine
+reads, and any already set on it. It can show one in full, with its options and the
 warning each carries, and change it for you.
 [Change how a Routine behaves](https://docs.popcorn.ai/change-how-a-routine-behaves.md)
 walks through it.

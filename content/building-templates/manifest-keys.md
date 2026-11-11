@@ -84,7 +84,9 @@ change is not touched at all, so a Member's pause survives.
 
 A switch gets its label and description from `strings.yaml`, under
 `settings.fields`; Questionnaire labels `popcorn.email_send_mode` there as
-*Email sending*, with a warning on its Send option. A channel parameter
+*Email sending*, with a warning on its Send option. That switch also has
+the platform's own words, which the Routine Settings tools show for a
+template that reads it without promoting it. A channel parameter
 gets them from `channel_parameter_fields:`, which maps a top-level
 parameter to an optional `label` (up to 60 characters) and `description`
 (up to 400). The Routine Settings tools print them beside the value, so
@@ -257,10 +259,15 @@ documents:
 | `required` | whether people are told the Routine needs it; `false` when absent |
 | `sources` | how a person supplies it: `upload`, `google_drive`, or both |
 | `drive_mime_types` | which Google Drive files the picker lets be picked; derived from `accept` when absent |
+| `title`, `used_for` | what the Reference is called and what it is for, when `strings.yaml` doesn't say |
 
 What a card calls the Reference and says it is for comes from
 `strings.yaml`, under `documents.<id>`: see
-[strings.yaml](https://docs.popcorn.ai/strings-yaml.md).
+[strings.yaml](https://docs.popcorn.ai/strings-yaml.md). Where
+`strings.yaml` has no `title` or `body` for it, `list_references` uses the
+entry's own `title` and `used_for`, and failing those names the Reference
+by its `id`. Questionnaire declares neither, since its `strings.yaml`
+says both.
 
 **The `flow` runs on every add and every replace.** Adding the file, from
 its card in Popcorn or with `add_reference`, starts the Flow with the
@@ -357,8 +364,9 @@ status_kinds:
 
 The first phase starts at 0, the last ends at 100, and the bar only moves
 forward: a phase may not start before the one above it ends. A failed
-phase is not declared, since a Flow's `failure_status` writes it. An Install
-refuses a kind that breaks one of these rules.
+phase is not declared, since a Flow's `failure_status` writes it. A Publish
+and its dry run refuse a kind that breaks one of these rules
+(`status_kind_invalid`), since every Install of it would.
 
 A Flow moves the chip with `foundation.status.set`, naming the kind and a
 `state`, and the Run fills in `pct`, `label`, `terminal` and `ok` from the

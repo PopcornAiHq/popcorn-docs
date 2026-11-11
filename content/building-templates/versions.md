@@ -170,6 +170,12 @@ A Publish is refused when:
   setting without the policy it belongs to, and the other Column rules in
   [adding a Table](https://docs.popcorn.ai/adding-a-table.md). The
   refusal names each Table and Column
+- a Transition's `writes` holds a value the store would refuse for its
+  Column, such as `''` into a datetime Column (write `null` instead);
+  staff `cta:` buttons have no `cta_apply` Flow to run; or a
+  `status_kinds:` kind would be refused by every Install. The dry run
+  names each finding by its rule: `transition_write_type`,
+  `cta_apply_missing` and `status_kind_invalid`
 - the Version or its content already exists (below)
 
 > [!WARNING] Keep `app_type:`
@@ -178,6 +184,18 @@ A Publish is refused when:
 > and `channel_agent` on each Routine it reaches, which is every Routine on
 > the Copy. Keep both keys in every Version, and treat `app validate`'s
 > `clears-app-type` warning as an error.
+
+### What a dry run warns about
+
+`create_routine_version`'s dry run also lists warnings, each under its
+rule's name, and a Publish accepts a Version that has them. Among them:
+
+| Rule | What it flags |
+|---|---|
+| `states_steps_unlisted` | a graph with a Review and no Step marker, so the Routine lists no Steps; see [the Publish checks](https://docs.popcorn.ai/states-authoring.md#checks-once-the-graph-parses) |
+| `integration_undeclared` | a Flow reading `$channel.integrations.<name>` that its `required_integrations` doesn't declare, outside a block gated on a probe of it; see [Flow grammar](https://docs.popcorn.ai/flow-grammar.md) |
+| `document_accept_mismatch` | a `documents:` entry whose `accept` differs from its Flow's `foundation.file.detect` |
+| `required_steps_mismatch` | a `feature.onboarding.evaluate` Step whose `required_steps` differs from the setup checklist's required steps; see [the setup checklist](https://docs.popcorn.ai/setup-checklist.md#how-the-routine-is-marked-set-up) |
 
 Every one of those checks asks *is this allowed and well-formed*. None asks
 **did you mean to do this to every Routine on the Copy**, and none refuses a

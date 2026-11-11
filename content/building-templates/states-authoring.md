@@ -351,8 +351,9 @@ next pass, because a blank `Last Asked` is due at once.
 
 > [!IMPORTANT] The name is fixed
 > Popcorn and `take_action` both start the Flow by the literal name
-> `cta_apply`, with those three inputs. Publish doesn't check that a Bundle
-> with buttons ships it.
+> `cta_apply`, with those three inputs. A Publish refuses a Bundle whose
+> staff Transitions carry `cta:` buttons and that has no `cta_apply` Flow:
+> see [the Publish checks](#the-publish-checks).
 
 ### Take one from your assistant
 
@@ -390,13 +391,16 @@ them, and a press while it is held is refused. Closing a recipient a pass
 is checking reads:
 
 ```text
-staff.close is not legal here: recipient is waiting; A pass is emailing or checking this recipient; try again once it has finished.
+staff.close is not legal here: A pass is emailing or checking this recipient; try again once it has finished.
 ```
 
 `cta_apply` fails the Run with that reason and the guard's code,
-`RecipientBusy`. The reason names every edge the Event has: Close's edge
-from the Review is refused because the recipient is `waiting`, and its
-edge from `waiting` by the guard. Once the pass releases the Row, the
+`RecipientBusy`. Close has an edge from the Review and one from
+`waiting`, and the reason is the one that leaves from where the Row
+stands: the guard's. The other edge, refused only because the recipient
+isn't on its State, goes unmentioned. A Row on a State no edge of the
+Event leaves names every edge's State instead, as in `staff.close is not
+legal here: recipient is answered`. Once the pass releases the Row, the
 Action can be taken again.
 
 > [!TIP] Give a guard words
@@ -952,6 +956,36 @@ states: column 'Stage' carries display hint 'status:new,waiting,answered,no_resp
 
 A template moving from hand-kept hints onto the tier deletes them; there
 is no need to copy the rendered value back in.
+
+### Checks once the graph parses
+
+Two more checks run on a graph that parses, beside the Table check. A dry
+run lists everything they find at once, each under its rule's name, and
+the message opens `manifest.yaml states:`, or names the Recipe's file.
+
+**`transition_write_type`: a Transition's `writes` must be a value the
+store takes for the Column as declared**: its type, a number or datetime
+`format`, and `required: true`. Otherwise every press of the button would
+fail after it was offered. An edit to Questionnaire's Ask again that
+empties `Last Asked` with `''` rather than `null`:
+
+```text
+manifest.yaml states: transition staff.ask_again (from no_response) writes 'Last Asked': '', which the store refuses for table 'recipients' (Last Asked: not a valid ISO 8601 datetime). Write null to empty it: writes: {Last Asked: null}.
+```
+
+**`cta_apply_missing`: a Bundle with buttons ships `cta_apply`.** Every
+staff Transition with a `cta:` runs it when pressed:
+
+```text
+manifest.yaml states: transitions ['staff.ask_again', 'staff.close', 'staff.mark_answered'] carry cta: buttons, and pressing one (in the app or through take_action) runs this bundle's cta_apply flow, which the bundle does not have. Add cta_apply.yaml at the bundle's root, taking inputs action, record_ids and payload and applying them with feature.state.transition; or remove the cta: keys.
+```
+
+One more is a warning, which a Publish accepts.
+**`states_steps_unlisted`**: the primary machine has a Review, a State
+with `warn: true` that isn't terminal, and no State carries a
+`policy: {step: …}` marker, so `get_routine` lists no
+[Steps](https://docs.popcorn.ai/steps.md) and the Reviews appear in no
+Steps list. Questionnaire's `waiting` carries one, so it doesn't warn.
 
 ## A Recipe instead of `states:`
 
