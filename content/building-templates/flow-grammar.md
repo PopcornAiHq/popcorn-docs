@@ -50,6 +50,13 @@ description: >
   Ask one recipient the questionnaire's questions, and mark them Waiting.
   Run by `questionnaire_tick` for each recipient with no Stage yet.
 
+required_integrations:
+  inbox:
+    description: >
+      The connected Gmail: the questionnaire is sent, or left in Drafts,
+      from it.
+    connection: gmail
+
 inputs:
   conversation_id: { type: string }
   record_id: { type: integer }
@@ -63,15 +70,12 @@ steps:
       table_name: recipients
       record_id: $inputs.record_id
       column: Sending
-      holder: $trigger.run_id
       held_code: RecipientBeingAsked
       held_message: Another run is emailing this recipient.
-      refuse_when:
-        - code: RecipientAlreadyAsked
-          message: This recipient has already been asked.
-          when:
-            - { column: Stage, test: set }
-  # … compose, send, draft, thread, record, release, project
+      when_legal: world.asked
+      change_kind: questionnaire_sending
+      change_action: Started emailing the questionnaire
+  # … now, compose, send, draft, thread, record
 
 outputs:
   record_id: $inputs.record_id
@@ -98,7 +102,7 @@ Flow may set these keys:
 |---|---|---|
 | `failure_status: {kind, label}` | writes one terminal status update of that kind when a Step fails past every `on_error`, then fails the Run | `questionnaire_load`: "Questionnaire not added" on the Reference's card |
 | `confirm: when_asked` | a member's own message asking for the Run is its confirmation, so the Routine's Agent runs it without a dry run; a Run nobody's message started, and any other caller, still gets one. Not with `read_only` or `writes_channel_parameters` | `reply_by_set`: a member who names the date has asked for exactly this |
-| `required_integrations` | the Connections a Run needs; see below | none: the tick checks Gmail itself with `feature.email.check_connected` |
+| `required_integrations` | the Connections a Run needs; see below | `ask_recipient` and `check_recipient`: `inbox`, the Gmail Connection |
 | `best_effort: true` | every start goes to the batch tier, and the Flows it launches follow it; for a fan-out nobody waits on | none |
 | `trigger: message` | runs the Flow for every message in the Routine, with the message as `$inputs.message` | none |
 | `read_only: true` | the author's word that a Run changes nothing, so an Agent's Run of it needs no confirmation | none |
@@ -107,7 +111,9 @@ Flow may set these keys:
 **`required_integrations`** names what the Routine must connect, keyed by
 the name Steps read as `$channel.integrations.<name>`; `provider`
 constrains which account may back it, and an account of another provider
-counts as unconnected. While one is unconnected a Run does no work: it ends
+counts as unconnected. `connection` names the Manifest Connection, by its
+`id`, that backs it; it only links the two, for when two Connections share
+a provider, and nothing checks it when a Run starts. While one is unconnected a Run does no work: it ends
 before its first Step with empty outputs, which a Schedule, a Webhook, a
 Message Trigger or running a Schedule now sees as success. Starting the
 Flow directly is refused instead: `popcorn flow run` and a Flow's
@@ -127,11 +133,13 @@ then costs nothing.
 
 > [!NOTE] Gmail in Questionnaire
 > Questionnaire's Flows read Gmail as `$channel.integrations.inbox`, the
-> `config_name` of its Manifest's one Connection, without declaring it
-> under `required_integrations`. The tick's `probe` Step asks whether the
-> Connection can send, and the code block's `plan` asks nobody until it can.
-> Its `ask_recipient` and `check_recipient` read Gmail behind the tick's
-> probe, so a dry run of a Copy warns `integration_undeclared` for both.
+> `config_name` of its Manifest's one Connection. `ask_recipient` and
+> `check_recipient` declare it with `connection: gmail` and no `provider:`,
+> since the Connection takes either a `gmail` or a `google` account, so a
+> Run started on a Routine without Gmail ends empty rather than failing at
+> its first send. The tick declares nothing: its `probe` Step asks whether
+> the Connection can send, and the code block's `plan` asks nobody until
+> it can.
 
 **A Webhook-started Flow** gets `{conversation_id, payload, headers,
 source_hint, delivery_id, webhook_id}` as its inputs, and only from a

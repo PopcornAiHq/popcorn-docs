@@ -88,7 +88,7 @@ questionnaire_tick
   ├── check_recipient × waiting    claim the Row → the thread → new replies
   │                                → read_answers prompt → decide (code block)
   │                                → record → follow up?
-  └── project                      every Row's Status, Why and Actions from its Stage
+  └── project                      repairs any Row's Status, Why and Actions no write reached
 ```
 
 Each recipient is a [Run](https://docs.popcorn.ai/history.md) of its own,
@@ -102,8 +102,8 @@ reply-by date is set, and nobody new is asked once that date has passed.
 Recipients already waiting are still checked.
 
 > [!NOTE] Nothing fires when a Row is added
-> A recipient added by your assistant is asked on the next pass, and has
-> no Status or Actions until then. Adding or replacing the questionnaire,
+> A recipient added by your assistant is asked on the next pass. Adding or
+> replacing the questionnaire,
 > setting the reply-by date and connecting Gmail each start a pass at
 > once.
 
@@ -112,8 +112,8 @@ Recipients already waiting are still checked.
 A recipient's state is the `Stage`
 [Column](https://docs.popcorn.ai/table-columns.md), which the Flows write.
 `Status`, `Why` and the Actions are worked out from it by the template's
-[States tier](https://docs.popcorn.ai/states-authoring.md), so they can't
-disagree:
+[States tier](https://docs.popcorn.ai/states-authoring.md) as each write
+lands, so they can't disagree:
 
 ```
 "" (new) ──asked──▶ waiting ──answered──▶ answered
@@ -124,8 +124,11 @@ disagree:
 Mark answered: new, waiting or no_response ──▶ answered
 ```
 
-The moves a pass makes are `world` Transitions, declared so the graph is
-whole. The three Actions are `staff` Transitions, each a button:
+The moves a pass makes are `world` Transitions. The Flows write `Stage`
+rather than fire them, but their claims check them: `ask_recipient` takes
+a recipient only while `world.asked` leaves where they stand, and
+`check_recipient` only while `world.answered` does. The three Actions are
+`staff` Transitions, each a button, and each one edge:
 
 | Action | From | What it writes |
 |---|---|---|
@@ -142,8 +145,11 @@ come with the template's Version, so a description can't change them; see
 ## Rules worth knowing
 
 - **One email per recipient.** `ask_recipient` and `check_recipient` claim
-  the Row's `Sending` Column first, so two passes that overlap can't both
-  send a first email or the same follow-up.
+  the Row's `Sending` Column first, as a
+  [Row lease](https://docs.popcorn.ai/row-leases.md), so two passes that
+  overlap can't both send a first email or the same follow-up. The lease
+  is freed when the Run ends, unless an email went out and recording it
+  failed: then the recipient stays held rather than be emailed again.
 - **An Action never lands under a pass.** Each Action has the guard
   `not_held`, so it is refused while `Sending` is held: the pass writes
   `Stage` from the Row as its claim read it, and would overwrite it.

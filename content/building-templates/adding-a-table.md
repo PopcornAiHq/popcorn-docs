@@ -120,7 +120,7 @@ In `ask_recipient`, the step that records the first email:
 
 ```yaml title="ask_recipient.yaml"
   - id: record
-    when: $steps.thread.output.value != 'none'
+    when: $steps.thread.output.value
     activity: foundation.store.patch_row
     args:
       conversation_id: $inputs.conversation_id
@@ -135,7 +135,6 @@ In `ask_recipient`, the step that records the first email:
         Message Id: $steps.send.output.rfc822_message_id
         Asked Address: $steps.compose.output.to
         Emails Sent: $steps.now.output.iso
-        Sending: ""
       change_kind: questionnaire_asked
       change_action: $steps.compose.output.asked
 ```
@@ -154,9 +153,10 @@ The other Activities you will usually need are:
 - `foundation.store.get_record`: reads one Row by id.
 
 `patch_row` takes `expected_rev` (the Row's `_rev`) when another writer may
-have changed the Row since you read it. Questionnaire claims the Row's
-`Sending` Column instead, with `foundation.store.claim_row`, so two passes
-can't both email the same recipient.
+have changed the Row since you read it. Questionnaire takes a lease on the
+Row's `Sending` Column instead, with `foundation.store.claim_row`, so two
+passes can't both email the same recipient; see
+[Row leases](https://docs.popcorn.ai/row-leases.md).
 
 > [!IMPORTANT] Empty a datetime Column with null
 > The store checks each value against its Column's `type`, `format` and

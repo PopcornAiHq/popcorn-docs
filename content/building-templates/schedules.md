@@ -87,12 +87,12 @@ to `interval: 3600` in a Copy of the template (see
 publish a new [Version](https://docs.popcorn.ai/versions.md). Popcorn's
 Questionnaire offers no Routine Setting for it.
 
-> [!NOTE] Strings say fifteen minutes too
-> Questionnaire's `strings.yaml` describes its automations as running
-> *Every 15 minutes*, and its `AGENT.md` and `agent_summary` say the same.
-> A Copy that changes the cadence changes those words too. An automation
-> line written as `schedule: {flow: questionnaire_tick}` instead is
-> rendered from the Schedule at Publish, and follows it: see
+> [!NOTE] AGENT.md says fifteen minutes too
+> Questionnaire's `AGENT.md` and `agent_summary` describe its pass as
+> running every fifteen minutes, so a Copy that changes the cadence changes
+> those words too. Its `strings.yaml` automation lines are written as
+> `schedule: {flow: questionnaire_tick}`, rendered from the Schedule at
+> Publish, so they follow it: see
 > [strings.yaml](https://docs.popcorn.ai/strings-yaml.md#automations).
 
 ## Install reconciles by (Flow, slug)

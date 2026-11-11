@@ -62,8 +62,8 @@ Questionnaire writes `Team`; people and the Routine's
 [Agent](https://docs.popcorn.ai/agent.md) fill it in.
 
 Every Version also needs a higher `version:`, edited in the same change.
-The Copy's series is its own, so `offsite` goes from `0.2.3` to whatever
-you choose, such as `0.3.0`.
+The Copy's series is its own, so `offsite` goes from `0.3.0` to whatever
+you choose, such as `0.4.0`.
 
 ## Publish it
 
@@ -80,7 +80,7 @@ check it would fail, and how many other Routines on `offsite` it will
 update. `changelog` is the note recorded on the Version.
 
 > [!WARNING] A Publish reaches every Routine on the Copy
-> `#team-offsite` installs `0.3.0` at once, and every other Routine on
+> `#team-offsite` installs `0.4.0` at once, and every other Routine on
 > `offsite` takes it on its next Daily Update.
 
 ## Check that it landed
@@ -291,7 +291,7 @@ popcorn app publish --bump minor -m "Add a Team column to recipients"
 popcorn app status
 ```
 
-`--bump minor` writes `version: "0.3.0"` into `manifest.yaml` once the
+`--bump minor` writes `version: "0.4.0"` into `manifest.yaml` once the
 Version exists; `-m` is the note recorded on it, as `changelog` is over
 MCP. `app validate` checks offline that the new semver is higher than the
 Copy's newest before anything is sent, and warns `clears-app-type` on a

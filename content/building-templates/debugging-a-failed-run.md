@@ -176,8 +176,8 @@ Outputs: {"asked": [],
   Item's changes newest first, each with who or what made it and its
   `entry_id`, and under them the Runs that changed it and how each ended.
   Questionnaire names each change: "Started emailing the questionnaire",
-  "Sent the questionnaire", "Couldn't email the questionnaire; will try
-  again".
+  "Sent the questionnaire", and "Released the hold its run had taken" when
+  the Run ends.
 - **`read_history_entry`**, with an `entry_id`, shows that one change in
   full: every field it changed, before and after, and, when a Run made it,
   what the Run did, step by step in order, each with its outcome and any
@@ -203,9 +203,10 @@ Flow did its work. These are the ways it can succeed having done nothing.
 **A Step failed and was skipped.** Under `on_error: skip` the Run goes on
 with the Step's output null, and ends `succeeded`. `get_run` still lists
 the Step as failed, with its message, among the newest Steps. In
-`ask_recipient`, a `send` that failed is skipped, `release` empties
-`Sending`, and the Row's History says "Couldn't email the questionnaire;
-will try again": the next pass asks the recipient again.
+`ask_recipient`, a `send` that failed is skipped, nothing is recorded, and
+the platform frees the Row when the Run ends, so its History shows the
+claim and then "Released the hold its run had taken": the next pass asks
+the recipient again.
 
 **A child failed under the pass.** The tick's `ask` and `check` Steps skip
 a failed child, so the pass succeeds without it; see "Read what a pass did"
@@ -245,11 +246,12 @@ A Run started by a person or an agent is refused at the start instead,
 naming the missing Integrations. So this quiet ending belongs to Schedules,
 Webhooks, Message Triggers and Flows started by other Flows.
 
-> [!NOTE] Questionnaire checks Gmail itself
-> Questionnaire's Flows declare no `required_integrations`: the tick's
-> `probe` Step asks `feature.email.check_connected` whether Gmail can send,
-> and `plan` reports `ready: false` when it cannot. So a pass on a Routine
-> without Gmail runs its Steps and asks nobody.
+> [!NOTE] Questionnaire checks Gmail twice
+> The tick's `probe` Step asks `feature.email.check_connected` whether
+> Gmail can send, and `plan` reports `ready: false` when it cannot, so a
+> pass on a Routine without Gmail runs its Steps and asks nobody. And
+> `ask_recipient` and `check_recipient` declare `inbox` in
+> `required_integrations`, so one started any other way ends quietly too.
 
 **It launched a Run and finished.** `foundation.workflow.start_flow` starts a
 separate Run and returns at once, so the parent succeeds whatever the child
@@ -478,7 +480,7 @@ output omits them. What each part says:
 | `version_id` | The Version of the template the Run pinned, printed as `version:`. Null (`-`) until the Run has pinned, and on Runs older than the field. |
 
 The detail names **Activities, not Step ids** — `foundation.store.patch_row`,
-not `record` or `release`, which in `check_recipient` call the same one. The timeline names both:
+not `record` or `record_follow_up`, which in `check_recipient` call the same one. The timeline names both:
 
 ```bash
 popcorn flow runs timeline <workflow-id> --channel <channel>

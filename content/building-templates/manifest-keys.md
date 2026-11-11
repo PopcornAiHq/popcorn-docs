@@ -33,7 +33,7 @@ Manifest, which `#team-offsite` runs, declares under each key.
 
 | Key | What Install does | In Questionnaire |
 |---|---|---|
-| `version` | required to publish; must be a semver such as `1.2.0` — `1.0` parses as a number and is refused | `"0.2.1"` |
+| `version` | required to publish; must be a semver such as `1.2.0` — `1.0` parses as a number and is refused | `"0.3.0"` |
 | `display_name`, `description` | catalog copy for the template picker | `Questionnaire`, and one sentence |
 | `changelog` | documentation only on a Copy of the template (the CLI calls it a *fork line*); the Version's note comes from `app publish -m` | one entry per Version |
 | `tables` | additive reconcile — Tables and Columns added, attributes fixed, never dropped or renamed; see [Table Columns](https://docs.popcorn.ai/table-columns.md) | `recipients`, one Row per `Email` |
@@ -217,9 +217,10 @@ such as several calendars to book into. `min` is at least 1.
 > Nothing at run time reads it. What stops a Flow running without the
 > account is the Flow's own
 > [`required_integrations`](https://docs.popcorn.ai/flow-grammar.md), or a
-> check of its own: Questionnaire's Flows declare none, and probe Gmail
-> with `feature.email.check_connected`, so the tick asks nobody until the
-> mailbox can send.
+> check of its own. Questionnaire does both: `ask_recipient` and
+> `check_recipient` declare Gmail, and the tick probes it with
+> `feature.email.check_connected`, so it asks nobody until the mailbox can
+> send.
 
 Publish refuses an unknown field, an unknown `kind` and a duplicate `id`.
 

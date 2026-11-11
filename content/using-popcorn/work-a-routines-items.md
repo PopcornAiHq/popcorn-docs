@@ -101,8 +101,9 @@ with the Status it moves the Item to. At *No response* those are:
 - **Close** — to *Closed*, so nobody follows up.
 
 Someone not asked yet, or still *Waiting*, offers *Mark answered* and
-*Close*. Someone added since the last Run offers nothing yet: they have no
-Status until the next Run picks them up.
+*Close*. Someone just added shows *Not asked yet* and offers both as soon
+as their Row is saved, or at the latest once the next Run has passed over
+them.
 
 > [!NOTE] Not while a Run holds it
 > While a Run is emailing someone or reading their replies, they offer no
