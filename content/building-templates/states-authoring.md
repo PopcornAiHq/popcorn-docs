@@ -119,17 +119,8 @@ states:
         label: Ask again
         message: "Ask {Name|this recipient} again."
     - on: staff.mark_answered
-      from: no_response
-      to: answered
-      guard: [not_held]
-      expected: true
-      description: Marked answered by a person
-      cta:
-        kind: mark-answered
-        label: Mark answered
-        message: "Mark {Name|this recipient} as answered."
-    - on: staff.mark_answered
-      from: [new, waiting]
+      from: [new, waiting, no_response]
+      review: true
       to: answered
       guard: [not_held]
       expected: true
@@ -139,18 +130,8 @@ states:
         label: Mark answered
         message: "Mark {Name|this recipient} as answered."
     - on: staff.close
-      from: no_response
-      to: closed
-      guard: [not_held]
-      expected: true
-      description: Closed, so nobody follows up
-      cta:
-        kind: close
-        label: Close
-        prominence: quiet
-        message: "Close {Name|this recipient}."
-    - on: staff.close
-      from: [new, waiting]
+      from: [new, waiting, no_response]
+      review: true
       to: closed
       guard: [not_held]
       expected: true
@@ -175,9 +156,9 @@ Read it top to bottom:
   [Review](https://docs.popcorn.ai/reviews.md).
 - **Two Event families.** The `world` Transitions are the moves a pass
   makes. The `staff` Transitions are people's decisions, and each carries
-  a `cta:`, the button that is its Action. Mark answered and Close are two
-  edges each, one from the Review and one from `new` and `waiting`, so the
-  Steps list names them among the Review's choices (see
+  a `cta:`, the button that is its Action. Mark answered and Close leave
+  `new` and `waiting` as well as the Review, and carry `review: true` so
+  the Steps list still names them among the Review's choices (see
   [Which States are Steps](https://docs.popcorn.ai/state-machine.md#which-states-are-steps)).
 - **One guard, `not_held`.** Every Action needs `Sending` empty; see
   [The guard that keeps an Action from landing under a pass](#the-guard-that-keeps-an-action-from-landing-under-a-pass).
@@ -212,13 +193,13 @@ whole file, ask it to read `manifest.yaml` from the
 ## How the Flows move a recipient
 
 Questionnaire's [Flows](https://docs.popcorn.ai/flow-grammar.md) never fire
-a `world` Event. They write `Stage` as a plain fact, then project. Here is
-the end of `ask_recipient`, which records the first email and projects the
-Row:
+a `world` Event. They write `Stage` as a plain fact, and the write projects
+the Row as it lands. Here is the end of `ask_recipient`, which records the
+first email:
 
 ```yaml title="ask_recipient.yaml"
   - id: record
-    when: $steps.thread.output.value != 'none'
+    when: $steps.thread.output.value
     activity: foundation.store.patch_row
     args:
       conversation_id: $inputs.conversation_id
@@ -232,25 +213,26 @@ Row:
         Follow Ups: 0
         Message Id: $steps.send.output.rfc822_message_id
         Asked Address: $steps.compose.output.to
-        Sending: ""
       change_kind: questionnaire_asked
       change_action: $steps.compose.output.asked
-
-  - id: project
-    when: $steps.thread.output.value != 'none'
-    activity: feature.state.project
-    on_error: { policy: skip, retry: 1 }
-    args:
-      record_ids: [$inputs.record_id]
 ```
 
 `check_recipient` does the same with whatever its code block settles:
 `answered`, `no_response`, or a blank `Stage` when the Email was corrected,
-which reads as `new` again. `feature.state.project` reads each Row's
-`Stage`, composes its Status, and writes `Status`, `Why` and `CTAs`. The
-[Schedule](https://docs.popcorn.ai/schedules.md)'s Flow, `questionnaire_tick`,
-ends every pass by projecting every Row. That covers Rows added since the
-last pass and any Row whose own projection failed:
+which reads as `new` again. Because `Stage` is a Column the projection
+reads, each write composes the Row's Status and writes `Status`, `Why` and
+`CTAs` in the same call (see
+[Status is a projection](https://docs.popcorn.ai/state-machine.md#status-is-a-projection-not-a-column-somebody-writes)).
+Neither Flow writes `Sending`: their claim is a
+[Row lease](https://docs.popcorn.ai/row-leases.md) that the platform frees
+when the Run ends.
+
+Not every Row is reached by a write that projects: a Row from before the
+States tier, which `adopt` below writes as a plain fact, one changed by a
+writer that doesn't project, or one whose projection failed. A Row at
+Answered, Closed or No response is never claimed again, so it would stay
+stale. The [Schedule](https://docs.popcorn.ai/schedules.md)'s Flow,
+`questionnaire_tick`, ends every pass by projecting the whole Table:
 
 ```yaml title="questionnaire_tick.yaml"
   - id: project
@@ -261,13 +243,16 @@ last pass and any Row whose own projection failed:
       results: changed
 ```
 
-With no `record_ids` it projects the whole Table. `results` narrows only
-what the Step returns (`all`, `changed` or `warn`), not what it writes.
+With no `record_ids` it projects the whole Table, and writes only the Rows
+whose Status, Why or Actions are stale. `results` narrows only what the
+Step returns (`all`, `changed` or `warn`), not what it writes.
 
-So the `world` Transitions are a record of the moves, kept so the graph is
-whole. The Publish checks need them, because `waiting` and `no_response`
-are reachable only through them, and a rendered graph draws them. They are
-not what moves a Row.
+So the `world` Transitions don't move a Row. The claims read them:
+`ask_recipient` claims with `when_legal: world.asked` and `check_recipient`
+with `when_legal: world.answered`, so a recipient is taken only from a
+State that Event leaves, and any other is refused as `NoEdge`. The Publish
+checks need them too, because `waiting` and `no_response` are reachable
+only through them, and a rendered graph draws them.
 
 > [!WARNING] A direct write isn't judged
 > A Flow that writes a stored Column itself skips the engine's judgement of
@@ -371,11 +356,11 @@ listed and marked "in Popcorn", and `take_action` refuses them.
 
 ## The guard that keeps an Action from landing under a pass
 
-`ask_recipient` and `check_recipient` start by claiming the Row: they write
-their Run's id into `Sending`, and clear it in the same patch that writes
-the new `Stage`. In between, they decide from the Row as the claim read
-it. An Action that landed in that window would be overwritten when the
-pass writes `Stage`, so every Action carries `not_held`:
+`ask_recipient` and `check_recipient` start by claiming the Row: they hold
+`Sending` as a [Row lease](https://docs.popcorn.ai/row-leases.md) until
+their Run ends. Meanwhile they decide from the Row as the claim read it.
+An Action that landed in that window would be overwritten when the pass
+writes `Stage`, so every Action carries `not_held`:
 
 ```yaml title="manifest.yaml"
   guards:
@@ -395,13 +380,11 @@ staff.close is not legal here: A pass is emailing or checking this recipient; tr
 ```
 
 `cta_apply` fails the Run with that reason and the guard's code,
-`RecipientBusy`. Close has an edge from the Review and one from
-`waiting`, and the reason is the one that leaves from where the Row
-stands: the guard's. The other edge, refused only because the recipient
-isn't on its State, goes unmentioned. A Row on a State no edge of the
-Event leaves names every edge's State instead, as in `staff.close is not
-legal here: recipient is answered`. Once the pass releases the Row, the
-Action can be taken again.
+`RecipientBusy`. A Row on a State no edge of the Event leaves gets the
+edge's States instead, as in `staff.close is not legal here: recipient is
+answered`. Since the claim and the lease's release are both writes to a
+Column the guard reads, the Actions disappear when a pass claims the Row
+and come back when its Run ends.
 
 > [!TIP] Give a guard words
 > Without `code:` and `message:`, a refusal reads `guard not_held refused`
@@ -459,6 +442,10 @@ changelog: >-
   and `Status` becomes its projection, declared as a `states:` graph, so
   No response is a Review with three Actions: …
 ```
+
+A change to the edges alone is announced the same way. The 0.3.0 entry
+says `STATE CHANGE, to edges only (no state is added, renamed or
+removed)`, then what moved.
 
 A check in Popcorn's own repository refuses a change to a template's
 `states:` section, or its removal, without that sentence, so a State added,
@@ -658,6 +645,7 @@ turns it back.
 | `effects` | names of Bundle-side work, echoed back per applied Row |
 | `detail` / `detail_from` | the landing State's detail value, literal or from that payload key; the landing State must declare `detail:` |
 | `importance` | 1–10, how loudly a client draws the edge; display only. An int, or a map of source State to rank with an optional `default` |
+| `review` | `true` lists the button among a Review's choices on the Steps list though it also leaves a Step; display only. See [Which States are Steps](https://docs.popcorn.ai/state-machine.md#which-states-are-steps) |
 | `description` | the line the Row's History records when the edge lands |
 
 The machine is inferred: a qualified reference names it, or else it is the
@@ -879,6 +867,14 @@ states: cta kind 'ask-again' is used by both 'staff.ask_again' and 'staff.resume
 states: 'world.asked' carries a cta but is not a staff event
 ```
 
+**`review: true` lists a button among a Review's choices**, so it needs a
+`cta:`, an edge of the first machine, and a Review among its `from:`
+States. Questionnaire's Close without `no_response` in its `from:`:
+
+```text
+states: transition on 'staff.close' sets review: true but its from: ['new', 'waiting'] names no Review (a warn: true state that is neither terminal nor a Step with policy.chase or policy.step); add the Review to from: or drop review
+```
+
 **No two machines share a State name**, because Status holds their union:
 
 ```text
@@ -1026,7 +1022,8 @@ end, terminals hold, and the Table declares what the tier touches. It does
 not prove **intent**, which is still yours to check:
 
 - **Events nothing fires.** Questionnaire's `world` edges pass every check,
-  and nothing fires them: its Flows write `Stage`. That is by design there.
+  and nothing fires them: its Flows write `Stage`, and only its claims'
+  `when_legal` reads them. That is by design there.
   In your own graph, search the Flows for each non-staff Event and for
   every value they write to a stored Column.
 - **Terminals reached too early.** Mark answered leaves `new`, so a

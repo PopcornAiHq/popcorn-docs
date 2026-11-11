@@ -529,7 +529,7 @@
 
 - q: How is the Questionnaire template built, and why can't Ask again land while a pass is checking a recipient?
   concept: questionnaire-template
-  pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, since the pass writes Stage from the Row it read
+  pass: one Schedule runs a pass that plans, asks new recipients and checks waiting ones; a code block decides; Stage is a State Machine whose Actions carry the not_held guard, refused while the pass holds the Row's Sending claim, a lease freed when its Run ends, since the pass writes Stage from the Row it read
   trap: says the Actions write Status directly, or that a pass waits for an Action to finish
 
 - q: How do I clear a datetime column from a flow or a transition's writes?

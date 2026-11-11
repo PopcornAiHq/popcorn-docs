@@ -112,17 +112,8 @@ states:
         label: Ask again
         message: "Ask {Name|this recipient} again."
     - on: staff.mark_answered
-      from: no_response
-      to: answered
-      guard: [not_held]
-      expected: true
-      description: Marked answered by a person
-      cta:
-        kind: mark-answered
-        label: Mark answered
-        message: "Mark {Name|this recipient} as answered."
-    - on: staff.mark_answered
-      from: [new, waiting]
+      from: [new, waiting, no_response]
+      review: true
       to: answered
       guard: [not_held]
       expected: true
@@ -132,18 +123,8 @@ states:
         label: Mark answered
         message: "Mark {Name|this recipient} as answered."
     - on: staff.close
-      from: no_response
-      to: closed
-      guard: [not_held]
-      expected: true
-      description: Closed, so nobody follows up
-      cta:
-        kind: close
-        label: Close
-        prominence: quiet
-        message: "Close {Name|this recipient}."
-    - on: staff.close
-      from: [new, waiting]
+      from: [new, waiting, no_response]
+      review: true
       to: closed
       guard: [not_held]
       expected: true
@@ -203,6 +184,17 @@ if it writes one, though a plain store write is not refused. That is why
 changing a Row's Status means firing an Event rather than setting a value:
 set the value and the next projection overwrites it.
 
+A plain write to a Column the projection reads, such as `Stage` or the
+`Sending` Column a guard reads, projects the Row in the same call: the
+`foundation.store` Activities, the MCP row tools and a Row added in Popcorn
+all do. That holds for a `states:` graph the Row alone decides, with no
+derived machine, no external or Setting guard and no `worklist:`; any
+other graph is projected by the Bundle's own `feature.state.project`
+Steps, as is every Recipe. Not every writer projects, such as an
+[Agent](https://docs.popcorn.ai/agent.md) writing the store directly, so a
+Bundle that relies on it still ends its pass with a whole-Table
+`feature.state.project`, as Questionnaire does.
+
 > "Mark Ana as answered in #team-offsite. She told me her answers on a
 > call."
 
@@ -222,9 +214,12 @@ An Event is `family.event`, and `events:` lists each family's names.
 named by the Bundle. Questionnaire's `world` Events (`asked`, `answered`,
 `gave_up`, `restarted`) are the moves its
 [Flows](https://docs.popcorn.ai/flow-grammar.md) make: `ask_recipient`
-and `check_recipient` write `Stage` with `foundation.store.patch_row`, then
-call `feature.state.project` to recompute `Status`, `Why` and the Actions.
-The world edges are declared so the graph is whole: without `world.asked`,
+and `check_recipient` write `Stage` with `foundation.store.patch_row`, and
+each write recomputes `Status`, `Why` and the Actions as it lands. The
+Flows' claims read the world edges too: `when_legal: world.asked` takes a
+recipient only while that edge leaves their State (see
+[Row leases](https://docs.popcorn.ai/row-leases.md)). And they make the
+graph whole: without `world.asked`,
 nothing could reach `waiting` (Ask again starts from `no_response`, which
 only `waiting` leads to), and Publish would refuse the graph.
 
@@ -242,18 +237,16 @@ Questionnaire's three:
 | Action | From | Writes |
 |---|---|---|
 | **Ask again** | `no_response` | `Follow Ups: 0`, `Last Asked: null`, so the next pass follows up at once |
-| **Mark answered** | `no_response`; and `new`, `waiting` | nothing else |
-| **Close** (`prominence: quiet`) | `no_response`; and `new`, `waiting` | nothing else |
+| **Mark answered** | `new`, `waiting`, `no_response` | nothing else |
+| **Close** (`prominence: quiet`) | `new`, `waiting`, `no_response` | nothing else |
 
 A `cta:` takes a `kind`, unique across the graph, a `label`, and a
 `message`: the line a chat posts, filled from the Row, where
 `{Name|this recipient}` falls back to its text when `Name` is blank.
 
-Mark answered and Close are each declared as two edges with the same
-`cta:`, one from the Review and one from the States before it, so the
-Steps list names them among the Review's choices (see
-[Which States are Steps](#which-states-are-steps)). A person sees one
-button either way.
+Mark answered and Close each leave the Review and the States before it,
+and carry `review: true` so the Steps list still names them among the
+Review's choices (see [Which States are Steps](#which-states-are-steps)).
 
 > [!IMPORTANT] Empty a datetime with null
 > Ask again writes `Last Asked: null`, not `""`: `Last Asked` is a
@@ -325,9 +318,26 @@ Questionnaire's `waiting` carries the marker:
 
 A Step's ways out are its edges that are not buttons. A button also
 offered from a Step is one every open Item has, like an Archive, so it is
-not listed among a Review's choices. That is why Questionnaire declares
-Mark answered and Close twice. A graph with no Step lists no Steps, and
-Popcorn hides the tab.
+not listed among a Review's choices, unless its edge carries
+`review: true`. Questionnaire's Mark answered and Close leave `waiting` as
+well as `no_response`, so both carry it:
+
+```yaml title="manifest.yaml"
+    - on: staff.close
+      from: [new, waiting, no_response]
+      review: true
+      to: closed
+```
+
+`review: true` changes only the list, never what a press does. It needs a
+`cta:`, an edge of the first machine, and a Review among its `from:`
+States; Publish refuses it otherwise, for example:
+
+```text
+states: transition on 'staff.close' sets review: true but its from: ['new', 'waiting'] names no Review (a warn: true state that is neither terminal nor a Step with policy.chase or policy.step); add the Review to from: or drop review
+```
+
+A graph with no Step lists no Steps, and Popcorn hides the tab.
 
 For `#team-offsite`, `get_routine` lists:
 

@@ -177,15 +177,15 @@ en:
     automations:
       - id: ask
         name: Emails your questions to new recipients
-        schedule: Every 15 minutes
+        schedule: {flow: questionnaire_tick}
         required_connection: gmail
       - id: replies
         name: Records answers from replies
-        schedule: Every 15 minutes
+        schedule: {flow: questionnaire_tick}
         required_connection: gmail
       - id: follow_up
         name: Follows up on unanswered questions
-        schedule: Every 15 minutes
+        schedule: {flow: questionnaire_tick}
         required_connection: gmail
 ```
 
@@ -196,18 +196,9 @@ connection* while that Connection isn't made. An entry can also name a
 `required_document`, a Reference's id, and read *Needs document* while it
 is missing; Questionnaire's don't.
 
-`schedule` is text, or the
+`schedule` is text, or, as in Questionnaire, the
 [Schedule](https://docs.popcorn.ai/schedules.md) it describes, named by
-its Flow:
-
-```yaml title="strings.yaml"
-      - id: ask
-        name: Emails your questions to new recipients
-        schedule: {flow: questionnaire_tick}
-        required_connection: gmail
-```
-
-Publish writes that Schedule's cadence in its place, from the Manifest's
+its Flow. Publish writes that Schedule's cadence in its place, from the Manifest's
 `schedules:`: *Every 15 minutes* for Questionnaire's `interval: 900`,
 *Every hour*, *Every day at 8:00 (America/Los_Angeles)* or *Every Monday
 at 2:30*. A daily `deadline` or `window` Schedule runs at a minute inside
@@ -215,9 +206,9 @@ its hour, so it reads *Every day between 8:00 and 9:00*. A Copy that
 changes the interval changes the line with it. Add
 `slug:` beside `flow:` when the Flow has several Schedules. Publish
 refuses a mapping that names no Schedule, or more than one, or a cron it
-can't put in words, and the message names the entry. Questionnaire writes
-the text, so a Copy that changes how often its pass runs changes the text
-too.
+can't put in words, and the message names the entry. A line written as
+text, such as `schedule: Every 15 minutes`, is shown as written, so a Copy
+that changes the interval has to change the text too.
 
 ## Audit lines and the Connection subline
 
