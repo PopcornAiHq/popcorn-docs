@@ -128,13 +128,9 @@ The moves a pass makes are `world` Transitions. The Flows write `Stage`
 rather than fire them, but their claims check them: `ask_recipient` takes
 a recipient only while `world.asked` leaves where they stand, and
 `check_recipient` only while `world.answered` does. The three Actions are
-`staff` Transitions, each a button, and each one edge:
-
-| Action | From | What it writes |
-|---|---|---|
-| **Ask again** | `no_response` | `Follow Ups` back to 0 and `Last Asked` empty, so the next pass follows up at once |
-| **Mark answered** | `new`, `waiting`, `no_response` | Nothing else: `Answers` keeps what the replies gave |
-| **Close** | `new`, `waiting`, `no_response` | Nothing else |
+`staff` Transitions, each a button, and each one edge. Their edges and
+what each writes are in
+[Every button is an edge](https://docs.popcorn.ai/state-machine.md#every-button-is-an-edge).
 
 So the Routine has two [Steps](https://docs.popcorn.ai/steps.md):
 *Waiting* is Answers, marked with `policy.step` and run by the template's

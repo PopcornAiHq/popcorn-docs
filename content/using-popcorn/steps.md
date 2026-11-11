@@ -56,8 +56,9 @@ A Step sends its first email, then follows up while nothing comes back:
   schedule and the hours are
   [Routine Settings](https://docs.popcorn.ai/routine-settings.md), and a
   Step can have its own.
-- **Until.** When the follow-ups run out, the Item closes with a reason,
-  such as *No response*.
+- **Until.** When the follow-ups run out, the Item stops waiting on a reply
+  and waits at a [Review](https://docs.popcorn.ai/reviews.md), such as
+  *No response*, for a person to decide.
 - **After.** A reply after that reopens the Step it went quiet on.
 
 An Item's [Status](https://docs.popcorn.ai/actions-and-status.md) names the
@@ -79,8 +80,8 @@ Popcorn does:
 - each Step's kind and name, and the ways an Item leaves it on its own;
 - each Review's reason and choices, where each leads, and which are made
   only in Popcorn;
-- in a Routine whose Steps are its own, the Version of them that is
-  installed;
+- in a Routine whose Steps are its own, the
+  [Version](https://docs.popcorn.ai/versions.md) of them that is installed;
 - how many Items are at each Step.
 
 > [!TIP] Filtering by Step
@@ -97,14 +98,6 @@ in Popcorn, or to their assistant. The Agent takes a few minutes to draft
 it, and the proposal shows the Steps before and after before anything is
 installed. The walkthrough is
 [changing a Routine's Steps](https://docs.popcorn.ai/change-how-a-routine-behaves.md#change-its-steps).
-
-- The change stays with this Routine and survives the template's
-  improvements (see
-  [customizing a Routine](https://docs.popcorn.ai/customizing-a-routine.md)).
-- An earlier [Version](https://docs.popcorn.ai/versions.md), or the
-  template's own, can be put back.
-- A change that would remove a Step Items are still at is refused.
-- One change is drafted at a time on a Routine.
 
 > [!NOTE] Only where the Steps are the Routine's own
 > A Routine's Steps can be changed this way only when its template keeps

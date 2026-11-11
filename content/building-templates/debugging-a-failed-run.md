@@ -242,9 +242,12 @@ stops while it is missing. A `create_routine_version` dry run also warns
 when the Bundle's Flows use an Integration or a `$channel.*` parameter the
 Routine lacks, or an account of the wrong provider.
 
-A Run started by a person or an agent is refused at the start instead,
-naming the missing Integrations. So this quiet ending belongs to Schedules,
-Webhooks, Message Triggers and Flows started by other Flows.
+Starting the Flow by name is refused instead: `popcorn flow run` and another
+Flow's `foundation.workflow.start_flow` get 409 `missing_integrations`, and a
+`call_flow` Step with `mode: wait` fails (`ChildFlowMissingIntegrations`,
+above). Running a Schedule now, Schedules, Webhooks, Message Triggers and a
+`detach` child end quietly; see
+[the shape of a Flow](https://docs.popcorn.ai/flow-grammar.md).
 
 > [!NOTE] Questionnaire checks Gmail twice
 > The tick's `probe` Step asks `feature.email.check_connected` whether

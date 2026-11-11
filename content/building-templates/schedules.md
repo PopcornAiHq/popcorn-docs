@@ -68,7 +68,9 @@ inputs.
 
 ## One cadence, and a class that routes it
 
-Each entry names exactly one of `interval:` or `cron:`. Publish does not
+Each entry names at most one of `interval:` or `cron:`. An entry with
+neither is on demand: it is created paused, and a Flow arms it with
+`foundation.workflow.update_schedule`'s `fire_at`. Publish does not
 refuse one naming both: the Install fails for a new Schedule, while a
 Schedule that already exists is instead skipped and kept exactly as it was,
 and the Install reports it as skipped. The same rule applies to an unknown
@@ -87,19 +89,17 @@ to `interval: 3600` in a Copy of the template (see
 publish a new [Version](https://docs.popcorn.ai/versions.md). Popcorn's
 Questionnaire offers no Routine Setting for it.
 
-> [!NOTE] AGENT.md says fifteen minutes too
-> Questionnaire's `AGENT.md` and `agent_summary` describe its pass as
-> running every fifteen minutes, so a Copy that changes the cadence changes
-> those words too. Its `strings.yaml` automation lines are written as
-> `schedule: {flow: questionnaire_tick}`, rendered from the Schedule at
-> Publish, so they follow it: see
-> [strings.yaml](https://docs.popcorn.ai/strings-yaml.md#automations).
+Questionnaire's `AGENT.md`, `agent_summary` and `strings.yaml`'s
+`waiting_body` say fifteen minutes in words, so change them with the number;
+its automation lines follow the Schedule
+([changing a Routine Template](https://docs.popcorn.ai/template-authoring.md#read-the-files)).
 
 ## Install reconciles by (Flow, slug)
 
 Install upserts each Schedule by (Flow, slug), then deletes the name-keyed
-Schedules the Manifest no longer declares; Schedules a Member created through
-another surface are never touched. On a Version update an unchanged
+Schedules the Manifest does not declare. A Schedule a Member created on one
+of the Routine's Flows is name-keyed too, so a full Install deletes it; a
+Version update does not. On a Version update an unchanged
 Schedule is left as it is, so a Member's pause survives; only Schedules the
 *old* Manifest declared and the new one drops are deleted, and a recreated
 Schedule keeps its paused state and note.
@@ -115,7 +115,8 @@ Schedule keeps its paused state and note.
 A Routine's live Schedules can differ from its Manifest on purpose. A
 template's own `set_app_mode` Flow, where it has one, compresses them for
 `popcorn.app_mode: test` and pauses them for `off`, and the platform offsets
-a plain daily cron away from the top of the hour. Questionnaire has no
+a plain daily cron of class `deadline` or `window` away from the top of
+the hour. Questionnaire has no
 `set_app_mode` Flow, so its Schedule matches its Manifest.
 
 > "Do #team-offsite's live schedules match its template?"

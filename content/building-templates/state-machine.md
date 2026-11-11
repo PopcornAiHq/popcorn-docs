@@ -28,7 +28,7 @@ below). The platform ships the engine and runs the graph; the Bundle ships
 the graph and the vocabulary. The platform knows none of your State names,
 only its own few words: `none`, `same`, the `staff` Event family whose
 edges are buttons, and the `system` family, the only one that may leave a
-terminal State. Writing one step by step is
+`terminal: true` State. Writing one step by step is
 [authoring a States tier](https://docs.popcorn.ai/states-authoring.md).
 
 ## Questionnaire's machine
@@ -179,8 +179,9 @@ machine. With one machine, Questionnaire's `Status` is simply its `Stage`,
 shown with the State's `label`, and `Why` is the State's `why`.
 
 Nothing should hand-write it. A Transition's own writes may not touch the
-projection Columns, and a Flow's patch that asks to be projected is refused
-if it writes one, though a plain store write is not refused. That is why
+projection Columns, a `feature.state.transition` Step's own `writes` are
+refused if they name one, and so is a `foundation.store` write on a graph
+the Row alone decides (below). That is why
 changing a Row's Status means firing an Event rather than setting a value:
 set the value and the next projection overwrites it.
 
@@ -248,15 +249,14 @@ Mark answered and Close each leave the Review and the States before it,
 and carry `review: true` so the Steps list still names them among the
 Review's choices (see [Which States are Steps](#which-states-are-steps)).
 
-> [!IMPORTANT] Empty a datetime with null
-> Ask again writes `Last Asked: null`, not `""`: `Last Asked` is a
-> `datetime` Column, and the store refuses an empty string for one. See
-> [Table Columns](https://docs.popcorn.ai/table-columns.md).
+`Last Asked` is a `datetime`, so it is emptied with `null`, not `""`
+([Table Columns](https://docs.popcorn.ai/table-columns.md#type-format-display)).
 
 A person's click and `take_action` both start the Bundle's `cta_apply`
-Flow with the Action and the Rows. Questionnaire's `cta_apply` is one
+Flow with the Action and the Rows. Questionnaire's `cta_apply` is a
 `feature.state.transition` Step, which judges the edge from each Row's
-`Stage`, applies the writes and re-projects the Row.
+`Stage`, applies the writes and re-projects the Row, and a Step that fails
+the Run when no Row was applied.
 
 **Guards** are conditions an edge requires. Most are Column or
 machine-state predicates the platform evaluates itself, combined with
@@ -278,8 +278,8 @@ The whole spec is resolved when the Bundle is parsed. It fails when:
   but the initial one marks the edge that is its normal way in with
   `expected:`, as `world.asked` is for `waiting`
 - a non-terminal State of a Funnel machine has no way out
-- a terminal State is left by anything but a `system` Event: nothing
-  leaves `answered` or `closed`
+- a `terminal: true` State is left by anything but a `system` Event:
+  nothing leaves `answered` or `closed`
 - two machines share a State name, a `cta.kind` is used twice, or a Column
   the tier needs is not declared
 
@@ -294,7 +294,7 @@ The whole spec is resolved when the Bundle is parsed. It fails when:
 
 A Routine's [Steps](https://docs.popcorn.ai/steps.md), as `get_routine`
 and the **Routine steps** tab in Popcorn list them, are read off the
-first machine's States in the order they are declared. Two kinds make a
+first non-Overlay machine's States in the order they are declared. Two kinds make a
 row:
 
 - **A Step** is a State whose `policy:` names a Step type: `questions`
@@ -330,7 +330,7 @@ well as `no_response`, so both carry it:
 ```
 
 `review: true` changes only the list, never what a press does. It needs a
-`cta:`, an edge of the first machine, and a Review among its `from:`
+`cta:`, an edge of that machine, and a Review among its `from:`
 States; Publish refuses it otherwise, for example:
 
 ```text

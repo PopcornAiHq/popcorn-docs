@@ -145,7 +145,7 @@ existed uses this form, so it keeps working unchanged.
 
 | | Lease (no `holder:`) | Manual (`holder:` or `release: manual`) |
 |---|---|---|
-| Holder | the Run, `lease:…` | the value given |
+| Holder | the Run, `lease:…` | the value given; with `release: manual` and no `holder:`, the bare Run id |
 | Freed when the Run ends | yes, unless committed and the Run failed | no; the Flow frees it |
 | Taken over after a timeout | yes, unless committed | never |
 | `commits_leases` | applies | ignored |

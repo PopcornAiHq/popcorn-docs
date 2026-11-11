@@ -225,5 +225,5 @@ en:
 
 | Key | Where it shows |
 |---|---|
-| `today.audit.row_created`, `row_updated`, `row_deleted` | Meant as the line a Row's history shows for a change with no other description; Popcorn shows its own "Row created", "Row updated" and "Row deleted" there instead |
+| `today.audit.row_created`, `row_updated`, `row_deleted` | The line a Row's history in Popcorn shows for a change with no other description, in place of "Row created", "Row updated" and "Row deleted" |
 | `connections.email_subline` | Nothing shows it |

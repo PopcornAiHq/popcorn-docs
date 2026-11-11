@@ -50,16 +50,8 @@ a fit" or "already done".
 
 ## What is waiting
 
-> "Who in #team-offsite needs us to decide what to do next?"
-
-> [!TIP] MCP tool call
-> Your assistant calls `get_status`, then `list_rows` with a filter on the
-> Status Column for the Items at one Review in full.
-
-Your assistant counts the Items at each Status and marks the Statuses that
-need a person. Where the Routine keeps a list of what is waiting, it lists
-that too, newest first, with why and which Items; otherwise it lists the
-Items at those Statuses from the Table.
+Ask your assistant which Items need a person; see
+[Find what is waiting](https://docs.popcorn.ai/work-a-routines-items.md#find-what-is-waiting).
 
 > [!TIP] In Popcorn
 > Items at a Review show as needing review. Each one's Status names its
@@ -67,15 +59,8 @@ Items at those Statuses from the Table.
 
 ## Making the choice
 
-> "Jane answered at standup. Mark Jane as answered."
-
-> [!TIP] MCP tool call
-> Your assistant calls `list_actions` to see the choices, then
-> `take_action`.
-
-Your assistant makes the choice as pressing its button would: straight away
-when you named the Item and the choice, and otherwise once you agree to what
-it shows you.
+Your assistant makes the choice as pressing its button would; see
+[Make the call](https://docs.popcorn.ai/work-a-routines-items.md#make-the-call).
 
 > [!NOTE] Some choices are made in Popcorn
 > A choice that opens a form, such as sending an agreement whose fields a
@@ -86,10 +71,9 @@ it shows you.
 
 Some work happens without the Routine: an answer given on the phone, a call
 already held. In `#team-offsite`, *Mark answered* covers it, and is offered
-before anyone has stopped answering too. In a claims intake Routine, when
-its **Step forward** [setting](https://docs.popcorn.ai/routine-settings.md) is
-on, an Item offers choices such as *Already answered* or *Call already
-held*, which move it past a Step without waiting for it.
+before anyone has stopped answering too. In a claims intake Routine, an Item
+offers choices such as *Already answered* or *Call already held*, which
+move it past a Step without waiting for it.
 
 ## Adding or removing a Review
 

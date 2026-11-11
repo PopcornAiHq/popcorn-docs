@@ -71,9 +71,12 @@ admin. Some need more:
 | change any other [Routine Setting](https://docs.popcorn.ai/routine-settings.md), prompts and email wording included | a Workspace admin who is also a Member of the Routine |
 | replace a Webhook someone else made | an admin of the Routine, or a Workspace admin |
 | post in a Routine set to announcements only | an admin of the Routine, or a Workspace admin |
-| stop a [Run](https://docs.popcorn.ai/history.md) | a Member or admin of the Routine, not a guest |
+| stop a [Run](https://docs.popcorn.ai/history.md) | a Member of the Routine, not a guest, or a Workspace admin |
 | create a Routine | anyone in the Workspace but a guest |
 | publish a [Version](https://docs.popcorn.ai/versions.md) of a template | a Workspace admin |
+
+Here, a Member of the Routine means a Routine Role of `member` or above: a
+guest of the Routine is refused unless they are a Workspace admin.
 
 > [!NOTE] Your assistant has your Roles
 > Your assistant acts as you, so it can do what your Roles allow and

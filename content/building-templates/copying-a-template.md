@@ -89,10 +89,6 @@ Publishing to the Copy afterwards needs a Workspace admin: see
 [Versions](https://docs.popcorn.ai/versions.md), which takes the `Team`
 Column from here.
 
-> [!CAUTION] A Copy is one-way
-> Once `#team-offsite` is on `offsite`, it no longer receives Popcorn's
-> improvements to Questionnaire, and nothing moves it back.
-
 ## See what it runs
 
 > "What does #team-offsite run now?"
@@ -121,9 +117,7 @@ Workspace already has is an Install that names it, which is a dry run too.
 A Workspace has one Copy of a template unless it names more, and **every
 Routine on a Copy is brought to the Copy's newest Version**: the one you
 published from by an Install that starts at once, and each of the others by
-its own Daily Update, within a day. The Daily Update runs as the Workspace,
-not as the person who published, so whether that person is a Member of the
-other Routines does not matter. A `Team` Column tested on `#team-offsite`
+its own Daily Update, within a day. A `Team` Column tested on `#team-offsite`
 reaches `#board-offsite` too. The exceptions are in
 [installing](https://docs.popcorn.ai/versions.md#installing): the Install
 on the Routine you published from can be blocked, and the Daily Update
@@ -165,7 +159,7 @@ today; the rest is the CLI's form of the steps above.
 
 | To | Over MCP | With the CLI |
 |---|---|---|
-| read a Routine's settings | `list_routine_settings` | `popcorn channel-config params`, `popcorn table scalar` |
+| read a Routine's settings | `list_routine_settings` | `popcorn channel-config show`, `popcorn table scalar list` |
 | make a Copy | `copy_routine_template` | `popcorn app fork --channel team-offsite --name offsite` |
 | make a Copy and check out its files | — | `popcorn app checkout --channel team-offsite --fork=offsite` |
 | see what one Routine runs | `get_routine` | `popcorn app list --channel team-offsite` |

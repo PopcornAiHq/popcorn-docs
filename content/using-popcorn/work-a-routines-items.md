@@ -92,17 +92,13 @@ who or what made it and why, and the work that made it. See
 > Your assistant calls `list_actions`.
 
 Your assistant lists the Actions the Item offers now, given its Status, each
-with the Status it moves the Item to. At *No response* those are:
-
-- **Ask again** — back to *Waiting*, with the follow-ups starting over. The
-  next [Run](https://docs.popcorn.ai/history.md) follows up with the questions still open.
-- **Mark answered** — to *Answered*, for answers given outside email, by
-  phone or in person.
-- **Close** — to *Closed*, so nobody follows up.
+with the Status it moves the Item to. At *No response* those are the
+Review's three choices ([Reviews](https://docs.popcorn.ai/reviews.md)).
 
 Someone not asked yet, or still *Waiting*, offers *Mark answered* and
 *Close*. Someone just added shows *Not asked yet* and offers both as soon
-as their Row is saved, or at the latest once the next Run has passed over
+as their Row is saved, or at the latest once the next
+[Run](https://docs.popcorn.ai/history.md) has passed over
 them.
 
 > [!NOTE] Not while a Run holds it
@@ -165,11 +161,6 @@ Routine's work and its Actions change that. See
 > [!TIP] MCP tool call
 > Your assistant calls `list_triggers`, then `run_trigger`, then `get_run`.
 
-Your assistant finds the Routine's
-[Schedule](https://docs.popcorn.ai/triggers.md) and runs it now: straight
-away when you asked for that Schedule, and otherwise once you agree. Its
-next scheduled Run still happens, and your assistant can show how the Run
-is going or how it ended.
-
-> [!NOTE] One at a time
-> If a Run of that Schedule is already going, nothing new starts.
+Your assistant runs the Routine's Schedule now, as
+[Triggers](https://docs.popcorn.ai/triggers.md#running-a-schedule-now)
+describes.

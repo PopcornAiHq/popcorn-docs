@@ -218,14 +218,9 @@ with an `integration_id` (`popcorn channel-config accounts` lists them). A
 account, read as `$channel.integrations.<name>` and set with `popcorn
 channel-config integrations set`. An **Integration Requirement** is what a
 template needs connected: a Flow's `required_integrations:`, or the Manifest's
-`connections:`. Only `required_integrations:` is enforced: while one is
-unconnected (or bound to an account of another provider) a Run does no work,
-ending before its first Step with empty outputs, which a Schedule, a Webhook or
-a Message Trigger sees as success. Starting the Flow directly is refused
-instead: `popcorn flow run` and `foundation.workflow.start_flow` get 409
-`missing_integrations`. A `call_flow` Step waiting on it fails, under its own
-`on_error`; a `detach` child just ends empty. `connections:` declares what to
-connect and stops nothing.
+`connections:`. Only a Flow's `required_integrations:` stops a Run;
+`connections:` declares what to connect and stops nothing (see
+[the shape of a Flow](https://docs.popcorn.ai/flow-grammar.md)).
 
 Learn more: [Connections](https://docs.popcorn.ai/connections.md)
 
@@ -260,9 +255,9 @@ staff-family Transition may carry one.
 
 Changing one Routine without changing the others made from the same template.
 Most changes stay with that one Routine and survive the template's
-improvements: its Routine Settings, its Connections, its Instructions and,
-where its template keeps them with the Routine, its Steps and the Actions
-between them. A change to what the Routine is built from (a new Table, a kind
+improvements: its Routine Settings, its Connections, its Instructions, its
+References and, where its template keeps them with the Routine, its Steps and
+the Actions between them. A change to what the Routine is built from (a new Table, a kind
 of Step its template does not offer) gives it a Copy of its own instead. That
 Copy no longer receives the template's improvements, which cannot be undone.
 Popcorn says which kind a change is before it makes it.

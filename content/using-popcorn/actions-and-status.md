@@ -76,13 +76,9 @@ any one of them.
 > [!TIP] MCP tool call
 > Your assistant calls `take_action`.
 
-Taking an Action is the same as pressing its button in Popcorn: whatever the
-Action sends or records is real. You named the Item and the Action, so your
-assistant takes it straight away. Otherwise it shows you first what happens
-to each Item, and acts once you agree.
-
 The Action applies in the background, and your assistant can show the
-Item's new Status once it has.
+Item's new Status once it has; see
+[Make the call](https://docs.popcorn.ai/work-a-routines-items.md#make-the-call).
 
 > [!NOTE] All or nothing
 > If one of the Items doesn't offer the Action now, nothing is done to any

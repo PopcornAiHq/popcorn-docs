@@ -126,9 +126,9 @@ hand stays listed, so it can be set back.
 | `popcorn.agent_reply_mode` | `mentions`, `strict`, `eager` | the Routine's default | no; the platform does |
 
 `popcorn.email_send_mode` is the one to know: only `draft` and `send`
-activate anything. In Questionnaire, `draft` leaves each first email in
-Gmail's Drafts and never follows up, and `off` asks nobody but still reads
-replies. E-signature requests read it too, unless the signing Step names a
+activate anything; what each mode does in Questionnaire is in its
+[rules worth knowing](https://docs.popcorn.ai/questionnaire-template.md#rules-worth-knowing).
+E-signature requests read it too, unless the signing Step names a
 key of its own — `popcorn.signing_send_mode` is the convention, for a
 template whose mail and binding documents need separate consent.
 
@@ -162,31 +162,7 @@ What a template *shows* in its settings panel is a separate, deliberately
 smaller choice: the Bundle promotes switches into the panel under
 `settings.fields` in `strings.yaml`, with a label, a description, its
 options and a warning on any of them, and anything unpromoted stays
-readable in the developer view. Questionnaire promotes one:
-
-```yaml title="strings.yaml"
-en:
-  settings:
-    fields:
-      - key: popcorn.email_send_mode
-        label: Email sending
-        input: mode
-        options:
-          - value: "off"
-            label: "Off"
-          - value: draft
-            label: Draft
-          - value: send
-            label: Send
-            note: Real emails are sent to recipients from the connected Gmail.
-```
-
-Its `description` is left out here. The Send option's `note` is why
-`update_routine_setting` shows a change to `send` before making it.
-
-A template that reads `popcorn.email_send_mode` and promotes nothing for
-it still gets a label, options and that warning: the platform's own,
-*Email sending* with Off, Draft and Send, and on Send "Real emails are
-sent from the connected inbox." The Routine Settings tools show them, and
-`update_routine_setting` shows a change to `send` first all the same. A
-promoted entry replaces all of the platform's words.
+readable in the developer view. Questionnaire promotes
+`popcorn.email_send_mode`; the shape, and the platform's words for an
+unpromoted switch, are in
+[strings.yaml](https://docs.popcorn.ai/strings-yaml.md#promoted-settings).

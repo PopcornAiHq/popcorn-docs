@@ -81,11 +81,12 @@ schedules:
     jitter: 60
 ```
 
-The interval is also written in words: in `strings.yaml`'s `automations`
-and `waiting_body`, in `agent_summary` under the Manifest's `scalars:`, and
-in `AGENT.md`. Those are what the Routine's
+The interval is also written in words: in `strings.yaml`'s
+`waiting_body`, in `agent_summary` under the Manifest's `scalars:`, and in
+`AGENT.md`. Those are what the Routine's
 [Agent](https://docs.popcorn.ai/agent.md) and the setup checklist tell
-people, so a change to the number changes them too.
+people, so a change to the number changes them too. The `automations`
+lines in `strings.yaml` take their cadence from the Schedule itself.
 
 ### Try the change
 
@@ -95,7 +96,7 @@ people, so a change to the number changes them too.
 > [!TIP] MCP tool call
 > Your assistant calls `create_routine_version` without `confirm`.
 
-Your assistant sends the edits as a dry run: `interval: 3600`, the four
+Your assistant sends the edits as a dry run: `interval: 3600`, the three
 pieces of wording, and `version:` bumped past the one it read. The dry run
 reports every check a Publish would fail and each file's diff, and changes
 nothing. A Routine still on Popcorn's template can dry-run a change, so the
@@ -118,7 +119,8 @@ The [Copy](https://docs.popcorn.ai/copying-a-template.md) starts
 byte-identical to the Version `#team-offsite` runs, and the Routine moves
 onto it. Other Routines made from Questionnaire stay where they are.
 Workspace admins and the Routine's
-[Members](https://docs.popcorn.ai/members.md) can make one.
+[Members](https://docs.popcorn.ai/members.md), but not its guests, can make
+one.
 
 > [!CAUTION] A Copy is for good
 > The Routine never goes back to Popcorn's template and stops receiving its
@@ -270,11 +272,9 @@ Three traps are worth carrying into every edit:
   Omitting `schedules:` does not.
 - **An unknown top-level key is silently ignored.** A typo such as
   `schedule:` installs nothing and reports nothing.
-- **An untyped Bundle clears the Routine's `app_type`** and
-  `channel_agent`. A Publish to a Copy does not refuse one, and
-  `create_routine_version`'s dry run does not warn about it: it clears
-  both on every Routine on the Copy. Check both keys are still there
-  before you confirm.
+- **Keep `app_type:`.** A Publish refuses a Manifest without it. Dropping
+  `channel_agent:` hands the Routine's Members back to the default Agent;
+  see [Manifest keys](https://docs.popcorn.ai/manifest-keys.md).
 
 ## Writing Flows
 
@@ -501,7 +501,7 @@ the files agree with each other and whether an Install will do what you
 think: a fixture named `.yaml`, a write to an undeclared Column, a Schedule
 naming a Flow that is not there, a path the Bundle format does not name
 (`path-not-published`, left behind at Publish), and a Manifest that has
-lost `app_type:` (`clears-app-type`; treat that warning as an error).
+lost `app_type:` (`clears-app-type`, an error in a Checkout).
 `--strict` makes warnings fail too, the CI form. In a Checkout of a Copy's
 Head, logged in and with edits since the Checkout, it also sends the edits
 to the server, which runs the checks `create_routine_version`'s dry run
@@ -562,8 +562,9 @@ tells a coding agent that an edit is not a release until `app validate` and
 > [!NOTE] Copies accumulate
 > `popcorn app lines` lists the Workspace's Copies, each with its Head and
 > when it was published; `popcorn app list --channel '#team-offsite'`
-> shows what the Routine runs, as `get_routine` does. Nothing shows how
-> many Routines ride each Copy, and none can be deleted. A bare `app fork`
+> shows what the Routine runs, as `get_routine` does. `list_routines` with
+> `template` and `copy` lists the Routines on one, and no Copy can be
+> deleted. A bare `app fork`
 > adopts the single Copy that exists and is refused once there are two:
 > name one with `--name`.
 

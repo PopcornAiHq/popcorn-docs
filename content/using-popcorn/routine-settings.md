@@ -44,14 +44,8 @@ A setting:
 | Follow-ups before giving up | how many follow-ups it sends before someone is *No response*, 3 by default |
 | `prompts.read_questionnaire`, `prompts.read_answers` | the prompts it reads the questionnaire and each reply with |
 
-A claims intake Routine has more, such as *Agreement sending* for the
-Signing Provider, *Reply matching* for an inbox several Routines share, and
-*Step forward* for moving an
-[Item](https://docs.popcorn.ai/work-a-routines-items.md) past a Step done
-outside Popcorn (see [Reviews](https://docs.popcorn.ai/reviews.md)).
-
-The names follow the Routine's own words, so a Routine that sends a retainer
-says "Retainer sending".
+A claims intake Routine has more, such as *Retainer sending* for the
+Signing Provider and *Reply matching* for an inbox several Routines share.
 
 ## Finding and changing one
 
