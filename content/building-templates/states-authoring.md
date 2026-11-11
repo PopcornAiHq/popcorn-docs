@@ -966,8 +966,8 @@ the message opens `manifest.yaml states:`, or names the Recipe's file.
 **`transition_write_type`: a Transition's `writes` must be a value the
 store takes for the Column as declared**: its type, a number or datetime
 `format`, and `required: true`. Otherwise every press of the button would
-fail after it was offered. Questionnaire's Ask again writing `''` to empty
-`Last Asked`:
+fail after it was offered. An edit to Questionnaire's Ask again that
+empties `Last Asked` with `''` rather than `null`:
 
 ```text
 manifest.yaml states: transition staff.ask_again (from no_response) writes 'Last Asked': '', which the store refuses for table 'recipients' (Last Asked: not a valid ISO 8601 datetime). Write null to empty it: writes: {Last Asked: null}.
