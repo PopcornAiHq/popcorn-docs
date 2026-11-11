@@ -123,6 +123,11 @@ The `<id>` in `documents.<id>` is the id of the Reference's entry under
 | `documents.<id>.body` | What the card, and that listing, say the Reference is used for |
 | `documents.<id>.replace_confirm` | The confirmation Popcorn shows before Replace on the card; an assistant replacing it shows its own |
 
+When the file has no `title` or `body` for a Reference, an assistant
+listing the References uses the `title` and `used_for` of its entry in the
+Manifest instead: see
+[Manifest keys](https://docs.popcorn.ai/manifest-keys.md#declaring-references).
+
 > "Which References does #team-offsite use?"
 
 > [!TIP] MCP tool call
@@ -158,6 +163,12 @@ shown before the switch is set to it. Which switches to promote, and how
 a Scalar becomes a setting, is in
 [Scalar tiers and Routine Settings](https://docs.popcorn.ai/scalar-tiers.md).
 
+A template that reads `popcorn.email_send_mode` without promoting it
+still offers it: the Routine Settings tools show the platform's words for
+it, *Email sending* with the options Off, Draft and Send, and on Send the
+note "Real emails are sent from the connected inbox." A promoted entry
+replaces all of them.
+
 ## Automations
 
 ```yaml title="strings.yaml"
@@ -183,9 +194,30 @@ Popcorn each entry shows under the Connection it names in
 `required_connection`, with its `name` and `schedule`, and reads *Needs
 connection* while that Connection isn't made. An entry can also name a
 `required_document`, a Reference's id, and read *Needs document* while it
-is missing; Questionnaire's don't. `schedule` is text: it doesn't come
-from the Manifest's `schedules:`, so a Copy that changes how often the
-pass runs changes it too.
+is missing; Questionnaire's don't.
+
+`schedule` is text, or the
+[Schedule](https://docs.popcorn.ai/schedules.md) it describes, named by
+its Flow:
+
+```yaml title="strings.yaml"
+      - id: ask
+        name: Emails your questions to new recipients
+        schedule: {flow: questionnaire_tick}
+        required_connection: gmail
+```
+
+Publish writes that Schedule's cadence in its place, from the Manifest's
+`schedules:`: *Every 15 minutes* for Questionnaire's `interval: 900`,
+*Every hour*, *Every day at 8:00 (America/Los_Angeles)* or *Every Monday
+at 2:30*. A daily `deadline` or `window` Schedule runs at a minute inside
+its hour, so it reads *Every day between 8:00 and 9:00*. A Copy that
+changes the interval changes the line with it. Add
+`slug:` beside `flow:` when the Flow has several Schedules. Publish
+refuses a mapping that names no Schedule, or more than one, or a cron it
+can't put in words, and the message names the entry. Questionnaire writes
+the text, so a Copy that changes how often its pass runs changes the text
+too.
 
 ## Audit lines and the Connection subline
 

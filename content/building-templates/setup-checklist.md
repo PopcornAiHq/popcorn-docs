@@ -83,7 +83,7 @@ how Popcorn tells it is done:
 | Step | `kind` | Completed by | Done when |
 |---|---|---|---|
 | `connect_inbox` | `connect_inbox` | making the Gmail Connection | every email Connection is made and its sign-in still works |
-| `questionnaire` | `upload_file` | adding the questionnaire, which runs `questionnaire_load` | `questionnaire_load` has marked it done |
+| `questionnaire` | `upload_file` | adding the questionnaire, which runs `questionnaire_load` | `questionnaire_load` has marked it done, and the questionnaire is still kept |
 | `reply_by` | `set_value` | typing a date, which runs `reply_by_set` with it | `questionnaire.reply_by` holds a value the field takes |
 
 > [!NOTE] `{reply_by}` is not a placeholder here
@@ -179,6 +179,17 @@ seen. `mark_onboarding` has no `on_error`, so a failed mark fails the
 upload: a step that never reads done is worse than an upload that can be
 tried again.
 
+A marked upload step reads done only while its document is still kept, in
+the envelope Scalar of the `documents:` entry whose `flow` is the step's:
+`questionnaire_file` for Questionnaire. Deleting the questionnaire opens
+the step again. A step can name another envelope under
+`inputs.envelope_key`, and a step whose Flow two `documents:` entries share
+goes by its mark alone, since which document it uploads can't be told.
+
+> [!NOTE] `get_setup` goes by the mark
+> An assistant's `get_setup` lists an upload step done once its Flow has
+> marked it, and still lists it done after the document is deleted.
+
 ### A typed value
 
 A `set_value` step asks for one value. Its `field` is the input the card
@@ -221,15 +232,17 @@ The Flow does its own checking: a value that isn't a date fails the run
 with `ReplyByRefused`, and the person sees the Flow's reason. A
 `set_value` step is done while its `scalar` holds a value its `field`
 takes, read live, so clearing the value opens the step again. The Flow
-marks the step all the same, because `feature.onboarding.evaluate` reads
-the marks.
+marks the step all the same: `get_setup` reads the mark, and the step
+falls back on it when the value can't be read.
 
 ## How the Routine is marked set up
 
 `feature.onboarding.mark_step` records one step as done.
-`feature.onboarding.evaluate` decides whether the whole setup is: the
-first time Gmail is connected (`email_connected`) and every step in
-`required_steps` is marked done, it sets the Routine's `setup_fulfilled`
+`feature.onboarding.evaluate` decides whether the whole setup is, by the
+same rule Popcorn applies when a step is completed on its card or with
+`complete_setup_step`: the first time every required step of the
+checklist is done, each read as the table above says, it sets the
+Routine's `setup_fulfilled`
 [Scalar](https://docs.popcorn.ai/scalar-tiers.md) to `"true"`. It never
 clears it again.
 
@@ -253,10 +266,16 @@ clears it again.
 Any of the three steps can be the last one done, so Questionnaire
 evaluates in every Flow that completes one (`questionnaire_load`,
 `reply_by_set` and `on_auth_change`) and again at the end of each pass of
-`questionnaire_tick`. `required_steps` lists the upload and value steps,
-the ones a Flow marks; the Connection is `email_connected`. Popcorn sets
-the same Scalar when a value step completed through it or an assistant
-leaves no required step open.
+`questionnaire_tick`. Popcorn sets the same Scalar when a value step
+completed through it or an assistant leaves no required step open.
+
+On a checklist written in `strings.yaml`, `required_steps` is accepted and
+ignored: the checklist says what setup waits on. A dry run warns
+(`required_steps_mismatch`) when a Flow's list differs from the
+checklist's required steps, leaving out Connection steps, which is why
+Questionnaire's lists its upload and value steps and not
+`connect_inbox`. `email_connected` is the Flow's own probe: `false` holds
+the latch, and when it is left out the rule reads the Connection itself.
 
 Once `setup_fulfilled` is set, Popcorn stops showing the checklist on the
 Today tab, and a later Gmail disconnect asks the person to reconnect
@@ -276,7 +295,7 @@ find each other only by name:
 
 | In `strings.yaml` | Must equal |
 |---|---|
-| an upload or value step's `id` | the `step_id` its Flow passes to `feature.onboarding.mark_step`, and an entry in every `required_steps` |
+| an upload or value step's `id` | the `step_id` its Flow passes to `feature.onboarding.mark_step` |
 | an upload step's `flow`, `status_kind` and `accept`, and `sources` when both say | the `documents:` entry naming the same Flow |
 | an upload step's `status_kind` | an entry under `status_kinds:` in the Manifest, and the `kind` its Flow's `foundation.status.set` writes |
 | an upload step's `accept` | the `accept` its Flow gives `foundation.file.detect`, which refuses any other file |
@@ -286,11 +305,14 @@ find each other only by name:
 The Manifest's `documents:`, `connections:` and `status_kinds:` keys are
 described in [Manifest keys](https://docs.popcorn.ai/manifest-keys.md).
 
-> [!WARNING] Only the document link is checked
+> [!WARNING] Only the document link is refused
 > A Bundle whose upload step and `documents:` entry disagree is refused
-> when it is validated or published. Nothing checks the rest: a step id
-> misspelt in `mark_step` never reads done, and one left out of
-> `required_steps` lets the Routine be marked set up without it.
+> when it is validated or published. Two more disagreements are warnings
+> in a dry run, which a Publish accepts: a `documents:` entry whose
+> `accept` differs from its Flow's `foundation.file.detect`
+> (`document_accept_mismatch`), and a `required_steps` list that differs
+> from the checklist (`required_steps_mismatch`). Nothing checks the rest:
+> a step id misspelt in `mark_step` never reads done.
 
 ## What a person sees
 
@@ -357,8 +379,10 @@ On a Copy, your assistant drafts three changes. The step itself, in
 A Flow named `sender_name_set` that takes `value`, stores it in
 `questionnaire.sender_name` with `foundation.store.set_scalar`, marks
 `sender_name` done with `feature.onboarding.mark_step`, and evaluates the
-setup as `reply_by_set` does. And, because the step is required,
-`sender_name` added to `required_steps` in every Flow that evaluates.
+setup as `reply_by_set` does. And `sender_name` added to `required_steps`
+in every Flow that evaluates. The step holds setup either way, because it
+says `required: true`; the edit keeps the lists agreeing with the
+checklist, so the dry run doesn't warn `required_steps_mismatch`.
 
 The step only asks for the name. For the emails to be signed with it,
 the template's code block has to read `questionnaire.sender_name` when it

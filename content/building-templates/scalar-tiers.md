@@ -38,7 +38,7 @@ template, that is:
 |---|---|
 | `follow_up_days`, `max_follow_ups` | `channel_parameters:` in the [Manifest](https://docs.popcorn.ai/manifest-keys.md) |
 | `popcorn.email_send_mode` | `default_scalars:`, and labelled *Email sending* in `strings.yaml` |
-| the other `popcorn.*` keys | the platform: every Routine has them, set or not (below) |
+| `popcorn.agent_reply_placement`, `popcorn.agent_reply_mode` | the platform: every Routine has them, set or not (below) |
 | `prompts.read_answers`, `prompts.read_questionnaire` | the `prompts/` files |
 
 Questionnaire's `scalars:` tier, `coordinator_name`, `agent_runnable_flows`
@@ -107,8 +107,13 @@ declares.
 Keys beginning `popcorn.` are a platform convention, not something a
 template defines. Every Routine Template reads the same keys with the same
 meaning, so an operator learns one set of switches rather than one per
-template. Every Routine lists them among its settings, whether its template
-reads them or not.
+template. A Routine always lists the two `agent_reply_*` keys among its
+settings, since the platform reads them for every Routine. It lists any
+other only when something it runs reads it, its template promotes or seeds
+it, or the Routine already holds a value for it. So
+`list_routine_settings` doesn't offer `#team-offsite` a switch such as
+`popcorn.app_mode` that would change nothing there, and a value set by
+hand stays listed, so it can be set back.
 
 | Key | Values | Unset or unrecognised reads as | Questionnaire reads it |
 |---|---|---|---|
@@ -178,3 +183,10 @@ en:
 
 Its `description` is left out here. The Send option's `note` is why
 `update_routine_setting` shows a change to `send` before making it.
+
+A template that reads `popcorn.email_send_mode` and promotes nothing for
+it still gets a label, options and that warning: the platform's own,
+*Email sending* with Off, Draft and Send, and on Send "Real emails are
+sent from the connected inbox." The Routine Settings tools show them, and
+`update_routine_setting` shows a change to `send` first all the same. A
+promoted entry replaces all of the platform's words.

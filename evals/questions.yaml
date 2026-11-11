@@ -544,7 +544,7 @@
 
 - q: I added a setup step to my copy but it never shows as done.
   concept: setup-checklist
-  pass: an upload or value step is marked done only when its flow calls feature.onboarding.mark_step with a step_id equal to the step's id in strings.yaml; check the spelling, and add the id to required_steps in every feature.onboarding.evaluate
+  pass: an upload or value step is marked done only when its flow calls feature.onboarding.mark_step with a step_id equal to the step's id in strings.yaml; check the spelling; the setup checklist's required steps are what feature.onboarding.evaluate waits on, so required_steps needs no entry beyond keeping the dry run's required_steps_mismatch warning quiet
   trap: suggests republishing, refreshing the client, or marking it done by hand
 
 - q: How does a value typed into a setup step reach my flow?
@@ -554,7 +554,7 @@
 
 - q: I changed the Schedule interval but the automations list still says every 15 minutes.
   concept: strings-yaml
-  pass: today.automations `schedule` is display text in strings.yaml, not derived from the manifest's schedules; edit it in the same Version
+  pass: a text `schedule` in today.automations is the template's own words, so edit it in the same Version; or write `schedule: {flow: <flow>}` and Publish renders it from that Schedule ("Every hour")
   trap: says the schedule didn't apply, or to reinstall
 
 - q: What does halts_workflow do on a manifest connection?
@@ -571,3 +571,38 @@
   concept: template-authoring
   pass: run_code_block runs the block on the same runner as a code.execute step, with inputs and the unpublished changes, and tests=true runs its tests; nothing is published or written, and the block can't read the Routine's Tables, so pass what the step's reads would; then publish the same changes with create_routine_version
   trap: says to publish a Version and run a Flow to test it, or that the block can read the Routine's Tables
+
+- q: Does feature.onboarding.evaluate still need required_steps to know when my Routine is set up?
+  concept: setup-checklist
+  pass: no; on a strings.yaml checklist it ignores required_steps and latches once every required: true step is done, read live; a dry run warns required_steps_mismatch when a literal list differs
+  trap: says a required step left out of required_steps lets the Routine finish setup without it
+
+- q: My upload setup step reopened after the document was deleted. Is that a bug?
+  concept: setup-checklist
+  pass: no; an upload step reads done only while its documents: entry's envelope scalar still holds the file, so deleting the document reopens it (get_setup still goes by the mark)
+  trap: says a marked step stays done forever
+
+- q: Publish refuses my States transition with transition_write_type for writing '' to a datetime column. What do I write instead?
+  concept: states-authoring, versions
+  pass: transition_write_type refuses a writes value the store would refuse for the Column; write null to empty it
+  trap: says to change the Column to text, or that the store accepts empty strings
+
+- q: Why does Publish say cta_apply_missing for my bundle with buttons?
+  concept: states-authoring, versions
+  pass: staff Transitions with cta: buttons run the bundle's cta_apply flow when pressed; add cta_apply.yaml taking action, record_ids and payload and applying them with feature.state.transition, or remove the cta: keys
+  trap: says Popcorn applies buttons itself without a flow
+
+- q: My template reads popcorn.email_send_mode but doesn't promote it in settings.fields. What label does it get?
+  concept: scalar-tiers, strings-yaml
+  pass: the platform's own words, Email sending with Off, Draft and Send and a warning on Send, shown by the Routine Settings tools; a promoted entry replaces them
+  trap: says an unpromoted switch has no label or isn't a setting
+
+- q: Why doesn't list_routine_settings offer popcorn.app_mode on my Routine?
+  concept: scalar-tiers
+  pass: a popcorn.* switch is listed only when something the Routine runs reads it, the template promotes or seeds it, or the Routine already holds a value; the two agent_reply_* keys are always listed
+  trap: says every Routine lists every popcorn.* key, or that the setting is broken
+
+- q: Can I name a Reference in manifest.yaml without a strings.yaml entry?
+  concept: manifest-keys, strings-yaml
+  pass: yes, a documents: entry's title and used_for are what list_references shows when strings.yaml has no documents.<id>.title or body; strings.yaml still wins
+  trap: says only strings.yaml can name a Reference
