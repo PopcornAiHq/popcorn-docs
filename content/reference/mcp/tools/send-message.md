@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/send-message
 title: send_message
-order: 351
+order: 353
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-09
+updated: 2026-11-11
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []

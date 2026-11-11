@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-references
 title: list_references
-order: 331
+order: 332
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   List the documents a Routine works from (its References): what each is for,
   when it was added and by whom, and which are still waiting.

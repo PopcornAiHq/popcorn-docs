@@ -1,15 +1,15 @@
 ---
 id: mcp/tools/list-routine-templates
 title: list_routine_templates
-order: 334
+order: 335
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   List the Routine Templates a new Routine in this workspace can start from.
 concepts: [set-up-a-routine]
-used_with: [mcp/tools/create-routine]
+used_with: [mcp/tools/create-routine, mcp/tools/create-routine-template]
 ---
 
 [read-only]
@@ -18,7 +18,7 @@ used_with: [mcp/tools/create-routine]
 list_routine_templates(query=None, cursor=None)
 ```
 
-Each row shows the template's name, its slug (what [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)'s `template` takes), what it does, the connections someone sets up before it runs, and the optional ones that only the work using them needs. A template this workspace can't run isn't listed.
+Each row shows the template's name, its slug (what [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md)'s `template` takes), what it does, the connections someone sets up before it runs, and the optional ones that only the work using them needs. A template this workspace can't run isn't listed. Templates this workspace made itself ([`create_routine_template`](https://docs.popcorn.ai/mcp/tools/create-routine-template.md)) are listed too, marked as its own; no other workspace sees them.
 
 ## Arguments
 

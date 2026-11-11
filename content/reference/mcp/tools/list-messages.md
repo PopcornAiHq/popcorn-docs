@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-messages
 title: list_messages
-order: 330
+order: 331
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   A Routine's top-level messages, newest first, or one thread's replies.
 concepts: []

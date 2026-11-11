@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-triggers
 title: list_triggers
-order: 339
+order: 340
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   List how work arrives in a Routine: its schedules, the webhooks other
   systems post to, and the messages and References that start work.

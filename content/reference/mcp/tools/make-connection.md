@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/make-connection
 title: make_connection
-order: 341
+order: 342
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-09
+updated: 2026-11-11
 summary: >
   Make one of a Routine's Connections: connect an account you have signed in
   to, or make the webhook another system posts to.

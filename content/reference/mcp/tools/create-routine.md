@@ -5,11 +5,11 @@ order: 307
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
 concepts: [set-up-a-routine]
-used_with: [mcp/tools/get-routine, mcp/tools/list-routine-templates]
+used_with: [mcp/tools/get-routine, mcp/tools/list-routine-templates, mcp/tools/create-routine-template]
 ---
 
 [writes]
@@ -27,7 +27,7 @@ A name already used in this workspace is refused, with the ID of the Routine tha
 | Argument | Type | Notes |
 |---|---|---|
 | `name` [required] | `str` | The Routine's name, e.g. "claims-west". Spaces become hyphens; the response shows the name it got. |
-| `template` | `str` | A Routine Template's slug from [`list_routine_templates`](https://docs.popcorn.ai/mcp/tools/list-routine-templates.md), e.g. "claimcoordinator". |
+| `template` | `str` | A Routine Template's slug from [`list_routine_templates`](https://docs.popcorn.ai/mcp/tools/list-routine-templates.md), e.g. "claimcoordinator", or one this workspace made with [`create_routine_template`](https://docs.popcorn.ai/mcp/tools/create-routine-template.md) ("ws_…"). |
 | `private` | `bool` | true for a private Routine, joined only by you and `members`; default false. A Routine that isn't private adds everyone in the workspace. |
 | `members` | `list[str]` | People to add to a private Routine: "@username", email or user ID, all active members of this workspace (anyone else is refused). You're always a member. |
 | `confirm` | `bool` | For a Routine's own agent in Popcorn, true to create what its dry run showed. Any other caller creates without it. Default `False`. |

@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-11
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -40,9 +40,36 @@ between, the first attempt's response lost — would leave the column
 held with no release path. A row the store answers without a `rev`
 fails `StoreClaimRowNoRevision`: without a rev to match on there is
 no single winner, and a claim that cannot promise one is no claim.
-Releasing is the flow's job: it writes
-`{column: ""}` on every outcome, through whatever step re-derives the
-row's state, so a failed run lands the row back where it was.
+
+WHO RELEASES IT. `release: on_finish` makes the claim a
+lease the run owns: the holder is the run's own
+`lease:<workflow_id>/<run_id>` (any `holder:` is ignored), and the
+interpreter clears the column with `foundation.store.release_row`
+when the run ends, compare-and-set on that holder, so a flow that
+already released, or a row another run has since claimed, is left
+alone. A run that fails after a step marked `commits_leases`
+succeeded keeps its leases: past that step the hold is what stops a
+side effect from being repeated. A lease whose run ended without
+releasing (timed out, terminated) is taken over by the next claim,
+with `change_kind: lease_lapsed`, unless that run had committed
+(`lease.holder_lapsed`).
+
+`release: manual` is the claim as it was before leases: the holder
+is `holder:` (else the bare run id), nothing releases it but the
+flow, and no later claim takes it over, so it suits a hold meant to
+outlive its run. A claim that names `holder:` and no `release:` is
+manual. That is the form every flow written before leases uses, and
+each of them either releases its hold itself, through a step that
+re-derives the row's state, or keeps it on purpose after a failure
+(an email already sent, a write kept for inspection); a platform
+release or a takeover would change what those flows do. Omitting
+both is a lease.
+
+`when_legal` names an event of the table's `states:` graph; the
+claim refuses (with the graph's own refusal code) unless an edge for
+it leaves from the row's current state, judged with the holder column
+clear and the guards only the caller can vouch for left to the step
+that fires the edge.
 
 This is the read-check-write of a code block's claim without the
 code runner: the decision is a handful of cell comparisons, and a
@@ -52,12 +79,6 @@ projection). A flow that needs the row's derived machines repainted
 at claim time keeps the code step; one that only needs the lock — the
 modal is open with its own spinner while the merge runs — takes this
 and lets its publish step repaint.
-
-`holder` is the claimant's identity, normally `$trigger.run_id`,
-and the release step compares the column to the same value. Passing
-it explicitly (rather than reading the activity's own run id) keeps
-the claim and its release on one source and lets a flow claim on
-behalf of a run it launched.
 
 `wait_for_holder_seconds` > 0 polls the row once a second, for at
 most that long, while another holder has it, then claims the row as
@@ -85,7 +106,6 @@ would. A row that does not exist fails `StoreClaimRowNotFound`.
     table_name: <string>
     record_id: <integer>
     column: <string>
-    holder: <string>
 ```
 
 **Arguments**
@@ -96,7 +116,9 @@ would. A row that does not exist fails `StoreClaimRowNotFound`.
 | `table_name` | string | yes |  |
 | `record_id` | integer | yes |  |
 | `column` | string | yes | The holder column, e.g. Regenerating or Sending. |
-| `holder` | string | yes | This claimant's identity; normally $trigger.run_id. An opaque, exact string: compared byte for byte with the column. |
+| `holder` | string, optional | no | A manual claim's identity; normally $trigger.run_id. An opaque, exact string: compared byte for byte with the column. Ignored by a lease (release: on_finish), whose holder is the run's own lease:<workflow_id>/<run_id>. |
+| `release` | `on_finish` / `manual`, optional | no | on_finish: the run releases the row when it ends. manual: the flow releases it. Unset: manual when holder is given, else on_finish. |
+| `when_legal` | string, optional | no | A states-graph event (family.event); refuse unless one of its edges leaves from the row's current state. |
 | `held_code` | string | no | Failure type when another holder has the column, or the row changed under the claim. Default `"StoreClaimRowHeld"`. |
 | `held_message` | string | no | Default `"Another run holds this row; wait for it to finish."`. |
 | `refuse_when` | list of StoreClaimRefusal | no |  |
@@ -112,13 +134,19 @@ would. A row that does not exist fails `StoreClaimRowNotFound`.
 when the column already carried this holder (a retry). `row` is the
 row's cells exactly as the claim read them, BEFORE the write, so a
 flow reads `$steps.<id>.output.row.<Column>` for what it is about to
-act on; `rev` is the row's revision after the claim.
+act on; `rev` is the row's revision after the claim. `release`,
+`table_name` and `column` say what the interpreter releases at run
+end; `lapsed_holder` is the run a takeover took the row from.
 
 | Field | Type | Notes |
 |---|---|---|
 | `record_id` | integer |  |
 | `holder` | string |  |
 | `claimed` | boolean |  |
+| `release` | string |  |
+| `table_name` | string |  |
+| `column` | string |  |
+| `lapsed_holder` | string, optional |  |
 | `rev` | integer, optional |  |
 | `row` | object |  |
 | `file_stem` | string, optional |  |
@@ -481,6 +509,11 @@ instead of silently clobbering. One fence per call:
   The patched columns are always among them; other cells may have
   moved, and the patch lands over them on the fresh revision.
 
+On the table the bundle's `states:` graph runs on, when the row alone
+decides its Status, a write that touches what the graph reads is
+projected in the same write: Status, Why and the Actions follow the
+row, and naming one of those columns yourself is refused.
+
 ```yaml
 - id: <step>
   activity: foundation.store.patch_row
@@ -581,6 +614,53 @@ cells are returned: a hundred records would be history-sized.
 | `rev` | integer, optional |  |
 | `error` | string, optional |  |
 
+### `foundation.store.release_row`
+
+*Beta.*
+
+Clear `column` on one row, only while it still holds `holder`.
+
+The end of a `claim_row` lease: the interpreter runs it for every
+lease a run took when the run ends. A column holding anything else
+(the flow released it itself, or another run has claimed the row since)
+is left as it is, so a release can never free a hold that is not its
+own. One If-Match write on the rev the comparison read; a write landing
+in between is re-read and compared again.
+
+```yaml
+- id: <step>
+  activity: foundation.store.release_row
+  args:
+    conversation_id: <string>
+    table_name: <string>
+    record_id: <integer>
+    column: <string>
+    holder: <string>
+```
+
+**Arguments**
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `conversation_id` | string | yes |  |
+| `table_name` | string | yes |  |
+| `record_id` | integer | yes |  |
+| `column` | string | yes |  |
+| `holder` | string | yes |  |
+| `change_kind` | string, optional | no | Default `"lease_released"`. |
+| `change_action` | string, optional | no | Default `"Released the hold its run had taken"`. |
+
+**Returns**
+
+`released` — this call cleared the column; false when it no
+longer held `holder` (or the row is gone).
+
+| Field | Type | Notes |
+|---|---|---|
+| `record_id` | integer |  |
+| `released` | boolean |  |
+| `rev` | integer, optional |  |
+
 ### `foundation.store.set_scalar`
 
 Set a conversation-scoped scalar (a named key/value).
@@ -646,6 +726,11 @@ duplicated; `on_conflict` chooses `replace` (default) or `merge` (keep
 the columns the incoming row omits). `change_kind` / `change_action`
 name the write in the audit log (see `patch_row`); without them a write
 with no source file is anonymous.
+
+On the table the bundle's `states:` graph runs on, when the row alone
+decides its Status, every row written is projected as it landed, in
+the same step: a new row starts with its Status, Why and Actions, and
+naming one of those columns yourself is refused.
 
 ```yaml
 - id: <step>

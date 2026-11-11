@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-table
 title: get_table
-order: 322
+order: 323
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-11
 summary: >
   Show a table's columns in order, with each one's type and merge policy, the
   table's merge key, and its state machine if it has one.
