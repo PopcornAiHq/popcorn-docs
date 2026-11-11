@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-11
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -349,7 +349,8 @@ leaves every other stage alone. Mappings on the path are created when
 absent and descended into when present; a non-mapping on the path is
 refused. `value` is any JSON (a mapping, a list, a number, a string,
 null) up to 32 KiB. `unset: true` removes the leaf instead and takes
-no `value`; unsetting a path that is not there is a no-op.
+no `value`; unsetting a path that is not there is a no-op, and
+unsetting a whole parameter puts the app's own value back in force.
 
 The run's own `$channel.*` keeps its pinned values: read the new
 value from this step's output, not from `$channel` again.
@@ -376,10 +377,11 @@ What the write left behind.
 `parameter` is the top-level name written (the first segment of
 `key`) and `value` its WHOLE value after the write — the mapping a
 nested write descended into, not just the leaf — so a following step
-can read the sibling it kept. `changed` is False when the document
-already held exactly this (a retried step, an unset of an absent
-path). `rev` is the config's content hash afterwards, the same token
-the channel-config endpoints hand out.
+can read the sibling it kept; after an unset of the whole parameter it
+is the value the channel falls back to. `changed` is False when the
+channel already resolved to exactly this (a retried step, an unset of
+an absent path). `rev` is the config's content hash afterwards, the
+same token the channel-config endpoints hand out.
 
 | Field | Type | Notes |
 |---|---|---|

@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-11
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -115,10 +115,11 @@ own. The recipe is held to every check a `states:` section passes
 at publish and to the manifest's `contract`, and is refused when a
 live row holds a state it does not declare or when it moves a stored
 machine to another column. An install then renders the graph's
-display hints onto the live tables, renders the bundle's client copy
-through the recipe's `vocabulary:`, seeds the scalar keys its
-stages read, and writes the revision last: if an earlier write
-fails, the previous revision stays in force. `dry_run` checks and
+display hints onto the live tables, seeds the scalar keys its stages
+read, and writes the revision last: if an earlier write fails, the
+previous revision stays in force. It writes no client copy: the
+bundle's copy reads in the recipe's `vocabulary:` from then on.
+`dry_run` checks and
 writes nothing; `fail_step: false` reports a refusal instead of
 failing the step. Rows are re-projected by a later run, which pins
 the new revision.
