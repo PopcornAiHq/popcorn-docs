@@ -561,3 +561,13 @@
   concept: manifest-keys
   pass: it changes only what people are told (list_connections says the Routine's automations are paused); a Flow's required_integrations, or its own check such as check_connected, is what stops work
   trap: says it pauses the Routine's Schedules
+
+- q: Can my assistant create a brand-new Routine Template for our Workspace over MCP, without copying one of Popcorn's?
+  concept: template-authoring
+  pass: yes, a Workspace admin's assistant calls create_routine_template (dry run, then confirm with the plan_id); the key is ws_<name> and app_type must match; create_routine with template="ws_<name>" makes a Routine on it, and create_routine_version publishes later Versions; only that Workspace sees it
+  trap: says new templates are never self-serve, or that it needs a deploy or a Copy of a Popcorn template
+
+- q: How do I test a change to a template's code block without publishing a Version?
+  concept: template-authoring
+  pass: run_code_block runs the block on the same runner as a code.execute step, with inputs and the unpublished changes, and tests=true runs its tests; nothing is published or written, and the block can't read the Routine's Tables, so pass what the step's reads would; then publish the same changes with create_routine_version
+  trap: says to publish a Version and run a Flow to test it, or that the block can read the Routine's Tables
