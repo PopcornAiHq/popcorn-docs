@@ -47,9 +47,10 @@ talking to it.
 > Your assistant calls `send_message`, then `list_messages` to read the
 > answer.
 
-Your assistant posts your question in the Routine, as you. The Agent answers
-a little later, either in a thread under your message or after it, and your
-assistant reads the answer back to you.
+Your assistant posts your question in the Routine, as you, and people there
+see a small robot on your picture that says your assistant sent it. The Agent
+answers a little later, either in a thread under your message or after it,
+and your assistant reads the answer back to you.
 
 > [!NOTE] When it answers
 > An @mention of the Agent always gets an answer. Most Routines' Agents

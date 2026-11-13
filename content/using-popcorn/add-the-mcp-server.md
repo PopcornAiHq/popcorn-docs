@@ -62,7 +62,10 @@ It should name the Workspace you chose.
 
 ## It acts as you
 
-Every MCP tool call runs on your behalf with your permissions.
+Every MCP tool call runs on your behalf with your permissions. A message it
+sends is yours, and Popcorn's web and desktop apps mark it with a small robot
+on your picture, labelled "Sent by *your name*'s agent through Popcorn's
+connection", so people can tell it from one you typed.
 
 What you ask for exactly happens at once, such as taking an
 [Action](https://docs.popcorn.ai/actions-and-status.md) on Items you name.
