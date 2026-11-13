@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/search-docs
 title: search_docs
-order: 351
+order: 355
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   Search the Popcorn docs and get the best pages' titles, ids and summaries.
 concepts: []

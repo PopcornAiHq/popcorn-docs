@@ -1,31 +1,32 @@
 ---
 id: mcp/tools/install-routine
 title: install_routine
-order: 326
+order: 329
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
-  Install the newest version of a Routine's copy of its template, or move it
-  onto a copy the workspace already has.
+  Install the newest version of a Routine's copy of its template, move it onto
+  a copy the workspace already has, or give a Routine that runs no template
+  one.
 concepts: [copying-a-template, versions]
-used_with: [mcp/tools/create-routine, mcp/tools/get-routine, mcp/tools/create-routine-version, mcp/tools/list-routine-settings, mcp/tools/copy-routine-template]
+used_with: [mcp/tools/create-routine, mcp/tools/get-routine, mcp/tools/create-routine-version, mcp/tools/list-routine-settings, mcp/tools/copy-routine-template, mcp/tools/list-routine-templates]
 ---
 
 [writes] [destructive] [dry run]
 
 ```
-install_routine(routine_id, copy=None, confirm=False, plan_id=None)
+install_routine(routine_id, copy=None, template=None, confirm=False, plan_id=None)
 ```
 
-**Which template.** It installs the Routine Template the Routine already runs, never another one: a Routine runs another template only by creating a new Routine with create_routine(template=…).
+**No template yet.** With template, a Routine that runs none gets it as [`create_routine`](https://docs.popcorn.ai/mcp/tools/create-routine.md) would, with default settings; its messages stay and the template acts on new ones. A dry run unless `confirm=true`. Needs the Routine's owner or admin, or a workspace admin in it.
 
-**Catching up.** Without copy, this is a catch-up: a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. The install runs in the background; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows when it lands. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install waited on another install, or when `get_routine` shows the Routine behind its copy.
+**Catching up.** Without copy or template, this is a catch-up: a Routine on its own copy installs that copy's newest version. It runs without confirm, because the daily update would install the same version. The install runs in the background; [`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) shows when it lands. Use it after a [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md) whose install waited on another install, or when `get_routine` shows the Routine behind its copy.
 
 **Moving to a copy.** With copy, or when a Routine on Popcorn's template would join the workspace's only copy, the Routine moves onto that copy, one-way, and installs its newest version. If the workspace has several copies, name one with copy. A move is a dry run that changes nothing unless `confirm=true`. Workspace admins and the Routine's members may call it.
 
-**What it doesn't do.** It doesn't put a template on a Routine that has none, and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. It is refused while the Routine's template updates are locked, and when another install is still running on the Routine. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
+**What it doesn't do.** It never replaces the template a Routine runs (a new Routine from create_routine(template=…) runs another), and Popcorn's new versions reach Routines on Popcorn's template through the daily update, not through this tool. It is refused while the Routine's template updates are locked, and when another install is still running on the Routine. To change how one Routine behaves, check [`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md) first; a move onto a copy is one-way.
 
 ## Arguments
 
@@ -33,8 +34,9 @@ install_routine(routine_id, copy=None, confirm=False, plan_id=None)
 |---|---|---|
 | `routine_id` [required] | `str` | The Routine's ID (not its name). |
 | `copy` | `str` | The name of a copy of this Routine's template to move onto, as [`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md) named it. |
-| `confirm` | `bool` | true to make the move. With a person there, show them the dry run first. Default `False`. |
-| `plan_id` | `str` | The `plan_id` a move's dry run gave, with `confirm=true` and the same copy. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
+| `template` | `str` | For a Routine that runs no template only: a slug from [`list_routine_templates`](https://docs.popcorn.ai/mcp/tools/list-routine-templates.md), e.g. "agentchat". |
+| `confirm` | `bool` | true to make the move or give the template. With a person there, show them the dry run first. Default `False`. |
+| `plan_id` | `str` | The `plan_id` the dry run gave, with `confirm=true` and the same copy or template. A Routine's own agent in Popcorn must pass it, from a dry run in an earlier run; an assistant connected from outside Popcorn is given none and needn't. |
 
 **Example** — “Move #intake onto our acme-west version of the claims app.”
 

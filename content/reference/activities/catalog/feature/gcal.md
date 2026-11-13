@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-13
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -131,6 +131,8 @@ the auth to the bound Google account before the read.
 | `display_name` | string | Attendee name, if set. |
 | `response_status` | string | needsAction / declined / tentative / accepted. |
 | `organizer` | boolean | True for the event's organizer. |
+| `optional` | boolean | True for an optional guest. |
+| `resource` | boolean | True for a room or other resource, never a person. |
 
 `GcalBookedBy`:
 
@@ -157,6 +159,8 @@ the auth to the bound Google account before the read.
 | `created` | string | RFC3339 time the event was created. |
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
+| `ical_uid` | string | The id every attendee's copy of the meeting shares (iCalUID), whichever calendar it is on. Every instance of a series has the series' one. |
+| `original_start` | string | For one instance of a recurring series: when it was first due (RFC3339, or YYYY-MM-DD), which with ical_uid names the instance even after it moved. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
 | `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
 | `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |
@@ -212,6 +216,8 @@ the auth to the bound Google account before the read.
 | `display_name` | string | Attendee name, if set. |
 | `response_status` | string | needsAction / declined / tentative / accepted. |
 | `organizer` | boolean | True for the event's organizer. |
+| `optional` | boolean | True for an optional guest. |
+| `resource` | boolean | True for a room or other resource, never a person. |
 
 `GcalBookedBy`:
 
@@ -238,6 +244,8 @@ the auth to the bound Google account before the read.
 | `created` | string | RFC3339 time the event was created. |
 | `updated` | string | RFC3339 time the event last changed. |
 | `recurring_event_id` | string | The series id when this is one instance of a recurring event. |
+| `ical_uid` | string | The id every attendee's copy of the meeting shares (iCalUID), whichever calendar it is on. Every instance of a series has the series' one. |
+| `original_start` | string | For one instance of a recurring series: when it was first due (RFC3339, or YYYY-MM-DD), which with ical_uid names the instance even after it moved. |
 | `conference_url` | string | Video call link (Google Meet), if any. |
 | `conference_id` | string | The call's id apart from its link: a Google Meet meeting code, or the id a conferencing add-on (Teams, Zoom) gives it. |
 | `attachments` | list of GcalAttachment | Files attached to the event (the first 5): Gemini notes, transcripts, recordings, agendas. |

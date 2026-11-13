@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/create-routine
 title: create_routine
-order: 307
+order: 309
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   Create a Routine in this workspace, optionally from a Routine Template.
 concepts: [set-up-a-routine]

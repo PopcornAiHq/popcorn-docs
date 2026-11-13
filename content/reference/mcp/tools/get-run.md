@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-run
 title: get_run
-order: 320
+order: 323
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   One of a Routine's runs, by its reference: how it is going or how it ended,
   what started it, and its inputs and outputs.

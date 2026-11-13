@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/take-action
 title: take_action
-order: 355
+order: 359
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   Take one Action on one or more of a Routine's items, as a person pressing
   its button in Popcorn would.
