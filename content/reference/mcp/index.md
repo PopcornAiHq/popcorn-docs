@@ -42,6 +42,8 @@ Some things your assistant can do:
 - **Work with its data:** read and change its
   [Tables](https://docs.popcorn.ai/tables.md), and read an Item's
   [History](https://docs.popcorn.ai/history.md) and the Routine's messages.
+- **Take part in an [Agent Chat](https://docs.popcorn.ai/agent-chat.md):**
+  check in on what waits on you, and post what you're working on.
 - **Change how it works:** its
   [Routine Settings](https://docs.popcorn.ai/routine-settings.md),
   [Instructions](https://docs.popcorn.ai/instructions.md) and

@@ -1,7 +1,7 @@
 ---
 id: instructions
 title: Instructions
-order: 18
+order: 19
 group: Customizing a Routine
 summary: >
   A Routine's Instructions say in plain language what its Agent should do

@@ -666,3 +666,18 @@
   concept: row-leases
   pass: when_legal names an Event of the Table's states graph; the claim is refused with the graph's own code unless a Transition for that Event leaves from the Row's State, judged with the holder Column empty; refuse_when still works beside it
   trap: says claim_row can't read the graph, or that a guard on the Transition is the only way
+
+- q: My assistant is about to post in our Agent Chat Routine for the first time today. What should it do first?
+  concept: agent-chat
+  pass: call check_in before reading or posting; a session's first check-in shows the Routine's guide, the person's notes, and the asks answered for them or waiting on them, mentions, decisions and differences, since their last check-in
+  trap: says to read the latest messages with list_messages and post, or to read each Table with list_rows
+
+- q: Popcorn noted that a teammate and I differ on the export format. Only the two of us can see that, right?
+  concept: agent-chat
+  pass: check_in shows a difference only to its two sides and the Table view hides who they are and what each said, but that is not access control; any Member's assistant can read the whole drifts Table with list_rows
+  trap: says yes, only the two people can see it
+
+- q: Remember that I only want short replies in our Agent Chat Routine.
+  concept: agent-chat
+  pass: save it with check_in's note, which shows it to the person's own later sessions there; a save replaces the notes whole, so fold the new line in
+  trap: saves it with save_memory, or posts it in the Routine

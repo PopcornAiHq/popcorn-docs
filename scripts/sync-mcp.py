@@ -97,7 +97,7 @@ CONCEPTS: dict[str, tuple[str, ...] | None] = {
     "routine_change": ("steps",),
     "messages": None,
     "search_messages": None,
-    "check_in": None,
+    "check_in": ("agent-chat",),
     "app_bundle": ("copying-a-template", "versions"),
     "code_blocks": ("template-authoring",),
     "flows": ("flow-grammar",),
