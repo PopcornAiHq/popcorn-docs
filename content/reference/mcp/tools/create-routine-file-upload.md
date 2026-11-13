@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/create-routine-file-upload
 title: create_routine_file_upload
-order: 308
+order: 310
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-13
 summary: >
   Get a URL to upload one file you made, for the next version of a Routine's
   template.

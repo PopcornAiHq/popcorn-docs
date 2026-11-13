@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/create-rows
 title: create_rows
-order: 311
+order: 313
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   Add rows to one of a Routine's tables.
 concepts: [tables]

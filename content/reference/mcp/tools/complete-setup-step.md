@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/complete-setup-step
 title: complete_setup_step
-order: 304
+order: 305
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-09
+updated: 2026-11-13
 summary: >
   Complete one step of a Routine's setup that asks for a value, as its card on
   the Today tab in Popcorn does.

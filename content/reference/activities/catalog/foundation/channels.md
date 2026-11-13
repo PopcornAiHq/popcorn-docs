@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-13
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -80,6 +80,7 @@ to retry.
 | Argument | Type | Required | Notes |
 |---|---|---|---|
 | `channel_ids` | list of string | yes | Up to 100 channel ids (UUIDs), e.g. a search step's `channel_ids`. Empty strings are ignored; duplicates collapse. |
+| `include_member_ids` | boolean | no | Also return each found channel's member ids (people and bots, at most 200), one more call per channel. At most 10 channel ids may be asked for with it. Default `false`. |
 
 **Returns**
 
@@ -96,6 +97,7 @@ to retry.
 | `channel_id` | string | The requested id (echoed). |
 | `found` | boolean | False when the id is unknown, deleted, not a UUID, or a channel the bot may not read. The other fields are then null. |
 | `name` | string, optional | The channel's name, as shown after `#`. Null for a DM, group DM or self-DM, which have no name of their own; none is made up from the participants. |
+| `member_ids` | list of string, optional | With include_member_ids, a found channel's member ids (people and bots, at most 200); null otherwise. |
 | `type` | string, optional | workspace_channel, public_channel, private_channel, shared_channel, shared_private_channel, dm, group_dm or self_dm. |
 
 ### `foundation.channels.list`

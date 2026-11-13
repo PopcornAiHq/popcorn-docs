@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-history-entry
 title: read_history_entry
-order: 345
+order: 348
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   One change from an item's History, in full: every field it changed, before
   and after, and who or what made it and why.

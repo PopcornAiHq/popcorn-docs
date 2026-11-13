@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-11
+updated: 2026-11-13
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -271,15 +271,19 @@ UTF-8 text, so the attachment renders broken.
 
 ### `foundation.channel.react`
 
-Add an emoji reaction to a message in a channel the bot can read.
+Add an emoji reaction to a message in a channel the bot can read,
+or take the bot's own off (`remove: true`).
 
 The lightest acknowledgement a flow can give: a 👀 on an ask that is
-being looked at, a ✅ on one that is done. Reacts as the workflow's bot
-(`auth.agent_user_id`) on `message_id` in `channel_id`; the message
-must be in that channel. Several emoji in one string ("👍🎉") are
-added one each. Idempotent: a reaction the bot already has on the
-message answers `already: true` instead of failing. A refused or
-unknown message fails the step non-retryably.
+being looked at, a ✅ on one that is done, and the 👀 taken off once
+the ✅ is on. Reacts as the workflow's bot (`auth.agent_user_id`) on
+`message_id` in `channel_id`; the message must be in that channel.
+Several emoji in one string ("👍🎉") are added one each; `remove`
+takes one. Idempotent both ways: a reaction the bot already has (add)
+or does not have (remove) answers `already: true` instead of failing.
+Adding to a refused or unknown message fails the step non-retryably;
+removing from a message that is gone answers `already: true`, since
+the reaction is not there either way.
 
 ```yaml
 - id: <step>
@@ -297,14 +301,15 @@ unknown message fails the step non-retryably.
 | `channel_id` | string | yes | UUID of the channel the message is in. |
 | `message_id` | string | yes | UUID of the message to react to (from channel.history or search.messages, or a tracker column). |
 | `emoji` | string | yes | The emoji itself, e.g. 👀 or ✅ — a Unicode character, not a :shortcode:. |
+| `remove` | boolean | no | True to take the bot's own reaction with this emoji off the message instead of adding it. One emoji at a time. Only the bot's own reaction is removed, never a person's. Default `false`. |
 
 **Returns**
 
 | Field | Type | Notes |
 |---|---|---|
 | `message_id` | string | The message reacted to (echoed). |
-| `emoji` | string | The emoji added (echoed). |
-| `already` | boolean | True when the bot had already reacted with this emoji and nothing was added. |
+| `emoji` | string | The emoji added or removed (echoed). |
+| `already` | boolean | True when nothing changed: the bot had already reacted with this emoji (add), or had not (remove). |
 
 ### `foundation.channel.set_attachment_metadata`
 
