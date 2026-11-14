@@ -5,7 +5,7 @@ order: 357
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-14
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []
@@ -35,7 +35,7 @@ send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=No
 | `routine_id` [required] | `str` | The Routine's ID ([`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) returns it). |
 | `text` | `str` | Message text (markdown). Optional with a file. |
 | `thread_id` | `str` | Reply in this thread (its first message's ID). The Routine's own agent, without one, posts in the thread it is answering. |
-| `mentions` | `list[str]` | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
+| `mentions` | `list[str]` | People to mention and notify: "@username" or a member's name (any case), email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
 | `attachment` | `Attachment \| list[Attachment]` | A text file, or a list of them. |
 | `upload_ids` | `list[str]` | `upload_ids` from `create_message_upload`, each sent once. |
 
