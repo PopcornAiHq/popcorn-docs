@@ -5,7 +5,7 @@ order: 330
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-14
 summary: >
   List the Actions a person can take on one of a Routine's items now: the
   buttons Popcorn shows on it, each with the Status it moves the item to.
@@ -21,7 +21,7 @@ list_actions(routine, row_id)
 
 Which ones are offered depends on where the item stands; [`take_action`](https://docs.popcorn.ai/mcp/tools/take-action.md) takes one.
 
-Some Actions are taken only in Popcorn (a form to fill in, a document to sign, a request to the Routine's agent); they're listed and marked.
+One that collects values lists their names, for `take_action`'s fields. Some are taken only in Popcorn; they're marked.
 
 ## Arguments
 
