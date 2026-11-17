@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-routine-file
 title: read_routine_file
-order: 351
+order: 354
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Read one file of a version of a Routine's template, exactly as stored.
 concepts: [copying-a-template, versions]

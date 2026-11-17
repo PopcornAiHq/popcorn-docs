@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-runs
 title: list_runs
-order: 341
+order: 344
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   The Routine's runs, newest first: the work each did or is doing, how it
   ended, when, what started it, and its reference.

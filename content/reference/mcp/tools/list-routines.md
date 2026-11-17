@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-routines
 title: list_routines
-order: 339
+order: 342
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   List the Routines you can see in this workspace: the ones you're in, and the
   ones you can view without joining.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-routine-change
 title: get_routine_change
-order: 320
+order: 323
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Show where a change to a Routine's Steps stands: still drafting, the
   proposal as Steps before and after, refused, failed or installed.
