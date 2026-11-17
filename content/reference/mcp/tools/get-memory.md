@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-memory
 title: get_memory
-order: 318
+order: 321
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   One memory in full: its text, its category and name, when it was saved and
   last changed, and its metadata.

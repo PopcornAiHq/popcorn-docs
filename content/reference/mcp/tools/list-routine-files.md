@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-routine-files
 title: list_routine_files
-order: 336
+order: 339
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   List the files of a version of a Routine's template, with each file's size
   and sha256.

@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-message
 title: read_message
-order: 349
+order: 352
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   One message in a Routine, in full: its whole text, a line per attachment or
   other part, its reply count and its reactions.
@@ -38,8 +38,8 @@ Each file attached to it comes with a download link, which works for a limited t
 Routine: #intake (c7d2…5b)
 Message: 7e1a…47
 Author: Dana Smith
-Sent: 2026-09-29 14:01 UTC
-Replies: ↳ 1 reply (thread_id: 7e1a…47)
+Sent: 2026-09-29 14:01:00 UTC
+Replies: ↳ 1 reply, last 2026-09-29 14:03:12 (thread_id: 7e1a…47)
 Reactions: 👀 1
 
 What's still open on claim 4471?

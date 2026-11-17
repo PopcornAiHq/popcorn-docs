@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/get-row
 title: get_row
-order: 322
+order: 325
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Show one row in full: every column, its rev, when it was created and last
   changed, and its state if the table has a state machine.

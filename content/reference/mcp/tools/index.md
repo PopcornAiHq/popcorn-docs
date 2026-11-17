@@ -5,7 +5,7 @@ order: 301
 group: MCP
 layout: lookup
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Every tool the hosted server offers and what it does, with what its badges
   mean and which tools preview a change before making it.
@@ -43,7 +43,7 @@ declares to your assistant, helping it decide what to ask before a call:
 ## C
 
 - **[`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)** — [writes] [destructive] [dry run] Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
-- **[`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md)** — [writes] See what waits on you in an Agent Chat Routine, where you were mentioned and what the team decided, since you last checked.
+- **[`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md)** — [writes] See what changed in an Agent Chat Routine since you last checked.
 - **[`complete_setup_step`](https://docs.popcorn.ai/mcp/tools/complete-setup-step.md)** — [writes] [destructive] [dry run] Complete one step of a Routine's setup that asks for a value, as its card on the Today tab in Popcorn does.
 - **[`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)** — [writes] [destructive] [dry run] Give a Routine its own named copy of the Routine Template it runs.
 - **[`create_message_upload`](https://docs.popcorn.ai/mcp/tools/create-message-upload.md)** — [writes] Get a URL to upload one file to attach to a message in a Routine.
@@ -57,8 +57,14 @@ declares to your assistant, helping it decide what to ask before a call:
 ## D
 
 - **[`delete_memory`](https://docs.popcorn.ai/mcp/tools/delete-memory.md)** — [writes] [destructive] [idempotent] Drop one entry of your own memory in this workspace, by the name it is listed under.
+- **[`delete_message`](https://docs.popcorn.ai/mcp/tools/delete-message.md)** — [writes] [destructive] [idempotent] Delete a Routine message you wrote, at once and for everyone.
+- **[`delete_message_as_admin`](https://docs.popcorn.ai/mcp/tools/delete-message-as-admin.md)** — [writes] [destructive] [idempotent] [dry run] Delete a message someone else wrote in a Routine you administer.
 - **[`delete_rows`](https://docs.popcorn.ai/mcp/tools/delete-rows.md)** — [writes] [destructive] [idempotent] [dry run] Delete rows from one of a Routine's tables, by ID.
 - **[`duplicate_routine`](https://docs.popcorn.ai/mcp/tools/duplicate-routine.md)** — [writes] [dry run] Create a new Routine in this workspace that copies an existing one's setup.
+
+## E
+
+- **[`edit_message`](https://docs.popcorn.ai/mcp/tools/edit-message.md)** — [writes] [destructive] [idempotent] Replace the text of a Routine message you wrote, keeping its files.
 
 ## G
 

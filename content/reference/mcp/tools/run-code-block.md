@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/run-code-block
 title: run_code_block
-order: 352
+order: 355
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Run one code block of a Routine's template on Popcorn's code runner, with
   inputs you give, and return what its run(inputs) returns, without publishing

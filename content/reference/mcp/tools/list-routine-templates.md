@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-routine-templates
 title: list_routine_templates
-order: 338
+order: 341
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   List the Routine Templates a new Routine in this workspace can start from.
 concepts: [set-up-a-routine]

@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-10
+updated: 2026-11-17
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -777,7 +777,7 @@ vendor address to return.
 
 | Argument | Type | Required | Notes |
 |---|---|---|---|
-| `provider` | string | no | Mailbox backend the draft sends through, as the canonical user_integrations provider ('google', 'microsoft'); pass $channel.integrations.<name>.provider. An unknown value degrades to an empty identity. Default `"google"`. |
+| `provider` | string | no | Mailbox backend the draft sends through, as the canonical integrations provider ('google', 'microsoft'); pass $channel.integrations.<name>.provider. An unknown value degrades to an empty identity. Default `"google"`. |
 | `medium` | string | no | The draft's medium. A From: line and a mailbox sign-off only make sense for an email draft, so any non-'email' medium (e.g. 'sms') short-circuits to an EMPTY identity — leave this at 'email' to resolve one. Default `"email"`. |
 | `sign_as_user_id` | string, optional | no | Optional user to SIGN the draft as — pass $trigger.user_id so the body is signed with the name of whoever asked for the draft, not the connected mailbox's owner. The address/From: line still belongs to the bound mailbox account. Best-effort: empty/None or an unresolvable user keeps the mailbox owner's name. |
 

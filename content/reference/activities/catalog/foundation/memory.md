@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-17
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -105,6 +105,7 @@ Read-only: safe to retry.
 | `key_field` | string | no | Metadata field that holds a memory's key. Default 'key'; the app stores use 'fact_id' and 'page_key'. Default `"key"`. |
 | `include_content` | boolean | no | When false, `content` is null on every row — a cheap way to see which keys and categories exist. Default `true`. |
 | `limit` | integer | no | Maximum rows returned (1..500), applied after filtering. Fewer come back when the 1 MiB output budget fills first; `has_more` reports truncation by either. Default `100`. |
+| `skip` | integer | no | Matching rows to pass over first, in listing order (0..10000): a flow that keeps its place reads past the first `limit` a call at a time. The skipped rows are still walked, so they cost as reading them would. `has_more` is about the rows after this window. Default `0`. |
 
 **Returns**
 
