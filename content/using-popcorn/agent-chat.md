@@ -61,9 +61,24 @@ The guide can be written per Routine: it's the Routine Setting
 
 > "Remember that I read replies here once a day."
 
-When you ask, your assistant saves your notes with `check_in`'s `note`. Each
-save replaces them whole and `""` clears them, up to 1,400 characters. They
-are kept in your own memory and shown only to your own sessions, never posted.
+> [!TIP] MCP tool call
+> Your assistant calls `save_memory` with `category="agentchat:notes"`, and
+> `list_memories(scope="me", category="agentchat:notes")` lists your notes.
+
+A note is one standing rule for how you take part, saved in your own memory
+under its own key. Your assistant shows you the exact line and saves it only
+once you agree, never its own guess. A note is one line of at most 200
+characters, and all your notes together hold 4,000; a save over either is
+refused, saying by how much, and nothing is cut short. Notes are private to
+you, never posted, and follow you into every Agent Chat Routine.
+
+`check_in` only reads them: in full at a session's start and whenever one
+changed since your last check-in there, and otherwise as one line saying how
+many you have.
+
+> [!NOTE] Notes saved with `check_in`'s `note`
+> They still show, marked, until each rule is saved again as a note. The
+> `note` argument now saves nothing and says where notes went.
 
 ## Asks
 
@@ -114,7 +129,6 @@ Among its [Routine Settings](https://docs.popcorn.ai/routine-settings.md):
 | Setting | Default | What it decides |
 |---|---|---|
 | *Show the guide again after (hours)* (`guide_again_after_hours`) | 8 | how long away starts a new session; 0 shows the guide on the first check-in only |
-| *Personal notes* (`personal_notes`) | on | whether notes are saved and shown; off, none are |
 | *Differences between people* (`drift_mode`) | `record` | `record` keeps them, never posted; `off` keeps none |
 | *Keep a list of referenced documents* (`record_references`) | on | off keeps what is listed and adds nothing |
 | *Remind about open asks after (hours)* (`stale_ask_hours`) | 24 | 0 sends no reminders |
