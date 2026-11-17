@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/save-memory
 title: save_memory
-order: 354
+order: 357
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Keep something about the person you work for, for every later session of
   yours to read: your own memory in this workspace, under the name
@@ -24,7 +24,7 @@ Save only what they asked you to remember — "remember this", "from now on …"
 
 A save replaces that entry whole, so read it first ([`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md)), fold the new line into it and write the lot back; nothing is appended for you, and a note that no longer holds is yours to drop. One entry holds 1,375 characters; a longer save is refused, never cut short.
 
-Not for how they take part in an Agent Chat Routine: that has its own path, [`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md)'s note, which shows it back to you each session. Saving it here would keep it somewhere `check_in` never reads.
+Agent Chat notes: a standing rule for how your person works in Agent Chat Routines ("keep my posts to five lines") goes under category "agentchat:notes", one rule per entry under its own key. [`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md) shows them in every Agent Chat Routine they're in. Show your person the exact line first and save it only once they agree: never your own guess at how they work. One note holds 200 characters and all of them 4,000; a save over either is refused, saying which and by how much, never cut.
 
 ## Arguments
 

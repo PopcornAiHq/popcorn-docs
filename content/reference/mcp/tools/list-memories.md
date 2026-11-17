@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-memories
 title: list_memories
-order: 333
+order: 336
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   List the memories kept for a Routine, the workspace or you, most recently
   changed first: what people told an agent and what templates keep.

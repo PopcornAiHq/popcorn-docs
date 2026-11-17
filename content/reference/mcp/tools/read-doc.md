@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/read-doc
 title: read_doc
-order: 347
+order: 350
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Read one page of the Popcorn docs by its id, or one section of it.
 concepts: []

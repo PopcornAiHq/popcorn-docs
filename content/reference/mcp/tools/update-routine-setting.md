@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/update-routine-setting
 title: update_routine_setting
-order: 360
+order: 363
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Change one of a Routine's settings, on this Routine only.
 concepts: [routine-settings]

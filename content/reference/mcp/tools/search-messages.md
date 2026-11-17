@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/search-messages
 title: search_messages
-order: 356
+order: 359
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Search message text across the Routines you can see, ranked by relevance or
   newest first.
@@ -43,6 +43,6 @@ To page through one Routine in time order, use `list_messages`.
 → search_messages(query="Northside Auto", after="2026-09-01T00:00:00Z")
 
 2 messages matching "Northside Auto", most relevant first:
-[2026-09-29 14:03] (id: 9a3c…19) #intake · Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension.
-[2026-09-12 10:15] (id: e11b…9d) #claims-east · Dana Smith: Northside Auto says the parts arrive Monday.
+[2026-09-29 14:03:00] (id: 9a3c…19) #intake · Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension.
+[2026-09-12 10:15:00] (id: e11b…9d) #claims-east · Dana Smith: Northside Auto says the parts arrive Monday.
 ```

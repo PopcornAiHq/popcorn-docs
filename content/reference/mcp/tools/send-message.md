@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/send-message
 title: send_message
-order: 357
+order: 360
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []
@@ -18,13 +18,15 @@ used_with: [mcp/tools/create-message-upload, mcp/tools/list-messages, mcp/tools/
 send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None, upload_ids=None)
 ```
 
-**Who posts.** You post as yourself; the Routine's own agent posts as itself (its bot user), never as the member it is serving.
+In an Agent Chat Routine: post as you go, not only when you're done, and say more than feels necessary. Your teammates can't see your session.
 
-**Refused.** It is refused in an archived Routine, and in one in announcement mode unless you are its admin or a workspace admin.
+**Who posts.** You post as yourself; the Routine's agent as itself (its bot user), never as the member it serves.
+
+**Refused.** In an archived Routine, and in one in announcement mode unless you're its admin or a workspace admin.
 
 **Files.** Text files go in `attachment`; any other, uploaded with [`create_message_upload`](https://docs.popcorn.ai/mcp/tools/create-message-upload.md), in `upload_ids`; at most 10 in all. One unusable `upload_id` refuses the whole send, saying why.
 
-**Answers.** An @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need an answer, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. There is no answer in a Routine homed in another workspace. While the agent is already running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting a reply of its own.
+**Answers.** An @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need one, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. A Routine homed in another workspace never answers. While the agent is running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting its own reply.
 
 **Replies.** A reply arrives asynchronously: to a top-level message, in a thread under it or, in a Routine that answers top-level (many do), after it; inside a thread, in that thread. The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) calls that read the answer.
 
@@ -35,7 +37,7 @@ send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=No
 | `routine_id` [required] | `str` | The Routine's ID ([`get_routine`](https://docs.popcorn.ai/mcp/tools/get-routine.md) returns it). |
 | `text` | `str` | Message text (markdown). Optional with a file. |
 | `thread_id` | `str` | Reply in this thread (its first message's ID). The Routine's own agent, without one, posts in the thread it is answering. |
-| `mentions` | `list[str]` | People to mention and notify: "@username", email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
+| `mentions` | `list[str]` | People to mention and notify: "@username" or a member's name (any case), email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
 | `attachment` | `Attachment \| list[Attachment]` | A text file, or a list of them. |
 | `upload_ids` | `list[str]` | `upload_ids` from `create_message_upload`, each sent once. |
 
@@ -52,5 +54,5 @@ Replies arrive asynchronously: the Routine's agent typically answers within seco
 
 Routine: #intake (c7d2…5b) · thread: 7e1a…47
 1 of 1 replies, newest first:
-[2026-09-29 14:03] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
+[2026-09-29 14:03:00] (id: 9a3c…19) Intake agent: Two things are open on claim 4471: the repair estimate from Northside Auto, requested on Sept 24, and Dana's sign-off on the rental extension. Everything else is closed.
 ```

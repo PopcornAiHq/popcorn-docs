@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/list-tables
 title: list_tables
-order: 342
+order: 345
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-17
 summary: >
   List the tables in a Routine, with each one's row count.
 concepts: [tables]
