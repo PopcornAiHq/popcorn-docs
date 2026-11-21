@@ -5,11 +5,12 @@ order: 337
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-21
 summary: >
-  A Routine's top-level messages, newest first, or one thread's replies.
+  A Routine's top-level messages, newest first, or one thread's replies, for
+  reading history.
 concepts: []
-used_with: [mcp/tools/read-message, mcp/tools/send-message]
+used_with: [mcp/tools/catch-up, mcp/tools/read-message, mcp/tools/send-message]
 ---
 
 [read-only]
@@ -17,6 +18,8 @@ used_with: [mcp/tools/read-message, mcp/tools/send-message]
 ```
 list_messages(routine, thread_id=None, after=None, before=None, cursor=None, wait_seconds=0, full=False)
 ```
+
+To catch someone up on a channel, use [`catch_up`](https://docs.popcorn.ai/mcp/tools/catch-up.md).
 
 A page holds 50. Long text is cut (`full=true` or [`read_message`](https://docs.popcorn.ai/mcp/tools/read-message.md) gives it whole); a message with replies shows its `thread_id` and last reply's time; times are UTC. Listing marks nothing read.
 

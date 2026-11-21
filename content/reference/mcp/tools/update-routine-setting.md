@@ -5,7 +5,7 @@ order: 363
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-21
 summary: >
   Change one of a Routine's settings, on this Routine only.
 concepts: [routine-settings]
@@ -18,7 +18,7 @@ used_with: [mcp/tools/create-routine-version, mcp/tools/list-routine-settings]
 update_routine_setting(routine_id, key, value="OMITTED", changes=None, confirm=False, plan_id=None)
 ```
 
-**Dry run.** Without `confirm=true` this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value, or one whose option carries a warning, it also gives a `plan_id`: to change it, call again with the key, `confirm=true` and that `plan_id`, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here. A switch, such as a send mode, can be changed by any member of the Routine; any other setting, prompts included, needs a workspace admin who is also a member. An archived Routine's settings can't be changed.
+**Dry run.** Without `confirm=true` this is a dry run that changes nothing: it shows the old and new value, what the setting does, and the warning the new option carries. For a long value, or one whose option carries a warning, it also gives a `plan_id`: to change it, call again with the key, `confirm=true` and that `plan_id`, and the value needn't be sent again. Setting the template default resets the setting. A switch takes one of its options; any other setting keeps the shape of the template default (a list stays a list, a number a number). Secrets and the Routine's Steps aren't changed here. A switch, such as a send mode, can be changed by any member of the Routine or a workspace admin; any other setting, prompts included, needs a workspace admin, who needn't be a member. An archived Routine's settings can't be changed.
 
 **Long text.** For a long text (a prompt, an email template, agent guidance), pass changes instead of value: text ops applied in order to the current text, as [`create_routine_version`](https://docs.popcorn.ai/mcp/tools/create-routine-version.md)'s ops are. The anchor is the text exactly and must match once:
 

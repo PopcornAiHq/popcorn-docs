@@ -1,11 +1,11 @@
 ---
 id: mcp/tools/change-routine
 title: change_routine
-order: 303
+order: 304
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-06
+updated: 2026-11-21
 summary: >
   Change a Routine's Steps by describing the change in words, previewed before
   anything is installed, or put back an earlier version of its Steps.
