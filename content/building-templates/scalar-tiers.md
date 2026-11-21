@@ -46,9 +46,9 @@ and `agent_summary`, is configuration the template owns, and not a
 setting.
 
 > [!NOTE] Who can change one
-> A Member of the Routine can change a switch such as
+> A Member of the Routine or a Workspace admin can change a switch such as
 > `popcorn.email_send_mode`. A channel parameter or a prompt, such as
-> `follow_up_days`, needs a Workspace admin who is also a Member.
+> `follow_up_days`, needs a Workspace admin, who needn't be a Member.
 
 ## The tiers
 

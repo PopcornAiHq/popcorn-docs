@@ -89,10 +89,10 @@ Work already under way keeps the value it started with; the next
 the new one.
 
 > [!NOTE] Who can change a setting
-> Any [Member](https://docs.popcorn.ai/members.md) of the Routine can change a
-> switch, such as whether emails are
-> sent. Any other setting, prompts and email wording included, needs a
-> Workspace admin who is also a Member.
+> Any [Member](https://docs.popcorn.ai/members.md) of the Routine, or a
+> Workspace admin, can change a switch, such as whether emails are sent. Any
+> other setting, prompts and email wording included, needs a Workspace
+> admin. A Workspace admin needn't be in the Routine, even a private one.
 
 > [!TIP] Setting it back
 > To undo the change, set the setting back to the template's default.
