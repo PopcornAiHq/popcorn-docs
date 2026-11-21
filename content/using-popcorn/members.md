@@ -5,10 +5,11 @@ order: 12
 group: How a Routine works
 summary: >
   Who may do what in a Routine. A Workspace Role and a Routine Role are
-  separate. Most changes need a Member of the Routine or a Workspace admin;
-  changing a prompt or an email's wording needs a Workspace admin who is
-  also a Member, and a switch any Member. Your assistant has your Roles, so
-  what it's refused you are too. list_workspace_members shows Roles.
+  separate. Most changes need a Member of the Routine or a Workspace admin,
+  who can set up any Routine, private ones too, without joining it, but not
+  read its messages or rows. A prompt or email wording needs a Workspace
+  admin. Your assistant has your Roles, so what it's refused you
+  are too; list_workspace_members shows them.
 lede: >
   Who is in a Workspace and in each Routine, and what their Role lets them
   do.
@@ -67,8 +68,8 @@ admin. Some need more:
 |---|---|
 | see a Routine's [Connections](https://docs.popcorn.ai/connections.md) | a Member of the Routine, or a Workspace admin |
 | make a Connection, add a [Reference](https://docs.popcorn.ai/reference-documents.md), run a [Schedule](https://docs.popcorn.ai/triggers.md), finish a setup step | a Member of the Routine, or a Workspace admin |
-| change a switch, such as whether emails are sent, or the notes the Routine's Agent works from | a Member of the Routine |
-| change any other [Routine Setting](https://docs.popcorn.ai/routine-settings.md), prompts and email wording included | a Workspace admin who is also a Member of the Routine |
+| change a switch, such as whether emails are sent, or the notes the Routine's Agent works from | a Member of the Routine, or a Workspace admin |
+| change any other [Routine Setting](https://docs.popcorn.ai/routine-settings.md), prompts and email wording included | a Workspace admin |
 | replace a Webhook someone else made | an admin of the Routine, or a Workspace admin |
 | post in a Routine set to announcements only | an admin of the Routine, or a Workspace admin |
 | stop a [Run](https://docs.popcorn.ai/history.md) | a Member of the Routine, not a guest, or a Workspace admin |
@@ -77,6 +78,31 @@ admin. Some need more:
 
 Here, a Member of the Routine means a Routine Role of `member` or above: a
 guest of the Routine is refused unless they are a Workspace admin.
+
+## A Workspace admin outside a Routine
+
+A Workspace admin or owner controls any Routine in their Workspace without
+joining it, a private one included. Without being a Member, they can:
+
+- see and finish its setup steps;
+- see and change its Routine Settings;
+- see its [Triggers](https://docs.popcorn.ai/triggers.md), and run a
+  Schedule now;
+- see and make its Connections;
+- see whether its template has finished installing.
+
+Its messages, its Members and its
+[Items](https://docs.popcorn.ai/work-a-routines-items.md) stay with its
+Members: to read them, join the Routine. Join it too to add a
+[Reference](https://docs.popcorn.ai/reference-documents.md) to a private
+Routine, and so to finish a setup step that asks for a document. Anyone else
+in the Workspace needs to be a Member to change a Routine.
+
+> [!NOTE] Name the Routine
+> A private Routine you haven't joined isn't listed when your assistant
+> lists Routines, and isn't shown in full. Name it, such as
+> `#team-offsite`, and ask for its setup, settings, Triggers or
+> Connections.
 
 > [!NOTE] Your assistant has your Roles
 > Your assistant acts as you, so it can do what your Roles allow and
