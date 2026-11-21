@@ -5,7 +5,7 @@ order: 324
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-21
 summary: >
   Show one of a Routine's settings in full: its whole value, the template
   default, what it accepts and who may change it.
@@ -42,5 +42,5 @@ The {{ firm }} team
 
 Template default: the same as the value
 Accepts: text, the shape of the template default
-Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
+Changed by: update_routine_setting, by a workspace admin.
 ```

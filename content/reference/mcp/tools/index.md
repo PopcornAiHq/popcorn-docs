@@ -5,7 +5,7 @@ order: 301
 group: MCP
 layout: lookup
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-21
 summary: >
   Every tool the hosted server offers and what it does, with what its badges
   mean and which tools preview a change before making it.
@@ -42,8 +42,8 @@ declares to your assistant, helping it decide what to ask before a call:
 
 ## C
 
+- **[`catch_up`](https://docs.popcorn.ai/mcp/tools/catch-up.md)** — [writes] Catch your person up on an Agent Chat channel: what's new since they last looked, what's on them, and what's waiting on others.
 - **[`change_routine`](https://docs.popcorn.ai/mcp/tools/change-routine.md)** — [writes] [destructive] [dry run] Change a Routine's Steps by describing the change in words, previewed before anything is installed, or put back an earlier version of its Steps.
-- **[`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md)** — [writes] See what changed in an Agent Chat Routine since you last checked.
 - **[`complete_setup_step`](https://docs.popcorn.ai/mcp/tools/complete-setup-step.md)** — [writes] [destructive] [dry run] Complete one step of a Routine's setup that asks for a value, as its card on the Today tab in Popcorn does.
 - **[`copy_routine_template`](https://docs.popcorn.ai/mcp/tools/copy-routine-template.md)** — [writes] [destructive] [dry run] Give a Routine its own named copy of the Routine Template it runs.
 - **[`create_message_upload`](https://docs.popcorn.ai/mcp/tools/create-message-upload.md)** — [writes] Get a URL to upload one file to attach to a message in a Routine.
@@ -91,7 +91,7 @@ declares to your assistant, helping it decide what to ask before a call:
 - **[`list_connections`](https://docs.popcorn.ai/mcp/tools/list-connections.md)** — [read-only] List the Connections a Routine needs: the accounts and other services its template works through.
 - **[`list_history`](https://docs.popcorn.ai/mcp/tools/list-history.md)** — [read-only] What happened to one item: each change with who or what made it and why, the runs that changed it and how they ended, and its email turns.
 - **[`list_memories`](https://docs.popcorn.ai/mcp/tools/list-memories.md)** — [read-only] List the memories kept for a Routine, the workspace or you, most recently changed first: what people told an agent and what templates keep.
-- **[`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md)** — [read-only] A Routine's top-level messages, newest first, or one thread's replies.
+- **[`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md)** — [read-only] A Routine's top-level messages, newest first, or one thread's replies, for reading history.
 - **[`list_references`](https://docs.popcorn.ai/mcp/tools/list-references.md)** — [read-only] List the documents a Routine works from (its References): what each is for, when it was added and by whom, and which are still waiting.
 - **[`list_routine_files`](https://docs.popcorn.ai/mcp/tools/list-routine-files.md)** — [read-only] List the files of a version of a Routine's template, with each file's size and sha256.
 - **[`list_routine_settings`](https://docs.popcorn.ai/mcp/tools/list-routine-settings.md)** — [read-only] List a Routine's settings, set or not: what its template lets this Routine change on its own.
