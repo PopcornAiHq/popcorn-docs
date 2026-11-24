@@ -619,6 +619,15 @@ wins; a setting it leaves out keeps its installed value. `popcorn table schema
 Learn more: [Tables](https://docs.popcorn.ai/tables.md) and [Table
 Columns](https://docs.popcorn.ai/table-columns.md)
 
+### Topic Map
+
+The Routine Template that reads what the Workspace's other Routines publish
+and gathers it into the strands of work a team has in flight, one topic per
+Item. A topic offers one Action, which reads Mark done while the topic is on
+the map and Reopen once it is closed.
+
+Learn more: [Topic Map](https://docs.popcorn.ai/topic-map.md)
+
 ### tracker
 
 Another name for a Routine, in older product copy and MCP descriptions; many
