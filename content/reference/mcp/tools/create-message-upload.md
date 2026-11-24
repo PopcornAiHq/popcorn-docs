@@ -5,7 +5,7 @@ order: 307
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-13
+updated: 2026-11-24
 summary: >
   Get a URL to upload one file to attach to a message in a Routine.
 concepts: []
@@ -20,7 +20,7 @@ create_message_upload(routine_id, filename, size, sha256)
 
 Upload with the curl line this returns, then pass the `upload_id` to [`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md) in `upload_ids`. The upload goes to Popcorn's file storage host, which a sandboxed assistant (such as claude.ai's) may not reach; then send a text file as `attachment`, and add any other file in Popcorn.
 
-Exactly `size` bytes with this `sha256`, or refused; at most 50 MiB; an image, PDF or common document (a refusal lists them). The URL works 15 minutes; the `upload_id` is yours, for one message in this Routine within an hour. Refused where `send_message` is.
+Exactly `size` bytes with this `sha256`, or refused; at most 50 MiB; an image, video (.mp4, .mov, .webm), PDF, common document, font (.otf, .ttf, .woff, .woff2) or zip (a refusal lists them); zip any other file, or several, to send it. The URL works 15 minutes; the `upload_id` is yours, for one message in this Routine within an hour. Refused where `send_message` is.
 
 ## Arguments
 
