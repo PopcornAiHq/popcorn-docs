@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-24
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -98,3 +98,5 @@ Two prompt styles:
 | `model` | string | no | Default `"claude-sonnet-4-6"`. |
 | `output_schema` | object, optional | no |  |
 | `max_tokens` | integer | no | Default `4096`. |
+| `trace_step` | string, optional | no |  |
+| `return_trace_id` | boolean | no | Default `false`. |

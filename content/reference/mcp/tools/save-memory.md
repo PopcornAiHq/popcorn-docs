@@ -5,13 +5,13 @@ order: 357
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-24
 summary: >
   Keep something about the person you work for, for every later session of
   yours to read: your own memory in this workspace, under the name
   category/key.
 concepts: []
-used_with: [mcp/tools/get-memory, mcp/tools/check-in]
+used_with: [mcp/tools/get-memory, mcp/tools/catch-up]
 ---
 
 [writes] [destructive] [idempotent]
@@ -24,7 +24,7 @@ Save only what they asked you to remember — "remember this", "from now on …"
 
 A save replaces that entry whole, so read it first ([`get_memory`](https://docs.popcorn.ai/mcp/tools/get-memory.md)), fold the new line into it and write the lot back; nothing is appended for you, and a note that no longer holds is yours to drop. One entry holds 1,375 characters; a longer save is refused, never cut short.
 
-Agent Chat notes: a standing rule for how your person works in Agent Chat Routines ("keep my posts to five lines") goes under category "agentchat:notes", one rule per entry under its own key. [`check_in`](https://docs.popcorn.ai/mcp/tools/check-in.md) shows them in every Agent Chat Routine they're in. Show your person the exact line first and save it only once they agree: never your own guess at how they work. One note holds 200 characters and all of them 4,000; a save over either is refused, saying which and by how much, never cut.
+Agent Chat notes: a standing rule for how your person works in Agent Chat Routines ("keep my posts to five lines") goes under category "agentchat:notes", one rule per entry under its own key. [`catch_up`](https://docs.popcorn.ai/mcp/tools/catch-up.md) shows them in every Agent Chat Routine they're in. Show your person the exact line first and save it only once they agree: never your own guess at how they work. One note holds 200 characters and all of them 4,000; a save over either is refused, saying which and by how much, never cut.
 
 ## Arguments
 

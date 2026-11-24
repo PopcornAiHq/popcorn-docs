@@ -112,6 +112,7 @@ CONCEPTS: dict[str, tuple[str, ...] | None] = {
     "actions": ("actions-and-status",),
     "history": ("history",),
     "memories": None,
+    "notifications": None,
     "docs": None,
 }
 # Long enough that no word or shortened ID matches, only an opaque token.
