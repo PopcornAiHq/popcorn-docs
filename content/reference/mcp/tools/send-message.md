@@ -5,17 +5,17 @@ order: 360
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-24
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []
-used_with: [mcp/tools/create-message-upload, mcp/tools/list-messages, mcp/tools/get-routine]
+used_with: [mcp/tools/create-message-upload, mcp/tools/get-routine]
 ---
 
 [writes]
 
 ```
-send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None, upload_ids=None)
+send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None, upload_ids=None, answers=None, exact=False)
 ```
 
 In an Agent Chat Routine: post as you go, not only when you're done, and say more than feels necessary. Your teammates can't see your session.
@@ -24,11 +24,11 @@ In an Agent Chat Routine: post as you go, not only when you're done, and say mor
 
 **Refused.** In an archived Routine, and in one in announcement mode unless you're its admin or a workspace admin.
 
-**Files.** Text files go in `attachment`; any other, uploaded with [`create_message_upload`](https://docs.popcorn.ai/mcp/tools/create-message-upload.md), in `upload_ids`; at most 10 in all. One unusable `upload_id` refuses the whole send, saying why.
+**Files.** Text files go in `attachment`; any other, uploaded with [`create_message_upload`](https://docs.popcorn.ai/mcp/tools/create-message-upload.md), in `upload_ids`; at most 10 in all.
 
-**Answers.** An @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need one, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle (the bot in the Routine's member list) in `mentions`. A Routine homed in another workspace never answers. While the agent is running a task in the Routine, your message may be passed into that task, or queued behind it, instead of getting its own reply.
+**Answers.** An @mention of the agent gets an answer. A plain message goes to a classifier: most Routines' agents answer most messages, some only those that need one, and a Routine can be set to answer only @mentions. To be surer of an answer, put the agent's handle in `mentions`. A Routine homed in another workspace never answers. While the agent runs a task here, your message may join or queue behind it.
 
-**Replies.** A reply arrives asynchronously: to a top-level message, in a thread under it or, in a Routine that answers top-level (many do), after it; inside a thread, in that thread. The response gives the new message's ID and the [`list_messages`](https://docs.popcorn.ai/mcp/tools/list-messages.md) calls that read the answer.
+**Replies.** A reply arrives asynchronously; the response says where.
 
 ## Arguments
 
@@ -40,6 +40,8 @@ In an Agent Chat Routine: post as you go, not only when you're done, and say mor
 | `mentions` | `list[str]` | People to mention and notify: "@username" or a member's name (any case), email, user ID, or "me". Only these are mentioned; "@name" in the text is not parsed. |
 | `attachment` | `Attachment \| list[Attachment]` | A text file, or a list of them. |
 | `upload_ids` | `list[str]` | `upload_ids` from `create_message_upload`, each sent once. |
+| `answers` | `str \| int` | Replying to an ask: its `row_id` or `ask_key` marks it answered, crediting you. |
+| `exact` | `bool` | Agent Chat forwards a misplaced message where it belongs (it says so); true: don't. Default `False`. |
 
 **Example** — “Send the agent in #intake my notes on claim 4471 and the adjuster's call log, ask what's still open, and tell me what it says.”
 

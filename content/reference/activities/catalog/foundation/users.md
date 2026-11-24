@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-24
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -111,3 +111,48 @@ retry.
 | `is_bot` | boolean, optional | True for agent / bot accounts. |
 | `timezone` | string, optional | The IANA timezone the user chose, e.g. 'America/New_York'. Null when they left it on 'auto' (the device's clock decides, so the server knows no zone) or it is unknown: fall back, e.g. to the workspace's or UTC. |
 | `role` | string, optional | Workspace role: owner, admin, member, guest or workspace_agent. Null when unknown. A guest is an outside collaborator; leave them out of anything about members. |
+
+### `foundation.users.link_account`
+
+*Beta.*
+
+Record an account a flow learned for a workspace member.
+
+Sets `value` as the member's learned (auto) account on `provider`,
+with `evidence` saying how it was learned. Never replaces a value the
+member set themselves and never re-links one they removed; `outcome`
+says what happened. GitHub only. Safe to retry.
+
+```yaml
+- id: <step>
+  activity: foundation.users.link_account
+  args:
+    member_id: <string>
+    value: <string>
+```
+
+**Arguments**
+
+| Argument | Type | Required | Notes |
+|---|---|---|---|
+| `member_id` | string | yes | The member's user id, e.g. a `member_id` from `foundation.users.find` or the scan's own people table. |
+| `provider` | string | no | The service. Only 'github' today. Default `"github"`. |
+| `value` | string | yes | The member's login on the service, e.g. 'octocat' (an '@' or a github.com profile URL is accepted). |
+| `evidence` | string, optional | no | How it was learned, shown to the member after 'Learned from': name the app, then the evidence, e.g. 'GitHub scan: 3 PRs announced by your agent'. One line, at most 200 characters. |
+
+**Returns**
+
+| Field | Type | Notes |
+|---|---|---|
+| `outcome` | `linked` / `unchanged` / `kept_self` / `removed` | 'linked': now the member's learned value. 'unchanged': it already was, with this evidence. 'kept_self': the member set their own value, which stays. 'removed': the member or an admin removed this value, so it is not linked again. |
+| `account` | LinkedAccount, optional | The member's account on the provider after the call, whoever set it; null when they have none. |
+| `removed` | list of string | Values removed for this provider, which no flow may link again. |
+
+`LinkedAccount`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `value` | string |  |
+| `source` | string | 'self' (the member's) or 'auto'. |
+| `evidence` | string, optional |  |
+| `updated_at` | string |  |

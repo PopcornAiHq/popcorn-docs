@@ -5,7 +5,7 @@ order: 320
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-17
+updated: 2026-11-24
 summary: >
   Show a Routine's Instructions, the guidance its agents work from,
   Routine-wide and for each Step.
@@ -53,7 +53,7 @@ Changed by: with change_routine (describe the change), or in Popcorn by telling 
   Offer the adjuster call link before anything else.
 
 ## Prompt files
-Changed by: update_routine_setting, by a workspace admin who's also a member of the Routine.
+Changed by: update_routine_setting, by a workspace admin.
 - prompts.validator (the template's):
   Judge each answer against its question.
 - prompts.writer (changed for this Routine):
