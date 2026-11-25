@@ -4,12 +4,12 @@ title: Add the MCP server
 order: 1
 group: Getting started
 summary: >
-  Adding Popcorn's MCP server to an AI assistant: add the hosted server at
-  https://mcp.popcorn.ai/mcp (in Claude, a custom connector set to Register
-  automatically; in Claude Code, then /mcp), sign in to Popcorn, choose a
-  Workspace and Allow, then check it with get_workspace. The assistant acts
-  as you, in that Workspace, until you disconnect it. Help:
-  support@popcorn.ai.
+  Adding Popcorn's MCP server to an AI assistant: add
+  https://mcp.popcorn.ai/mcp (a Claude custom connector set to Register
+  automatically; Claude Code, then /mcp; a Gemini custom app; Gemini CLI,
+  then /mcp auth), sign in to Popcorn, choose a Workspace and Allow, then
+  check it with get_workspace. The assistant acts as you, in that
+  Workspace, until you disconnect it. Help: support@popcorn.ai.
 lede: >
   Allow your AI assistant to find your Routines, see what needs your input
   and act on your behalf through Popcorn's MCP server.
@@ -66,6 +66,44 @@ You need a Popcorn account that is a
 
     See [OpenAI's help](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
     for details.
+
+=== "Gemini"
+
+    In the Gemini app on the web, at
+    [gemini.google.com](https://gemini.google.com):
+
+    1. Select **Settings** > **Connected Apps**. If **Connected Apps**
+       isn't there, select **Personal Intelligence** > **Connected Apps**.
+    2. Under **Custom apps**, select **Add a custom app**.
+    3. Enter `https://mcp.popcorn.ai/mcp` as the MCP server URL, then
+       select **Next**.
+    4. Follow the on-screen instructions to sign in to Popcorn.
+
+    Leave **Advanced features** as they are: Popcorn registers Gemini
+    automatically, so it needs no client credentials.
+
+    Once you've signed in, type `@` in a chat and choose Popcorn, so
+    Gemini uses it for that prompt. Custom apps added on the web also
+    work in Gemini's mobile app.
+
+    > [!NOTE] Personal Google Accounts in the US
+    > Google offers custom apps only to a personal Google Account, in the
+    > US, 18 or over, in English, with Gemini's History on. With a work or
+    > school account, use Gemini CLI instead. See
+    > [Google's help](https://support.google.com/gemini/answer/17209137)
+    > for details.
+
+=== "Gemini CLI"
+
+    ```bash
+    gemini mcp add --transport http --scope user popcorn https://mcp.popcorn.ai/mcp
+    ```
+
+    Then start Gemini CLI and run `/mcp auth popcorn` to sign in.
+
+    > [!NOTE] Trusted folders
+    > Gemini CLI turns MCP servers off in a folder you haven't trusted.
+    > Start it in a folder you trust, or trust the folder when it asks.
 
 ## Sign in and choose a Workspace
 
