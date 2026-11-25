@@ -1,12 +1,12 @@
 ---
 id: activities/catalog/feature/chase-stage
 title: feature.chase.stage
-order: 127
+order: 128
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-03
+updated: 2026-11-25
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.

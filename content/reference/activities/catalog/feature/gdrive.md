@@ -1,12 +1,12 @@
 ---
 id: activities/catalog/feature/gdrive
 title: feature.gdrive
-order: 133
+order: 134
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-10-31
+updated: 2026-11-25
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
