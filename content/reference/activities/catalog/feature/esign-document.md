@@ -1,12 +1,12 @@
 ---
 id: activities/catalog/feature/esign-document
 title: feature.esign.document
-order: 130
+order: 131
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-04
+updated: 2026-11-25
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
