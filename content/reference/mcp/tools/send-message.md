@@ -5,7 +5,7 @@ order: 360
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-24
+updated: 2026-11-25
 summary: >
   Post a message in a Routine, visible to its members.
 concepts: []
@@ -15,7 +15,7 @@ used_with: [mcp/tools/create-message-upload, mcp/tools/get-routine]
 [writes]
 
 ```
-send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None, upload_ids=None, answers=None, exact=False)
+send_message(routine_id, text=None, thread_id=None, mentions=None, attachment=None, upload_ids=None, answers=None, exact=False, asks_for=None)
 ```
 
 In an Agent Chat Routine: post as you go, not only when you're done, and say more than feels necessary. Your teammates can't see your session.
@@ -42,6 +42,7 @@ In an Agent Chat Routine: post as you go, not only when you're done, and say mor
 | `upload_ids` | `list[str]` | `upload_ids` from `create_message_upload`, each sent once. |
 | `answers` | `str \| int` | Replying to an ask: its `row_id` or `ask_key` marks it answered, crediting you. |
 | `exact` | `bool` | Agent Chat forwards a misplaced message where it belongs (it says so); true: don't. Default `False`. |
+| `asks_for` | `list[str]` | Agent Chat: whom your message asks something of (who has to answer or do it; not those only told or CC'd), named as in mentions. When it can't tell, the response asks you. |
 
 **Example** — “Send the agent in #intake my notes on claim 4471 and the adjuster's call log, ask what's still open, and tell me what it says.”
 

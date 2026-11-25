@@ -1,12 +1,12 @@
 ---
 id: activities/catalog/foundation/store
 title: foundation.store
-order: 121
+order: 122
 group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-11
+updated: 2026-11-25
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.

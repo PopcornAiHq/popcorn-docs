@@ -1,12 +1,12 @@
 ---
 id: activities/catalog/feature/onboarding
 title: feature.onboarding
-order: 136
+order: 137
 group: Activities
 parent: activities/catalog/feature
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-11
+updated: 2026-11-25
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
