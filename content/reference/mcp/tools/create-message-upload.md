@@ -5,7 +5,7 @@ order: 307
 group: MCP
 parent: mcp/tools
 generated: scripts/sync-mcp.py
-updated: 2026-11-24
+updated: 2026-11-28
 summary: >
   Get a URL to upload one file to attach to a message in a Routine.
 concepts: []
@@ -18,7 +18,7 @@ used_with: [mcp/tools/send-message]
 create_message_upload(routine_id, filename, size, sha256)
 ```
 
-Upload with the curl line this returns, then pass the `upload_id` to [`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md) in `upload_ids`. The upload goes to Popcorn's file storage host, which a sandboxed assistant (such as claude.ai's) may not reach; then send a text file as `attachment`, and add any other file in Popcorn.
+Upload with the curl line this returns, then pass the `upload_id` to [`send_message`](https://docs.popcorn.ai/mcp/tools/send-message.md) in `upload_ids`. The upload goes to uploads.popcorn.ai, Popcorn's upload-only host. A claude.ai sandbox reaches it once an organization owner allows that one domain in its network egress settings; until then, send a text file as `attachment`, and add any other file in Popcorn.
 
 Exactly `size` bytes with this `sha256`, or refused; at most 50 MiB; an image, video (.mp4, .mov, .webm), PDF, common document, font (.otf, .ttf, .woff, .woff2) or zip (a refusal lists them); zip any other file, or several, to send it. The URL works 15 minutes; the `upload_id` is yours, for one message in this Routine within an hour. Refused where `send_message` is.
 
@@ -40,17 +40,16 @@ Routine: #intake (c7d2…5b)
 Upload for a message in #intake: Claim 4471 timeline.png, 48,211 bytes, sha256 5d41402a….
 upload_id: 4e1a9c07….png
 method: PUT
-url: https://uploads.popcorn.ai/4e1a9….png?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…
+url: https://uploads.popcorn.ai/messa….png?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…
 headers:
-  Content-Type: image/png
   x-amz-checksum-sha256: XUFAKrxL…
-The URL works for 15 minutes; the upload_id goes into one message within 60 minutes. Once uploaded, the file is in the Routine's files even if it is never sent, so upload only what you mean to post.
+The URL works for 15 minutes; the upload_id goes into one message within 60 minutes. The file reaches the Routine only when it is sent; an upload never sent is deleted within a day.
 
 Run this with FILE replaced by the file's path; it prints nothing when the upload succeeds:
-curl -fsS -T FILE -H 'Content-Type: image/png' -H 'x-amz-checksum-sha256: XUFAKrxL…' 'https://uploads.popcorn.ai/4e1a9….png?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…'
+curl -fsS -T FILE -H 'x-amz-checksum-sha256: XUFAKrxL…' 'https://uploads.popcorn.ai/messa….png?X-Amz-Al…&X-Amz-Expires=900&X-Amz-Si…%3Bhost%3Bx-amz-checksum-sha256&X-Amz-Signature=8a3f…'
 
 Then send it: send_message(routine_id="c7d2…5b", upload_ids=["4e1a9c07….png"]), with text if you like.
-If curl can't connect to uploads.popcorn.ai, this organization doesn't allow it: add the file in Popcorn instead.
+If curl can't connect to uploads.popcorn.ai (from claude.ai, a 403 from the proxy), this organization's sandbox doesn't allow it: an organization owner can allow the one domain uploads.popcorn.ai in claude.ai's network egress settings. Until then, add the file in Popcorn instead.
 
 → send_message(routine_id="c7d2…5b", text="The timeline for claim 4471, from first notice to today.", upload_ids=["4e1a9c07b2d35f68/0000000000000001/9b3f62e18c4d4a07a5e1d2c3b4a59681.png"])
 
