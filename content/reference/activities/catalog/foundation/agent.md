@@ -6,7 +6,7 @@ group: Activities
 parent: activities/catalog/foundation
 layout: lookup
 generated: scripts/sync-activities.py
-updated: 2026-11-24
+updated: 2026-11-28
 summary: >
   One domain's activities, each with the Step that calls it, its arguments and
   what it returns.
@@ -46,7 +46,7 @@ No description in the catalog.
 | `process_guidance` | string | no | Default `""`. |
 | `model` | string | no | Default `""`. |
 | `reply` | `json` / `text` | no | Default `"json"`. |
-| `act_as` | `agent` / `member` | no | `agent` (default): the workspace agent. `member`: a person, for an agent whose tools are Popcorn's MCP server. That is the person the run was started for ($trigger.user_id): who pressed Run, or the member whose message the channel agent was answering when it started the run. A call_flow child carries its parent's. A run started for nobody (a schedule, a webhook) is refused (ActAsRefused), except in a call_flow child, which acts as the channel's first admin member (NoChannelAdmin if there is none). That person's own role decides what the tools may do. Default `"agent"`. |
+| `act_as` | `agent` / `member` | no | `agent` (default): the workspace agent. `member`: a person, for an agent whose tools are Popcorn's MCP server. That is the person the run was started for ($trigger.user_id): who pressed Run, or the member whose message the channel agent was answering when it started the run. A call_flow child carries its parent's. A run an agent or a parent flow started for someone it could not tie to a message they wrote is refused (ActAsRefused). A run started for nobody (a schedule, a webhook) is refused (ActAsRefused), except in a call_flow child, which acts as the channel's first admin member (NoChannelAdmin if there is none). That person's own role decides what the tools may do. Default `"agent"`. |
 
 **Returns**
 
